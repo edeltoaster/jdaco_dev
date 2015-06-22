@@ -1124,7 +1124,7 @@ public class DataQuery {
 	public static HashMap<String, HashSet<String>> getDOMINE() {
 		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
 		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(DataQuery.class.getResourceAsStream("/data/DOMINE_2.0_HC.txt")));
+			BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(DataQuery.class.getResourceAsStream("/data/DOMINE_2.0_HC.txt.gz"))));
 			while (in.ready()) {
 				String line = in.readLine();
 				if (line.startsWith("PFAM1"))
@@ -1164,7 +1164,7 @@ public class DataQuery {
 			threshold = 0.329;
 		
 		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(DataQuery.class.getResourceAsStream("/data/IDDI_1.0_90.txt")));
+			BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(DataQuery.class.getResourceAsStream("/data/IDDI_1.0_90.txt.gz"))));
 			while (in.ready()) {
 				String line = in.readLine();
 				if (line.startsWith("PFAM1"))
