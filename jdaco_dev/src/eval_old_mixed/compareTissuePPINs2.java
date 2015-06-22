@@ -1,4 +1,4 @@
-package eval_tissues;
+package eval_old_mixed;
 
 import java.io.File;
 import java.util.HashMap;
@@ -102,15 +102,6 @@ public class compareTissuePPINs2 {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println("IntAct2");
-		computeForNetwork("human_intact.tsv", "/Users/tho/Desktop/IntAct2/");
-		//System.out.println("LitPrePPI");
-		//computeForNetwork("human_lit_preppi.tsv", "/Users/tho/Desktop/LitPrePPI/");
-		//System.out.println("Lit2013");
-		//computeForNetwork("human_lit_2013.tsv", "/Users/tho/Desktop/Lit2013/");
-		//System.out.println("Human2014");
-		//computeForNetwork("human_2014_Vidal.tsv", "/Users/tho/Desktop/Human2014/");
-		System.out.println("PrePPI2");
-		computeForNetwork("human_ppi.tsv", "/Users/tho/Desktop/PrePPI2/");
+
 	}
 }

@@ -18,7 +18,7 @@ public class builtMCalTechNetworks {
 	
 	public static void main(String[] args) {
 		System.out.println("Build CalTech data networks");
-		PPIN ppi = new PPIN("mixed_data/human_ppi.tsv");
+		PPIN ppi = new PPIN("mixed_data/human_ppi.tsv.gz");
 		System.out.println("human preppi");
 		System.out.println(ppi.getSizesStr());
 		

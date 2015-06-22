@@ -51,7 +51,7 @@ public class checkENC_TFs_only {
 	}
 	
 	public static void main(String[] args) {
-		Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_tfs.txt");
+		Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_tfs.txt.gz");
 		
 		//System.out.println("sample #complexes #variants");
 		Map<String, DACOResultSet> data_map = new HashMap<String, DACOResultSet>();
@@ -172,8 +172,7 @@ public class checkENC_TFs_only {
 		// read binding data and restrict to reachable ones in DNAse data
 		System.out.println("bdh reading");
 		seed.retainAll(relevant_targets);
-		//BindingDataHandler bdh = new BindingDataHandler("mixed_data/human_fimo_2k.txt.gz", seed, 00001, seed);
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Desktop/human_fimo_5k.txt.gz", seed, 0.0001, seed);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/binding_sites/human_fimo_2k.txt.gz", seed, 0.0001, seed);
 		System.out.println(bdh.getTFsWithBindingData().size());
 		System.out.println(bdh.getTargetsToTFsMap().keySet().size());
 		

@@ -1,4 +1,4 @@
-package eval_mixed;
+package eval_old_mixed;
 
 import java.io.File;
 import java.util.Set;
@@ -21,8 +21,8 @@ public class JDACO_sink_test {
 	static int d_min = -50;
 	static int d_max = 50;
 	static int min_TFs = 2;
-	static NetworkBuilder network_builder = new NetworkBuilder(new PPIN("mixed_data/human_ppi.tsv"));
-	static BindingDataHandler bdh = new BindingDataHandler("mixed_data/human_fimo_2k.txt.gz");
+	static NetworkBuilder network_builder = new NetworkBuilder(new PPIN("mixed_data/human_ppi.tsv.gz"));
+	static BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/binding_sites/human_fimo_2k.txt.gz");
 	static String out_folder = "PrePPI_spl_d6_med_min2/";
 	
 	public static void process(String sample, String path) {

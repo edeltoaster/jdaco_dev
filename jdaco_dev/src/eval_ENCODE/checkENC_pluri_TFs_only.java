@@ -10,7 +10,6 @@ import java.util.Set;
 import framework.BindingDataHandler;
 import framework.DACOResultSet;
 import framework.DataQuery;
-import framework.RegulatoryNetwork;
 import framework.Utilities;
 
 public class checkENC_pluri_TFs_only {
@@ -50,7 +49,7 @@ public class checkENC_pluri_TFs_only {
 	}
 	
 	public static void main(String[] args) {
-		Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_tfs.txt");
+		Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_tfs.txt.gz");
 		
 		//System.out.println("sample #complexes #variants");
 		Map<String, DACOResultSet> data_map = new HashMap<String, DACOResultSet>();
@@ -135,7 +134,7 @@ public class checkENC_pluri_TFs_only {
 		
 		// read binding data and restrict to reachable ones in DNAse data
 		System.out.println("bdh reading");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Desktop/human_fimo_5k.txt.gz", all_needed, 0.0001, relevant_targets);//NANOG relatively "weak"
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/binding_sites/human_fimo_2k.txt.gz", all_needed, 0.0001, relevant_targets);//NANOG relatively "weak"
 		System.out.println("reachable targets: " + bdh.getTargetsToTFsMap().keySet().size());
 		System.out.println("Settings: 5k, DNAse targets, adj/med like before; rough_adj: -5-15");
 		for (HashSet<String> tfc:pluri_tfcs) {
@@ -162,12 +161,5 @@ public class checkENC_pluri_TFs_only {
 			System.out.println("    Med: " + mediated);
 			System.out.println("    Coloc: " + coloc);
 		}
-		
-		System.out.println("bdh2");
-		bdh = new BindingDataHandler("/Users/tho/Desktop/human_fimo_5k.txt.gz", all_needed, 0.0001, all_needed);//NANOG relatively "weak"
-		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tfcs, bdh, -50, 50, 3);
-		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/pluri_net.txt");
-		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/pluri_net_2.txt", 2);
-		regnet.writeHumanNodeTable("/Users/tho/Desktop/pluri_table.txt");
 	}
 }

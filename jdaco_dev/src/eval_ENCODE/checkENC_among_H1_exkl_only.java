@@ -51,7 +51,7 @@ public class checkENC_among_H1_exkl_only {
 	}
 	
 	public static void main(String[] args) {
-		Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_tfs.txt");
+		Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_tfs.txt.gz");
 		
 		//System.out.println("sample #complexes #variants");
 		Map<String, DACOResultSet> data_map = new HashMap<String, DACOResultSet>();
@@ -181,7 +181,7 @@ public class checkENC_among_H1_exkl_only {
 		System.out.println("bdh reading");
 		involved_tfs.retainAll(relevant_targets);
 		//BindingDataHandler bdh = new BindingDataHandler("mixed_data/human_fimo_2k.txt.gz", seed, 00001, seed);
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Desktop/human_fimo_5k.txt.gz", involved_tfs, 0.0001, involved_tfs);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/binding_sites/human_fimo_2k.txt.gz", involved_tfs, 0.0001, involved_tfs);
 		
 		RegulatoryNetwork regnet = new RegulatoryNetwork(ESC_tfc, bdh, -50, 50, 3, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");

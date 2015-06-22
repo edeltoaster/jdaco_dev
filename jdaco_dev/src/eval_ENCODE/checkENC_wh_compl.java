@@ -15,7 +15,7 @@ import framework.Utilities;
 public class checkENC_wh_compl {
 	
 	public static void main(String[] args) {
-		Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_tfs.txt");
+		Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_tfs.txt.gz");
 		
 		//System.out.println("sample #complexes #variants");
 		Map<String, DACOResultSet> data_map = new HashMap<String, DACOResultSet>();

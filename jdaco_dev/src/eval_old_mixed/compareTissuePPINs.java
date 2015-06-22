@@ -1,4 +1,4 @@
-package eval_tissues;
+package eval_old_mixed;
 
 import java.io.File;
 import java.util.HashMap;
@@ -112,23 +112,7 @@ public class compareTissuePPINs {
 	}
 	
 	public static void main(String[] args) {
-		//System.out.println("IntAct");
-		//computeForNetwork("human_intact.tsv", "/Users/tho/Desktop/IntAct/");
-		//System.out.println("LitPrePPI");
-		//computeForNetwork("human_lit_preppi.tsv", "/Users/tho/Desktop/LitPrePPI/");
-		//System.out.println("Lit2013");
-		//computeForNetwork("human_lit_2013.tsv", "/Users/tho/Desktop/Lit2013/");
-		//System.out.println("Human2014");
-		//computeForNetwork("human_2014_Vidal.tsv", "/Users/tho/Desktop/Human2014/");
-		//System.out.println("PrePPI");
-		//computeForNetwork("human_ppi.tsv", "/Users/tho/Desktop/PrePPI/");
-		//System.out.println("BioGRID");
-		//computeForNetwork("human_biogrid.tsv", "/Users/tho/Desktop/BioGRID/");
-		//System.out.println("STRING");
-		//computeForNetwork("human_string.tsv", "/Users/tho/Desktop/STRING/");
-		//System.out.println("HIPPIE");
-		//computeForNetwork("human_hippie.tsv", "/Users/tho/Desktop/HIPPIE/");
 		System.out.println("human merged");
-		computeForNetwork("human_merged.tsv", "/Users/tho/Desktop/merged/");
+		computeForNetwork("human_merged.tsv.gz", "/Users/tho/Desktop/merged/");
 	}
 }

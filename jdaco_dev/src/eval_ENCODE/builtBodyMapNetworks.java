@@ -16,7 +16,7 @@ public class builtBodyMapNetworks {
 	
 	public static void main(String[] args) {
 		System.out.println("Build bodymap data networks");
-		PPIN ppi = new PPIN("mixed_data/human_merged.tsv");
+		PPIN ppi = new PPIN("mixed_data/human_merged.tsv.gz");
 		System.out.println("human preppi");
 		System.out.println(ppi.getSizesStr());
 		

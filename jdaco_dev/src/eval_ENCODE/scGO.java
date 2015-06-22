@@ -22,7 +22,7 @@ public class scGO {
 	}
 
 	public static void main(String[] args) {
-		Set<String> ref_proteins = new PPIN("mixed_data/human_merged.tsv").getProteins();
+		Set<String> ref_proteins = new PPIN("mixed_data/human_merged.tsv.gz").getProteins();
 		Map<String, Set<String>> prot_map = new HashMap<String, Set<String>>();
 		String human = "9606";
 		Set<String> temp;

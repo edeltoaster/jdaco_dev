@@ -1,4 +1,4 @@
-package eval_mixed;
+package eval_TCGA;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -128,12 +128,13 @@ public class TCGAdiff {
 		Map<StrPair, Integer> overall_added = new HashMap<StrPair, Integer>();
 		Map<StrPair, Integer> overall_lost = new HashMap<StrPair, Integer>();
 		
-		for (File file:Utilities.getAllPrefixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/tissue_spec/cancer_nets/TCGA/", TCGA_prefix)) {
+		for (File file:Utilities.getAllPrefixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/cancer/TCGA/", TCGA_prefix)) {
 			String file_name = file.getAbsolutePath();
-			if (file_name.endsWith("tumor.txt.gz"))
+			if (file_name.endsWith("_transcripts_tumor.txt.gz"))
 				tumor_data.add(file_name);
-			else
+			else if (file_name.endsWith("_transcripts_normal.txt.gz")) {
 				normal_data.add(file_name);
+			}
 		}
 		
 		System.out.println(TCGA_prefix.split("_")[0]+": " + tumor_data.size() + " matched samples.");
@@ -141,12 +142,17 @@ public class TCGAdiff {
 		List<Double> tumor_nodes = new LinkedList<Double>();
 		List<Double> normal_edges = new LinkedList<Double>();
 		List<Double> tumor_edges = new LinkedList<Double>();
-		List<Double> P_rew = new LinkedList<Double>();
+		Map<String, Double> P_rew = new HashMap<String, Double>();
+		
+		new File(out_folder).mkdir();
+		
+		// over all patients
 		for (int i = 0; i < tumor_data.size(); i++) {
 			
 			String tumor_file = tumor_data.get(i);
 			String normal_file = normal_data.get(i);
-			
+			String[] path = tumor_file.split("/");
+			String patient_id = path[path.length-1].split("_")[1];
 			
 			// transcript-based
 			PPIN tumor_net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(tumor_file, rsem_cutoff)).getPPIN();
@@ -160,20 +166,26 @@ public class TCGAdiff {
 			Set<StrPair> added_interactions = tumor_net.removeAllIAs(normal_net).getInteractions();
 			Set<StrPair> lost_interactions = normal_net.removeAllIAs(tumor_net).getInteractions();
 			
-			P_rew.add( ((double)added_interactions.size()+ lost_interactions.size())/Math.min(tumor_net.getSizes()[1], normal_net.getSizes()[1]));
+			P_rew.put(patient_id, ((double)added_interactions.size()+ lost_interactions.size())/Math.min(tumor_net.getSizes()[1], normal_net.getSizes()[1]));
 			
 			// count
+			List<String> temp_list = new LinkedList<String>();
+			
 			for (StrPair pair:added_interactions) {
+				temp_list.add(pair.getL() + " " + pair.getR() + "+");
 				if(!overall_added.containsKey(pair))
 					overall_added.put(pair, 0);
 				overall_added.put(pair, overall_added.get(pair)+1 );
 			}
 			for (StrPair pair:lost_interactions) {
+				temp_list.add(pair.getL() + " " + pair.getR() + "-");
 				if(!overall_lost.containsKey(pair))
 					overall_lost.put(pair, 0);
 				overall_lost.put(pair, overall_lost.get(pair)+1 );
 			}
 			
+			// output diff-network
+			Utilities.writeEntries(temp_list, out_folder + patient_id+"_diffnet.txt");
 		}
 		
 		// do diff.
@@ -190,110 +202,35 @@ public class TCGAdiff {
 		}
 		
 		// sizes
-		System.out.println("t-based sizes:");
+		System.out.println("sizes:");
 		System.out.println("n: " + Utilities.getMean(normal_nodes) + " / " + Utilities.getMean(normal_edges) + " +- " + Utilities.getStd(normal_nodes) + " / " + Utilities.getStd(normal_edges));
 		System.out.println("t: " + Utilities.getMean(tumor_nodes) + " / " + Utilities.getMean(tumor_edges) + " +- " + Utilities.getStd(tumor_nodes) + " / " + Utilities.getStd(tumor_edges));
-		System.out.println("P_rew: " + Utilities.getMean(P_rew) + " +- " + Utilities.getStd(P_rew));
-		new File(out_folder).mkdir();
-		FDRwriteOutNet(diff, tumor_data.size(), out_folder + "t_net.txt", Utilities.getMean(P_rew), FDR);
+		System.out.println("P_rew: " + Utilities.getMean(P_rew.values()) + " +- " + Utilities.getStd(P_rew.values()));
 		
-		// write P_rews for statistics
+		FDRwriteOutNet(diff, tumor_data.size(), out_folder + "sign_diffnet.txt", Utilities.getMean(P_rew.values()), FDR);
+		
+		// write P_rews
 		List<String> temp_list = new LinkedList<String>();
-		for (double d:P_rew)
-			temp_list.add(Double.toString(d));
-		Utilities.writeEntries(temp_list, out_folder + "t_P_rew.txt");
-		
-		/**
-		 * Now the same based on genes
-		 */
-		// reset data, split data
-		overall_added = new HashMap<StrPair, Integer>();
-		overall_lost = new HashMap<StrPair, Integer>();
-		
-		normal_nodes.clear();
-		tumor_nodes.clear();
-		normal_edges.clear();
-		tumor_edges.clear();
-		P_rew.clear();
-		temp_list.clear();
-		for (int i = 0; i < tumor_data.size(); i++) {
-			String tumor_file = tumor_data.get(i);
-			String normal_file = normal_data.get(i);
-			
-			
-			// gene-based
-			PPIN tumor_net = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(tumor_file, rsem_cutoff)).getPPIN();
-			tumor_nodes.add((double) tumor_net.getSizes()[0]);
-			tumor_edges.add((double) tumor_net.getSizes()[1]);
-			
-			PPIN normal_net = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(normal_file, rsem_cutoff)).getPPIN();
-			normal_nodes.add((double) normal_net.getSizes()[0]);
-			normal_edges.add((double) normal_net.getSizes()[1]);
-			
-			Set<StrPair> added_interactions = tumor_net.removeAllIAs(normal_net).getInteractions();
-			Set<StrPair> lost_interactions = normal_net.removeAllIAs(tumor_net).getInteractions();
-			
-			P_rew.add( ((double)added_interactions.size()+ lost_interactions.size())/Math.min(tumor_net.getSizes()[1], normal_net.getSizes()[1]));
-			
-			// count
-			for (StrPair pair:added_interactions) {
-				if(!overall_added.containsKey(pair))
-					overall_added.put(pair, 0);
-				overall_added.put(pair, overall_added.get(pair)+1 );
-			}
-			for (StrPair pair:lost_interactions) {
-				if(!overall_lost.containsKey(pair))
-					overall_lost.put(pair, 0);
-				overall_lost.put(pair, overall_lost.get(pair)+1 );
-			}
-			
-		}
-		
-		// do diff.
-		diff = new HashMap<StrPair, Double>();
-		for (StrPair pair:overall_added.keySet()) {
-			if (!diff.containsKey(pair))
-				diff.put(pair, 0.0);
-			diff.put(pair, diff.get(pair) + overall_added.get(pair));
-		}
-		for (StrPair pair:overall_lost.keySet()) {
-			if (!diff.containsKey(pair))
-				diff.put(pair, 0.0);
-			diff.put(pair, diff.get(pair) - overall_lost.get(pair));
-		}
-		
-		// sizes
-		System.out.println("g-based sizes:");
-		System.out.println("n: " + Utilities.getMean(normal_nodes) + " / " + Utilities.getMean(normal_edges) + " +- " + Utilities.getStd(normal_nodes) + " / " + Utilities.getStd(normal_edges));
-		System.out.println("t: " + Utilities.getMean(tumor_nodes) + " / " + Utilities.getMean(tumor_edges) + " +- " + Utilities.getStd(tumor_nodes) + " / " + Utilities.getStd(tumor_edges));
-		System.out.println("P_rew: " + Utilities.getMean(P_rew) + " +- " + Utilities.getStd(P_rew));
-		
-		FDRwriteOutNet(diff, normal_data.size(), out_folder + "g_net.txt", Utilities.getMean(P_rew), FDR);
-		
-		// write P_rews for statistics
-		for (double d:P_rew)
-			temp_list.add(Double.toString(d));
-		Utilities.writeEntries(temp_list, out_folder + "g_P_rew.txt");
-				
-		System.out.println("");
+		for (String patient:P_rew.keySet())
+			temp_list.add(patient + " " + Double.toString(P_rew.get(patient)));
+		Utilities.writeEntries(temp_list, out_folder + "P_rew.txt");
+		System.out.println();
 	}
 	
 	public static void main(String[] args) {
-		System.out.println("TCGA diff-builder, FDR: 0.05");
+		System.out.println("TCGA diff-builder, human merged, FDR: 0.05");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
-		//original_ppi = new PPIN("/Users/tho/Documents/workspace/JDACO/mixed_data/human_merged.tsv");
-		original_ppi = DataQuery.getIntActNetwork("9606");
+		System.out.println("iPfam version: " + DataQuery.getIPfamVersion());
+		System.out.println("3did version: " + DataQuery.get3didVersion());
+		System.out.println();
+		
+		original_ppi = new PPIN("mixed_data/human_merged.tsv.gz");
 		NetworkBuilder builder = new NetworkBuilder(original_ppi);
 		
 		// get all prefixes
 		Set<String> cancers = new HashSet<String>();
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/tissue_spec/cancer_nets/TCGA/", ".txt.gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/cancer/TCGA/", ".txt.gz")) {
 			cancers.add(f.getName().split("_")[0]);
-		}
-		
-		// remove not yet usable data
-		for (String c:new String[]{"ESCA", "PCPG", "PAAD", "MESO", "UVM", "SARC", "CHOL", "TGCT", "THYM"}) {
-			cancers.remove(c);
 		}
 		
 		new File("/Users/tho/Desktop/merged_fdr5/").mkdir();
