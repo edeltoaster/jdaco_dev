@@ -26,45 +26,10 @@ public class TCGAdiff {
 	static PPIN original_ppi;
 	static double rsem_cutoff = 1.0;
 	static BinomialTest test = new BinomialTest();
-
-	public static void writeOutNet(Map<StrPair, Double> diff, int samples, String out_path, double P_rew, double P_cutoff) {
-		List<String> helper = new LinkedList<String>();
-		
-		Map<Integer, Double> test_map = new HashMap<Integer, Double>();
-		for (StrPair pair:diff.keySet()) {
-			int v = (int) Math.abs(diff.get(pair));
-			
-			if (v == 0)
-				continue;
-			
-			if (!test_map.containsKey(v))
-				test_map.put(v, test.binomialTest(samples, (int) Math.abs(v), P_rew, AlternativeHypothesis.GREATER_THAN));
-		}
-		
-		helper.add("Protein1 Protein2 Type Count Probability p-val");
-		int n = 0;
-		for (StrPair pair:diff.keySet()) {
-			double v = diff.get(pair);
-			
-			if (v == 0)
-				continue;
-			
-			String sign = "-";
-			if (Math.signum(v) == +1) 
-				sign = "+";
-			double p = test_map.get((int) Math.abs(v));
-			if (p >= P_cutoff)
-				continue;
-			helper.add(pair.getL() + " " + pair.getR() + " " + sign + " " + (int) Math.abs(v) + " " + Math.abs(v / samples) + " " + p);
-			n++;
-		}
-		System.out.println(n + " diff-IAs with p below " + P_cutoff);
-		Utilities.writeEntries(helper, out_path);
-	}
 	
-	public static void FDRwriteOutNet(Map<StrPair, Double> diff, int samples, String out_path, double P_rew, double FDR) {
+	public static HashSet<String> FDRwriteOutNet(Map<StrPair, Double> diff, int samples, String out_path, double P_rew, double FDR) {
 		List<String> helper = new LinkedList<String>();
-		
+		HashSet<String> sign_net = new HashSet<String>();
 		Map<StrPair, Double> test_map = new HashMap<StrPair, Double>();
 		Map<Double, LinkedList<StrPair>> p2pair = new HashMap<Double, LinkedList<StrPair>>();
 		for (StrPair pair:diff.keySet()) {
@@ -113,11 +78,14 @@ public class TCGAdiff {
 				if (Math.signum(v) == +1) 
 					sign = "+";
 				helper.add(pair.getL() + " " + pair.getR() + " " + sign + " " + (int) Math.abs(v) + " " + Math.abs(v / samples) + " " + p + " " + rawp2adjp.get(p));
+				sign_net.add(pair.getL() + " " + pair.getR() + " " + sign);
 				k++;
 			}
 		}
 		System.out.println(k + " diff-IAs with FDR below " + FDR);
 		Utilities.writeEntries(helper, out_path);
+		
+		return sign_net;
 	}
 	
 	public static void process(NetworkBuilder builder, String out_folder, String TCGA_prefix, double FDR) {
@@ -144,6 +112,8 @@ public class TCGAdiff {
 		List<Double> tumor_edges = new LinkedList<Double>();
 		Map<String, Double> P_rew = new HashMap<String, Double>();
 		
+		Map<String, HashSet<String>> diffnets = new HashMap<String, HashSet<String>>();
+		
 		new File(out_folder).mkdir();
 		
 		// over all patients
@@ -169,23 +139,24 @@ public class TCGAdiff {
 			P_rew.put(patient_id, ((double)added_interactions.size()+ lost_interactions.size())/Math.min(tumor_net.getSizes()[1], normal_net.getSizes()[1]));
 			
 			// count
-			List<String> temp_list = new LinkedList<String>();
+			HashSet<String> temp_net = new HashSet<String>();
 			
 			for (StrPair pair:added_interactions) {
-				temp_list.add(pair.getL() + " " + pair.getR() + "+");
+				temp_net.add(pair.getL() + " " + pair.getR() + " +");
 				if(!overall_added.containsKey(pair))
 					overall_added.put(pair, 0);
 				overall_added.put(pair, overall_added.get(pair)+1 );
 			}
 			for (StrPair pair:lost_interactions) {
-				temp_list.add(pair.getL() + " " + pair.getR() + "-");
+				temp_net.add(pair.getL() + " " + pair.getR() + " -");
 				if(!overall_lost.containsKey(pair))
 					overall_lost.put(pair, 0);
 				overall_lost.put(pair, overall_lost.get(pair)+1 );
 			}
 			
 			// output diff-network
-			Utilities.writeEntries(temp_list, out_folder + patient_id+"_diffnet.txt");
+			Utilities.writeEntries(temp_net, out_folder + patient_id+"_diffnet.txt");
+			diffnets.put(patient_id, temp_net);
 		}
 		
 		// do diff.
@@ -207,7 +178,7 @@ public class TCGAdiff {
 		System.out.println("t: " + Utilities.getMean(tumor_nodes) + " / " + Utilities.getMean(tumor_edges) + " +- " + Utilities.getStd(tumor_nodes) + " / " + Utilities.getStd(tumor_edges));
 		System.out.println("P_rew: " + Utilities.getMean(P_rew.values()) + " +- " + Utilities.getStd(P_rew.values()));
 		
-		FDRwriteOutNet(diff, tumor_data.size(), out_folder + "sign_diffnet.txt", Utilities.getMean(P_rew.values()), FDR);
+		HashSet<String> sign_net = FDRwriteOutNet(diff, tumor_data.size(), out_folder + "sign_diffnet.txt", Utilities.getMean(P_rew.values()), FDR);
 		
 		// write P_rews
 		List<String> temp_list = new LinkedList<String>();
@@ -215,6 +186,15 @@ public class TCGAdiff {
 			temp_list.add(patient + " " + Double.toString(P_rew.get(patient)));
 		Utilities.writeEntries(temp_list, out_folder + "P_rew.txt");
 		System.out.println();
+		
+		// write sign. patient subnetworks
+		for (String patient_id:diffnets.keySet()) {
+			// prune nets to sign. parts
+			diffnets.get(patient_id).retainAll(sign_net);
+			
+			// output
+			Utilities.writeEntries(diffnets.get(patient_id), out_folder + patient_id+"_signdiffnet.txt");
+		}
 	}
 	
 	public static void main(String[] args) {
