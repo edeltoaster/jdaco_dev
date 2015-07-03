@@ -155,12 +155,11 @@ public class JDACO {
 		// stats
 		System.out.println("Seed protein list: " + seed_file + " (" + seed.size() + " proteins)");
 		
-		// no seeds
-		System.out.println("Percentile: " + percentile);
-		
 		// determine thresholds
-		if (pair_threshold == -1.0)
+		if (pair_threshold == -1.0) {
+			System.out.println("Percentile: " + percentile);
 			pair_threshold = ppin.getPercentile(percentile);
+		}
 		
 		if (prob_threshold == -1.0)
 			prob_threshold = Math.pow(pair_threshold, max_depth-1);
