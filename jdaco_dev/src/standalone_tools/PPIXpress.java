@@ -43,7 +43,7 @@ public class PPIXpress {
 		System.out.println("	-tp=[percentile] : only take transcripts/genes with an expression above the [percentile]-th percentile into account (default: overrides option above)");
 		System.out.println("	-w : add weights using STRING, interactions that are not in STRING are discarded");
 		System.out.println("	-l : do not retrieve current 3did/iPfam data, only use domain-domain interaction data from DOMINE & IDDI");
-		System.out.println("	-r=[release] : try to use data from a certain ENSEMBL release, uses newest if specific release not found");
+		System.out.println("	-r=[release] : try to use data from a certain Ensembl release, uses newest if specific release not found");
 		System.out.println("	-e : extend MySQL timeout to 5 min (default: 3 min)");
 		System.out.println("	-s=[US, UK, AS, 'specific URL'] : change initial server, note that US and asian mirrors only store the last two releases (default: US)");
 		
@@ -66,7 +66,7 @@ public class PPIXpress {
 		System.out.println("	- GENCODE GTF (gene) files");
 		System.out.println("	- simple textfiles with transcript and expression per line");
 		System.out.println("	- simple textfile with gene and expression per line");
-		System.out.println("	Transcripts/Genes besides TCGA are assumed to be given as ENSEMBL identifiers.");
+		System.out.println("	Transcripts/Genes besides TCGA are assumed to be given as Ensembl identifiers.");
 		
 		System.exit(0);
 	}

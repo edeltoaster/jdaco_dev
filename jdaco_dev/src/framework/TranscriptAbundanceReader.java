@@ -714,7 +714,7 @@ public class TranscriptAbundanceReader {
 	public static Map<String, Float> readSample(String path, double threshold, boolean gene_level_only, String organism_database) {
 		String type = TranscriptAbundanceReader.inferTranscriptAbundanceFileType(path);
 		Map<String, Float> abundance = null;
-		
+		System.out.println(type);
 		if (type.equals("Cufflinks G")) {
 			abundance = TranscriptAbundanceReader.readCufflinksGenesFPKM(path, threshold);
 		} else if (type.equals("Cufflinks T")) {
@@ -736,7 +736,7 @@ public class TranscriptAbundanceReader {
 				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, organism_database, false);
 			else
 				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, false);
-		} else if (type.equals("linewise (header ) G")) {
+		} else if (type.equals("linewise (header) G")) {
 			abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, true);
 		} else if (type.equals("linewise (header) T")) {
 			if (gene_level_only)
@@ -771,5 +771,9 @@ public class TranscriptAbundanceReader {
 		double p = (percentile) / 100.0 * values.size();
 		
 		return values.get((int) p);
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(readSample("/Users/tho/Desktop/test_expr.txt", 1.0, true, null));
 	}
 }
