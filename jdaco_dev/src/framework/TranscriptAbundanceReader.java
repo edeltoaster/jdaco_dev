@@ -235,8 +235,8 @@ public class TranscriptAbundanceReader {
 	 * @param threshold
 	 * @return map of gene/transcript -> expression (if a transcript/gene above > threshold)
 	 */
-	public static Map<String, Float> readExpressionFile(String file, double threshold) {
-		return readExpressionFile(file, threshold, null);
+	public static Map<String, Float> readExpressionFile(String file, double threshold, boolean header) {
+		return readExpressionFile(file, threshold, null, header);
 	}
 	
 	/**
@@ -247,7 +247,7 @@ public class TranscriptAbundanceReader {
 	 * @param organism_database -> to convert to genes if necessary
 	 * @return map of gene/transcript -> expression (if a transcript/gene above > threshold)
 	 */
-	public static Map<String, Float> readExpressionFile(String file, double threshold, String organism_database) {
+	public static Map<String, Float> readExpressionFile(String file, double threshold, String organism_database, boolean header) {
 		Map<String, Float> abundance = new HashMap<String, Float>();
 		
 		try {
@@ -260,8 +260,13 @@ public class TranscriptAbundanceReader {
 			while (in.ready()) {
 				// parse
 				String line = in.readLine();
+				
 				if (line.startsWith("#"))
 					continue;
+				if (header) {
+					header = false;
+					continue;
+				}
 				String[] split = line.split("\\s+");
 				String transcript = split[0];
 				float expr = Float.parseFloat(split[1]);
@@ -541,13 +546,19 @@ public class TranscriptAbundanceReader {
 	/**
 	 * Infers from the Ensembl identifier if it is a (T)ranscript, (G)ene or (P)rotein.
 	 * Special cases: 
-	 * yeast genes starts with Y. SGD ORF.
-	 * fruitfly from flybase -> FBgn0032956 gene, FBtr0085899. FlyBase
-	 * C. elegans -> WBGene00004893, F53H8.4. WormBase
+	 * - yeast genes starts with Y. SGD ORF.
+	 * - fruitfly from flybase -> FBgn0032956 gene, FBtr0085899. FlyBase
+	 * - C. elegans -> WBGene00004893, F53H8.4. WormBase
+	 * - return 'o' for identifiers used in TCGA
 	 * @param identifier
 	 * @return
 	 */
 	public static char getEnsemblIDType(String identifier) {
+		
+		// is TCGA identifier, UCSC transcript or HGNC|Entrez
+		if (identifier.startsWith("uc") || identifier.contains("|"))
+			return 'o';
+		
 		// yeast gene
 		if (identifier.startsWith("Y"))
 			return 'G';
@@ -555,8 +566,11 @@ public class TranscriptAbundanceReader {
 			return 'T';
 		
 		int i = 0;
-		while (!Character.isDigit(identifier.charAt(i)))
+		while (!Character.isDigit(identifier.charAt(i))) {
 			i++;
+			if (identifier.length() == i) // for non-digit identifiers
+				return 'o';
+		}
 		
 		char t = identifier.charAt(--i);
 		
@@ -576,6 +590,8 @@ public class TranscriptAbundanceReader {
 	 */
 	public static String inferTranscriptAbundanceFileType(String file) {
 		try {
+			boolean second_row = false;
+			String may_be = "";
 			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
@@ -608,10 +624,15 @@ public class TranscriptAbundanceReader {
 				} else {
 					
 					// assume TCGA from header
-					if (line.startsWith("gene_id"))
-						return "TCGA G";
+					if (line.startsWith("gene_id")) {
+						may_be = "TCGA G";
+						second_row = true;
+						continue;
+					}
 					else if (line.startsWith("isoform_id")) {
-						return "TCGA T";
+						may_be = "TCGA T";
+						second_row = true;
+						continue;
 					}
 					
 					if (line.startsWith("Protein")) // PPIN / DDIN ?
@@ -620,7 +641,22 @@ public class TranscriptAbundanceReader {
 					// assume simple linewise file
 					char type = getEnsemblIDType(split[0]);
 					
-					return "linewise " + type;
+					if (type == 'o') {
+						if (second_row)
+							if (may_be.equals(""))
+								return "unknown";
+							else
+								return may_be; // some TCGA determined earlier
+						else { // header for linewise?
+							second_row = true;
+							continue;
+						}
+					}
+					
+					if (second_row)
+						return "linewise (header) " + type;
+					else
+						return "linewise " + type;
 				}
 				
 			}
@@ -694,12 +730,19 @@ public class TranscriptAbundanceReader {
 			else
 				abundance = TranscriptAbundanceReader.readGencodeGTFTranscripts(path, threshold);
 		} else if (type.equals("linewise G")) {
-			abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold);
+			abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, false);
 		} else if (type.equals("linewise T")) {
 			if (gene_level_only)
-				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, organism_database);
+				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, organism_database, false);
 			else
-				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold);
+				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, false);
+		} else if (type.equals("linewise (header ) G")) {
+			abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, true);
+		} else if (type.equals("linewise (header) T")) {
+			if (gene_level_only)
+				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, organism_database, true);
+			else
+				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, true);
 		} else if (type.equals("TCGA G")) {
 			abundance = TranscriptAbundanceReader.readTCGAGeneRSEM(path, threshold);
 		} else if (type.equals("TCGA T")) {
