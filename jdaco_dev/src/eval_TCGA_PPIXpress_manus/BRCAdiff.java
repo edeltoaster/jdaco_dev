@@ -195,11 +195,31 @@ public class BRCAdiff {
 		new File(out_folder).mkdir();
 		FDRwriteOutNet(diff, tumor_data.size(), out_folder + "t_net.txt", Utilities.getMean(P_rew), FDR);
 		
-		// write P_rews for statistics
+		// write stuff for statistics
 		List<String> temp_list = new LinkedList<String>();
 		for (double d:P_rew)
 			temp_list.add(Double.toString(d));
 		Utilities.writeEntries(temp_list, out_folder + "t_P_rew.txt");
+		
+		temp_list.clear();
+		for (double d:normal_nodes)
+			temp_list.add(Double.toString(d));
+		Utilities.writeEntries(temp_list, out_folder + "t_normal_nodes.txt");
+		
+		temp_list.clear();
+		for (double d:tumor_nodes)
+			temp_list.add(Double.toString(d));
+		Utilities.writeEntries(temp_list, out_folder + "t_tumor_nodes.txt");
+		
+		temp_list.clear();
+		for (double d:normal_edges)
+			temp_list.add(Double.toString(d));
+		Utilities.writeEntries(temp_list, out_folder + "t_normal_edges.txt");
+		
+		temp_list.clear();
+		for (double d:tumor_edges)
+			temp_list.add(Double.toString(d));
+		Utilities.writeEntries(temp_list, out_folder + "t_tumor_edges.txt");
 		
 		/**
 		 * Now the same based on genes
@@ -268,15 +288,36 @@ public class BRCAdiff {
 		
 		FDRwriteOutNet(diff, normal_data.size(), out_folder + "g_net.txt", Utilities.getMean(P_rew), FDR);
 		
-		// write P_rews for statistics
+		// write stuff for statistics
 		for (double d:P_rew)
 			temp_list.add(Double.toString(d));
 		Utilities.writeEntries(temp_list, out_folder + "g_P_rew.txt");
-				
+			
+		temp_list.clear();
+		for (double d:normal_nodes)
+			temp_list.add(Double.toString(d));
+		Utilities.writeEntries(temp_list, out_folder + "g_normal_nodes.txt");
+		
+		temp_list.clear();
+		for (double d:tumor_nodes)
+			temp_list.add(Double.toString(d));
+		Utilities.writeEntries(temp_list, out_folder + "g_tumor_nodes.txt");
+		
+		temp_list.clear();
+		for (double d:normal_edges)
+			temp_list.add(Double.toString(d));
+		Utilities.writeEntries(temp_list, out_folder + "g_normal_edges.txt");
+		
+		temp_list.clear();
+		for (double d:tumor_edges)
+			temp_list.add(Double.toString(d));
+		Utilities.writeEntries(temp_list, out_folder + "g_tumor_edges.txt");
+		
 		System.out.println("");
 	}
 	
 	public static void main(String[] args) {
+		DataQuery.enforceSpecificEnsemblRelease("79");
 		System.out.println("TCGA diff-builder, FDR: 0.05");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		//System.out.println("strichter local only data");
