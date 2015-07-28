@@ -103,10 +103,12 @@ public class TranscriptAbundanceReader {
 					String[] temp = s.trim().split("\\s+");
 					
 					// special case: FPKM "       nan"
-					if (temp.length > 2 || !temp[1].startsWith("\""))
+					if (temp.length > 2)
 						continue;
 					
-					temp[1] = temp[1].substring(1, temp[1].length()-1);
+					// cut out "" if there are any
+					if (temp[1].startsWith("\""))
+						temp[1] = temp[1].substring(1, temp[1].length()-1);
 					
 					if (temp[0].equals("gene_id"))
 						gene = temp[1].split("\\.")[0];
@@ -774,6 +776,7 @@ public class TranscriptAbundanceReader {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(readSample("/Users/tho/Desktop/test_expr.txt", 1.0, true, null));
+		Map<String, Float> test = readSample("/Users/tho/Desktop/bla.gtf", 0.6, false, null);
+		System.out.println(test.get("ENST00000450305"));
 	}
 }
