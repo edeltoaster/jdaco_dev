@@ -14,6 +14,7 @@ public class locGO {
 
 	public static void writeOut(String file, Map<String, Set<String>> data, Set<String> ref_proteins) {
 		List<String> lines = new LinkedList<String>();
+		lines.add("Protein\tlocation");
 		for (String protein:ref_proteins) {
 			String temp = protein + "\t";
 			for (String loc:data.keySet()) {
