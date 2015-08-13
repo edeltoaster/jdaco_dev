@@ -26,6 +26,7 @@ public class TCGAdiff {
 	static PPIN original_ppi;
 	static double rsem_cutoff = 1.0;
 	static BinomialTest test = new BinomialTest();
+	static int min_samples = 15;
 	
 	public static HashSet<String> FDRwriteOutNet(Map<StrPair, Double> diff, int samples, String out_path, double P_rew, double FDR) {
 		List<String> helper = new LinkedList<String>();
@@ -106,6 +107,12 @@ public class TCGAdiff {
 		}
 		
 		System.out.println(TCGA_prefix.split("_")[0]+": " + tumor_data.size() + " matched samples.");
+		
+		if (tumor_data.size() < min_samples) {
+			System.out.println("Too few samples.");
+			return;
+		}
+		
 		List<Double> normal_nodes = new LinkedList<Double>();
 		List<Double> tumor_nodes = new LinkedList<Double>();
 		List<Double> normal_edges = new LinkedList<Double>();
@@ -156,6 +163,8 @@ public class TCGAdiff {
 			
 			// output diff-network
 			Utilities.writeEntries(temp_net, out_folder + patient_id+"_diffnet.txt");
+			normal_net.writePPIN(out_folder + patient_id+"_normalppi.txt");
+			tumor_net.writePPIN(out_folder + patient_id+"_tumorppi.txt");
 			diffnets.put(patient_id, temp_net);
 		}
 		
