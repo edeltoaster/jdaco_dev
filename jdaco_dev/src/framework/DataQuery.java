@@ -57,6 +57,8 @@ public class DataQuery {
 	private static Map<String, Map<String, String>> cache_ucsc = new HashMap<String, Map<String,String>>();
 	private static Map<String, String> cache_Esembl_db = new HashMap<String, String>();
 	private static List<String[]> cache_HGNC;
+	private static Map<String, String> uniprot_sec_accs;
+	private static String uniprot_release;
 	
 	/**
 	 * Queries UniProt to find organism name from a given protein
@@ -957,6 +959,69 @@ public class DataQuery {
 		// build
 		
 		return new PPIN(new BufferedReader(new InputStreamReader(inputStream)), 0.0);
+	}
+	
+	public static Map<String, String> getUniprotSecondaryAccMap() {
+		
+		// cache
+		if (DataQuery.uniprot_sec_accs != null)
+			return DataQuery.uniprot_sec_accs;
+		
+		Map<String, String> sec_to_primary = new HashMap<String, String>();
+		try {
+			URL server = new URL("ftp://ftp.uniprot.org/pub/databases/uniprot/knowledgebase/docs/sec_ac.txt");
+			URLConnection connection = server.openConnection();
+			
+			// read and build pipe
+			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String line;
+			
+			boolean no_data_yet = true;
+			while ( (line = datastream.readLine()) != null ) {
+				if (line.isEmpty())
+					continue;
+				
+				if (no_data_yet) {
+					if (line.startsWith("Release:")) {
+						// parse version
+						String[] temp = line.trim().split("\\s+");
+						DataQuery.uniprot_release = temp[1];
+					} else if (line.startsWith("_")) {
+						no_data_yet = false;
+					}
+					
+					continue;
+				}
+				
+				// parse data
+				String[] temp = line.trim().split("\\s+");
+				sec_to_primary.put(temp[0], temp[1]);
+			}
+			datastream.close();
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("UniProt");
+			
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get accession data from Uniprot in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			return getUniprotSecondaryAccMap();
+		}
+			
+		// write to cache
+		DataQuery.uniprot_sec_accs = sec_to_primary;
+		
+		return sec_to_primary;
+	}
+	
+	public static String getUniprotRelease() {
+		if (DataQuery.uniprot_release == null)
+			DataQuery.getUniprotSecondaryAccMap();
+		
+		return DataQuery.uniprot_release;
 	}
 	
 	/**
