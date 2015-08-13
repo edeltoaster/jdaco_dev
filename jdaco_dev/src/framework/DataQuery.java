@@ -961,6 +961,11 @@ public class DataQuery {
 		return new PPIN(new BufferedReader(new InputStreamReader(inputStream)), 0.0);
 	}
 	
+	/**
+	 * Retrieves a mapping of secondary to primary accessions from Uniprot,
+	 * enables to filter/update data with old annotation
+	 * @return
+	 */
 	public static Map<String, String> getUniprotSecondaryAccMap() {
 		
 		// cache
@@ -1017,6 +1022,9 @@ public class DataQuery {
 		return sec_to_primary;
 	}
 	
+	/**
+	 * Returns release of Uniprot accession mapping data
+	 */
 	public static String getUniprotRelease() {
 		if (DataQuery.uniprot_release == null)
 			DataQuery.getUniprotSecondaryAccMap();
@@ -1186,6 +1194,9 @@ public class DataQuery {
 		return known_DDIs;
 	}
 	
+	/**
+	 * Reads DOMINE data
+	 */
 	public static HashMap<String, HashSet<String>> getDOMINE() {
 		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
 		try {
@@ -1220,6 +1231,9 @@ public class DataQuery {
 		return ddis;
 	}
 	
+	/**
+	 * Reads IDDI data
+	 */
 	public static HashMap<String, HashSet<String>> getIDDI() {
 		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
 		
@@ -1258,6 +1272,9 @@ public class DataQuery {
 		return ddis;
 	}
 	
+	/**
+	 * Returns version of iPfam data
+	 */
 	public static String getIPfamVersion() {
 		String version_string = "";
 		try {
@@ -1296,6 +1313,10 @@ public class DataQuery {
 		return version_string;
 	}
 	
+	/**
+	 * Retrieves current iPfam interaction data
+	 * @return interaction data
+	 */
 	public static HashMap<String, HashSet<String>> getIPfam() {
 
 		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
@@ -1366,6 +1387,9 @@ public class DataQuery {
 		return ddis;
 	}
 	
+	/**
+	 * Returns version of 3did data
+	 */
 	public static String get3didVersion() {
 		String version_string = "unknown";
 		Date date = null;
@@ -1395,6 +1419,10 @@ public class DataQuery {
 		return version_string;
 	}
 	
+	/**
+	 * Retrieval of current 3did interaction data
+	 * @return interaction data
+	 */
 	public static HashMap<String, HashSet<String>> get3did() {
 		
 		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
