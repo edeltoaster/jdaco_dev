@@ -374,6 +374,64 @@ public class PPIN {
 		}
 	}
 	
+	/**
+	 * Alternative/Copy constructor that is able to update Uniprot accessions
+	 * @param old_ppi: the original PPIN
+	 * @param update_uniprot: if false just copy, if true the accessions are updated
+	 */
+	public PPIN(PPIN old_ppi, boolean update_uniprot) {
+		
+		Map<String, String> update_map = new HashMap<String, String>();
+		
+		if (update_uniprot)
+			update_map = DataQuery.getUniprotSecondaryAccMap();
+		
+		this.is_weighted = old_ppi.is_weighted;
+		
+		for (String p1:old_ppi.getPartners().keySet()) {
+			
+			// mapping for protein 1
+			String p1n = p1;
+			if (update_map.containsKey(p1))
+				p1n = update_map.get(p1);
+			
+			for (String p2:old_ppi.getPartners().get(p1)) {
+				
+				// read only once, but write twice then
+				if (p1.compareTo(p2) <= 0)
+					continue;
+				
+				// mapping for protein 2
+				String p2n = p2;
+				if (update_map.containsKey(p2))
+					p2n = update_map.get(p2);
+				
+				// get weight using old data
+				StrPair pair = new StrPair(p1, p2);
+				double w = old_ppi.getWeights().get(pair);
+				
+				// every interaction only once -> add both directions
+				if (!this.partners.containsKey(p1n)) {
+					this.w_whole.put(p1n, 0.0);
+					this.partners.put(p1n, new HashSet<String>());
+				}
+				this.partners.get(p1n).add(p2);
+				this.w_whole.put(p1n, this.w_whole.get(p1n) + w);
+				
+				if (!this.partners.containsKey(p2n)) {
+					this.w_whole.put(p2n, 0.0);
+					this.partners.put(p2n, new HashSet<String>());
+				}
+				this.partners.get(p2n).add(p1);
+				this.w_whole.put(p2n, this.w_whole.get(p2n) + w);
+				
+				// write weight using old data
+				pair = new StrPair(p1n, p2n);
+				this.weights.put(pair, w);
+			}
+		}
+	}
+	
 	public boolean contains(String protein) {
 		return this.w_whole.keySet().contains(protein);
 	}
@@ -726,6 +784,14 @@ public class PPIN {
 			}
 		
 		return new PPIN(all_interactions);
+	}
+	
+	/**
+	 * Retrieves a map of changes in Uniprot accessions and constructs an updated network from the current network that is then returned
+	 * @return a new PPIN where accessions are updated
+	 */
+	public PPIN updateUniprotAccessions() {
+		return new PPIN(this, true);
 	}
 	
 	public double getPairWeight(String protein1, String protein2) {
