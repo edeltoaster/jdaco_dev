@@ -375,7 +375,8 @@ public class PPIN {
 	}
 	
 	/**
-	 * Alternative/Copy constructor that is able to update Uniprot accessions
+	 * Alternative/Copy constructor that is able to update Uniprot accessions. If proteins - and therefore also interactions - are merged,
+	 * the merged interaction is annotated with the max. of all its annotated weights.
 	 * @param old_ppi: the original PPIN
 	 * @param update_uniprot: if false just copy, if true the accessions are updated
 	 */
@@ -411,25 +412,46 @@ public class PPIN {
 				double w = old_ppi.getWeights().get(pair);
 				
 				// every interaction only once -> add both directions
-				if (!this.partners.containsKey(p1n)) {
-					this.w_whole.put(p1n, 0.0);
+				if (!this.partners.containsKey(p1n))
 					this.partners.put(p1n, new HashSet<String>());
-				}
-				this.partners.get(p1n).add(p2);
-				this.w_whole.put(p1n, this.w_whole.get(p1n) + w);
 				
-				if (!this.partners.containsKey(p2n)) {
-					this.w_whole.put(p2n, 0.0);
+				this.partners.get(p1n).add(p2n);
+				
+				if (!this.partners.containsKey(p2n))
 					this.partners.put(p2n, new HashSet<String>());
-				}
-				this.partners.get(p2n).add(p1);
-				this.w_whole.put(p2n, this.w_whole.get(p2n) + w);
 				
-				// write weight using old data
+				this.partners.get(p2n).add(p1n);
+				
+				// write weight using new data, if already exists: use max of annotated weights
 				pair = new StrPair(p1n, p2n);
-				this.weights.put(pair, w);
+				if (this.weights.containsKey(pair)) {
+					
+					// only update if larger
+					if (w > this.weights.get(pair))
+						this.weights.put(pair, w);
+					
+				} else {
+					this.weights.put(pair, w);
+				}
+					
 			}
 		}
+		
+		// update w_whole afterwards to stay consistent
+		for (StrPair pair: this.weights.keySet()) {
+			String p1 = pair.getL();
+			String p2 = pair.getR();
+			double w = this.weights.get(pair);
+			
+			if (!this.w_whole.containsKey(p1))
+				this.w_whole.put(p1, 0.0);
+			if (!this.w_whole.containsKey(p2))
+				this.w_whole.put(p2, 0.0);
+			
+			this.w_whole.put(p1, this.w_whole.get(p1) + w);
+			this.w_whole.put(p2, this.w_whole.get(p2) + w);
+		}
+		
 	}
 	
 	public boolean contains(String protein) {
