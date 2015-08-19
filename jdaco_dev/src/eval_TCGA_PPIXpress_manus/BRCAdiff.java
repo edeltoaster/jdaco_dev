@@ -120,6 +120,8 @@ public class BRCAdiff {
 	
 	public static void process(NetworkBuilder builder, String out_folder, String TCGA_prefix, double FDR) {
 		
+		new File(out_folder).mkdir();
+		
 		// split data
 		List<String> tumor_data = new ArrayList<String>();
 		List<String> normal_data = new ArrayList<String>();
@@ -224,6 +226,10 @@ public class BRCAdiff {
 		/**
 		 * Now the same based on genes
 		 */
+		
+		if (!out_folder.contains("all_")) // only do that once
+			return;
+		
 		// reset data, split data
 		overall_added = new HashMap<StrPair, Integer>();
 		overall_lost = new HashMap<StrPair, Integer>();
@@ -317,34 +323,85 @@ public class BRCAdiff {
 	}
 	
 	public static void main(String[] args) {
+		DataQuery.switchServer("ensembldb.ensembl.org:3306");
 		DataQuery.enforceSpecificEnsemblRelease("79");
 		DataQuery.enforceSpecific3didRelease("2015_02");
 		System.out.println("TCGA diff-builder, FDR: 0.05");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
-		//System.out.println("strichter local only data");
-		//DataQuery.localDDIsOnly();
-		//DataQuery.stricterLocalDDIs();
+		System.out.println("3did:" + DataQuery.get3didVersion());
+		System.out.println("iPfam:" + DataQuery.getIPfamVersion());
 		
-		// get all prefixes
-		Set<String> cancers = new HashSet<String>();
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/tissue_spec/cancer_nets/TCGA/", ".txt.gz")) {
-			cancers.add(f.getName().split("_")[0]);
-		}
 		
 		PPIN intact = new PPIN("mixed_data/human_intact.txt.gz");
 		PPIN biogrid = new PPIN("mixed_data/human_biogrid.txt.gz");
 		
+		System.out.println("");
+		
+		System.out.println("ALL-DDI");
+		
 		original_ppi = intact;
 		NetworkBuilder builder = new NetworkBuilder(original_ppi);
 		
-		new File("/Users/tho/Desktop/intact_fdr5/").mkdir();
-		process(builder, "/Users/tho/Desktop/intact_fdr5/", "BRCA", 0.05);
+		System.out.println("IntAct");
+		process(builder, "/Users/tho/Desktop/all_intact/", "BRCA", 0.05);
 		
 		original_ppi = biogrid;
 		builder = new NetworkBuilder(original_ppi);
 		
-		new File("/Users/tho/Desktop/biogrid_fdr5/").mkdir();
-		process(builder, "/Users/tho/Desktop/biogrid_fdr5/", "BRCA", 0.05);
+		System.out.println("BioGRID");
+		process(builder, "/Users/tho/Desktop/all_biogrid/", "BRCA", 0.05);
+		
+		DataQuery.localDDIsOnly();
+		//DataQuery.stricterLocalDDIs();
+		
+		System.out.println("PRE_HC");
+		
+		original_ppi = intact;
+		builder = new NetworkBuilder(original_ppi);
+		
+		System.out.println("IntAct");
+		process(builder, "/Users/tho/Desktop/local_intact/", "BRCA", 0.05);
+		
+		original_ppi = biogrid;
+		builder = new NetworkBuilder(original_ppi);
+		
+		System.out.println("BioGRID");
+		process(builder, "/Users/tho/Desktop/local_biogrid/", "BRCA", 0.05);
+		
+		
+		DataQuery.onlyRetrievedDDIs();
+		
+		System.out.println("RETRIEVED");
+		
+		original_ppi = intact;
+		builder = new NetworkBuilder(original_ppi);
+		
+		System.out.println("IntAct");
+		process(builder, "/Users/tho/Desktop/retrieved_intact/", "BRCA", 0.05);
+		
+		original_ppi = biogrid;
+		builder = new NetworkBuilder(original_ppi);
+		
+		System.out.println("BioGRID");
+		process(builder, "/Users/tho/Desktop/retrieved_biogrid/", "BRCA", 0.05);
+		
+		
+		DataQuery.localDDIsOnly();
+		DataQuery.stricterLocalDDIs();
+		
+		System.out.println("PRE_VHC");
+		
+		original_ppi = intact;
+		builder = new NetworkBuilder(original_ppi);
+		
+		System.out.println("IntAct");
+		process(builder, "/Users/tho/Desktop/less_intact/", "BRCA", 0.05);
+		
+		original_ppi = biogrid;
+		builder = new NetworkBuilder(original_ppi);
+		
+		System.out.println("BioGRID");
+		process(builder, "/Users/tho/Desktop/less_biogrid/", "BRCA", 0.05);
 		
 	}
 
