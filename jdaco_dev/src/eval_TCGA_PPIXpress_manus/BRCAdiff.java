@@ -318,6 +318,7 @@ public class BRCAdiff {
 	
 	public static void main(String[] args) {
 		DataQuery.enforceSpecificEnsemblRelease("79");
+		DataQuery.enforceSpecific3didRelease("2015_02");
 		System.out.println("TCGA diff-builder, FDR: 0.05");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		//System.out.println("strichter local only data");

@@ -41,6 +41,7 @@ public class DataQuery {
 	private static boolean up2date_DDIs = true;
 	private static String STRING_version = "10";
 	private static String specific_ensembl_release = ""; // global option
+	private static String specific_3did_release = "current";
 	private static int retries = 0;
 	private static int timeout = 3*60; // 3min
 	private static PrintStream err_out = System.err;
@@ -1045,6 +1046,14 @@ public class DataQuery {
 	}
 	
 	/**
+	 * Enforces to use a specific 3did release, default: current -> "current"
+	 * @param release
+	 */
+	public static void enforceSpecific3didRelease(String release) {
+		DataQuery.specific_3did_release = release;
+	}
+	
+	/**
 	 * Clears cached results
 	 */
 	public static void resetCaches() {
@@ -1394,7 +1403,7 @@ public class DataQuery {
 		String version_string = "unknown";
 		Date date = null;
 		try {
-			URL server = new URL("http://3did.irbbarcelona.org/download/current/3did_flat.gz");
+			URL server = new URL("http://3did.irbbarcelona.org/download/" + DataQuery.specific_3did_release + "/3did_flat.gz");
 			URLConnection connection = server.openConnection();
 			date = new Date(connection.getLastModified());
 		} catch (Exception e) {
@@ -1420,7 +1429,7 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Retrieval of current 3did interaction data
+	 * Retrieval of 3did interaction data
 	 * @return interaction data
 	 */
 	public static HashMap<String, HashSet<String>> get3did() {
@@ -1428,7 +1437,7 @@ public class DataQuery {
 		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
 		
 		try {
-			URL server = new URL("http://3did.irbbarcelona.org/download/current/3did_flat.gz");
+			URL server = new URL("http://3did.irbbarcelona.org/download/" + DataQuery.specific_3did_release + "/3did_flat.gz");
 			URLConnection connection = server.openConnection();
 			
 			// read
