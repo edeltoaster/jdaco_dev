@@ -385,7 +385,7 @@ public class BRCAdiff {
 		System.out.println("BioGRID");
 		process(builder, "/Users/tho/Desktop/retrieved_biogrid/", "BRCA", 0.05);
 		
-		
+		// not working like this, execute extra
 		DataQuery.localDDIsOnly();
 		DataQuery.stricterLocalDDIs();
 		
