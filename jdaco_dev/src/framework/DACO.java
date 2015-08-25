@@ -412,7 +412,7 @@ public class DACO {
 		timer.cancel();
 		pool.shutdown();
 		
-		System.gc();
+		Runtime.getRuntime().gc();
 		
 		return new HashSet<HashSet<String>>(temp_results);
 	}
