@@ -41,8 +41,8 @@ public class TranscriptAbundanceReader {
 				if (line.startsWith("tracking_id"))
 					continue;
 				String[] split = line.split("\\s+");
-				String transcript = split[0];
-				String gene = split[3];
+				String transcript = split[0].split("\\.")[0];
+				String gene = split[3].split("\\.")[0];
 				float fpkm = Float.parseFloat(split[9]);
 				if (fpkm <= threshold) // common threshold = 1
 					continue;
@@ -57,6 +57,66 @@ public class TranscriptAbundanceReader {
 			in.close();
 		} catch (Exception e) {
 			System.err.println("Problem while trying to parse Cufflinks FPKM file.");
+		}
+		
+		if (return_gene_level)
+			return gene_abundance;
+		
+		return transcript_abundance;
+	}
+	
+	/**
+	 * Reads RSEM output files of genes or transcripts (gzipped also fine, ending .gz assumed there)
+	 * and allow all only transcripts/genes with transcripts above threshold or if a gene file is parsed genes above threshold.
+	 * @param file
+	 * @param threshold
+	 * @param return_gene_level
+	 * @return map of gene/transcript -> FPKM (if a transcript/gene above > threshold)
+	 */
+	public static Map<String, Float> readRSEMFile(String file, double threshold, boolean return_gene_level) {
+		Map<String, Float> transcript_abundance = new HashMap<String, Float>();
+		Map<String, Float> gene_abundance = new HashMap<String, Float>();
+		int transcript_index = 0;
+		int gene_index = 1;
+		
+		try {
+			BufferedReader in = null;
+			if (file.endsWith(".gz"))
+				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+			else
+				in = new BufferedReader(new FileReader(file));
+			
+			while (in.ready()) {
+				// parse
+				String line = in.readLine();
+				
+				// check actual type of file
+				if (line.startsWith("transcript_id")) // leave indices as already set
+					continue;
+				if (line.startsWith("gene_id")) { // change indices
+					transcript_index = 1;
+					gene_index = 0;
+					continue;
+				}
+				
+				String[] split = line.split("\\s+");
+				String transcript = split[transcript_index].split("\\.")[0]; // shear off version
+				String gene = split[gene_index].split("\\.")[0];
+				
+				float fpkm = Float.parseFloat(split[6]);
+				if (fpkm <= threshold) // common threshold = 1
+					continue;
+				
+				transcript_abundance.put(transcript, fpkm);
+				
+				// gene abundance is the sum of transcript abundances
+				if (!gene_abundance.containsKey(gene))
+					gene_abundance.put(gene, 0f);
+				gene_abundance.put(gene, gene_abundance.get(gene) + fpkm);
+			}
+			in.close();
+		} catch (Exception e) {
+			System.err.println("Problem while trying to parse RSEM file.");
 		}
 		
 		if (return_gene_level)
@@ -270,7 +330,7 @@ public class TranscriptAbundanceReader {
 					continue;
 				}
 				String[] split = line.split("\\s+");
-				String transcript = split[0];
+				String transcript = split[0].split("\\.")[0];
 				float expr = Float.parseFloat(split[1]);
 				if (expr <= threshold) // common threshold = 1
 					continue;
@@ -321,16 +381,6 @@ public class TranscriptAbundanceReader {
 	}
 	
 	/**
-	 * Reads GTF files of transcripts (gzipped also fine, ending .gz assumed there)
-	 * and returns all that are above a certain threshold.
-	 * @param file
-	 * @return map transcript -> FPKM (if > threshold)
-	 */
-	public static Map<String, Float> readGencodeGTFTranscripts(String file, double threshold) {
-		return readGencodeGTFFile(file, threshold, false);
-	}
-	
-	/**
 	 * Reads Cufflinks FPKM_tracking files of genes or transcripts (gzipped also fine, ending .gz assumed there)
 	 * and returns all genes that are above a certain threshold. If a transcript file is used a gene is expressed if at least one transcript is above the threshold
 	 * @param file
@@ -338,6 +388,36 @@ public class TranscriptAbundanceReader {
 	 */
 	public static Map<String, Float> readCufflinksGenesFPKM(String file, double threshold) {
 		return readCufflinksFPKMFile(file, threshold, true);
+	}
+	
+	/**
+	 * Reads RSEM files of transcripts (gzipped also fine, ending .gz assumed there)
+	 * and returns all that are above a certain threshold.
+	 * @param file
+	 * @return map transcript -> FPKM (if > threshold)
+	 */
+	public static Map<String, Float> readRSEMTranscriptsFPKM(String file, double threshold) {
+		return readRSEMFile(file, threshold, false);
+	}
+	
+	/**
+	 * Reads RSEM files of genes or transcripts (gzipped also fine, ending .gz assumed there)
+	 * and returns all genes that are above a certain threshold. If a transcript file is used a gene is expressed if at least one transcript is above the threshold
+	 * @param file
+	 * @return map gene -> FPKM (if > threshold)
+	 */
+	public static Map<String, Float> readRSEMGenesFPKM(String file, double threshold) {
+		return readRSEMFile(file, threshold, true);
+	}
+	
+	/**
+	 * Reads GTF files of transcripts (gzipped also fine, ending .gz assumed there)
+	 * and returns all that are above a certain threshold.
+	 * @param file
+	 * @return map transcript -> FPKM (if > threshold)
+	 */
+	public static Map<String, Float> readGencodeGTFTranscripts(String file, double threshold) {
+		return readGencodeGTFFile(file, threshold, false);
 	}
 	
 	/**
@@ -615,7 +695,8 @@ public class TranscriptAbundanceReader {
 						return "GTF G";
 					else
 						return "GTF T";
-				} else if (split.length > 9) {// assume Cufflinks tracking output due to length
+					
+				} else if (split.length == 13) {// assume Cufflinks due to length
 					
 					// get next line, no information here
 					if (line.startsWith("tracking_id"))
@@ -623,6 +704,15 @@ public class TranscriptAbundanceReader {
 					
 					char type = getEnsemblIDType(split[0]);
 					return "Cufflinks " + type;
+					
+				} else if (split.length > 13) {// assume RSEM due to length
+					
+					// assume type from header
+					if (line.startsWith("gene_id"))
+						return "RSEM G";
+					if (line.startsWith("transcript_id"))
+						return "RSEM T";
+					
 				} else {
 					
 					// assume TCGA from header
@@ -716,7 +806,7 @@ public class TranscriptAbundanceReader {
 	public static Map<String, Float> readSample(String path, double threshold, boolean gene_level_only, String organism_database) {
 		String type = TranscriptAbundanceReader.inferTranscriptAbundanceFileType(path);
 		Map<String, Float> abundance = null;
-		System.out.println(type);
+		
 		if (type.equals("Cufflinks G")) {
 			abundance = TranscriptAbundanceReader.readCufflinksGenesFPKM(path, threshold);
 		} else if (type.equals("Cufflinks T")) {
@@ -724,6 +814,15 @@ public class TranscriptAbundanceReader {
 				abundance = TranscriptAbundanceReader.readCufflinksGenesFPKM(path, threshold);
 			else
 				abundance = TranscriptAbundanceReader.readCufflinksTranscriptsFPKM(path, threshold);
+			
+		} else if (type.equals("RSEM G")) {
+			abundance = TranscriptAbundanceReader.readRSEMGenesFPKM(path, threshold);
+		} else if (type.equals("RSEM T")) {
+			if (gene_level_only)
+				abundance = TranscriptAbundanceReader.readRSEMGenesFPKM(path, threshold);
+			else
+				abundance = TranscriptAbundanceReader.readRSEMTranscriptsFPKM(path, threshold);
+			
 		} else if (type.equals("GTF G")) {
 			abundance = TranscriptAbundanceReader.readGencodeGTFGenes(path, threshold);
 		} else if (type.equals("GTF T")) {
@@ -731,6 +830,7 @@ public class TranscriptAbundanceReader {
 				abundance = TranscriptAbundanceReader.readGencodeGTFGenes(path, threshold);
 			else
 				abundance = TranscriptAbundanceReader.readGencodeGTFTranscripts(path, threshold);
+			
 		} else if (type.equals("linewise G")) {
 			abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, false);
 		} else if (type.equals("linewise T")) {
@@ -738,6 +838,7 @@ public class TranscriptAbundanceReader {
 				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, organism_database, false);
 			else
 				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, false);
+			
 		} else if (type.equals("linewise (header) G")) {
 			abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, true);
 		} else if (type.equals("linewise (header) T")) {
@@ -745,6 +846,7 @@ public class TranscriptAbundanceReader {
 				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, organism_database, true);
 			else
 				abundance = TranscriptAbundanceReader.readExpressionFile(path, threshold, true);
+			
 		} else if (type.equals("TCGA G")) {
 			abundance = TranscriptAbundanceReader.readTCGAGeneRSEM(path, threshold);
 		} else if (type.equals("TCGA T")) {
@@ -773,10 +875,5 @@ public class TranscriptAbundanceReader {
 		double p = (percentile) / 100.0 * values.size();
 		
 		return values.get((int) p);
-	}
-	
-	public static void main(String[] args) {
-		Map<String, Float> test = readSample("/Users/tho/Desktop/bla.gtf", 0.6, false, null);
-		System.out.println(test.get("ENST00000450305"));
 	}
 }
