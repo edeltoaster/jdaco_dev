@@ -64,6 +64,8 @@ public class PPIXpress {
 		System.out.println("	- TCGA (RNA-seq V2) : rsem.genes.normalized_results files");
 		System.out.println("	- GENCODE GTF (transcript) files");
 		System.out.println("	- GENCODE GTF (gene) files");
+		System.out.println("	- RSEM (transcript) files");
+		System.out.println("	- RSEM (gene) files");
 		System.out.println("	- simple textfiles with transcript and expression per line");
 		System.out.println("	- simple textfile with gene and expression per line");
 		System.out.println("	Transcripts/Genes besides TCGA are assumed to be given as Ensembl identifiers.");
