@@ -71,7 +71,7 @@ public class TranscriptAbundanceReader {
 	 * @param file
 	 * @param threshold
 	 * @param return_gene_level
-	 * @return map of gene/transcript -> FPKM (if a transcript/gene above > threshold)
+	 * @return map of gene/transcript -> TPM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readRSEMFile(String file, double threshold, boolean return_gene_level) {
 		Map<String, Float> transcript_abundance = new HashMap<String, Float>();
@@ -103,16 +103,16 @@ public class TranscriptAbundanceReader {
 				String transcript = split[transcript_index].split("\\.")[0]; // shear off version
 				String gene = split[gene_index].split("\\.")[0];
 				
-				float fpkm = Float.parseFloat(split[6]);
-				if (fpkm <= threshold) // common threshold = 1
+				float tpm = Float.parseFloat(split[5]);
+				if (tpm <= threshold) // common threshold = 1
 					continue;
 				
-				transcript_abundance.put(transcript, fpkm);
+				transcript_abundance.put(transcript, tpm);
 				
 				// gene abundance is the sum of transcript abundances
 				if (!gene_abundance.containsKey(gene))
 					gene_abundance.put(gene, 0f);
-				gene_abundance.put(gene, gene_abundance.get(gene) + fpkm);
+				gene_abundance.put(gene, gene_abundance.get(gene) + tpm);
 			}
 			in.close();
 		} catch (Exception e) {
@@ -174,11 +174,11 @@ public class TranscriptAbundanceReader {
 						gene = temp[1].split("\\.")[0];
 					else if (temp[0].equals("transcript_id"))
 						transcript = temp[1].split("\\.")[0];
-					else if (temp[0].equals("FPKM") || temp[0].equals("RPKM")) { // if there is one specifically elaborated datapoint -> take it and don't think about further ones
+					else if (temp[0].equals("FPKM") || temp[0].equals("RPKM") || temp[0].equals("TPM")) { // if there is one specifically elaborated datapoint -> take it and don't think about further ones
 						fpkm = Float.parseFloat(temp[1]);
 						break;
 					}
-					else if (temp[0].startsWith("FPKM") || temp[0].startsWith("RPKM")) { // startswith but NOT equals
+					else if (temp[0].startsWith("FPKM") || temp[0].startsWith("RPKM") || temp[0].startsWith("TPM")) { // startswith but NOT equals
 						fpkm += Float.parseFloat(temp[1]);
 						sample_count++;
 					}
@@ -394,9 +394,9 @@ public class TranscriptAbundanceReader {
 	 * Reads RSEM files of transcripts (gzipped also fine, ending .gz assumed there)
 	 * and returns all that are above a certain threshold.
 	 * @param file
-	 * @return map transcript -> FPKM (if > threshold)
+	 * @return map transcript -> TPM (if > threshold)
 	 */
-	public static Map<String, Float> readRSEMTranscriptsFPKM(String file, double threshold) {
+	public static Map<String, Float> readRSEMTranscriptsTPM(String file, double threshold) {
 		return readRSEMFile(file, threshold, false);
 	}
 	
@@ -404,9 +404,9 @@ public class TranscriptAbundanceReader {
 	 * Reads RSEM files of genes or transcripts (gzipped also fine, ending .gz assumed there)
 	 * and returns all genes that are above a certain threshold. If a transcript file is used a gene is expressed if at least one transcript is above the threshold
 	 * @param file
-	 * @return map gene -> FPKM (if > threshold)
+	 * @return map gene -> TPM (if > threshold)
 	 */
-	public static Map<String, Float> readRSEMGenesFPKM(String file, double threshold) {
+	public static Map<String, Float> readRSEMGenesTPM(String file, double threshold) {
 		return readRSEMFile(file, threshold, true);
 	}
 	
@@ -816,12 +816,12 @@ public class TranscriptAbundanceReader {
 				abundance = TranscriptAbundanceReader.readCufflinksTranscriptsFPKM(path, threshold);
 			
 		} else if (type.equals("RSEM G")) {
-			abundance = TranscriptAbundanceReader.readRSEMGenesFPKM(path, threshold);
+			abundance = TranscriptAbundanceReader.readRSEMGenesTPM(path, threshold);
 		} else if (type.equals("RSEM T")) {
 			if (gene_level_only)
-				abundance = TranscriptAbundanceReader.readRSEMGenesFPKM(path, threshold);
+				abundance = TranscriptAbundanceReader.readRSEMGenesTPM(path, threshold);
 			else
-				abundance = TranscriptAbundanceReader.readRSEMTranscriptsFPKM(path, threshold);
+				abundance = TranscriptAbundanceReader.readRSEMTranscriptsTPM(path, threshold);
 			
 		} else if (type.equals("GTF G")) {
 			abundance = TranscriptAbundanceReader.readGencodeGTFGenes(path, threshold);
