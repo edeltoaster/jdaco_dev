@@ -384,9 +384,15 @@ public class PPIXpress_GUI {
 		text_threshold.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					threshold = Double.parseDouble(text_threshold.getText());
+					if (chckbxPercentile.isSelected())
+						percentile = Double.parseDouble(text_threshold.getText());
+					else
+						threshold = Double.parseDouble(text_threshold.getText());
 				} catch (Exception ex) {
-					stream_output.println("Expression threshold no valid floating point value.");
+					if (chckbxPercentile.isSelected())
+						stream_output.println("Percentile no valid floating point value.");
+					else
+						stream_output.println("Expression threshold no valid floating point value.");
 				}
 			}
 		});
@@ -394,9 +400,15 @@ public class PPIXpress_GUI {
 			@Override
 			public void focusLost(FocusEvent e) {
 				try {
-					threshold = Double.parseDouble(text_threshold.getText());
+					if (chckbxPercentile.isSelected())
+						percentile = Double.parseDouble(text_threshold.getText());
+					else
+						threshold = Double.parseDouble(text_threshold.getText());
 				} catch (Exception ex) {
-					stream_output.println("Expression threshold no valid floating point value.");
+					if (chckbxPercentile.isSelected())
+						stream_output.println("Percentile no valid floating point value.");
+					else
+						stream_output.println("Expression threshold no valid floating point value.");
 				}
 			}
 		});
