@@ -4,15 +4,18 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Domain-domain interaction network suitable for performant DACO algorithm execution
@@ -130,9 +133,16 @@ public class DDIN {
 	 */
 	public void writeDDIN(String file) {
 		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			BufferedWriter bw = null;
+			if (file.endsWith(".gz"))
+				bw = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(file))));
+			else
+				bw = new BufferedWriter(new FileWriter(file));
+			
+			
 			bw.write("Protein/Domain1 Domain2 IAType Weight");
 			bw.newLine();
+			
 			// write proteins -> domains
 			for (String protein:this.protein_to_domains.keySet())
 				for (String domain:this.protein_to_domains.get(protein)) {
@@ -140,6 +150,7 @@ public class DDIN {
 					bw.write(temp);
 					bw.newLine();
 				}
+			
 			//write DDIs
 			for (String domain1:this.ddis.keySet())
 				for (String domain2:this.ddis.get(domain1)) {
