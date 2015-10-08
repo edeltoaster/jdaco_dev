@@ -6,3 +6,6 @@ granulocyte_monocyte_progenitor_cell GMP
 megakaryocyte-erythroid_progenitor_cell MEP
 erythroblast EB
 CD34-negative_CD41-positive_CD42-positive_megakaryocyte_cell MK
+#CD4-positive_alpha-beta_T_cell CD4_T
+#CD8-positive_alpha-beta_T_cell CD8_T
+#CD38-negative_naive_B_cell B
