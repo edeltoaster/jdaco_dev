@@ -19,13 +19,13 @@ public class build_networks {
 	
 	public static void main(String[] args) {
 		
-		Map<String, String> folder_type_map = new HashMap<>();
-		for (String s:Utilities.readEntryFile("eval_code/hemato_PPI/cell_types.txt")) {
-			if (s.startsWith("#"))
-				continue;
-			String[] spl = s.trim().split(" ");
-			folder_type_map.put(spl[0], spl[1]);
-		}
+//		Map<String, String> folder_type_map = new HashMap<>();
+//		for (String s:Utilities.readEntryFile("eval_code/hemato_PPI/cell_types.txt")) {
+//			if (s.startsWith("#"))
+//				continue;
+//			String[] spl = s.trim().split(" ");
+//			folder_type_map.put(spl[0], spl[1]);
+//		}
 		
 		PPIN original_ppin = new PPIN("mixed_data/human_merged_6_Oct_15.tsv.gz");
 		NetworkBuilder builder = new NetworkBuilder(original_ppin);
@@ -46,10 +46,10 @@ public class build_networks {
 			String file_name = path_split[path_split.length-1].split("\\.")[0] + ".tsv.gz";
 			String cell_type = path_split[path_split.length-2];
 			
-			if (!folder_type_map.containsKey(cell_type))
-				continue;
-			
-			cell_type = folder_type_map.get(cell_type);
+//			if (!folder_type_map.containsKey(cell_type))
+//				continue;
+//			
+//			cell_type = folder_type_map.get(cell_type);
 			
 			String out_path = network_folder + cell_type + "/";
 			
