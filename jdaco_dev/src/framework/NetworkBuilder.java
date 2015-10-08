@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 /**
- * bla
+ * Implementation of the network construction method PPIXpress
  * @author Thorsten Will
  */
 public class NetworkBuilder {
@@ -187,6 +187,7 @@ public class NetworkBuilder {
 			holistic_domain_to_protein.remove(domain);
 		}
 	}
+	
 	/**
 	 * Returns the underlying holistic DDIN
 	 * @return
@@ -195,7 +196,12 @@ public class NetworkBuilder {
 		return new DDIN(this.holistic_ddis, this.holistic_protein_to_domains, this.holistic_domain_to_protein);
 	}
 	
-	public ConstructedNetworks constructAssociatedNetworksFromTranscriptMap(Map<String, String> protein_to_assumed_isoform) {
+	/**
+	 * Construct specific PPIN and DDIN from a map of abundant proteins and their assumed transcripts
+	 * @param protein_to_assumed_transcript
+	 * @return
+	 */
+	public ConstructedNetworks constructAssociatedNetworksFromTranscriptMap(Map<String, String> protein_to_assumed_transcript) {
 		// map that stores p1<->p2
 		HashMap<String, Set<String>> ppi_partners = new HashMap<String, Set<String>>();
 		// maps that store DDI-stuff
@@ -204,11 +210,11 @@ public class NetworkBuilder {
 		HashMap<String, String> domain_to_protein = new HashMap<String, String>();// HashMap since already final
 		
 		// shrink to proteins in network
-		protein_to_assumed_isoform.keySet().retainAll(this.original_ppi.getProteins());
+		protein_to_assumed_transcript.keySet().retainAll(this.original_ppi.getProteins());
 		
 		// scan all expressed proteins for their abundant domains and build a state-specific domain_map
 		Map<String, List<String>> domain_map = new HashMap<String, List<String>>();
-		for (String protein:protein_to_assumed_isoform.keySet()) {
+		for (String protein:protein_to_assumed_transcript.keySet()) {
 			
 			// FB domain handling
 			String holistic_domain_id = "FB|"+protein; // holistic_domain_id equals domain_id here
@@ -224,10 +230,10 @@ public class NetworkBuilder {
 			}
 			
 			// other domains
-			if (!this.transcript_to_domains.containsKey(protein_to_assumed_isoform.get(protein))) // for java 6 compatibility
-				this.transcript_to_domains.put(protein_to_assumed_isoform.get(protein), new LinkedList<String>());
+			if (!this.transcript_to_domains.containsKey(protein_to_assumed_transcript.get(protein))) // for java 6 compatibility
+				this.transcript_to_domains.put(protein_to_assumed_transcript.get(protein), new LinkedList<String>());
 			
-			for (String domain_type:this.transcript_to_domains.get(protein_to_assumed_isoform.get(protein))) {
+			for (String domain_type:this.transcript_to_domains.get(protein_to_assumed_transcript.get(protein))) {
 				holistic_domain_id = domain_type+"|"+protein;
 				// if not needed anyhow, don't add to any data structure
 				if (!this.holistic_ddis.containsKey(holistic_domain_id))
@@ -288,13 +294,14 @@ public class NetworkBuilder {
 		}
 		
 		// cleanup disconnected proteins
-		Set<String> disconnected_proteins = new HashSet<String>(protein_to_assumed_isoform.keySet());
+		Set<String> disconnected_proteins = new HashSet<String>(protein_to_assumed_transcript.keySet());
 		disconnected_proteins.removeAll(ppi_partners.keySet());
 		
 		for (String protein:disconnected_proteins) {
 			for (String domain:protein_to_domains.get(protein))
 				domain_to_protein.remove(domain);
 			protein_to_domains.remove(protein);
+			protein_to_assumed_transcript.remove(protein);
 		}
 		
 		// cleanup domains without interactions
@@ -314,29 +321,40 @@ public class NetworkBuilder {
 		PPIN constructed_ppin = new PPIN(this.original_ppi, ppi_partners);
 		// convert data to right format
 		DDIN constructed_ddin = new DDIN(ddis, protein_to_domains, domain_to_protein);
-		return new ConstructedNetworks(constructed_ppin, constructed_ddin, this.db, this.isoform_based);
+		
+		return new ConstructedNetworks(constructed_ppin, constructed_ddin, protein_to_assumed_transcript, this.db, this.isoform_based);
 	}
 	
+	/**
+	 * Construct specific PPIN and DDIN from a map of transcript abundances
+	 * @param transcript_abundance
+	 * @return
+	 */
 	public ConstructedNetworks constructAssociatedNetworksFromTranscriptAbundance(Map<String, Float> transcript_abundance) {
 		
 		// map abundant transcripts to proteins and those again to highest expressed transcript
-		Map<String, String> major_isoform = new HashMap<String, String>();
+		Map<String, String> major_transcript = new HashMap<String, String>();
 		for (String transcript:transcript_abundance.keySet()) {
 			if (!this.transcript_to_proteins.containsKey(transcript)) // if no protein coding tanscript
 				continue;
 			for (String protein:this.transcript_to_proteins.get(transcript)) {
-				if (!major_isoform.containsKey(protein))
-					major_isoform.put(protein, transcript);
+				if (!major_transcript.containsKey(protein))
+					major_transcript.put(protein, transcript);
 				else { // compare case
-					if (transcript_abundance.get(transcript) > transcript_abundance.get(major_isoform.get(protein)))
-						major_isoform.put(protein, transcript);
+					if (transcript_abundance.get(transcript) > transcript_abundance.get(major_transcript.get(protein)))
+						major_transcript.put(protein, transcript);
 				}
 			}
 		}
 		
-		return this.constructAssociatedNetworksFromTranscriptMap(major_isoform);
+		return this.constructAssociatedNetworksFromTranscriptMap(major_transcript);
 	}
 	
+	/**
+	 * Construct specific PPIN and DDIN from a set of abundant proteins
+	 * @param proteins
+	 * @return
+	 */
 	public ConstructedNetworks constructAssociatedNetworksFromProteinSet(Set<String> proteins) {
 		
 		// map proteins to isoform
@@ -352,6 +370,11 @@ public class NetworkBuilder {
 		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms);
 	}
 	
+	/**
+	 * Construct specific PPIN and DDIN from a set of abundant genes
+	 * @param genes
+	 * @return
+	 */
 	public ConstructedNetworks constructAssociatedNetworksFromGeneAbundance(Set<String> genes) {
 		
 		// map proteins to isoform
@@ -385,7 +408,7 @@ public class NetworkBuilder {
 	}
 
 	/**
-	 * Constructs matching DDIN to PPIN subnetwork of abundant proteins assuming isoforms
+	 * Constructs matching DDIN to PPIN subnetwork of abundant proteins assuming principal isoforms
 	 * @param unpruned_ppi
 	 * @param abundant_proteins
 	 */
@@ -395,7 +418,7 @@ public class NetworkBuilder {
 	}
 	
 	/**
-	 * Constructs matching DDIN to PPIN assuming isoforms
+	 * Constructs matching DDIN to PPIN assuming principal isoforms
 	 * @param ppi
 	 */
 	public static ConstructedNetworks constructAssociatedIsoformNetworks(PPIN ppi) {
@@ -403,7 +426,7 @@ public class NetworkBuilder {
 	}
 	
 	/**
-	 * Constructs DDIN (isoforms) from given PPIN and returns the resulting pair of networks
+	 * Constructs DDIN of principal isoforms from given PPIN and returns the resulting pair of networks
 	 */
 	private static ConstructedNetworks constructSingleDDIN(PPIN ppi) {
 		Map<String, List<String>> ddis = new HashMap<String, List<String>>();// will later be converted to fixed data structure
@@ -551,11 +574,11 @@ public class NetworkBuilder {
 		for (String protein:protein_to_domains.keySet())
 			protein_to_domains_array.put(protein, protein_to_domains.get(protein).toArray(new String[protein_to_domains.get(protein).size()]));
 		
-		return new ConstructedNetworks(ppi, new DDIN(ddis_array, protein_to_domains_array, domain_to_protein), db, true);
+		return new ConstructedNetworks(ppi, new DDIN(ddis_array, protein_to_domains_array, domain_to_protein), prot_isoform_map, db, true);
 	}
 
 	/**
-	 * Returns Ensembl DB that was used
+	 * Returns the Ensembl DB that was used to gather the data
 	 * @return
 	 */
 	public String getDB() {

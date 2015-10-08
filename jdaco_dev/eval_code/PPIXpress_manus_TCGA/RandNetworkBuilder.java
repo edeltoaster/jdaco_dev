@@ -322,7 +322,8 @@ public class RandNetworkBuilder {
 		PPIN constructed_ppin = new PPIN(this.original_ppi, ppi_partners);
 		// convert data to right format
 		DDIN constructed_ddin = new DDIN(ddis, protein_to_domains, domain_to_protein);
-		return new ConstructedNetworks(constructed_ppin, constructed_ddin, this.db, this.isoform_based);
+		
+		return new ConstructedNetworks(constructed_ppin, constructed_ddin, protein_to_assumed_isoform, this.db, this.isoform_based);
 	}
 	
 	public ConstructedNetworks constructAssociatedNetworksFromTranscriptAbundance(Map<String, Float> transcript_abundance) {
@@ -559,7 +560,7 @@ public class RandNetworkBuilder {
 		for (String protein:protein_to_domains.keySet())
 			protein_to_domains_array.put(protein, protein_to_domains.get(protein).toArray(new String[protein_to_domains.get(protein).size()]));
 		
-		return new ConstructedNetworks(ppi, new DDIN(ddis_array, protein_to_domains_array, domain_to_protein), db, true);
+		return new ConstructedNetworks(ppi, new DDIN(ddis_array, protein_to_domains_array, domain_to_protein), prot_isoform_map, db, true);
 	}
 
 	/**
