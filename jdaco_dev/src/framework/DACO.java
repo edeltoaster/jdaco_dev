@@ -1,8 +1,5 @@
 package framework;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
@@ -530,19 +527,12 @@ public class DACO {
 		// clean from subsets
 		DACO.filterOutput(results);
 		
-		// write
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(out_file));
-			for (HashSet<String> cluster : results) {
-				String temp = String.join(",", cluster);
-				bw.write(temp);
-				bw.newLine();
-			}
-			bw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		List<String> to_write = new LinkedList<>();
+
+		for (HashSet<String> cluster : results) 
+			to_write.add( String.join(",", cluster) );
+		
+		Utilities.writeEntries(to_write, out_file);
 	}
 	
 	/**

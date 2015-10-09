@@ -1,21 +1,15 @@
 package framework;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Domain-domain interaction network suitable for performant DACO algorithm execution
@@ -132,40 +126,26 @@ public class DDIN {
 	 * @param file
 	 */
 	public void writeDDIN(String file) {
-		try {
-			BufferedWriter bw = null;
-			if (file.endsWith(".gz"))
-				bw = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(file))));
-			else
-				bw = new BufferedWriter(new FileWriter(file));
-			
-			
-			bw.write("Protein/Domain1 Domain2 IAType Weight");
-			bw.newLine();
-			
-			// write proteins -> domains
-			for (String protein:this.protein_to_domains.keySet())
-				for (String domain:this.protein_to_domains.get(protein)) {
-					String temp = protein + " " + domain + " pd 10";
-					bw.write(temp);
-					bw.newLine();
-				}
-			
-			//write DDIs
-			for (String domain1:this.ddis.keySet())
-				for (String domain2:this.ddis.get(domain1)) {
-					// no double occurance
-					if (domain1.compareTo(domain2) <= 0)
-						continue;
-					String temp = domain1 + " " + domain2 + " dd 1";
-					bw.write(temp);
-					bw.newLine();
-				}
-			
-			bw.close();
-		} catch (IOException e) {
-			System.err.println("Problem while trying to write DDIN.");
-		}
+		List<String> to_write = new LinkedList<>();
+		
+		to_write.add("Protein/Domain1 Domain2 IAType Weight");
+
+
+		// write proteins -> domains
+		for (String protein:this.protein_to_domains.keySet())
+			for (String domain:this.protein_to_domains.get(protein))
+				to_write.add(protein + " " + domain + " pd 10");
+
+		//write DDIs
+		for (String domain1:this.ddis.keySet())
+			for (String domain2:this.ddis.get(domain1)) {
+				// no double occurance
+				if (domain1.compareTo(domain2) <= 0)
+					continue;
+				to_write.add(domain1 + " " + domain2 + " dd 1");
+			}
+		
+		Utilities.writeEntries(to_write, file);
 	}
 	
 	/**

@@ -184,7 +184,9 @@ public class RegulatoryNetwork {
 	public void writeNodeTable(String out_file) {
 		Set<String> seen_targets = new HashSet<String>();
 		List<String> to_write = new LinkedList<String>();
+		
 		to_write.add("Node Nodetype");
+		
 		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet()) {
 			String complex = String.join("/", tfs_in_complex);
 			to_write.add(complex + " complex");

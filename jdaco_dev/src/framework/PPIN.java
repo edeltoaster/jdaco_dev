@@ -1,14 +1,9 @@
 package framework;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +14,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Protein-protein interaction network implementation suitable for DACO implementation
@@ -563,26 +557,14 @@ public class PPIN {
 	 * @param file
 	 */
 	public void writePPIN(String file) {
-		try {
-			BufferedWriter bw = null;
-			if (file.endsWith(".gz"))
-				bw = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(file))));
-			else
-				bw = new BufferedWriter(new FileWriter(file));
+		List<String> to_write = new LinkedList<>();
+
+		to_write.add("Protein1 Protein2 weight");
 			
-			bw.write("Protein1 Protein2 weight");
-			bw.newLine();
-			
-			for (StrPair pair:this.weights.keySet()) {
-				String temp = pair.getL() + " " + pair.getR() + " " + this.weights.get(pair);
-				bw.write(temp);
-				bw.newLine();
-			}
-			bw.close();
-			
-		} catch (IOException e) {
-			System.err.println("Problem while trying to write PPIN.");
-		}
+		for (StrPair pair:this.weights.keySet())
+			to_write.add( pair.getL() + " " + pair.getR() + " " + this.weights.get(pair) );
+
+		Utilities.writeEntries(to_write, file);
 	}
 	
 	/**

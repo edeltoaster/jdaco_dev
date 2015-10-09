@@ -1,6 +1,8 @@
 package framework;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,9 +69,22 @@ public class ConstructedNetworks {
 	 * @return
 	 */
 	public Map<String, String> getProteinToAssumedTranscriptMap() {
-		return protein_to_assumed_transcript;
+		return this.protein_to_assumed_transcript;
 	}
 
+	/**
+	 * Writes the protein->transcript mapping to a file for later usage
+	 * @param out_file
+	 */
+	public void writeProteinToAssumedTranscriptMap(String out_file) {
+		List<String> to_write = new LinkedList<>();
+		
+		for (String protein:this.protein_to_assumed_transcript.keySet())
+			to_write.add( protein + " " + this.protein_to_assumed_transcript.get(protein));
+		
+		Utilities.writeEntries(to_write, out_file);
+	}
+	
 	/**
 	 * Returns Ensembl database that was used
 	 * @return

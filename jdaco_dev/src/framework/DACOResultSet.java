@@ -1,16 +1,14 @@
 package framework;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
@@ -127,20 +125,12 @@ public class DACOResultSet {
 	 * @param results
 	 */
 	public void writeCSV(String out_file) {
+		List<String> to_write = new LinkedList<>();
 		
-		// write
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(out_file));
-			for (HashSet<String> cluster : this.result) {
-				String temp = String.join(",", cluster);
-				bw.write(temp);
-				bw.newLine();
-			}
-			bw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		for (HashSet<String> cluster : this.result)
+			to_write.add( String.join(",", cluster) );
+		
+		Utilities.writeEntries(to_write, out_file);
 	}
 	
 	public Set<String> getAbundantSeedProteins() {
