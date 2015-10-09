@@ -604,7 +604,6 @@ public class DataQuery {
 				String uniprot = rs.getString(2);
 				int length = Integer.parseInt(rs.getString(3));
 				
-				// java 6 fixed
 				if (longest_length.containsKey(uniprot)) {
 					if (length > longest_length.get(uniprot)) {
 						longest_length.put(uniprot, length);
@@ -699,7 +698,6 @@ public class DataQuery {
 			if (!holistic_protein_domain_mapping.containsKey(protein))
 				holistic_protein_domain_mapping.put(protein, new HashSet<>());
 			
-			// java 6 fixed
 			if (transcript_domain_mapping.containsKey(transcript)) {
 				holistic_protein_domain_mapping.get(protein).addAll(transcript_domain_mapping.get(transcript));
 			} else {
@@ -723,7 +721,6 @@ public class DataQuery {
 		for (String protein:isoform_map.keySet()) {
 			String isoform = isoform_map.get(protein);
 			
-			// java 6 fixed
 			if (transcript_domain_mapping.containsKey(isoform)) {
 				isoform_protein_domain_mapping.put(protein, new HashSet<>(transcript_domain_mapping.get(isoform)));
 			} else {
@@ -1230,9 +1227,9 @@ public class DataQuery {
 				String d1 = temp[0];
 				String d2 = temp[1];
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<String>());
+					ddis.put(d1, new HashSet<>());
 				if (!ddis.containsKey(d2))
-					ddis.put(d2, new HashSet<String>());
+					ddis.put(d2, new HashSet<>());
 				ddis.get(d1).add(d2);
 				ddis.get(d2).add(d1);
 			}

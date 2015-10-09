@@ -362,7 +362,7 @@ public class NetworkBuilder {
 		Map<String, String> relevant_isoforms = new HashMap<>();
 		
 		for (String protein:proteins) { // empty list is returned in actual builder function for "", but protein is said to be abundant and can still have FB domains
-			if (!isoform.containsKey(protein)) // java 6
+			if (!isoform.containsKey(protein)) // java 6 compatibility
 				isoform.put(protein, "");
 			relevant_isoforms.put(protein, isoform.get(protein));
 		}
@@ -398,7 +398,7 @@ public class NetworkBuilder {
 				proteins.addAll(genes_to_proteins.get(gene));
 		
 		for (String protein:proteins) { // empty list is returned in actual builder function for "", but protein is said to be abundant and can still have FB domains
-			if (!isoform.containsKey(protein)) // java 6
+			if (!isoform.containsKey(protein)) // java 6 compatibility
 				isoform.put(protein, "");
 			relevant_isoforms.put(protein, isoform.get(protein));
 		}
