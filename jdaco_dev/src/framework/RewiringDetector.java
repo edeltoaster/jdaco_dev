@@ -1,6 +1,5 @@
 package framework;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,9 +18,12 @@ public class RewiringDetector {
 	private Map<String, ConstructedNetworks> group1;
 	private Map<String, ConstructedNetworks> group2;
 	private double FDR;
-	private String out_folder;
-	
-	// TODO: do right
+	private List<Double> g1_nodes = new LinkedList<>();
+	private List<Double> g2_nodes = new LinkedList<>();
+	private List<Double> g1_edges = new LinkedList<>();
+	private List<Double> g2_edges = new LinkedList<>();
+	private List<Double> P_rews = new LinkedList<>(); // TODO: more info here?
+	private Map<StrPair, Double> differential_network = new HashMap<>();
 	
 	private String checkReason(boolean addition, StrPair interaction, String sample1, String sample2) {
 		String p1 = interaction.getL();
@@ -63,35 +65,26 @@ public class RewiringDetector {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
-		this.out_folder = out_folder;
 		
-		process();
+		determineGroupwiseDifferences();
+		assessRewiring();
 	}
 	
-	private void process() {
+	private void determineGroupwiseDifferences() {
 		Map<StrPair, Integer> overall_added = new HashMap<>();
 		Map<StrPair, Integer> overall_lost = new HashMap<>();
-		
-		System.out.println("Processing " + this.out_folder + ":");
-		System.out.println("Comparing " + this.group1.size() + " with " + this.group2.size() + " samples.");
-
-		List<Double> g1_nodes = new LinkedList<>();
-		List<Double> g2_nodes = new LinkedList<>();
-		List<Double> g1_edges = new LinkedList<>();
-		List<Double> g2_edges = new LinkedList<>();
-		List<Double> P_rew = new LinkedList<>();
 		
 		// sizes / edges
 		for (ConstructedNetworks cn:this.group1.values()) {
 			PPIN ppin = cn.getPPIN();
-			g1_nodes.add( (double) ppin.getSizes()[0]);
-			g1_edges.add((double) ppin.getSizes()[1]);
+			this.g1_nodes.add( (double) ppin.getSizes()[0]);
+			this.g1_edges.add( (double) ppin.getSizes()[1]);
 		}
 		
 		for (ConstructedNetworks cn:this.group2.values()) {
 			PPIN ppin = cn.getPPIN();
-			g2_nodes.add( (double) ppin.getSizes()[0]);
-			g2_edges.add((double) ppin.getSizes()[1]);
+			this.g2_nodes.add( (double) ppin.getSizes()[0]);
+			this.g2_edges.add( (double) ppin.getSizes()[1]);
 		}
 		
 		// comparison
@@ -101,11 +94,10 @@ public class RewiringDetector {
 				PPIN ppin2 = cn2.getPPIN();
 				Set<StrPair> added_interactions = ppin2.removeAllIAs(ppin1).getInteractions();
 				Set<StrPair> lost_interactions = ppin1.removeAllIAs(ppin2).getInteractions();
-				P_rew.add( ((double)added_interactions.size()+ lost_interactions.size())/Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]));
+				this.P_rews.add( ((double)added_interactions.size()+ lost_interactions.size())/Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]));
 				
 				
-				// count
-				
+				// actual count
 				for (StrPair pair:added_interactions) {
 					if(!overall_added.containsKey(pair))
 						overall_added.put(pair, 0);
@@ -121,51 +113,29 @@ public class RewiringDetector {
 			}
 		}
 		
-		// do diff.
-		Map<StrPair, Double> diff = new HashMap<>();
-		for (StrPair pair:overall_added.keySet()) {
-			if (!diff.containsKey(pair))
-				diff.put(pair, 0.0);
-			diff.put(pair, diff.get(pair) + overall_added.get(pair));
-		}
-		for (StrPair pair:overall_lost.keySet()) {
-			if (!diff.containsKey(pair))
-				diff.put(pair, 0.0);
-			diff.put(pair, diff.get(pair) - overall_lost.get(pair));
-		}
+		// fill differential network
+		for (StrPair pair:overall_added.keySet())
+			this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0.0) + overall_added.get(pair));
 		
-		System.out.println("g1: " + (int) Utilities.getMean(g1_nodes) + "+-" + (int) Utilities.getStd(g1_nodes) + " / " + (int) Utilities.getMean(g1_edges) + "+-" + (int) Utilities.getStd(g1_edges));
-		System.out.println("g2: " + (int) Utilities.getMean(g2_nodes) + "+-" + (int) Utilities.getStd(g2_nodes) + " / " + (int) Utilities.getMean(g2_edges) + "+-" + (int) Utilities.getStd(g2_edges));
-		System.out.println("P_rew: " + Utilities.getMean(P_rew) + " +- " + Utilities.getStd(P_rew));
+		for (StrPair pair:overall_lost.keySet())
+			this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0.0) - overall_lost.get(pair));
 		
-		new File(out_folder).mkdir();
-		
-		writeOut(diff, P_rew.size(), out_folder + "diffnet.tsv", Utilities.getMean(P_rew), FDR);
-		
-		// write P_rews for statistics
-		List<String> temp_list = new LinkedList<>();
-		for (double d:P_rew)
-			temp_list.add(Double.toString(d));
-		
-		Utilities.writeEntries(temp_list, out_folder + "P_rew_distr.txt");
-		
-		System.out.println();
+		// clean from zeros (results of +1 and -1 ...)
+		this.differential_network.entrySet().removeIf( e -> e.getValue().equals(0.0));
 	}
 	
-	// stump
-	private void writeOut(Map<StrPair, Double> diff, int samples, String out_file, double P_rew, double FDR) {
+	private void assessRewiring() {
 		List<String> helper = new LinkedList<>();
 		Map<StrPair, Double> test_map = new HashMap<>();
 		Map<Double, LinkedList<StrPair>> p2pair = new HashMap<>();
-		for (StrPair pair:diff.keySet()) {
-			int v = (int) Math.abs(diff.get(pair));
+		double P_rew = Utilities.getMean(this.P_rews);
+		int groupwise_comparisons = this.group1.size()*this.group2.size();
+		
+		for (StrPair pair:this.differential_network.keySet()) {
+			int v = (int) Math.abs(this.differential_network.get(pair));
 			
-			if (v == 0)
-				continue;
-			
-			double raw_p = binom_test.binomialTest(samples, Math.abs(v), P_rew, AlternativeHypothesis.GREATER_THAN);
+			double raw_p = binom_test.binomialTest(groupwise_comparisons, v, P_rew, AlternativeHypothesis.GREATER_THAN);
 			test_map.put(pair, raw_p);
-			
 			if (!p2pair.containsKey(raw_p))
 				p2pair.put(raw_p, new LinkedList<>());
 			p2pair.get(raw_p).add(pair);
@@ -188,7 +158,7 @@ public class RewiringDetector {
 		
 		helper.add("Protein1 Protein2 Type Count Probability p-val p-val_adj reason");
 		k = 1;
-		p_values = new LinkedList<Double>(new HashSet<>(p_values));
+		p_values = new LinkedList<>(new HashSet<>(p_values));
 		Collections.sort(p_values);
 		for (double p:p_values) {
 			if (k > largest_k) { // remaining ones not deemed significant
@@ -196,11 +166,10 @@ public class RewiringDetector {
 				k--;
 				break;
 			}
+
 			for (StrPair pair:p2pair.get(p)) {
-				double v = diff.get(pair);
+				double v = this.differential_network.get(pair);
 				
-				if (v == 0)
-					continue;
 				String sign = "-";
 				boolean addition = false;
 				if (Math.signum(v) == +1) {
@@ -215,12 +184,11 @@ public class RewiringDetector {
 						reasons.add(checkReason(addition, pair, sample1, sample2));
 					}
 				
-				helper.add(pair.getL() + " " + pair.getR() + " " + sign + " " + (int) Math.abs(v) + " " + Math.abs(v / samples) + " " + p + " " + rawp2adjp.get(p) + " " + String.join(",", reasons));
+				helper.add(pair.getL() + " " + pair.getR() + " " + sign + " " + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p) + " " + String.join(",", reasons));
 				k++;
 			}
 		}
 		
-		System.out.println(k + " diff-IAs with FDR below " + FDR);
-		Utilities.writeEntries(helper, out_file);
+		Utilities.writeEntries(helper, "/Users/tho/Desktop/test.txt"); // TODO: for testing
 	}
 }
