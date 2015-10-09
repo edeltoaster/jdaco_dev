@@ -22,9 +22,9 @@ import java.util.zip.GZIPInputStream;
 public class PPIN {
 	
 	// okay with many threads since only written once
-	private HashMap<String, Set<String>> partners = new HashMap<String, Set<String>>();
-	private HashMap<StrPair, Double> weights = new HashMap<StrPair, Double>();
-	private HashMap<String, Double> w_whole = new HashMap<String, Double>();
+	private HashMap<String, Set<String>> partners = new HashMap<>();
+	private HashMap<StrPair, Double> weights = new HashMap<>();
+	private HashMap<String, Double> w_whole = new HashMap<>();
 	private boolean is_weighted = false;
 	
 	/**
@@ -107,7 +107,7 @@ public class PPIN {
 						// check for ensembl GENES: general, yeast, fruitfly, c.elegans
 						if ( (p1.length() > 6 && p1.startsWith("ENS") || p1.startsWith("YDL") || p1.startsWith("FBgn") || p1.startsWith("WBGene")) ) {
 							System.out.println("Retrieving ENSEMBL conversion data ... ");
-							Set<String> test_set = new HashSet<String>();
+							Set<String> test_set = new HashSet<>();
 							test_set.add(p1);
 							test_set.add(p2);
 							
@@ -117,13 +117,13 @@ public class PPIN {
 								return;
 							}
 							
-							conversion_map = new HashMap<String, String>();
+							conversion_map = new HashMap<>();
 							for (String[] temp:DataQuery.getGenesTranscriptsProteins(org_db)) {
 								conversion_map.put(temp[0], temp[2]);
 							}
 						} else {// otherwise assume HGNC, build map
 							System.out.println("Retrieving HGNC conversion data ... ");
-							conversion_map = new HashMap<String, String>();
+							conversion_map = new HashMap<>();
 							for (String[] temp:DataQuery.getHGNCProteinsGenes()) {
 								conversion_map.put(temp[0], temp[1]);
 							}
@@ -153,7 +153,7 @@ public class PPIN {
 				// every interaction only once
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<String>());
+					this.partners.put(p1, new HashSet<>());
 				}
 				
 				this.partners.get(p1).add(p2);
@@ -161,7 +161,7 @@ public class PPIN {
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<String>());
+					this.partners.put(p2, new HashSet<>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -198,14 +198,14 @@ public class PPIN {
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<String>());
+					this.partners.put(p1, new HashSet<>());
 				}
 				this.partners.get(p1).add(p2);
 				this.w_whole.put(p1, this.w_whole.get(p1) + w);
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<String>());
+					this.partners.put(p2, new HashSet<>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -235,14 +235,14 @@ public class PPIN {
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<String>());
+					this.partners.put(p1, new HashSet<>());
 				}
 				this.partners.get(p1).add(p2);
 				this.w_whole.put(p1, this.w_whole.get(p1) + w);
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<String>());
+					this.partners.put(p2, new HashSet<>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -270,14 +270,14 @@ public class PPIN {
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<String>());
+					this.partners.put(p1, new HashSet<>());
 				}
 				this.partners.get(p1).add(p2);
 				this.w_whole.put(p1, this.w_whole.get(p1) + w);
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<String>());
+					this.partners.put(p2, new HashSet<>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -311,14 +311,14 @@ public class PPIN {
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<String>());
+					this.partners.put(p1, new HashSet<>());
 				}
 				this.partners.get(p1).add(p2);
 				this.w_whole.put(p1, this.w_whole.get(p1) + w);
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<String>());
+					this.partners.put(p2, new HashSet<>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -349,7 +349,7 @@ public class PPIN {
 					// every interaction only once -> add both directions
 					if (!this.partners.containsKey(p1)) {
 						this.w_whole.put(p1, 0.0);
-						this.partners.put(p1, new HashSet<String>());
+						this.partners.put(p1, new HashSet<>());
 					}
 					
 					// interaction already added, don't add weights twice
@@ -361,7 +361,7 @@ public class PPIN {
 					
 					if (!this.partners.containsKey(p2)) {
 						this.w_whole.put(p2, 0.0);
-						this.partners.put(p2, new HashSet<String>());
+						this.partners.put(p2, new HashSet<>());
 					}
 					this.partners.get(p2).add(p1);
 					this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -379,7 +379,7 @@ public class PPIN {
 	 */
 	public PPIN(PPIN old_ppi, boolean update_uniprot) {
 		
-		Map<String, String> update_map = new HashMap<String, String>();
+		Map<String, String> update_map = new HashMap<>();
 		
 		if (update_uniprot)
 			update_map = DataQuery.getUniprotSecondaryAccMap();
@@ -410,12 +410,12 @@ public class PPIN {
 				
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1n))
-					this.partners.put(p1n, new HashSet<String>());
+					this.partners.put(p1n, new HashSet<>());
 				
 				this.partners.get(p1n).add(p2n);
 				
 				if (!this.partners.containsKey(p2n))
-					this.partners.put(p2n, new HashSet<String>());
+					this.partners.put(p2n, new HashSet<>());
 				
 				this.partners.get(p2n).add(p1n);
 				
@@ -575,7 +575,7 @@ public class PPIN {
 	public void permutateEdges(int iterations) {
 		// algorithm from "Specificity and Stability in Topology of Protein Networks", Science 2002
 		Random rnd = new Random(System.currentTimeMillis());
-		List<StrPair> edges = new ArrayList<StrPair>(this.weights.size());
+		List<StrPair> edges = new ArrayList<>(this.weights.size());
 		StrPair AB = null;
 		StrPair CD = null;
 		StrPair AD = null;
@@ -636,7 +636,7 @@ public class PPIN {
 	}
 	
 	private List<Double> getAllWeights() {
-		List<Double> all_weights = new ArrayList<Double>(this.weights.values());
+		List<Double> all_weights = new ArrayList<>(this.weights.values());
 		// sorts in ascending order
 		Collections.sort(all_weights);
 		return all_weights;
@@ -663,7 +663,7 @@ public class PPIN {
 	 */
 	public double getSampledComplexCutoff(double percentile, int depth) {
 		List<Double> all_weights = this.getAllWeights();
-		List<Double> high_weights = new LinkedList<Double>();
+		List<Double> high_weights = new LinkedList<>();
 		int no_samples = 10000;
 		double cutoff = this.getPercentile(percentile);
 		
@@ -723,11 +723,11 @@ public class PPIN {
 	 * @return
 	 */
 	public PPIN retainAllIAs(PPIN other_ppin) {
-		Map< String, Set<String>> supported_interactions = new HashMap<String, Set<String>>();
+		Map< String, Set<String>> supported_interactions = new HashMap<>();
 		
 		// do a deep copy
 		for (String protein:this.partners.keySet())
-			supported_interactions.put(protein, new HashSet<String>(this.partners.get(protein)));
+			supported_interactions.put(protein, new HashSet<>(this.partners.get(protein)));
 		
 		// remove IAs that are not in given set
 		for (String protein1:this.partners.keySet())
@@ -768,11 +768,11 @@ public class PPIN {
 	 * @return
 	 */
 	public PPIN mergeAllIAs(PPIN other_ppin) {
-		Map< String, Set<String>> all_interactions = new HashMap<String, Set<String>>();
+		Map< String, Set<String>> all_interactions = new HashMap<>();
 		
 		// do a deep copy
 		for (String protein:this.partners.keySet())
-			all_interactions.put(protein, new HashSet<String>(this.partners.get(protein)));
+			all_interactions.put(protein, new HashSet<>(this.partners.get(protein)));
 		
 		// add more IAs
 		for (String protein1:other_ppin.partners.keySet())
@@ -784,7 +784,7 @@ public class PPIN {
 				if (all_interactions.containsKey(protein1)) {
 					all_interactions.get(protein1).add(protein2);
 				} else {
-					all_interactions.put(protein1, new HashSet<String>());
+					all_interactions.put(protein1, new HashSet<>());
 					all_interactions.get(protein1).add(protein2);
 				}
 				
@@ -792,7 +792,7 @@ public class PPIN {
 				if (all_interactions.containsKey(protein2)) {
 					all_interactions.get(protein2).add(protein1);
 				} else {
-					all_interactions.put(protein2, new HashSet<String>());
+					all_interactions.put(protein2, new HashSet<>());
 					all_interactions.get(protein2).add(protein1);
 				}
 			}

@@ -25,8 +25,8 @@ public class RegulatoryNetwork {
 	private int min_TFs = 1;
 	
 	// only stores TF in complex, not actual partners
-	private final Map<HashSet<String>, Set<String>> complex_to_targets = new HashMap<HashSet<String>, Set<String>>();
-	private final Map<String, List<HashSet<String>>> tf_to_complex = new HashMap<String, List<HashSet<String>>>();
+	private final Map<HashSet<String>, Set<String>> complex_to_targets = new HashMap<>();
+	private final Map<String, List<HashSet<String>>> tf_to_complex = new HashMap<>();
 	
 	public RegulatoryNetwork(HashSet<HashSet<String>> TF_complexes, BindingDataHandler bdh, int min_TFs) {
 		this.TF_complexes = new DACOResultSet(TF_complexes, bdh.getTFsWithBindingData());
@@ -100,7 +100,7 @@ public class RegulatoryNetwork {
 		
 		// speed-up building process
 		ExecutorService threadpool = Executors.newFixedThreadPool(this.no_threads);
-		CompletionService<HashMap<HashSet<String>, Set<String>>> pool = new ExecutorCompletionService<HashMap<HashSet<String>, Set<String>>>(threadpool);
+		CompletionService<HashMap<HashSet<String>, Set<String>>> pool = new ExecutorCompletionService<>(threadpool);
 		
 		int i = 0;
 		for (HashSet<String> tfs_in_complex:this.TF_complexes.getSeedToComplexMap().keySet()) {
@@ -140,7 +140,7 @@ public class RegulatoryNetwork {
 	 * @param write_min_TFs
 	 */
 	public void writeRegulatoryNetwork(String out_file, int write_min_TFs) {
-		List<String> to_write = new LinkedList<String>();
+		List<String> to_write = new LinkedList<>();
 		to_write.add("TF(complex) target edgetype");
 
 		// write complex -> target
@@ -182,8 +182,8 @@ public class RegulatoryNetwork {
 	 * @param out_file
 	 */
 	public void writeNodeTable(String out_file) {
-		Set<String> seen_targets = new HashSet<String>();
-		List<String> to_write = new LinkedList<String>();
+		Set<String> seen_targets = new HashSet<>();
+		List<String> to_write = new LinkedList<>();
 		
 		to_write.add("Node Nodetype");
 		
@@ -209,11 +209,11 @@ public class RegulatoryNetwork {
 	 * @param out_file
 	 */
 	public void writeHumanNodeTable(String out_file) {
-		Set<String> seen_targets = new HashSet<String>();
-		List<String> to_write = new LinkedList<String>();
+		Set<String> seen_targets = new HashSet<>();
+		List<String> to_write = new LinkedList<>();
 		
 		List<String[]> HGNC_map = DataQuery.getHGNCProteinsGenes();
-		Map<String, String> up_hgnc = new HashMap<String, String>();
+		Map<String, String> up_hgnc = new HashMap<>();
 		for (String[] s:HGNC_map) {
 			up_hgnc.put(s[1], s[0]);
 		}

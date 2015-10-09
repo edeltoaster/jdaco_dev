@@ -25,9 +25,9 @@ public class DACO {
 	private final DDIN ddi;
 	
 	// collections for calculations need to be thread-safe
-	private Set<HashSet<String>> temp_results = Collections.newSetFromMap(new ConcurrentHashMap<HashSet<String>, Boolean>());
+	private Set<HashSet<String>> temp_results = Collections.newSetFromMap(new ConcurrentHashMap<>());
 	private int number_of_threads = Runtime.getRuntime().availableProcessors() / 2;
-	private ThreadPoolExecutor pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+	private ThreadPoolExecutor pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 	private int max_depth_of_search = 10;
 	private double pair_building_threshold = 0.75;
 	private double prob_cutoff = 0.5;
@@ -169,7 +169,7 @@ public class DACO {
 			double n_w_out = 0.0;
 			
 			// determine occupied domains from edges
-			HashSet<String> occupied_domains = new HashSet<String>();
+			HashSet<String> occupied_domains = new HashSet<>();
 			for (StrPair edge : domain_interactions) {
 				occupied_domains.add(edge.getL());
 				occupied_domains.add(edge.getR());
@@ -221,8 +221,8 @@ public class DACO {
 						
 						if (P_n >= prob_cutoff) {
 							// add
-							final HashSet<String> new_internal_proteins = new HashSet<String>(internal_proteins);
-							final HashSet<StrPair> new_domain_interactions = new HashSet<StrPair>(domain_interactions);
+							final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
+							final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
 							new_internal_proteins.add(add_max_protein);
 							
 							// cutoff, don't recurse
@@ -250,7 +250,7 @@ public class DACO {
 						final double d_out = c_w_out + n_w_out - n_w_in;
 						boolean any_addition = false;
 						
-						final HashSet<String> new_internal_proteins = new HashSet<String>(internal_proteins);
+						final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
 						new_internal_proteins.add(add_max_protein);
 						
 						if (pool.isShutdown()) {
@@ -269,7 +269,7 @@ public class DACO {
 										temp_results.add(new_internal_proteins);
 										return;// ok if only 1 choice is above threshold...
 									}
-									final HashSet<StrPair> new_domain_interactions = new HashSet<StrPair>(domain_interactions);
+									final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
 									new_domain_interactions.add(domain_edge);
 									
 									// recurse, only necessary to make new domain-IA objects
@@ -293,8 +293,8 @@ public class DACO {
 				// remove case
 				final StrPair distinct_domain_edge = boundary.get(del_max_protein);
 				final double P_n = P / ppi.getWeights().get(new StrPair(ddi.getDomain_to_protein().get(distinct_domain_edge.getL()), ddi.getDomain_to_protein().get(distinct_domain_edge.getR())));
-				final HashSet<String> new_internal_proteins = new HashSet<String>(internal_proteins);
-				final HashSet<StrPair> new_domain_interactions = new HashSet<StrPair>(domain_interactions);
+				final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
+				final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
 				new_internal_proteins.remove(del_max_protein);
 				new_domain_interactions.remove(distinct_domain_edge);
 				
@@ -345,21 +345,21 @@ public class DACO {
 	public HashSet<HashSet<String>> growPairs(String protein, Set<String> other_seed_proteins) {
 		
 		// re-init necessary stuff
-		temp_results = Collections.newSetFromMap(new ConcurrentHashMap<HashSet<String>, Boolean>(Math.min(number_of_threads / 2, 2)));
-		pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+		temp_results = Collections.newSetFromMap(new ConcurrentHashMap<>(Math.min(number_of_threads / 2, 2)));
+		pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 		
 		// check if in PPI
 		if (!ppi.contains(protein)) {
 			if (verbose != null)
 				verbose.println(protein+" not in PPIN.");
-			return new HashSet<HashSet<String>>();
+			return new HashSet<>();
 		}
 		
 		// determine start-pairs and DDIs
-		HashSet<String> seed = new HashSet<String>();
+		HashSet<String> seed = new HashSet<>();
 		seed.add(protein);
-		HashMap<String, LinkedList<StrPair>> incident = getIncidentNodes(seed, new HashSet<String>());
-		LinkedList<StepFunction> jobs = new LinkedList<DACO.StepFunction>();
+		HashMap<String, LinkedList<StrPair>> incident = getIncidentNodes(seed, new HashSet<>());
+		LinkedList<StepFunction> jobs = new LinkedList<>();
 		
 		// get all DDIs and proteins
 		int no_pair_proteins = 0;
@@ -372,11 +372,11 @@ public class DACO {
 				continue;
 			no_pair_proteins++;
 			LinkedList<StrPair> relevant_ddis = filterDomainInteractionAlternatives(incident.get(other_protein));
-			final HashSet<String> temp_set = new HashSet<String>(seed);
+			final HashSet<String> temp_set = new HashSet<>(seed);
 			temp_set.add(other_protein);
 			double[] coh = ppi.computeClusterCohesiveness(temp_set);
 			for (StrPair ddi_choice : relevant_ddis) {
-				final HashSet<StrPair> new_domain_interactions = new HashSet<StrPair>();
+				final HashSet<StrPair> new_domain_interactions = new HashSet<>();
 				new_domain_interactions.add(ddi_choice);
 				jobs.add(new StepFunction(temp_set, new_domain_interactions, coh[0], coh[1], P));
 			}
@@ -411,7 +411,7 @@ public class DACO {
 		
 		Runtime.getRuntime().gc();
 		
-		return new HashSet<HashSet<String>>(temp_results);
+		return new HashSet<>(temp_results);
 	}
 	
 	/**
@@ -422,7 +422,7 @@ public class DACO {
 	 */
 	public DACOResultSet batchGrowPairs(Set<String> seed_proteins) {
 		
-		HashSet<HashSet<String>> results = new HashSet<HashSet<String>>();
+		HashSet<HashSet<String>> results = new HashSet<>();
 		
 		for (String tf : seed_proteins) {
 			results.addAll(this.growPairs(tf, seed_proteins));
@@ -440,8 +440,8 @@ public class DACO {
 	 * @return
 	 */
 	private HashMap<String, StrPair> getBoundaryNodes(HashSet<String> internal_proteins, HashSet<StrPair> domain_interactions) {
-		HashMap<String, StrPair> boundary_nodes = new HashMap<String, StrPair>();
-		HashMap<String, LinkedList<StrPair>> associated_dom_interactions = new HashMap<String, LinkedList<StrPair>>();
+		HashMap<String, StrPair> boundary_nodes = new HashMap<>();
+		HashMap<String, LinkedList<StrPair>> associated_dom_interactions = new HashMap<>();
 		
 		for (StrPair domain_interaction : domain_interactions) {
 			String d1 = domain_interaction.getL();
@@ -449,10 +449,10 @@ public class DACO {
 			String p1 = ddi.getDomain_to_protein().get(d1);
 			String p2 = ddi.getDomain_to_protein().get(d2);
 			if (!associated_dom_interactions.containsKey(p1))
-				associated_dom_interactions.put(p1, new LinkedList<StrPair>());
+				associated_dom_interactions.put(p1, new LinkedList<>());
 			associated_dom_interactions.get(p1).add(domain_interaction);
 			if (!associated_dom_interactions.containsKey(p2))
-				associated_dom_interactions.put(p2, new LinkedList<StrPair>());
+				associated_dom_interactions.put(p2, new LinkedList<>());
 			associated_dom_interactions.get(p2).add(domain_interaction);
 		}
 		for (String protein : associated_dom_interactions.keySet()) {
@@ -471,8 +471,8 @@ public class DACO {
 	 * @return
 	 */
 	private LinkedList<StrPair> filterDomainInteractionAlternatives(LinkedList<StrPair> usable_interactions) {
-		HashSet<String> already_seen = new HashSet<String>();
-		LinkedList<StrPair> filtered_list = new LinkedList<StrPair>();
+		HashSet<String> already_seen = new HashSet<>();
+		LinkedList<StrPair> filtered_list = new LinkedList<>();
 		for (StrPair pair : usable_interactions) {
 			// reverse ordering
 			String[] sp1 = pair.getL().split("\\|");
@@ -499,7 +499,7 @@ public class DACO {
 	 * @return
 	 */
 	private HashMap<String, LinkedList<StrPair>> getIncidentNodes(HashSet<String> internal_proteins, HashSet<String> occupied_domains) {
-		HashMap<String, LinkedList<StrPair>> incident_nodes = new HashMap<String, LinkedList<StrPair>>();
+		HashMap<String, LinkedList<StrPair>> incident_nodes = new HashMap<>();
 		for (String protein : internal_proteins)
 			for (String domain1: ddi.getProtein_to_domains().get(protein)) {
 				if (occupied_domains.contains(domain1)) continue;
@@ -510,7 +510,7 @@ public class DACO {
 					
 					// add option
 					if (!incident_nodes.containsKey(protein2))
-						incident_nodes.put(protein2, new LinkedList<StrPair>());
+						incident_nodes.put(protein2, new LinkedList<>());
 					incident_nodes.get(protein2).add(new StrPair(domain1, domain2));
 				}
 			}
@@ -541,7 +541,7 @@ public class DACO {
 	 */
 	public static void filterOutput(HashSet<HashSet<String>> results) {
 		// clean from subsets
-		HashSet<HashSet<String>> sub = new HashSet<HashSet<String>>();
+		HashSet<HashSet<String>> sub = new HashSet<>();
 		for (HashSet<String> i : results)
 			for (HashSet<String> j : results) {
 				if (i.equals(j))

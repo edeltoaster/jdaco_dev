@@ -50,7 +50,7 @@ public class PPIXpress_GUI {
 	private static boolean STRING_weights = false;
 	private static String original_network_path;
 	private static PPIN original_ppin;
-	private static List<String> input_files = new LinkedList<String>();
+	private static List<String> input_files = new LinkedList<>();
 	private static double threshold = 1.0;
 	private static double percentile = -1;
 	private static boolean up2date_DDIs = true;
@@ -60,7 +60,7 @@ public class PPIXpress_GUI {
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
 	private static boolean load_HGNC = false;
-	private static List<String> matching_files_output = new LinkedList<String>();
+	private static List<String> matching_files_output = new LinkedList<>();
 	
 	// GUI stuff
 	private JFrame frmPpixpress;
@@ -71,7 +71,7 @@ public class PPIXpress_GUI {
 	private JProgressBar progressBar;
 	private static Thread compute_thread;
 	private static boolean computing = false;
-	private List<JComponent> activiy_changing_components = new LinkedList<JComponent>();
+	private List<JComponent> activiy_changing_components = new LinkedList<>();
 	
 	// added for compatibility
 	private JButton btnLoadNetwork;

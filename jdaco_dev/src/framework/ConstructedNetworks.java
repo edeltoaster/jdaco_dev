@@ -27,7 +27,7 @@ public class ConstructedNetworks {
 	public ConstructedNetworks(String ppi_file, String ddi_file, String db, boolean isoform_based) {
 		this.ppi = new PPIN(ppi_file);
 		this.ddi = new DDIN(ddi_file);
-		this.protein_to_assumed_transcript = new HashMap<String, String>();
+		this.protein_to_assumed_transcript = new HashMap<>();
 		this.db = db;
 		this.isoform_based = isoform_based;
 	}
@@ -48,6 +48,29 @@ public class ConstructedNetworks {
 		this.isoform_based = isoform_based;
 	}
 
+	
+	/**
+	 * Constructor to built object from files
+	 * @param ppi_file
+	 * @param ddi_file
+	 * @param protein_to_assumed_isoform
+	 * @param db
+	 * @param isoform_based
+	 */
+	public ConstructedNetworks(String ppi_file, String ddi_file, String protein_to_assumed_transcript_file, String db, boolean isoform_based) {
+		this.ppi = new PPIN(ppi_file);
+		this.ddi = new DDIN(ddi_file);
+		
+		this.protein_to_assumed_transcript = new HashMap<String, String>();
+		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
+			String[] spl = s.trim().split("\\s+");
+			this.protein_to_assumed_transcript.put(spl[0], spl[0]);
+		}
+		
+		this.db = db;
+		this.isoform_based = isoform_based;
+	}
+	
 	/**
 	 * Returns constructed PPIN
 	 * @return

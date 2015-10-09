@@ -31,7 +31,7 @@ public class Utilities {
 	 * @return entry per line
 	 */
 	public static HashSet<String> readEntryFile(String in_file) {
-		HashSet<String> input = new HashSet<String>();
+		HashSet<String> input = new HashSet<>();
 		try {
 			BufferedReader in = null;
 			if (in_file.endsWith(".gz"))
@@ -65,7 +65,7 @@ public class Utilities {
 	 * @return
 	 */
 	public static List<File> getAllMatchingFilesInSubfolders(String path, String filename) {
-		List<File> paths = new LinkedList<File>();
+		List<File> paths = new LinkedList<>();
 		
 		for (File f:listDirectoriesAndFiles(new File(path))) {
 			if (f.getName().equals(filename))
@@ -86,7 +86,7 @@ public class Utilities {
 	 * @return
 	 */
 	public static List<File> getAllPrefixMatchingFilesInSubfolders(String path, String prefix) {
-		List<File> paths = new LinkedList<File>();
+		List<File> paths = new LinkedList<>();
 		
 		for (File f:listDirectoriesAndFiles(new File(path))) {
 			if (f.getName().startsWith(prefix))
@@ -107,7 +107,7 @@ public class Utilities {
 	 * @return
 	 */
 	public static List<File> getAllSuffixMatchingFilesInSubfolders(String path, String suffix) {
-		List<File> paths = new LinkedList<File>();
+		List<File> paths = new LinkedList<>();
 		
 		for (File f:listDirectoriesAndFiles(new File(path))) {
 			if (f.getName().endsWith(suffix))
@@ -125,7 +125,7 @@ public class Utilities {
 	 * @return
 	 */
 	private static List<File> listDirectoriesAndFiles(File path) {
-		List<File> paths = new LinkedList<File>();
+		List<File> paths = new LinkedList<>();
 
 		for (File f:path.listFiles()) {
 			if (f.isHidden() || f.getName().startsWith("."))
@@ -192,8 +192,8 @@ public class Utilities {
 	 * @return
 	 */
 	public static List<List<Integer>> getAllIntPermutations(int n) {
-		List<List<Integer>> output = new LinkedList<List<Integer>>();
-		List<Integer> start = new ArrayList<Integer>(1);
+		List<List<Integer>> output = new LinkedList<>();
+		List<Integer> start = new ArrayList<>(1);
 		start.add(0);
 		output.add(start);
 		for (int i = 1; i < n; i++)
@@ -203,12 +203,12 @@ public class Utilities {
 	}
 	
 	public static List<List<Integer>> putInEveryPosition(int x, List<List<Integer>> list_of_lists) {
-		List<List<Integer>> new_list_of_lists = new LinkedList<List<Integer>>();
+		List<List<Integer>> new_list_of_lists = new LinkedList<>();
 		int n = list_of_lists.get(0).size();
 		// for every permutation so far
 		for (List<Integer> sublist:list_of_lists) 
 			for (int i = 0; i <= n; i++) { // for every position so far
-				List<Integer> temp_list = new ArrayList<Integer>(sublist);
+				List<Integer> temp_list = new ArrayList<>(sublist);
 				temp_list.add(i, x);
 				new_list_of_lists.add(temp_list);
 			}

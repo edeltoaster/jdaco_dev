@@ -1,11 +1,8 @@
 package framework;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,8 +22,8 @@ import java.util.zip.GZIPInputStream;
  * @author Thorsten Will
  */
 public class BindingDataHandler {
-	private final HashMap<String, HashMap<String, LinkedList<BindingSite>>> TF_to_targets = new HashMap<String, HashMap<String,LinkedList<BindingSite>>>();
-	private final Map<String, Set<String>> target_to_TFs = new HashMap<String, Set<String>>();
+	private final HashMap<String, HashMap<String, LinkedList<BindingSite>>> TF_to_targets = new HashMap<>();
+	private final Map<String, Set<String>> target_to_TFs = new HashMap<>();
 	
 	/**
 	 * Unrestricted constructor:
@@ -115,14 +112,14 @@ public class BindingDataHandler {
 				
 				// TF to target
 				if (!TF_to_targets.containsKey(tf))
-					TF_to_targets.put(tf, new HashMap<String, LinkedList<BindingSite>>());
+					TF_to_targets.put(tf, new HashMap<>());
 				if (!TF_to_targets.get(tf).containsKey(target))
-					TF_to_targets.get(tf).put(target, new LinkedList<BindingSite>());
+					TF_to_targets.get(tf).put(target, new LinkedList<>());
 				TF_to_targets.get(tf).get(target).add(bs);
 				
 				// target to TF
 				if (!target_to_TFs.containsKey(target))
-					target_to_TFs.put(target, new HashSet<String>());
+					target_to_TFs.put(target, new HashSet<>());
 				target_to_TFs.get(target).add(tf);
 			}
 			
@@ -142,7 +139,7 @@ public class BindingDataHandler {
 	 * Returns the set of TF with binding annotation
 	 */
 	public Set<String> getTFsWithBindingData() {
-		return new HashSet<String>(this.TF_to_targets.keySet());
+		return new HashSet<>(this.TF_to_targets.keySet());
 	}
 	
 	/**
@@ -152,7 +149,7 @@ public class BindingDataHandler {
 	 */
 	public Set<String> getTargets(String TF) {
 		if (!this.TF_to_targets.containsKey(TF))
-			return new HashSet<String>();
+			return new HashSet<>();
 		
 		return this.TF_to_targets.get(TF).keySet();
 	}
@@ -163,7 +160,7 @@ public class BindingDataHandler {
 	 * @return
 	 */
 	public Set<String> getRegulatingTFs(String target) {
-		return this.target_to_TFs.getOrDefault(target, new HashSet<String>());
+		return this.target_to_TFs.getOrDefault(target, new HashSet<>());
 	}
 	
 	public HashMap<String, HashMap<String, LinkedList<BindingSite>>> getTFToTargetsPositionalMap() {
@@ -179,21 +176,14 @@ public class BindingDataHandler {
 	 * @param out_file
 	 */
 	public void writeRegulatoryNetwork(String out_file) {
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(out_file));
-			bw.write("TF target");
-			bw.newLine();
-			for (String TF:this.TF_to_targets.keySet()) {
-				for (String target:this.getTargets(TF) ) {
-					bw.write(TF+" "+target);
-					bw.newLine();
-				}
-			}
-			bw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		List<String> to_write = new LinkedList<>();
+
+		to_write.add("TF target");
+		for (String TF:this.TF_to_targets.keySet())
+			for (String target:this.getTargets(TF) )
+				to_write.add(TF+" "+target);
+			
+		Utilities.writeEntries(to_write, out_file);
 	}
 	
 	/**
@@ -204,7 +194,7 @@ public class BindingDataHandler {
 	 */
 	public Set<String> getCommonTargets(Collection<String> TFs) {
 		
-		Set<String> common_targets = new HashSet<String>();
+		Set<String> common_targets = new HashSet<>();
 		
 		if (TFs.size() == 0)
 			return common_targets;
@@ -215,12 +205,12 @@ public class BindingDataHandler {
 			
 			// add everything from the first one
 			if (!initialized) {
-				common_targets.addAll(this.TF_to_targets.getOrDefault(TF, new HashMap<String, LinkedList<BindingSite>>()).keySet());
+				common_targets.addAll(this.TF_to_targets.getOrDefault(TF, new HashMap<>()).keySet());
 				initialized = true;
 			}
 			// retain only the overlap
 			else {
-				common_targets.retainAll(this.TF_to_targets.getOrDefault(TF, new HashMap<String, LinkedList<BindingSite>>()).keySet());
+				common_targets.retainAll(this.TF_to_targets.getOrDefault(TF, new HashMap<>()).keySet());
 			}
 			
 			// stop early if necessary
@@ -240,14 +230,14 @@ public class BindingDataHandler {
 	 */
 	public Set<String> getAdjacencyPossibilities(Collection<String> TFs, int d_min, int d_max, boolean allow_self_IAs) {
 		
-		List<String> tf_list = new ArrayList<String>(TFs);
-		Set<String> result = new HashSet<String>();
+		List<String> tf_list = new ArrayList<>(TFs);
+		Set<String> result = new HashSet<>();
 		
 		// catch special cases
 		if (TFs.size() == 0)
 			return result;
 		else if (TFs.size() == 1) {
-			for (String target:this.TF_to_targets.getOrDefault(tf_list.get(0), new HashMap<String, LinkedList<BindingSite>>()).keySet()) {
+			for (String target:this.TF_to_targets.getOrDefault(tf_list.get(0), new HashMap<>()).keySet()) {
 				result.add(target);
 			}
 			return result;
@@ -256,8 +246,8 @@ public class BindingDataHandler {
 		}
 		
 		// precompute all pairwise, memorize targets than can really be found by pairwise start
-		Set<String> common_targets = new HashSet<String>();
-		Map<StrPair, HashMap<String, LinkedList<BindingSite[]>>> prec_pw_adj = new HashMap<StrPair, HashMap<String,LinkedList<BindingSite[]>>>();
+		Set<String> common_targets = new HashSet<>();
+		Map<StrPair, HashMap<String, LinkedList<BindingSite[]>>> prec_pw_adj = new HashMap<>();
 		for (String tf1:TFs)
 			for (String tf2:TFs) {
 				if ( (tf1.compareTo(tf2) < 0) || (tf1.compareTo(tf2) == 0 && !allow_self_IAs) )
@@ -285,7 +275,7 @@ public class BindingDataHandler {
 						continue;
 					
 					// add next TFs, but try every order of permutations
-					List<String> remaining_TFs = new ArrayList<String>(TFs);
+					List<String> remaining_TFs = new ArrayList<>(TFs);
 					remaining_TFs.remove(tf1);
 					remaining_TFs.remove(tf2);
 					for (List<Integer> permutation:Utilities.getAllIntPermutations(remaining_TFs.size())) {
@@ -333,15 +323,15 @@ public class BindingDataHandler {
 	public HashMap<String, LinkedList<BindingSite[]>> getAdjacencyPossibilitiesExact(Collection<String> TFs, int d_min, int d_max, boolean allow_self_IAs) {
 		
 		List<String> tf_list = new ArrayList<String>(TFs);
-		HashMap<String, LinkedList<BindingSite[]>> result = new HashMap<String, LinkedList<BindingSite[]>>();
+		HashMap<String, LinkedList<BindingSite[]>> result = new HashMap<>();
 		
 		// catch special cases
 		if (TFs.size() == 0)
 			return result;
 		else if (TFs.size() == 1) {
-			for (String target:this.TF_to_targets.getOrDefault(tf_list.get(0), new HashMap<String, LinkedList<BindingSite>>()).keySet()) {
-				result.put(target, new LinkedList<BindingSite[]>());
-				for (BindingSite bs:this.TF_to_targets.getOrDefault(tf_list.get(0), new HashMap<String, LinkedList<BindingSite>>()).get(target))
+			for (String target:this.TF_to_targets.getOrDefault(tf_list.get(0), new HashMap<>()).keySet()) {
+				result.put(target, new LinkedList<>());
+				for (BindingSite bs:this.TF_to_targets.getOrDefault(tf_list.get(0), new HashMap<>()).get(target))
 					result.get(target).add(new BindingSite[]{bs});
 			}
 			return result;
@@ -351,7 +341,7 @@ public class BindingDataHandler {
 		
 		// precompute all pairwise
 		Set<String> common_targets = new HashSet<String>();
-		Map<StrPair, HashMap<String, LinkedList<BindingSite[]>>> prec_pw_adj = new HashMap<StrPair, HashMap<String,LinkedList<BindingSite[]>>>();
+		Map<StrPair, HashMap<String, LinkedList<BindingSite[]>>> prec_pw_adj = new HashMap<>();
 		for (String tf1:TFs)
 			for (String tf2:TFs) {
 				if ( (tf1.compareTo(tf2) < 0) || (tf1.compareTo(tf2) == 0 && !allow_self_IAs) )
@@ -365,7 +355,7 @@ public class BindingDataHandler {
 		// check for all common/shared targets
 		common_targets.retainAll(getCommonTargets(TFs));
 		for (String target:common_targets) {
-			LinkedList<BindingSite[]> all_pos = new LinkedList<BindingSite[]>();
+			LinkedList<BindingSite[]> all_pos = new LinkedList<>();
 			
 			// for all pairwise starting positions
 			for (String tf1:TFs) 
@@ -379,7 +369,7 @@ public class BindingDataHandler {
 						continue;
 					
 					// add next TFs, but try every order of permutations
-					List<String> remaining_TFs = new ArrayList<String>(TFs);
+					List<String> remaining_TFs = new ArrayList<>(TFs);
 					remaining_TFs.remove(tf1);
 					remaining_TFs.remove(tf2);
 					for (List<Integer> permutation:Utilities.getAllIntPermutations(remaining_TFs.size())) {
@@ -418,22 +408,22 @@ public class BindingDataHandler {
 	 * @return
 	 */
 	private HashMap<String, LinkedList<BindingSite[]>> getPairwiseAdjacent(String tf1, String tf2, String regulated_target, int d_min, int d_max) {
-		HashMap<String, LinkedList<BindingSite[]>> pw_results = new HashMap<String, LinkedList<BindingSite[]>>();
+		HashMap<String, LinkedList<BindingSite[]>> pw_results = new HashMap<>();
 		Set<String> targets_to_check;
 		
 		// check if a directed query or a general query
 		if (regulated_target == null) {
-			Set<String> tf_set = new HashSet<String>();
+			Set<String> tf_set = new HashSet<>();
 			tf_set.add(tf1);
 			tf_set.add(tf2);
 			targets_to_check = this.getCommonTargets(tf_set);
 		} else {
-			targets_to_check = new HashSet<String>();
+			targets_to_check = new HashSet<>();
 			targets_to_check.add(regulated_target);
 		}
 		
 		for (String target:targets_to_check) {
-			LinkedList<BindingSite[]> adj_intervals = new LinkedList<BindingSite[]>();
+			LinkedList<BindingSite[]> adj_intervals = new LinkedList<>();
 			
 			for (BindingSite bs1:this.TF_to_targets.get(tf1).get(target))
 				for (BindingSite bs2:this.TF_to_targets.get(tf2).get(target)) {
@@ -475,7 +465,7 @@ public class BindingDataHandler {
 	
 	private LinkedList<BindingSite[]> getAdjacentToComplex(LinkedList<BindingSite[]> prev_possibilities, String tf, String target, int d_min, int d_max) {
 		
-		LinkedList<BindingSite[]> adj_intervals = new LinkedList<BindingSite[]>();
+		LinkedList<BindingSite[]> adj_intervals = new LinkedList<>();
 		LinkedList<BindingSite> pos_to_add = this.TF_to_targets.get(tf).get(target);
 		
 		for (BindingSite[] fixed_positions:prev_possibilities)  {
@@ -525,7 +515,7 @@ public class BindingDataHandler {
 	
 	public Map<Set<String>, LinkedList<BindingSite[]>> getPossibleComplexPartnersAtTarget(String target, int d_min, int d_max, boolean allow_self_IAs) {
 		Set<String> targeting_tfs = this.target_to_TFs.get(target);
-		Map<Set<String>, LinkedList<BindingSite[]>> found_TF_tuples = new HashMap<Set<String>, LinkedList<BindingSite[]>>();
+		Map<Set<String>, LinkedList<BindingSite[]>> found_TF_tuples = new HashMap<>();
 		
 		for (String tf1:targeting_tfs)
 			for (String tf2:targeting_tfs) {
@@ -534,7 +524,7 @@ public class BindingDataHandler {
 				HashMap<String, LinkedList<BindingSite[]>> result = getPairwiseAdjacent(tf1, tf2, target, d_min, d_max);
 				if (!result.containsKey(target))
 					continue;
-				Set<String> involved_tfs = new HashSet<String>();
+				Set<String> involved_tfs = new HashSet<>();
 				involved_tfs.add(tf1);
 				involved_tfs.add(tf2);
 				found_TF_tuples.put(involved_tfs, result.get(target));
@@ -551,14 +541,14 @@ public class BindingDataHandler {
 	 * @param binding_data
 	 */
 	public static void writeBED(String trackname, String chromosome, String output_file, Map<Collection<String>, LinkedList<BindingSite[]>> binding_data) {
-		List<String> output_content = new LinkedList<String>();
+		List<String> output_content = new LinkedList<>();
 		
 		// write header
 		String header = "track name=" + trackname;
 		output_content.add(header);
 		
 		// write content
-		Map<Integer, LinkedList<String>> sorted_data = new TreeMap<Integer, LinkedList<String>>();
+		Map<Integer, LinkedList<String>> sorted_data = new TreeMap<>();
 		for (Collection<String> tfs:binding_data.keySet()) {
 			String tf_complex = String.join("/", tfs);
 			for (BindingSite[] bss:binding_data.get(tfs)) {
@@ -568,13 +558,13 @@ public class BindingDataHandler {
 				int score = 0;
 				String temp = chromosome + " " + left + " " + right + " " + tf_complex + " " + score + " " + strand;
 				if (!sorted_data.containsKey(left))
-					sorted_data.put(left, new LinkedList<String>());
+					sorted_data.put(left, new LinkedList<>());
 				sorted_data.get(left).add(temp);
 			}
 		}
 		
 		for (int left:sorted_data.keySet()) {
-			List<String> ensured_sorting = new ArrayList<String>(new HashSet<String>(sorted_data.get(left)));
+			List<String> ensured_sorting = new ArrayList<>(new HashSet<>(sorted_data.get(left)));
 			// sort by right
 			ensured_sorting.sort(new Comparator<String>() {
 

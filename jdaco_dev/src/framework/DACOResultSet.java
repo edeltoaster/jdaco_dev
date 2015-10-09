@@ -16,12 +16,12 @@ import java.util.zip.GZIPInputStream;
 public class DACOResultSet {
 	
 	private final HashSet<HashSet<String>> result;
-	private final Set<String> abundant_seed_poteins = new HashSet<String>();
-	private final Map<HashSet<String>, LinkedList<HashSet<String>>> seed_to_complex_map = new HashMap<HashSet<String>, LinkedList<HashSet<String>>>();
+	private final Set<String> abundant_seed_poteins = new HashSet<>();
+	private final Map<HashSet<String>, LinkedList<HashSet<String>>> seed_to_complex_map = new HashMap<>();
 	
 	public DACOResultSet(String daco_out_file, String seed_file) {
 		
-		this.result = new HashSet<HashSet<String>>();
+		this.result = new HashSet<>();
 		this.readResultCSV(daco_out_file);
 		
 		this.buildData(Utilities.readEntryFile(seed_file));
@@ -29,7 +29,7 @@ public class DACOResultSet {
 	
 	public DACOResultSet(String daco_out_file, Set<String> seed) {
 		
-		this.result = new HashSet<HashSet<String>>();
+		this.result = new HashSet<>();
 		this.readResultCSV(daco_out_file);
 		
 		this.buildData(seed);
@@ -54,7 +54,7 @@ public class DACOResultSet {
 			
 			while (in.ready()) {
 				String line = in.readLine();
-				this.result.add(new HashSet<String>(Arrays.asList(line.trim().split(","))));
+				this.result.add(new HashSet<>(Arrays.asList(line.trim().split(","))));
 			}
 			in.close();
 		} catch (Exception e) {
@@ -70,7 +70,7 @@ public class DACOResultSet {
 	 * @return
 	 */
 	private static HashSet<String> filterSeedProteins(Set<String> to_test, Set<String> seed) {
-		HashSet<String> from_seed = new HashSet<String>(to_test);
+		HashSet<String> from_seed = new HashSet<>(to_test);
 		from_seed.retainAll(seed);
 		return from_seed;
 	}
@@ -87,7 +87,7 @@ public class DACOResultSet {
 			if (from_seed.size() > 0) {
 				abundant_seed_poteins.addAll(from_seed);
 				if (!this.seed_to_complex_map.containsKey(from_seed))
-					this.seed_to_complex_map.put(from_seed, new LinkedList<HashSet<String>>());
+					this.seed_to_complex_map.put(from_seed, new LinkedList<>());
 				this.seed_to_complex_map.get(from_seed).add(set);
 			}
 		}

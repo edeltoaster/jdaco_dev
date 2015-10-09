@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import framework.ConstructedNetworks;
 import framework.DataQuery;
 import framework.NetworkBuilder;
 import framework.PPIN;
@@ -14,8 +15,8 @@ import framework.Utilities;
 
 public class build_networks {
 	static String BLUEPRINT_expr_folder = "/Users/tho/Desktop/BLUEPRINT_expr/";
-	static String network_folder = "/Users/tho/Desktop/BLUEPRINT_networks_0/";
-	static double TPM_threshold = 0;
+	static String network_folder = "/Users/tho/Desktop/BLUEPRINT_networks_0.03125/";
+	static double TPM_threshold = 0.03125;
 	
 	public static void main(String[] args) {
 		
@@ -43,7 +44,7 @@ public class build_networks {
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(BLUEPRINT_expr_folder, ".rsem.tsv.gz")) {
 			String path = f.getAbsolutePath();
 			String[] path_split = path.split("/");
-			String file_name = path_split[path_split.length-1].split("\\.")[0] + ".tsv.gz";
+			String file_name = path_split[path_split.length-1].split("\\.")[0];
 			String cell_type = path_split[path_split.length-2];
 			
 //			if (!folder_type_map.containsKey(cell_type))
@@ -56,14 +57,17 @@ public class build_networks {
 			if (!new File(out_path).exists())
 				new File(out_path).mkdir();
 			
-			PPIN specific_ppin = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readRSEMTranscriptsTPM(path, TPM_threshold)).getPPIN();
-			specific_ppin.writePPIN(out_path + file_name);
+			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readRSEMTranscriptsTPM(path, TPM_threshold));
+			cn.getPPIN().writePPIN(out_path + file_name + "-ppin.txt.gz");
+			cn.getDDIN().writeDDIN(out_path + file_name + "-ddin.txt.gz");
+			cn.writeProteinToAssumedTranscriptMap(out_path + file_name + "-map.txt.gz");
 			
 			// write path of network to data_map
 			if (!data_map.containsKey(cell_type)) {
 				data_map.put(cell_type, new LinkedList<>());
 			}
-			data_map.get(cell_type).add(out_path + file_name);
+			
+			data_map.get(cell_type).add(out_path + file_name + "-ppin.txt.gz");
 		}
 		
 		System.out.println();

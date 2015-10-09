@@ -33,7 +33,7 @@ public class DDIN {
 	
 	public DDIN(Map<String, List<String>> ddis, Map<String, List<String>> protein_to_domains, Map<String, String> domain_to_protein) {
 		// transform to right data structures
-		this.ddis = new HashMap<String, String[]>();
+		this.ddis = new HashMap<>();
 		for (String domain:ddis.keySet())
 			this.ddis.put(domain, ddis.get(domain).toArray(new String[ddis.get(domain).size()]));
 		
@@ -41,14 +41,14 @@ public class DDIN {
 		for (String protein:protein_to_domains.keySet())
 			this.protein_to_domains.put(protein, protein_to_domains.get(protein).toArray(new String[protein_to_domains.get(protein).size()]));
 		
-		this.domain_to_protein = new HashMap<String, String>(domain_to_protein);
+		this.domain_to_protein = new HashMap<>(domain_to_protein);
 	}
 	
 	// format [Protein/Domain1 Domain2 IAType Weight] assumed
 	public DDIN(String file) {
-		this.domain_to_protein = new HashMap<String, String>();
-		Map<String, List<String>> protein_to_domains = new HashMap<String, List<String>>();
-		Map<String, List<String>> ddis = new HashMap<String, List<String>>();
+		this.domain_to_protein = new HashMap<>();
+		Map<String, List<String>> protein_to_domains = new HashMap<>();
+		Map<String, List<String>> ddis = new HashMap<>();
 		
 		// read file
 		try {
@@ -82,10 +82,10 @@ public class DDIN {
 				} else { // domain-domain interaction
 					// add to DDI
 					if (!ddis.containsKey(partner1))
-						ddis.put(partner1, new LinkedList<String>());
+						ddis.put(partner1, new LinkedList<>());
 					ddis.get(partner1).add(partner2);
 					if (!ddis.containsKey(partner2))
-						ddis.put(partner2, new LinkedList<String>());
+						ddis.put(partner2, new LinkedList<>());
 					ddis.get(partner2).add(partner1);
 				}
 			}
@@ -98,15 +98,15 @@ public class DDIN {
 				System.err.println("Problem while parsing domain interaction network " + file + ".");
 		}
 		
-		this.ddis = new HashMap<String, String[]>();
+		this.ddis = new HashMap<>();
 		for (String domain:ddis.keySet())
 			this.ddis.put(domain, ddis.get(domain).toArray(new String[ddis.get(domain).size()]));
 		
-		this.protein_to_domains = new HashMap<String, String[]>();
+		this.protein_to_domains = new HashMap<>();
 		for (String protein:protein_to_domains.keySet())
 			this.protein_to_domains.put(protein, protein_to_domains.get(protein).toArray(new String[protein_to_domains.get(protein).size()]));
 		
-		this.domain_to_protein = new HashMap<String, String>(domain_to_protein);
+		this.domain_to_protein = new HashMap<>(domain_to_protein);
 	}
 	
 	public HashMap<String, String[]> getDDIs() {

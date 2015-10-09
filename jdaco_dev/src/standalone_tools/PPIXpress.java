@@ -21,7 +21,7 @@ public class PPIXpress {
 	private static boolean output_DDINs = false;
 	private static boolean STRING_weights = false;
 	private static String original_network_path;
-	private static List<String> input_files = new LinkedList<String>();
+	private static List<String> input_files = new LinkedList<>();
 	private static double threshold = 1.0;
 	private static double percentile = -1;
 	private static boolean up2date_DDIs = true;
@@ -31,7 +31,7 @@ public class PPIXpress {
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
 	private static boolean load_HGNC = false;
-	private static List<String> matching_files_output = new LinkedList<String>();
+	private static List<String> matching_files_output = new LinkedList<>();
 	
 	public static void printHelp() {
 		System.out.println("usage: java -jar PPIXpress.jar ([OPTIONS]) [INPUT-NETWORK] [OUTPUT-FOLDER] [EXPR-INPUT1] ([EXPR-INPUT2] ...)");

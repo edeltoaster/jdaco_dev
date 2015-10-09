@@ -25,8 +25,8 @@ public class TranscriptAbundanceReader {
 	 * @return map of gene/transcript -> FPKM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readCufflinksFPKMFile(String file, double threshold, boolean return_gene_level) {
-		Map<String, Float> transcript_abundance = new HashMap<String, Float>();
-		Map<String, Float> gene_abundance = new HashMap<String, Float>();
+		Map<String, Float> transcript_abundance = new HashMap<>();
+		Map<String, Float> gene_abundance = new HashMap<>();
 		
 		try {
 			BufferedReader in = null;
@@ -74,8 +74,8 @@ public class TranscriptAbundanceReader {
 	 * @return map of gene/transcript -> TPM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readRSEMFile(String file, double threshold, boolean return_gene_level) {
-		Map<String, Float> transcript_abundance = new HashMap<String, Float>();
-		Map<String, Float> gene_abundance = new HashMap<String, Float>();
+		Map<String, Float> transcript_abundance = new HashMap<>();
+		Map<String, Float> gene_abundance = new HashMap<>();
 		int transcript_index = 0;
 		int gene_index = 1;
 		
@@ -134,8 +134,8 @@ public class TranscriptAbundanceReader {
 	 * @return map of gene/transcript -> FPKM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readGencodeGTFFile(String file, double threshold, boolean return_gene_level) {
-		Map<String, Float> transcript_abundance = new HashMap<String, Float>();
-		Map<String, Float> gene_abundance = new HashMap<String, Float>();
+		Map<String, Float> transcript_abundance = new HashMap<>();
+		Map<String, Float> gene_abundance = new HashMap<>();
 		
 		try {
 			BufferedReader in = null;
@@ -216,7 +216,7 @@ public class TranscriptAbundanceReader {
 	 * @return map of transcript/no_samples -> FPKM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readCSHLData(String file) {
-		Map<String, Float> transcript_abundance = new HashMap<String, Float>();
+		Map<String, Float> transcript_abundance = new HashMap<>();
 		int max_sample_count = 1;
 		
 		try {
@@ -310,7 +310,7 @@ public class TranscriptAbundanceReader {
 	 * @return map of gene/transcript -> expression (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readExpressionFile(String file, double threshold, String organism_database, boolean header) {
-		Map<String, Float> abundance = new HashMap<String, Float>();
+		Map<String, Float> abundance = new HashMap<>();
 		
 		try {
 			BufferedReader in = null;
@@ -439,7 +439,7 @@ public class TranscriptAbundanceReader {
 	 * @return map Ensembl transcript or gene -> RSEM (if transcript > threshold)
 	 */
 	public static Map<String, Float> readTCGAIsoformRSEMFile(String file, double transcript_threshold, boolean return_gene_level) {
-		Map<String, Float> abundance = new HashMap<String, Float>();
+		Map<String, Float> abundance = new HashMap<>();
 		String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
 		Map<String, String> ucsc_to_ensembl = DataQuery.getUSCStoTranscriptMap(db);
 		
@@ -480,13 +480,13 @@ public class TranscriptAbundanceReader {
 		// if gene-level wanted: convert
 		if (return_gene_level) {
 			// get association by query
-			Map<String, String> transcript_to_gene = new HashMap<String, String>();
+			Map<String, String> transcript_to_gene = new HashMap<>();
 			for (String[] data:DataQuery.getGenesTranscriptsProteins(db)) {
 				String gene = data[0];
 				String transcript = data[1];
 				transcript_to_gene.put(transcript, gene);
 			}
-			Map<String, Float> gene_abundance = new HashMap<String, Float>();
+			Map<String, Float> gene_abundance = new HashMap<>();
 			for (String transcript:abundance.keySet()) {
 				// every transcript should be mappable
 				String gene = transcript_to_gene.get(transcript);
@@ -530,8 +530,8 @@ public class TranscriptAbundanceReader {
 	 * @return Ensembl gene -> RSEM (if > threshold)
 	 */
 	public static Map<String, Float> readTCGAGeneRSEM(String file, double threshold) {
-		Map<String, Float> gene_abundance = new HashMap<String, Float>();
-		Map<String, String> HGCN_to_ensembl = new HashMap<String, String>();
+		Map<String, Float> gene_abundance = new HashMap<>();
+		Map<String, String> HGCN_to_ensembl = new HashMap<>();
 		for (String[] entry:DataQuery.getHGNCProteinsGenes()) {
 			if (entry[2].equals(""))
 				continue;
@@ -604,9 +604,9 @@ public class TranscriptAbundanceReader {
 	 */
 	public static Set<String> getProteinAbundanceFromTCGAGeneRSEM(String file, double threshold) {
 		Set<String> expressed_HGCN = readTCGAGeneRSEM(file, threshold).keySet();
-		Set<String> expressed_proteins = new HashSet<String>();
+		Set<String> expressed_proteins = new HashSet<>();
 		
-		Map<String, String> HGCN_to_up = new HashMap<String, String>();
+		Map<String, String> HGCN_to_up = new HashMap<>();
 		for (String[] entry:DataQuery.getHGNCProteinsGenes()) {
 			if (entry[1].equals(""))
 				continue;
@@ -773,12 +773,12 @@ public class TranscriptAbundanceReader {
 		int datasets = data.size();
 		
 		// find all genes/transcripts that were noted
-		Set<String> transcripts = new HashSet<String>();
+		Set<String> transcripts = new HashSet<>();
 		for (Map<String, Float> d:data) {
 			transcripts.addAll(d.keySet());
 		}
 		
-		Map<String, Float> temp_abundances = new HashMap<String, Float>();
+		Map<String, Float> temp_abundances = new HashMap<>();
 		for (String s:transcripts) {
 			float expr = 0;
 			for (Map<String, Float> d:data)
@@ -787,7 +787,7 @@ public class TranscriptAbundanceReader {
 		}
 		
 		// filter for genes/transcripts that meet the threshold after averaging
-		Map<String, Float> final_abundances = new HashMap<String, Float>();
+		Map<String, Float> final_abundances = new HashMap<>();
 		for (String s:temp_abundances.keySet()) {
 			float avg_expr = temp_abundances.get(s);
 			if (avg_expr <= threshold)
@@ -808,7 +808,7 @@ public class TranscriptAbundanceReader {
 		double norm_sum = 0.0;
 		for (float f:fpkm_values.values())
 			norm_sum += f;
-		Map<String, Float> tpms = new HashMap<String, Float>();
+		Map<String, Float> tpms = new HashMap<>();
 		
 		for (String t:fpkm_values.keySet()) {
 			float f = (float) (1000000 * fpkm_values.get(t) / norm_sum);

@@ -49,14 +49,14 @@ public class DataQuery {
 	private static boolean no_local_DDIs = false;
 	
 	// caches
-	private static Map<String, List<String[]>> cache_genestransprots = new HashMap<String, List<String[]>>();
-	private static Map<String, Map<String, String>> cache_isoformtranscr = new HashMap<String, Map<String,String>>();
-	private static Map<String,Map<String, List<String>>> cache_transcrdom = new HashMap<String, Map<String,List<String>>>();
-	private static Map<String, Map<String, List<String>>> cache_ensembl_proteins = new HashMap<String, Map<String,List<String>>>();
-	private static Map<String, String> cache_db = new HashMap<String, String>();
-	private static Map<String, PPIN> cache_STRING = new HashMap<String, PPIN>();
-	private static Map<String, Map<String, String>> cache_ucsc = new HashMap<String, Map<String,String>>();
-	private static Map<String, String> cache_Esembl_db = new HashMap<String, String>();
+	private static Map<String, List<String[]>> cache_genestransprots = new HashMap<>();
+	private static Map<String, Map<String, String>> cache_isoformtranscr = new HashMap<>();
+	private static Map<String,Map<String, List<String>>> cache_transcrdom = new HashMap<>();
+	private static Map<String, Map<String, List<String>>> cache_ensembl_proteins = new HashMap<>();
+	private static Map<String, String> cache_db = new HashMap<>();
+	private static Map<String, PPIN> cache_STRING = new HashMap<>();
+	private static Map<String, Map<String, String>> cache_ucsc = new HashMap<>();
+	private static Map<String, String> cache_Esembl_db = new HashMap<>();
 	private static List<String[]> cache_HGNC;
 	private static Map<String, String> uniprot_sec_accs;
 	private static String uniprot_release;
@@ -294,7 +294,7 @@ public class DataQuery {
 		
 		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
 			return DataQuery.cache_genestransprots.get(organism_core_database);
-		List<String[]> associations = new LinkedList<String[]>();
+		List<String[]> associations = new LinkedList<>();
 		try {
 			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
@@ -335,7 +335,7 @@ public class DataQuery {
 		
 		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
 			return DataQuery.cache_genestransprots.get(organism_core_database);
-		List<String[]> associations = new LinkedList<String[]>();
+		List<String[]> associations = new LinkedList<>();
 		try {
 			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
@@ -381,7 +381,7 @@ public class DataQuery {
 		if (DataQuery.cache_ensembl_proteins.containsKey(organism_core_database))
 			return DataQuery.cache_ensembl_proteins.get(organism_core_database);
 		
-		Map<String, List<String>> ensembl_to_uniprot = new HashMap<String, List<String>>();
+		Map<String, List<String>> ensembl_to_uniprot = new HashMap<>();
 		
 		try {
 			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
@@ -429,7 +429,7 @@ public class DataQuery {
 			return DataQuery.cache_HGNC;
 		
 		// queries HGNC
-		List<String[]> entries = new LinkedList<String[]>();
+		List<String[]> entries = new LinkedList<>();
 		try {
 			URL server = new URL("http://www.genenames.org/cgi-bin/download?col=gd_app_sym&col=md_prot_id&col=md_ensembl_id&status=Approved&status_opt=2&where=&order_by=gd_app_sym_sort&format=text&limit=&submit=submit");
 			URLConnection connection = server.openConnection();
@@ -485,7 +485,7 @@ public class DataQuery {
 		}
 		
 		String query_xml = "<!DOCTYPE Query><Query client=\"true\" processor=\"TSV\" limit=\"-1\" header=\"1\"><Dataset name=\"uniprot\" config=\"uniprot_config\"><Filter name=\"ensembl_id\" value=\"" + genes + "\" filter_list=\"\"/><Filter name=\"entry_type\" value=\"Swiss-Prot\" filter_list=\"\"/><Attribute name=\"accession\"/><Attribute name=\"ensembl_id\"/></Dataset></Query>";
-		Map<String, String> up_ens_map = new HashMap<String, String>();
+		Map<String, String> up_ens_map = new HashMap<>();
 		
 		try {
 			URL server = new URL("http://www.biomart.org/biomart/martservice?query="+ URLEncoder.encode(query_xml, "UTF-8"));
@@ -532,8 +532,8 @@ public class DataQuery {
 		if (DataQuery.cache_ucsc.containsKey(organism_core_database))
 			return DataQuery.cache_ucsc.get(organism_core_database);
 		
-		Map<String, String> ucsc_to_ensembl = new HashMap<String, String>();
-		Set<String> allowed_transcript = new HashSet<String>();
+		Map<String, String> ucsc_to_ensembl = new HashMap<>();
+		Set<String> allowed_transcript = new HashSet<>();
 		
 		// to filter for known protein coding
 		for (String data[]:getGenesTranscriptsProteins(organism_core_database)) 
@@ -587,8 +587,8 @@ public class DataQuery {
 		if (DataQuery.cache_isoformtranscr.containsKey(organism_core_database))
 			return DataQuery.cache_isoformtranscr.get(organism_core_database);
 		
-		Map<String, String> longest_transcript = new HashMap<String, String>();
-		Map<String, Integer> longest_length = new HashMap<String, Integer>();
+		Map<String, String> longest_transcript = new HashMap<>();
+		Map<String, Integer> longest_length = new HashMap<>();
 		
 		try {
 			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
@@ -646,7 +646,7 @@ public class DataQuery {
 		if (DataQuery.cache_transcrdom.containsKey(organism_core_database))
 			return DataQuery.cache_transcrdom.get(organism_core_database);
 		
-		Map <String, List<String>> transcript_domain_mapping = new HashMap<String, List<String>>();
+		Map <String, List<String>> transcript_domain_mapping = new HashMap<>();
 		try {
 			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
@@ -691,19 +691,19 @@ public class DataQuery {
 	public static Map<String, Set<String>> getHolisticProteinDomainMap(String organism_core_database) {
 		Map<String, List<String>> transcript_domain_mapping = getTranscriptsDomains(organism_core_database);
 		List<String[]> associations = getGenesTranscriptsProteins(organism_core_database);
-		Map<String, Set<String>> holistic_protein_domain_mapping = new HashMap<String, Set<String>>();
+		Map<String, Set<String>> holistic_protein_domain_mapping = new HashMap<>();
 		for (String[] array:associations) {
 			String protein = array[2];
 			String transcript = array[1];
 			
 			if (!holistic_protein_domain_mapping.containsKey(protein))
-				holistic_protein_domain_mapping.put(protein, new HashSet<String>());
+				holistic_protein_domain_mapping.put(protein, new HashSet<>());
 			
 			// java 6 fixed
 			if (transcript_domain_mapping.containsKey(transcript)) {
 				holistic_protein_domain_mapping.get(protein).addAll(transcript_domain_mapping.get(transcript));
 			} else {
-				holistic_protein_domain_mapping.get(protein).addAll(new LinkedList<String>());
+				holistic_protein_domain_mapping.get(protein).addAll(new LinkedList<>());
 			}
 			
 		}
@@ -719,15 +719,15 @@ public class DataQuery {
 	public static Map<String, Set<String>> getIsoformProteinDomainMap(String organism_core_database) {
 		Map<String, List<String>> transcript_domain_mapping = getTranscriptsDomains(organism_core_database);
 		Map<String, String> isoform_map = getIsoformTranscriptsOfProteins(organism_core_database);
-		Map<String, Set<String>> isoform_protein_domain_mapping = new HashMap<String, Set<String>>();
+		Map<String, Set<String>> isoform_protein_domain_mapping = new HashMap<>();
 		for (String protein:isoform_map.keySet()) {
 			String isoform = isoform_map.get(protein);
 			
 			// java 6 fixed
 			if (transcript_domain_mapping.containsKey(isoform)) {
-				isoform_protein_domain_mapping.put(protein, new HashSet<String>(transcript_domain_mapping.get(isoform)));
+				isoform_protein_domain_mapping.put(protein, new HashSet<>(transcript_domain_mapping.get(isoform)));
 			} else {
-				isoform_protein_domain_mapping.put(protein, new HashSet<String>());
+				isoform_protein_domain_mapping.put(protein, new HashSet<>());
 			}
 			
 		}
@@ -744,7 +744,7 @@ public class DataQuery {
 	 */
 	public static Set<String> getProteinsWithGO(String GO_id, String taxon, boolean include_IEA, boolean only_experimental) {
 		
-		Set<String> entries = new HashSet<String>();
+		Set<String> entries = new HashSet<>();
 		try {
 			URL server = new URL("http://www.ebi.ac.uk/QuickGO/GAnnotation?format=tsv&gz=true&limit=-1&db=UniProtKB&tax="+ taxon +"&goid=" + GO_id);
 			URLConnection connection = server.openConnection();
@@ -973,7 +973,7 @@ public class DataQuery {
 		if (DataQuery.uniprot_sec_accs != null)
 			return DataQuery.uniprot_sec_accs;
 		
-		Map<String, String> sec_to_primary = new HashMap<String, String>();
+		Map<String, String> sec_to_primary = new HashMap<>();
 		try {
 			URL server = new URL("ftp://ftp.uniprot.org/pub/databases/uniprot/knowledgebase/docs/sec_ac.txt");
 			URLConnection connection = server.openConnection();
@@ -1197,7 +1197,7 @@ public class DataQuery {
 		
 		// to list
 		for (String domain:iddi_ddis.keySet()) {
-			known_DDIs.put(domain, new ArrayList<String>(iddi_ddis.get(domain)));
+			known_DDIs.put(domain, new ArrayList<>(iddi_ddis.get(domain)));
 		}
 		
 		return known_DDIs;
@@ -1207,7 +1207,7 @@ public class DataQuery {
 	 * Reads DOMINE data
 	 */
 	public static HashMap<String, HashSet<String>> getDOMINE() {
-		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
+		HashMap<String, HashSet<String>> ddis = new HashMap<>();
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(DataQuery.class.getResourceAsStream("/data/DOMINE_2.0_HC.txt.gz"))));
 			while (in.ready()) {
@@ -1244,7 +1244,7 @@ public class DataQuery {
 	 * Reads IDDI data
 	 */
 	public static HashMap<String, HashSet<String>> getIDDI() {
-		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
+		HashMap<String, HashSet<String>> ddis = new HashMap<>();
 		
 		// from original paper: 0.329 for 98% accuracy, 0.102 for 90% ; one MET4-partner in yeast: 0.20580978 needed, for example
 		double threshold = 0.102;
@@ -1267,9 +1267,9 @@ public class DataQuery {
 				String d1 = temp[0];
 				String d2 = temp[1];
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<String>());
+					ddis.put(d1, new HashSet<>());
 				if (!ddis.containsKey(d2))
-					ddis.put(d2, new HashSet<String>());
+					ddis.put(d2, new HashSet<>());
 				ddis.get(d1).add(d2);
 				ddis.get(d2).add(d1);
 			}
@@ -1328,7 +1328,7 @@ public class DataQuery {
 	 */
 	public static HashMap<String, HashSet<String>> getIPfam() {
 
-		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
+		HashMap<String, HashSet<String>> ddis = new HashMap<>();
 		
 		try {
 			URL server = new URL("ftp://selab.janelia.org/pub/ipfam/Current_Release/heterodomain_interaction.csv");
@@ -1348,9 +1348,9 @@ public class DataQuery {
 				String d1 = temp[0];
 				String d2 = temp[2];
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<String>());
+					ddis.put(d1, new HashSet<>());
 				if (!ddis.containsKey(d2))
-					ddis.put(d2, new HashSet<String>());
+					ddis.put(d2, new HashSet<>());
 				ddis.get(d1).add(d2);
 				ddis.get(d2).add(d1);
 			}
@@ -1373,7 +1373,7 @@ public class DataQuery {
 				String[] temp = line.split("\\s+");
 				String d1 = temp[0];
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<String>());
+					ddis.put(d1, new HashSet<>());
 				ddis.get(d1).add(d1);
 			}
 			
@@ -1434,7 +1434,7 @@ public class DataQuery {
 	 */
 	public static HashMap<String, HashSet<String>> get3did() {
 		
-		HashMap<String, HashSet<String>> ddis = new HashMap<String, HashSet<String>>();
+		HashMap<String, HashSet<String>> ddis = new HashMap<>();
 		
 		try {
 			URL server = new URL("http://3did.irbbarcelona.org/download/" + DataQuery.specific_3did_release + "/3did_flat.gz");
@@ -1456,9 +1456,9 @@ public class DataQuery {
 				String d2 = temp[4].split("\\.")[0];
 				
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<String>());
+					ddis.put(d1, new HashSet<>());
 				if (!ddis.containsKey(d2))
-					ddis.put(d2, new HashSet<String>());
+					ddis.put(d2, new HashSet<>());
 				ddis.get(d1).add(d2);
 				ddis.get(d2).add(d1);
 			}

@@ -186,7 +186,7 @@ public class JDACO {
 		// carry out computation
 		long start = System.currentTimeMillis();
 		System.out.println("Computing ...");
-		HashSet<HashSet<String>> results = new HashSet<HashSet<String>>();
+		HashSet<HashSet<String>> results = new HashSet<>();
 		int n = seed.size();
 		int i = 1;
 		for (String tf : seed) {
