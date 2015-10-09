@@ -1082,8 +1082,12 @@ public class DataQuery {
 	 * Switches to another Ensembl server
 	 */
 	public static void switchServer(String server) {
-		DataQuery.ensembl_mysql = server;
-		System.out.println("ENSEMBL server manually changed to " + DataQuery.ensembl_mysql + ".");
+		
+		if (!DataQuery.ensembl_mysql.equals(server)) {
+			DataQuery.ensembl_mysql = server;
+			System.out.println("ENSEMBL server manually changed to " + DataQuery.ensembl_mysql + ".");
+		}
+		
 	}
 	/**
 	 * Is called after too many connection attempts.
