@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import framework.ConstructedNetworks;
+import framework.RewiringDetector;
 import framework.Utilities;
 
 public class build_diff_networks {
@@ -30,7 +31,9 @@ public class build_diff_networks {
 	public static void main(String[] args) {
 		
 		// read all data
-		readNetworks(network_folder + "HSC/");
-
+		Map<String, ConstructedNetworks> HSC = readNetworks(network_folder + "HSC/");
+		Map<String, ConstructedNetworks> MPP = readNetworks(network_folder + "MPP/");
+		
+		RewiringDetector rd = new RewiringDetector(HSC, MPP, 0.05, results_root);
 	}
 }

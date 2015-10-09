@@ -64,7 +64,7 @@ public class ConstructedNetworks {
 		this.protein_to_assumed_transcript = new HashMap<String, String>();
 		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
 			String[] spl = s.trim().split("\\s+");
-			this.protein_to_assumed_transcript.put(spl[0], spl[0]);
+			this.protein_to_assumed_transcript.put(spl[0], spl[1]);
 		}
 		
 		this.db = db;

@@ -48,11 +48,11 @@ public class RewiringDetector {
 		
 		// else: check on transcript-level
 		if (!m1.get(p1).equals(m2.get(p1))) {
-			reasons.add( m1.get(p1) + "->" + m2.get(p1) );
+			reasons.add( p1 + ":" + m1.get(p1) + "->" + m2.get(p1) );
 		}
 		
 		if (!m1.get(p2).equals(m2.get(p2))) {
-			reasons.add( m1.get(p1) + "->" + m2.get(p1) );
+			reasons.add( p2 + ":" + m1.get(p2) + "->" + m2.get(p2) );
 		}
 		
 		return String.join("/", reasons);
@@ -139,6 +139,7 @@ public class RewiringDetector {
 		System.out.println("P_rew: " + Utilities.getMean(P_rew) + " +- " + Utilities.getStd(P_rew));
 		
 		new File(out_folder).mkdir();
+		
 		writeOut(diff, P_rew.size(), out_folder + "diffnet.tsv", Utilities.getMean(P_rew), FDR);
 		
 		// write P_rews for statistics
