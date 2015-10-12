@@ -22,52 +22,67 @@ public class RewiringDetector {
 	private List<Double> g2_nodes = new LinkedList<>();
 	private List<Double> g1_edges = new LinkedList<>();
 	private List<Double> g2_edges = new LinkedList<>();
-	private List<Double> P_rews = new LinkedList<>(); // TODO: more info here?
+	private List<Double> P_rews = new LinkedList<>();
 	private Map<StrPair, Double> differential_network = new HashMap<>();
+	private List<String> diffnet_report = new LinkedList<>();
+	private List<String> reasons_report = new LinkedList<>();
 	
+	/**
+	 * For a given change in an interaction, check for the reason in both samples and return a report
+	 * [sample1]-[sample2]: ...
+	 * @param addition
+	 * @param interaction
+	 * @param sample1
+	 * @param sample2
+	 * @return
+	 */
 	private String checkReason(boolean addition, StrPair interaction, String sample1, String sample2) {
 		String p1 = interaction.getL();
 		String p2 = interaction.getR();
 		Map<String, String> m1 = group1.get(sample1).getProteinToAssumedTranscriptMap();
 		Map<String, String> m2 = group2.get(sample2).getProteinToAssumedTranscriptMap();
 		List<String> reasons = new LinkedList<>();
+		String prefix = sample1 + "-" + sample2 + ":";
 		
 		// check protein-level
 		if (addition) { // interaction found in sample2 but not sample1 -> maybe one or both proteins not expressed in sample1?
-			if (!m1.containsKey(p1))
-				reasons.add(p1);
-			if (!m1.containsKey(p2))
-				reasons.add(p2);
+			if (!m1.containsKey(p1) && m2.containsKey(p1))
+				reasons.add(p1 + "(gained)");
+			if (!m1.containsKey(p2) && m2.containsKey(p2))
+				reasons.add(p2 + "(gained)");
 		} else { // vice versa
-			if (!m2.containsKey(p1))
-				reasons.add(p1);
-			if (!m2.containsKey(p2))
-				reasons.add(p2);
+			if (!m2.containsKey(p1) && m1.containsKey(p1))
+				reasons.add(p1 + "(lost)");
+			if (!m2.containsKey(p2) && m1.containsKey(p2))
+				reasons.add(p2 + "(lost)");
 		}
 		
 		if (reasons.size() != 0)
-			return String.join("/", reasons);
+			return prefix + String.join("/", reasons);
 		
 		// else: check on transcript-level
-		if (!m1.get(p1).equals(m2.get(p1))) {
-			reasons.add( p1 + ":" + m1.get(p1) + "->" + m2.get(p1) );
+		if (m1.containsKey(p1) && m2.containsKey(p1) && !m1.get(p1).equals(m2.get(p1))) {
+			reasons.add( p1 + "(" + m1.get(p1) + "->" + m2.get(p1) + ")");
 		}
 		
-		if (!m1.get(p2).equals(m2.get(p2))) {
-			reasons.add( p2 + ":" + m1.get(p2) + "->" + m2.get(p2) );
+		if (m1.containsKey(p2) && m2.containsKey(p2) && !m1.get(p2).equals(m2.get(p2))) {
+			reasons.add( p2 + "(" + m1.get(p2) + "->" + m2.get(p2) + ")");
 		}
 		
-		return String.join("/", reasons);
+		// note that there was no change observed
+		if (reasons.size() == 0)
+			return prefix + "no_change";
+		
+		return prefix + String.join("/", reasons);
 	}
 	
-	// stump
 	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR, String out_folder) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
 		
-		determineGroupwiseDifferences();
-		assessRewiring();
+		this.determineGroupwiseDifferences();
+		this.assessRewiring();
 	}
 	
 	private void determineGroupwiseDifferences() {
@@ -125,7 +140,6 @@ public class RewiringDetector {
 	}
 	
 	private void assessRewiring() {
-		List<String> helper = new LinkedList<>();
 		Map<StrPair, Double> test_map = new HashMap<>();
 		Map<Double, LinkedList<StrPair>> p2pair = new HashMap<>();
 		double P_rew = Utilities.getMean(this.P_rews);
@@ -156,7 +170,10 @@ public class RewiringDetector {
 			k++;
 		}
 		
-		helper.add("Protein1 Protein2 Type Count Probability p-val p-val_adj reason");
+		// write headers
+		this.diffnet_report.add("Protein1 Protein2 Type Count Probability p-val p-val_adj");
+		this.reasons_report.add("Protein1 Protein2 Type Reasons");
+		
 		k = 1;
 		p_values = new LinkedList<>(new HashSet<>(p_values));
 		Collections.sort(p_values);
@@ -184,11 +201,17 @@ public class RewiringDetector {
 						reasons.add(checkReason(addition, pair, sample1, sample2));
 					}
 				
-				helper.add(pair.getL() + " " + pair.getR() + " " + sign + " " + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p) + " " + String.join(",", reasons));
+				// store data as strings
+				this.diffnet_report.add(pair.getL() + " " + pair.getR() + " " + sign + " " + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p));
+				this.reasons_report.add(pair.getL() + " " + pair.getR() + " " + sign + " " + String.join(",", reasons));
+				
 				k++;
 			}
 		}
-		
-		Utilities.writeEntries(helper, "/Users/tho/Desktop/test.txt"); // TODO: for testing
+	}
+	
+	public void writeDiffnetAndReasons(String diffnet_out_path, String reasons_out_path) {
+		Utilities.writeEntries(this.diffnet_report, diffnet_out_path);
+		Utilities.writeEntries(this.reasons_report, reasons_out_path);
 	}
 }

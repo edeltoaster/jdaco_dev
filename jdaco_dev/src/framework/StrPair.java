@@ -1,7 +1,7 @@
 package framework;
 
 /**
- * Helper class, stores sorted par of strings
+ * Helper class, stores sorted pair of strings
  * @author Thorsten Will
  */
 public class StrPair {
