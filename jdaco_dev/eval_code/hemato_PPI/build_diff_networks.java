@@ -35,6 +35,6 @@ public class build_diff_networks {
 		Map<String, ConstructedNetworks> MPP = readNetworks(network_folder + "MK/");
 		
 		RewiringDetector rd = new RewiringDetector(HSC, MPP, 0.05, results_root);
-		rd.writeDiffnetAndReasons("/Users/tho/Desktop/diffnet.txt", "/Users/tho/Desktop/reasons.txt");
+		rd.writeDiffnet("/Users/tho/Desktop/diffnet.txt");
 	}
 }

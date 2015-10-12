@@ -25,11 +25,9 @@ public class RewiringDetector {
 	private List<Double> P_rews = new LinkedList<>();
 	private Map<StrPair, Double> differential_network = new HashMap<>();
 	private List<String> diffnet_report = new LinkedList<>();
-	private List<String> reasons_report = new LinkedList<>();
 	
 	/**
 	 * For a given change in an interaction, check for the reason in both samples and return a report
-	 * [sample1]-[sample2]: ...
 	 * @param addition
 	 * @param interaction
 	 * @param sample1
@@ -42,23 +40,22 @@ public class RewiringDetector {
 		Map<String, String> m1 = group1.get(sample1).getProteinToAssumedTranscriptMap();
 		Map<String, String> m2 = group2.get(sample2).getProteinToAssumedTranscriptMap();
 		List<String> reasons = new LinkedList<>();
-		String prefix = sample1 + "-" + sample2 + ":";
 		
 		// check protein-level
 		if (addition) { // interaction found in sample2 but not sample1 -> maybe one or both proteins not expressed in sample1?
 			if (!m1.containsKey(p1) && m2.containsKey(p1))
-				reasons.add(p1 + "(gained)");
+				reasons.add(p1 + "(gain)");
 			if (!m1.containsKey(p2) && m2.containsKey(p2))
-				reasons.add(p2 + "(gained)");
+				reasons.add(p2 + "(gain)");
 		} else { // vice versa
 			if (!m2.containsKey(p1) && m1.containsKey(p1))
-				reasons.add(p1 + "(lost)");
+				reasons.add(p1 + "(loss)");
 			if (!m2.containsKey(p2) && m1.containsKey(p2))
-				reasons.add(p2 + "(lost)");
+				reasons.add(p2 + "(loss)");
 		}
 		
 		if (reasons.size() != 0)
-			return prefix + String.join("/", reasons);
+			return String.join("/", reasons);
 		
 		// else: check on transcript-level
 		if (m1.containsKey(p1) && m2.containsKey(p1) && !m1.get(p1).equals(m2.get(p1))) {
@@ -71,9 +68,9 @@ public class RewiringDetector {
 		
 		// note that there was no change observed
 		if (reasons.size() == 0)
-			return prefix + "no_change";
+			return "no_change";
 		
-		return prefix + String.join("/", reasons);
+		return String.join("/", reasons);
 	}
 	
 	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR, String out_folder) {
@@ -170,9 +167,8 @@ public class RewiringDetector {
 			k++;
 		}
 		
-		// write headers
-		this.diffnet_report.add("Protein1 Protein2 Type Count Probability p-val p-val_adj");
-		this.reasons_report.add("Protein1 Protein2 Type Reasons");
+		// write header
+		this.diffnet_report.add("Protein1 Protein2 Type Count Probability P-val P-val_adj Reasons");
 		
 		k = 1;
 		p_values = new LinkedList<>(new HashSet<>(p_values));
@@ -194,24 +190,34 @@ public class RewiringDetector {
 					addition = true;
 				}
 				
-				// check for all samples
-				List<String> reasons = new LinkedList<>();
+				// check the exact reason for the difference between all samples
+				Map<String, List<String>> reasons = new HashMap<>();
 				for (String sample1:this.group1.keySet())
 					for (String sample2:this.group2.keySet()) {
-						reasons.add(checkReason(addition, pair, sample1, sample2));
+						String reason = checkReason(addition, pair, sample1, sample2);
+						if (!reasons.containsKey(reason))
+							reasons.put(reason, new LinkedList<>());
+						reasons.get(reason).add(sample1 + "-" + sample2);
 					}
 				
+				Map<String, Integer> reasons_count = new HashMap<>();
+				for (String reason: reasons.keySet())
+					reasons_count.put(reason, reasons.get(reason).size());
+				
+				// building descendingly sorted reasons-string for output
+				List<String> sorted_reasons = new LinkedList<>(reasons.keySet());
+				sorted_reasons.sort((e2,e1) -> reasons_count.get(e1).compareTo(reasons_count.get(e2)));
+				sorted_reasons.replaceAll(e->e + ":" + reasons_count.get(e));
+				
 				// store data as strings
-				this.diffnet_report.add(pair.getL() + " " + pair.getR() + " " + sign + " " + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p));
-				this.reasons_report.add(pair.getL() + " " + pair.getR() + " " + sign + " " + String.join(",", reasons));
+				this.diffnet_report.add(pair.getL() + " " + pair.getR() + " " + sign + " " + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p) + " " + String.join(",", sorted_reasons));
 				
 				k++;
 			}
 		}
 	}
 	
-	public void writeDiffnetAndReasons(String diffnet_out_path, String reasons_out_path) {
+	public void writeDiffnet(String diffnet_out_path) {
 		Utilities.writeEntries(this.diffnet_report, diffnet_out_path);
-		Utilities.writeEntries(this.reasons_report, reasons_out_path);
 	}
 }
