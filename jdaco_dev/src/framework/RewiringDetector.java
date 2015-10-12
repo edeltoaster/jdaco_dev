@@ -18,12 +18,16 @@ public class RewiringDetector {
 	private Map<String, ConstructedNetworks> group1;
 	private Map<String, ConstructedNetworks> group2;
 	private double FDR;
-	private List<Double> g1_nodes = new LinkedList<>();
-	private List<Double> g2_nodes = new LinkedList<>();
-	private List<Double> g1_edges = new LinkedList<>();
-	private List<Double> g2_edges = new LinkedList<>();
-	private List<Double> P_rews = new LinkedList<>();
+	
+	private Map<String, Double> g1_nodes = new HashMap<>();
+	private Map<String, Double> g2_nodes = new HashMap<>();
+	private Map<String, Double> g1_edges = new HashMap<>();
+	private Map<String, Double> g2_edges = new HashMap<>();
+	private Map<String, Double> P_rews = new HashMap<>();
+	
 	private Map<StrPair, Double> differential_network = new HashMap<>();
+	private Map<StrPair, Map<String, List<String>>> interaction_reasons_map = new HashMap<>();
+	private Map<StrPair, Map<String, Integer>> interaction_reasons_count_map = new HashMap<>();
 	private List<String> diffnet_report = new LinkedList<>();
 	
 	/**
@@ -87,26 +91,26 @@ public class RewiringDetector {
 		Map<StrPair, Integer> overall_lost = new HashMap<>();
 		
 		// sizes / edges
-		for (ConstructedNetworks cn:this.group1.values()) {
-			PPIN ppin = cn.getPPIN();
-			this.g1_nodes.add( (double) ppin.getSizes()[0]);
-			this.g1_edges.add( (double) ppin.getSizes()[1]);
+		for (String sample:this.group1.keySet()) {
+			PPIN ppin = this.group1.get(sample).getPPIN();
+			this.g1_nodes.put(sample, (double) ppin.getSizes()[0]);
+			this.g1_edges.put(sample, (double) ppin.getSizes()[1]);
 		}
 		
-		for (ConstructedNetworks cn:this.group2.values()) {
-			PPIN ppin = cn.getPPIN();
-			this.g2_nodes.add( (double) ppin.getSizes()[0]);
-			this.g2_edges.add( (double) ppin.getSizes()[1]);
+		for (String sample:this.group2.keySet()) {
+			PPIN ppin = this.group2.get(sample).getPPIN();
+			this.g2_nodes.put(sample, (double) ppin.getSizes()[0]);
+			this.g2_edges.put(sample, (double) ppin.getSizes()[1]);
 		}
 		
 		// comparison
-		for (ConstructedNetworks cn1:group1.values()) {
-			PPIN ppin1 = cn1.getPPIN();
-			for (ConstructedNetworks cn2:group2.values()) {
-				PPIN ppin2 = cn2.getPPIN();
+		for (String sample1:this.group1.keySet()) {
+			PPIN ppin1 = this.group1.get(sample1).getPPIN();
+			for (String sample2:group2.keySet()) {
+				PPIN ppin2 = this.group2.get(sample2).getPPIN();
 				Set<StrPair> added_interactions = ppin2.removeAllIAs(ppin1).getInteractions();
 				Set<StrPair> lost_interactions = ppin1.removeAllIAs(ppin2).getInteractions();
-				this.P_rews.add( ((double)added_interactions.size()+ lost_interactions.size())/Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]));
+				this.P_rews.put(sample1 + "-" + sample2, ((double)added_interactions.size()+ lost_interactions.size())/Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]));
 				
 				
 				// actual count
@@ -139,7 +143,7 @@ public class RewiringDetector {
 	private void assessRewiring() {
 		Map<StrPair, Double> test_map = new HashMap<>();
 		Map<Double, LinkedList<StrPair>> p2pair = new HashMap<>();
-		double P_rew = Utilities.getMean(this.P_rews);
+		double P_rew = Utilities.getMean(this.P_rews.values());
 		int groupwise_comparisons = this.group1.size()*this.group2.size();
 		
 		for (StrPair pair:this.differential_network.keySet()) {
@@ -200,23 +204,78 @@ public class RewiringDetector {
 						reasons.get(reason).add(sample1 + "-" + sample2);
 					}
 				
+				this.interaction_reasons_map.put(pair, reasons);
+				
+				// building sorted (descending) reasons-string for output
 				Map<String, Integer> reasons_count = new HashMap<>();
 				for (String reason: reasons.keySet())
 					reasons_count.put(reason, reasons.get(reason).size());
 				
-				// building descendingly sorted reasons-string for output
+				this.interaction_reasons_count_map.put(pair, reasons_count);
+				
 				List<String> sorted_reasons = new LinkedList<>(reasons.keySet());
 				sorted_reasons.sort((e2,e1) -> reasons_count.get(e1).compareTo(reasons_count.get(e2)));
 				sorted_reasons.replaceAll(e->e + ":" + reasons_count.get(e));
 				
 				// store data as strings
-				this.diffnet_report.add(pair.getL() + " " + pair.getR() + " " + sign + " " + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p) + " " + String.join(",", sorted_reasons));
+				this.diffnet_report.add(pair.getL() + " " + pair.getR() + " " + sign + " " 
+				+ (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p) + " " + String.join(",", sorted_reasons));
 				
 				k++;
 			}
 		}
 	}
+	// initial preprocessing up to here
+
+	public Map<String, ConstructedNetworks> getGroup1() {
+		return group1;
+	}
+
+	public Map<String, ConstructedNetworks> getGroup2() {
+		return group2;
+	}
+
+	public double getFDR() {
+		return FDR;
+	}
+
+	public Map<String, Double> getG1Nodes() {
+		return g1_nodes;
+	}
+
+	public Map<String, Double> getG2Nodes() {
+		return g2_nodes;
+	}
+
+	public Map<String, Double> getG1Edges() {
+		return g1_edges;
+	}
+
+	public Map<String, Double> getG2Edges() {
+		return g2_edges;
+	}
+
+	public Map<String, Double> getP_rews() {
+		return P_rews;
+	}
+
+	public Map<StrPair, Double> getDifferentialNetwork() {
+		return differential_network;
+	}
+
+	public Map<StrPair, Map<String, List<String>>> getInteractionReasonsMap() {
+		return interaction_reasons_map;
+	}
 	
+	public Map<StrPair, Map<String, Integer>> getInteractionReasonsCountMap() {
+		return interaction_reasons_count_map;
+	}
+	
+	
+	/**
+	 * Write information about the differential network to a Cytoscape-usable file
+	 * @param diffnet_out_path
+	 */
 	public void writeDiffnet(String diffnet_out_path) {
 		Utilities.writeEntries(this.diffnet_report, diffnet_out_path);
 	}

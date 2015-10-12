@@ -32,9 +32,9 @@ public class build_diff_networks {
 		
 		// read all data
 		Map<String, ConstructedNetworks> HSC = readNetworks(network_folder + "MEP/");
-		Map<String, ConstructedNetworks> MPP = readNetworks(network_folder + "MK/");
+		Map<String, ConstructedNetworks> MPP = readNetworks(network_folder + "EB/");
 		
 		RewiringDetector rd = new RewiringDetector(HSC, MPP, 0.05, results_root);
-		rd.writeDiffnet("/Users/tho/Desktop/diffnet.txt");
+		rd.writeDiffnet("/Users/tho/Desktop/MEP_EB.txt");
 	}
 }
