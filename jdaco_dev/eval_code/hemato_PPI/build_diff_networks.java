@@ -2,6 +2,8 @@ package hemato_PPI;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import framework.ConstructedNetworks;
@@ -30,11 +32,23 @@ public class build_diff_networks {
 	
 	public static void main(String[] args) {
 		
-		// read all data
-		Map<String, ConstructedNetworks> HSC = readNetworks(network_folder + "MEP/");
-		Map<String, ConstructedNetworks> MPP = readNetworks(network_folder + "EB/");
+		// define relations
+		List<String[]> relations = new LinkedList<String[]>();
+		relations.add(new String[]{"HSC", "MPP"});
+		relations.add(new String[]{"MPP", "CMP"});
+		relations.add(new String[]{"MPP", "CLP"});
+		// TODO: finish
 		
-		RewiringDetector rd = new RewiringDetector(HSC, MPP, 0.05, results_root);
-		rd.writeDiffnet("/Users/tho/Desktop/MEP_EB.txt");
+		for (String[] s:relations) {
+			String state1 = s[0];
+			String state2 = s[1];
+			
+			Map<String, ConstructedNetworks> g1 = readNetworks(network_folder + state1 + "/");
+			Map<String, ConstructedNetworks> g2 = readNetworks(network_folder + state2 + "/");
+			
+			RewiringDetector rd = new RewiringDetector(g1, g2, 0.05);
+			rd.writeDiffnet("/Users/tho/Desktop/" + state1 + "_" + state2 + ".txt");
+		}
+		
 	}
 }

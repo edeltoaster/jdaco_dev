@@ -77,7 +77,7 @@ public class RewiringDetector {
 		return String.join("/", reasons);
 	}
 	
-	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR, String out_folder) {
+	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
