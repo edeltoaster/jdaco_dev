@@ -37,17 +37,22 @@ public class build_diff_networks {
 		relations.add(new String[]{"HSC", "MPP"});
 		relations.add(new String[]{"MPP", "CMP"});
 		relations.add(new String[]{"MPP", "CLP"});
-		// TODO: finish
+		relations.add(new String[]{"CMP", "MEP"});
+		relations.add(new String[]{"CMP", "GMP"});
+		relations.add(new String[]{"MEP", "MK"});
+		relations.add(new String[]{"MEP", "EB"});
 		
 		for (String[] s:relations) {
 			String state1 = s[0];
 			String state2 = s[1];
 			
+			System.out.println("Processing " + state1 + " vs " + state2);
+			
 			Map<String, ConstructedNetworks> g1 = readNetworks(network_folder + state1 + "/");
 			Map<String, ConstructedNetworks> g2 = readNetworks(network_folder + state2 + "/");
 			
 			RewiringDetector rd = new RewiringDetector(g1, g2, 0.05);
-			rd.writeDiffnet("/Users/tho/Desktop/" + state1 + "_" + state2 + ".txt");
+			rd.writeDiffnet(results_root + state1 + "_" + state2 + ".txt");
 		}
 		
 	}
