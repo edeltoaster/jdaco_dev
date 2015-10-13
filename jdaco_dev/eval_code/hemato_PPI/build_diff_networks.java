@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import framework.ConstructedNetworks;
-import framework.RewiringDetector;
 import framework.Utilities;
+import framework.RewiringDetector;
 
 public class build_diff_networks {
 	
@@ -53,14 +53,14 @@ public class build_diff_networks {
 			String state1 = s[0];
 			String state2 = s[1];
 			
-			System.out.print("Processing " + state1 + " vs " + state2 + " : ");
-			
 			Map<String, ConstructedNetworks> g1 = readNetworks(network_folder + state1 + "/");
 			Map<String, ConstructedNetworks> g2 = readNetworks(network_folder + state2 + "/");
 			
 			RewiringDetector rd = new RewiringDetector(g1, g2, FDR);
+			System.out.print("Processing " + state1 + " vs " + state2 + " : ");
 			rd.writeDiffnet(results_folder + state1 + "_" + state2 + ".txt");
-			System.out.println(rd.getP_rews().size()  + " comparisons, " + rd.getInteractionReasonsMap().size() + " dIAs" );
+			double P_rew_rounded = (double)Math.round(Utilities.getMean(rd.getP_rews().values()) * 1000d) / 1000d;
+			System.out.println(rd.getP_rews().size()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getInteractionReasonsMap().size() + " dIAs" );
 		}
 		
 		System.out.println();

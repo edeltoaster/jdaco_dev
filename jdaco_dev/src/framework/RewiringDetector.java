@@ -18,6 +18,7 @@ public class RewiringDetector {
 	private Map<String, ConstructedNetworks> group1;
 	private Map<String, ConstructedNetworks> group2;
 	private double FDR;
+	private boolean strict_denominator = false;
 	
 	private Map<String, Double> g1_nodes = new HashMap<>();
 	private Map<String, Double> g2_nodes = new HashMap<>();
@@ -86,6 +87,16 @@ public class RewiringDetector {
 		this.assessRewiring();
 	}
 	
+	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR, boolean strict_denominator) {
+		this.group1 = group1;
+		this.group2 = group2;
+		this.FDR = FDR;
+		this.strict_denominator = strict_denominator;
+		
+		this.determineGroupwiseDifferences();
+		this.assessRewiring();
+	}
+	
 	private void determineGroupwiseDifferences() {
 		Map<StrPair, Integer> overall_added = new HashMap<>();
 		Map<StrPair, Integer> overall_lost = new HashMap<>();
@@ -110,7 +121,12 @@ public class RewiringDetector {
 				PPIN ppin2 = this.group2.get(sample2).getPPIN();
 				Set<StrPair> added_interactions = ppin2.removeAllIAs(ppin1).getInteractions();
 				Set<StrPair> lost_interactions = ppin1.removeAllIAs(ppin2).getInteractions();
-				this.P_rews.put(sample1 + "-" + sample2, ( (double) added_interactions.size() + lost_interactions.size() ) / Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]));
+				double denominator = (double) ppin1.mergeAllIAs(ppin2).getSizes()[1];
+				
+				if (this.strict_denominator)
+					denominator = Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]);
+				
+				this.P_rews.put(sample1 + "-" + sample2, ( (double) added_interactions.size() + lost_interactions.size() ) / denominator);
 				
 				
 				// actual count
@@ -147,10 +163,10 @@ public class RewiringDetector {
 		
 		// workaround: can happen in VERY FEW cases
 		if (P_rew > 1.0) {
-			System.err.println("P_rew too high: " + P_rew + ", set to 1.0.");
-			P_rew = 1.0;
+			System.err.println("P_rew too high, less strict denominator is advised.");
+			return;
 		} 
-		// TODO: think about P_rew measure
+		// TODO: think about P_rew measure: probably union of interactions?
 		
 		int groupwise_comparisons = this.group1.size()*this.group2.size();
 		
