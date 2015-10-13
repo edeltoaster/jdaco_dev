@@ -15,27 +15,32 @@ import framework.Utilities;
 
 public class build_networks {
 	static String BLUEPRINT_expr_folder = "/Users/tho/Desktop/BLUEPRINT_expr/";
-	static String network_folder = "/Users/tho/Desktop/BLUEPRINT_networks_0.03125/";
-	static double TPM_threshold = 0.03125;
+	static String network_folder_pre = "/Users/tho/Desktop/BLUEPRINT_networks/";
+	static Map<String, String> folder_type_map = new HashMap<>();
+	static PPIN original_ppin;
+	static NetworkBuilder builder;
 	
-	public static void main(String[] args) {
+	public static void preprocess() {
+		for (String s:Utilities.readEntryFile("eval_code/hemato_PPI/cell_types.txt")) {
+			if (s.startsWith("#"))
+				continue;
+			String[] spl = s.trim().split(" ");
+			folder_type_map.put(spl[0], spl[1]);
+		}
 		
-//		Map<String, String> folder_type_map = new HashMap<>();
-//		for (String s:Utilities.readEntryFile("eval_code/hemato_PPI/cell_types.txt")) {
-//			if (s.startsWith("#"))
-//				continue;
-//			String[] spl = s.trim().split(" ");
-//			folder_type_map.put(spl[0], spl[1]);
-//		}
-		
-		PPIN original_ppin = new PPIN("mixed_data/human_merged_6_Oct_15.tsv.gz");
-		NetworkBuilder builder = new NetworkBuilder(original_ppin);
-		
-		System.out.println("BLUEPRINT net-builder, TPM threshold: " + TPM_threshold);
 		System.out.println("Original PPIN: " + "mixed_data/human_merged_6_Oct_15.tsv.gz");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		System.out.println("3did:" + DataQuery.get3didVersion());
 		System.out.println("iPfam:" + DataQuery.getIPfamVersion());
+		
+		original_ppin = new PPIN("mixed_data/human_merged_6_Oct_15.tsv.gz");
+		builder = new NetworkBuilder(original_ppin);
+	}
+	
+	public static void process(double TPM_threshold) {
+		
+		System.out.println("BLUEPRINT net-builder, TPM threshold: " + TPM_threshold);
+		String network_folder = network_folder_pre + TPM_threshold + "/";
 		
 		new File(network_folder).mkdir();
 		
@@ -47,10 +52,10 @@ public class build_networks {
 			String file_name = path_split[path_split.length-1].split("\\.")[0];
 			String cell_type = path_split[path_split.length-2];
 			
-//			if (!folder_type_map.containsKey(cell_type))
-//				continue;
-//			
-//			cell_type = folder_type_map.get(cell_type);
+			if (!folder_type_map.containsKey(cell_type))
+				continue;
+			
+			cell_type = folder_type_map.get(cell_type);
 			
 			String out_path = network_folder + cell_type + "/";
 			
@@ -87,8 +92,18 @@ public class build_networks {
 			System.out.println();
 			System.out.println(cell_type + ": " + data_map.get(cell_type).size() + " samples");
 			System.out.println("Size: " + (int) Utilities.getMean(no_proteins) + "+-" + (int) Utilities.getStd(no_proteins) + " / " + (int) Utilities.getMean(no_interactions) + "+-" + (int) Utilities.getStd(no_interactions));
-			
 		}
+		System.out.println();
+	}
+	
+	public static void main(String[] args) {
+		preprocess();
 		
+		process(0.0);
+		process(0.03125);
+		process(0.1);
+		process(0.3);
+		process(0.5);
+		process(1.0);
 	}
 }

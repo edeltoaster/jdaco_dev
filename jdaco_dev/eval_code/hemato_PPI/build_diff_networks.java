@@ -13,8 +13,8 @@ import framework.Utilities;
 public class build_diff_networks {
 	
 	static double FDR = 0.05;
-	static String network_folder = "/Users/tho/Desktop/BLUEPRINT_networks_0.03125/";
-	static String results_root = "/Users/tho/Desktop/test/";
+	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
+	static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets/";
 	
 	public static Map<String, ConstructedNetworks> readNetworks(String folder) {
 		Map<String, ConstructedNetworks> data = new HashMap<>();
@@ -30,7 +30,11 @@ public class build_diff_networks {
 		return data;
 	}
 	
-	public static void main(String[] args) {
+	public static void process(String network_folder, String results_folder) {
+		
+		new File(results_folder).mkdir();
+		
+		System.out.println("Analysis for " + network_folder + ", writing to " + results_folder);
 		
 		// define relations
 		List<String[]> relations = new LinkedList<String[]>();
@@ -41,18 +45,39 @@ public class build_diff_networks {
 		relations.add(new String[]{"CMP", "GMP"});
 		relations.add(new String[]{"MEP", "MK"});
 		relations.add(new String[]{"MEP", "EB"});
+		relations.add(new String[]{"GMP", "N"});
+		relations.add(new String[]{"GMP", "M"});
+		relations.add(new String[]{"CLP", "CD4"});
 		
 		for (String[] s:relations) {
 			String state1 = s[0];
 			String state2 = s[1];
 			
-			System.out.println("Processing " + state1 + " vs " + state2);
+			System.out.print("Processing " + state1 + " vs " + state2 + " : ");
 			
 			Map<String, ConstructedNetworks> g1 = readNetworks(network_folder + state1 + "/");
 			Map<String, ConstructedNetworks> g2 = readNetworks(network_folder + state2 + "/");
 			
-			RewiringDetector rd = new RewiringDetector(g1, g2, 0.05);
-			rd.writeDiffnet(results_root + state1 + "_" + state2 + ".txt");
+			RewiringDetector rd = new RewiringDetector(g1, g2, FDR);
+			rd.writeDiffnet(results_folder + state1 + "_" + state2 + ".txt");
+			System.out.println(rd.getP_rews().size()  + " comparisons, " + rd.getInteractionReasonsMap().size() + " dIAs" );
+		}
+		
+		System.out.println();
+	}
+	
+	public static void main(String[] args) {
+		
+		new File(results_root).mkdir();
+		
+		for (File f:new File(network_folder).listFiles()) {
+			
+			if (!f.isDirectory())
+				continue;
+			
+			String threshold_results = f.getName();
+			process(f.getAbsolutePath() + "/", results_root + threshold_results + "/");
+			
 		}
 		
 	}

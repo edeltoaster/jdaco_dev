@@ -110,7 +110,7 @@ public class RewiringDetector {
 				PPIN ppin2 = this.group2.get(sample2).getPPIN();
 				Set<StrPair> added_interactions = ppin2.removeAllIAs(ppin1).getInteractions();
 				Set<StrPair> lost_interactions = ppin1.removeAllIAs(ppin2).getInteractions();
-				this.P_rews.put(sample1 + "-" + sample2, ((double)added_interactions.size()+ lost_interactions.size())/Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]));
+				this.P_rews.put(sample1 + "-" + sample2, ( (double) added_interactions.size() + lost_interactions.size() ) / Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]));
 				
 				
 				// actual count
@@ -144,6 +144,14 @@ public class RewiringDetector {
 		Map<StrPair, Double> test_map = new HashMap<>();
 		Map<Double, LinkedList<StrPair>> p2pair = new HashMap<>();
 		double P_rew = Utilities.getMean(this.P_rews.values());
+		
+		// workaround: can happen in VERY FEW cases
+		if (P_rew > 1.0) {
+			System.err.println("P_rew too high: " + P_rew + ", set to 1.0.");
+			P_rew = 1.0;
+		} 
+		// TODO: think about P_rew measure
+		
 		int groupwise_comparisons = this.group1.size()*this.group2.size();
 		
 		for (StrPair pair:this.differential_network.keySet()) {
@@ -219,7 +227,7 @@ public class RewiringDetector {
 				
 				// store data as strings
 				this.diffnet_report.add(pair.getL() + " " + pair.getR() + " " + sign + " " 
-				+ (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p) + " " + String.join(",", sorted_reasons));
+						+ (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p) + " " + String.join(",", sorted_reasons));
 				
 				k++;
 			}
