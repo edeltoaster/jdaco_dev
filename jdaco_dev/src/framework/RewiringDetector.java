@@ -26,10 +26,17 @@ public class RewiringDetector {
 	private Map<String, Double> g2_edges = new HashMap<>();
 	private Map<String, Double> P_rews = new HashMap<>();
 	
+	// all detected changes
 	private Map<StrPair, Double> differential_network = new HashMap<>();
+	private Map<Double, Double> rawp2adjp = new HashMap<>();
+	
+	// only stored for significant detected changes
+	private List<StrPair> significantly_rewired_interactions = new LinkedList<>();
+	private Map<StrPair, Double> interaction_p_map = new HashMap<>();
+	private Map<StrPair, Boolean> interaction_direction_map = new HashMap<>();
 	private Map<StrPair, Map<String, List<String>>> interaction_reasons_map = new HashMap<>();
 	private Map<StrPair, Map<String, Integer>> interaction_reasons_count_map = new HashMap<>();
-	private List<String> diffnet_report = new LinkedList<>();
+	private Map<StrPair, List<String>> interaction_sorted_reasons_map = new HashMap<>();
 	
 	/**
 	 * For a given change in an interaction, check for the reason in both samples and return a report
@@ -165,10 +172,9 @@ public class RewiringDetector {
 		if (P_rew > 1.0) {
 			System.err.println("P_rew too high, less strict denominator is advised.");
 			return;
-		} 
-		// TODO: think about P_rew measure: probably union of interactions?
+		}
 		
-		int groupwise_comparisons = this.group1.size()*this.group2.size();
+		int groupwise_comparisons = this.group1.size() * this.group2.size();
 		
 		for (StrPair pair:this.differential_network.keySet()) {
 			int v = (int) Math.abs(this.differential_network.get(pair));
@@ -185,18 +191,14 @@ public class RewiringDetector {
 		Collections.sort(p_values);
 		int k = 1;
 		int largest_k = -1;
-		Map<Double, Double> rawp2adjp = new HashMap<>();
 		
 		// find largest k
 		for (double p:p_values) {
 			if (p <= k * FDR / m)
 				largest_k = k;
-			rawp2adjp.put(p, (p* m) / k); // if multiple have the same rank, take the biggest
+			this.rawp2adjp.put(p, (p* m) / k); // if multiple have the same rank, take the biggest
 			k++;
 		}
-		
-		// write header
-		this.diffnet_report.add("Protein1 Protein2 Type Count Probability P-val P-val_adj Reasons");
 		
 		k = 1;
 		p_values = new LinkedList<>(new HashSet<>(p_values));
@@ -209,14 +211,16 @@ public class RewiringDetector {
 			}
 
 			for (StrPair pair:p2pair.get(p)) {
-				double v = this.differential_network.get(pair);
 				
-				String sign = "-";
+				this.interaction_p_map.put(pair, p);
+				this.significantly_rewired_interactions.add(pair);
+				
+				double v = this.differential_network.get(pair);
 				boolean addition = false;
 				if (Math.signum(v) == +1) {
-					sign = "+";
 					addition = true;
 				}
+				this.interaction_direction_map.put(pair, addition);
 				
 				// check the exact reason for the difference between all samples
 				Map<String, List<String>> reasons = new HashMap<>();
@@ -241,9 +245,7 @@ public class RewiringDetector {
 				sorted_reasons.sort((e2,e1) -> reasons_count.get(e1).compareTo(reasons_count.get(e2)));
 				sorted_reasons.replaceAll(e->e + ":" + reasons_count.get(e));
 				
-				// store data as strings
-				this.diffnet_report.add(pair.getL() + " " + pair.getR() + " " + sign + " " 
-						+ (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + rawp2adjp.get(p) + " " + String.join(",", sorted_reasons));
+				this.interaction_sorted_reasons_map.put(pair, sorted_reasons);
 				
 				k++;
 			}
@@ -301,6 +303,26 @@ public class RewiringDetector {
 	 * @param diffnet_out_path
 	 */
 	public void writeDiffnet(String diffnet_out_path) {
-		Utilities.writeEntries(this.diffnet_report, diffnet_out_path);
+		
+		List<String> to_write = new LinkedList<>();
+		int groupwise_comparisons = this.group1.size() * this.group2.size();
+		
+		// header
+		to_write.add("Protein1 Protein2 Type Count Probability p-val p-val_adj Reasons");
+		for (StrPair pair:this.significantly_rewired_interactions) {
+			
+			String sign = "-";
+			if (this.interaction_direction_map.get(pair))
+				sign = "+";
+			
+			double v = this.differential_network.get(pair);
+			double p = this.interaction_p_map.get(pair);
+			List<String> sorted_reasons = this.interaction_sorted_reasons_map.get(pair);
+			
+			to_write.add(pair.getL() + " " + pair.getR() + " " + sign + " " 
+			        + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + this.rawp2adjp.get(p) + " " + String.join(",", sorted_reasons));
+		}
+		
+		Utilities.writeEntries(to_write, diffnet_out_path);
 	}
 }
