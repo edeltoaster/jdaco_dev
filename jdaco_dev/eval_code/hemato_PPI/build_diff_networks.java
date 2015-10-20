@@ -9,6 +9,7 @@ import java.util.Map;
 import framework.ConstructedNetworks;
 import framework.Utilities;
 import framework.RewiringDetector;
+import framework.StrPair;
 
 public class build_diff_networks {
 	
@@ -59,8 +60,10 @@ public class build_diff_networks {
 			RewiringDetector rd = new RewiringDetector(g1, g2, FDR);
 			System.out.print("Processing " + state1 + " vs " + state2 + " : ");
 			rd.writeDiffnet(results_folder + state1 + "_" + state2 + ".txt");
+			Map<String, List<StrPair>> alt_splice_switches = rd.determineAltSplicingSwitches();
 			double P_rew_rounded = (double)Math.round(Utilities.getMean(rd.getP_rews().values()) * 1000d) / 1000d;
 			System.out.println(rd.getP_rews().size()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getInteractionReasonsMap().size() + " dIAs" );
+			System.out.println(alt_splice_switches.keySet().size() + " alt. sliced proteins that affect " + alt_splice_switches.values().stream().mapToInt(e->e.size()).sum() + " interactions.");
 		}
 		
 		System.out.println();

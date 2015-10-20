@@ -325,4 +325,31 @@ public class RewiringDetector {
 		
 		Utilities.writeEntries(to_write, diffnet_out_path);
 	}
+	
+	public Map<String, List<StrPair>> determineAltSplicingSwitches() {
+		Map<String, List<StrPair>> relevant_subset = new HashMap<>();
+		
+		for (StrPair pair: this.interaction_sorted_reasons_map.keySet()) {
+			
+			String main_reason = this.interaction_sorted_reasons_map.get(pair).get(0);
+			
+			// if very different reasons for this change: skip
+			if (main_reason.startsWith("no_change"))
+				continue;
+			// TODO: check: probably ALL cases and not only were they are most relevant? also: split or next
+			for (String s:main_reason.split("/")) {
+				String[] split_temp = s.split(":")[0].split("\\(");
+				String protein = split_temp[0];
+				String reason = split_temp[1].substring(0, split_temp[1].length() - 1);
+				
+				if (reason.contains("->")) {
+					if (!relevant_subset.containsKey(protein))
+						relevant_subset.put(protein, new LinkedList<>());
+					relevant_subset.get(protein).add(pair);
+				}
+			}
+		}
+		
+		return relevant_subset;
+	}
 }
