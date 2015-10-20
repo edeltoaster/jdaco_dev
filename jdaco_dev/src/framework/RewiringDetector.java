@@ -326,27 +326,38 @@ public class RewiringDetector {
 		Utilities.writeEntries(to_write, diffnet_out_path);
 	}
 	
-	public Map<String, List<StrPair>> determineAltSplicingSwitches() {
+	/**
+	 * Outputs a map of proteins and affected interactions where alternative splicing events of those proteins are the reasons for a difference regarding specific interactions.
+	 * A boolean switch defines if only the most appearing reason is counted or every instance
+	 * @param only_major
+	 * @return
+	 */
+	public Map<String, List<StrPair>> determineAltSplicingSwitches(boolean only_major) {
 		Map<String, List<StrPair>> relevant_subset = new HashMap<>();
 		
 		for (StrPair pair: this.interaction_sorted_reasons_map.keySet()) {
 			
-			String main_reason = this.interaction_sorted_reasons_map.get(pair).get(0);
+			for (String unprocessed_reason:this.interaction_sorted_reasons_map.get(pair)) {
 			
-			// if very different reasons for this change: skip
-			if (main_reason.startsWith("no_change"))
-				continue;
-			// TODO: check: probably ALL cases and not only were they are most relevant? also: split or next
-			for (String s:main_reason.split("/")) {
-				String[] split_temp = s.split(":")[0].split("\\(");
-				String protein = split_temp[0];
-				String reason = split_temp[1].substring(0, split_temp[1].length() - 1);
+				// if very different reasons for this change: skip
+				if (unprocessed_reason.startsWith("no_change"))
+					continue;
 				
-				if (reason.contains("->")) {
-					if (!relevant_subset.containsKey(protein))
-						relevant_subset.put(protein, new LinkedList<>());
-					relevant_subset.get(protein).add(pair);
+				for (String s:unprocessed_reason.split("/")) {
+					String[] split_temp = s.split(":")[0].split("\\(");
+					String protein = split_temp[0];
+					String reason = split_temp[1].substring(0, split_temp[1].length() - 1);
+					
+					if (reason.contains("->")) {
+						if (!relevant_subset.containsKey(protein))
+							relevant_subset.put(protein, new LinkedList<>());
+						relevant_subset.get(protein).add(pair);
+					}
 				}
+				
+				if (only_major)
+					break;
+				
 			}
 		}
 		
