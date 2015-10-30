@@ -859,7 +859,7 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Retrieves current IntAct network for a given organism
+	 * Retrieves current IntAct network for a given organism; if there is no data for the taxon, an empty network is returned
 	 * @param taxon_id
 	 * @return
 	 */
@@ -868,7 +868,7 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Retrieves current IntAct network for a given organism, prints feedback to ps
+	 * Retrieves current IntAct network for a given organism, prints feedback to ps;  if there is no data for the taxon, an empty network is returned
 	 * @param taxon_id
 	 * @param ps
 	 * @return
@@ -949,6 +949,87 @@ public class DataQuery {
 			}
 			
 			return getIntActNetwork(taxon_id, ps);
+		}
+		
+		// convert
+		InputStream inputStream = new ByteArrayInputStream(output.toString().getBytes(Charset.forName("UTF-8")));
+		
+		// build
+		
+		return new PPIN(new BufferedReader(new InputStreamReader(inputStream)), 0.0);
+	}
+	
+	/**
+	 * Retrieves current iRefIndex network for a given organism, prints feedback to ps; if there is no data for the taxon, an empty network is returned
+	 * @param taxon_id
+	 * @return
+	 */
+	public static PPIN getIRefIndexNetwork(String taxon_id) {
+		
+		StringBuilder output = new StringBuilder();
+		String line = null;
+		try {
+			// get actual filename
+			URL server = new URL("http://irefindex.org/download/irefindex/data/current/psi_mitab/MITAB2.6/");
+			URLConnection connection = server.openConnection();
+			
+			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			
+			while ( (line = datastream.readLine()) != null ) {
+				output.append(line);
+			}
+			
+			// parse html data
+			String net_file = "";
+			for (String s:output.toString().split("\"")) {
+				if (s.startsWith(taxon_id) && s.contains("mitab") && s.endsWith(".txt.zip"))
+					net_file = s;
+			}
+				
+			// use the knowledge of the filename to get the data
+			server = new URL("http://irefindex.org/download/irefindex/data/current/psi_mitab/MITAB2.6/" + net_file);
+			connection = server.openConnection();
+			
+			// read and build pipe
+			ZipInputStream zis = new ZipInputStream(connection.getInputStream());
+			
+			ZipEntry file_in_zip = null;
+			output = new StringBuilder();
+			while ( (file_in_zip = zis.getNextEntry()) != null)
+				if (file_in_zip.getName().endsWith(".txt")) {
+					datastream = new BufferedReader(new InputStreamReader(zis));
+					while ( (line = datastream.readLine()) != null ) {
+						
+						// actual parsing
+						if (line.isEmpty() || line.startsWith("#"))
+							continue;
+						
+						String[] temp = line.split("\\t");
+						
+						String[] p1 = temp[0].split(":");
+						String[] p2 = temp[1].split(":");
+						
+						// both proteins must be given as uniprot accs
+						if (!p1[0].equals("uniprotkb") || !p2[0].equals("uniprotkb"))
+							continue;
+						
+						output.append(p1[1].split("-")[0] + " " + p2[1].split("-")[0] + "\n");
+					}
+					datastream.close();
+					break;
+				}
+			zis.close();
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("iRefIndex");
+			
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get interaction data from iRefIndex in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			return getIRefIndexNetwork(taxon_id);
 		}
 		
 		// convert
