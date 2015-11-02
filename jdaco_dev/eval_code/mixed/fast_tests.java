@@ -1,4 +1,4 @@
-package unspecific;
+package mixed;
 
 public class fast_tests {
 	

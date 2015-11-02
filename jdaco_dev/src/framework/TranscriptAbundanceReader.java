@@ -208,12 +208,12 @@ public class TranscriptAbundanceReader {
 	}
 	
 	/**
-	 * Reads GTF files of transcripts as specified by CSHL ENCODE paper: 2 expressed replicates (>0) and iIDR < 0.1,
+	 * Reads GTF files of genes/transcripts as specified by CSHL ENCODE paper: 2 expressed replicates (>0) and iIDR < 0.1,
 	 * also adds a transcript "no_samples" that specifies number of samples.
 	 * @param file
 	 * @param threshold
 	 * @param return_gene_level
-	 * @return map of transcript/no_samples -> FPKM (if a transcript/gene above > threshold)
+	 * @return map of transcript/no_samples -> RPKM/FPKM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readCSHLData(String file) {
 		Map<String, Float> transcript_abundance = new HashMap<>();
@@ -233,7 +233,7 @@ public class TranscriptAbundanceReader {
 				
 				String type = split[2];
 				
-				if (!type.equals("transcript"))
+				if (!type.equals("transcript") && !type.equals("gene"))
 					continue;
 				
 				// parse attributes
@@ -251,6 +251,8 @@ public class TranscriptAbundanceReader {
 					
 					if (temp[0].equals("transcript_id"))
 						transcript = temp[1].split("\\.")[0];
+					else if (temp[0].equals("gene_id"))
+						transcript = temp[1].split("\\.")[0];
 					else if (temp[0].equals("FPKM") || temp[0].equals("RPKM")) { // if there is one specifically elaborated datapoint -> take it and don't think about further ones
 						fpkm = Float.parseFloat(temp[1]);
 						sample_count = 1;
@@ -265,7 +267,7 @@ public class TranscriptAbundanceReader {
 						sample_count++;
 					}
 					else if (temp[0].equals("iIDR")) {
-						if (Float.parseFloat(temp[1]) >= 0.1)
+						if (temp[1].equals("NA") || Float.parseFloat(temp[1]) >= 0.1)
 							fpkm = 0;
 						break;
 					}
