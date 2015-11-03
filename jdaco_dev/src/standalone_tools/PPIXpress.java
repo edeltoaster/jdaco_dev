@@ -19,18 +19,20 @@ import framework.Utilities;
 public class PPIXpress {
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
-	private static boolean STRING_weights = false;
+	private static boolean output_major_transcripts = false;
 	private static String original_network_path;
 	private static List<String> input_files = new LinkedList<>();
 	private static double threshold = 1.0;
 	private static double percentile = -1;
-	private static boolean up2date_DDIs = true;
 	private static String output_folder;
 	private static String organism_database;
 	
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
 	private static boolean load_HGNC = false;
+	private static boolean up2date_DDIs = true;
+	private static boolean update_UniProt = false;
+	private static boolean STRING_weights = false;
 	private static List<String> matching_files_output = new LinkedList<>();
 	
 	public static void printHelp() {
@@ -39,9 +41,11 @@ public class PPIXpress {
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-g : only use gene abundances (default: transcript abundance)");
 		System.out.println("	-d : also output underlying domain-domain interaction network(s) (default: no)");
+		System.out.println("	-m : also output major transcript per protein (default: no)");
 		System.out.println("	-t=[threshold] : only take transcripts/genes with an expression above [threshold] into account (default: 1.0)");
 		System.out.println("	-tp=[percentile] : only take transcripts/genes with an expression above the [percentile]-th percentile into account (default: overrides option above)");
 		System.out.println("	-w : add weights using STRING, interactions that are not in STRING are discarded");
+		System.out.println("	-u : update outdated UniProt accessions");
 		System.out.println("	-l : do not retrieve current 3did/iPfam data, only use domain-domain interaction data from DOMINE & IDDI");
 		System.out.println("	-r=[release] : try to use data from a certain Ensembl release, uses newest if specific release not found");
 		System.out.println("	-e : extend MySQL timeout to 5 min (default: 3 min)");
@@ -50,7 +54,7 @@ public class PPIXpress {
 		System.out.println("[INPUT-NETWORK] :");
 		System.out.println("	Any protein-protein interaction network in SIF-format: Protein1 Protein2 (weight).");
 		System.out.println("	Proteins are assumed to be given as UniProt or HGNC accessions.");
-		System.out.println("	Alternatively: use taxon:[organism taxon] to automatically retrieve current IntAct data for an organism.");
+		System.out.println("	Alternatively: use taxon:[organism taxon] to automatically retrieve current IntAct and iRefIndex data for an organism.");
 		
 		System.out.println("[OUTPUT-FOLDER] :");
 		System.out.println("	The outcome is written to this folder. If it does not exist, it is created.");
@@ -96,6 +100,14 @@ public class PPIXpress {
 			// output domain-domain interaction networks
 			else if (arg.equals("-w"))
 				STRING_weights = true;
+			
+			// output major transcript per protein
+			else if (arg.equals("-m"))
+				output_major_transcripts = true;
+			
+			// update outdated UniProt accessions
+			else if (arg.equals("-u"))
+				update_UniProt = true;
 			
 			// extends MySQL timeout
 			else if (arg.equals("-e"))
@@ -200,8 +212,12 @@ public class PPIXpress {
 		PPIN original_network = null;
 		if (original_network_path.startsWith("taxon:")) {
 			String taxon_id = original_network_path.split(":")[1];
-			System.out.print("Retrieving IntAct interaction network for taxon " + taxon_id + " ... ");
+			System.out.print("Retrieving IntAct interaction data for taxon " + taxon_id + " ... ");
 			original_network = DataQuery.getIntActNetwork(taxon_id, System.out);
+			System.out.println("done.");
+			
+			System.out.print("Retrieving iRefIndex interaction data for taxon " + taxon_id + " ... ");
+			original_network = original_network.mergeAllIAs(DataQuery.getIRefIndexNetwork(taxon_id, System.out));
 			System.out.println("done.");
 		} else {
 			System.out.println("Reading " + original_network_path + " (may take some time if ID conversion is necessary) ... ");
@@ -211,13 +227,19 @@ public class PPIXpress {
 		
 		System.out.println("Complete network: " + original_network.getSizesStr());
 		
+		if (update_UniProt) {
+			System.out.println("Retrieving data from UniProt to update protein accessions in network ...");
+			original_network = original_network.updateUniprotAccessions();
+			System.out.println("Size after update of UniProt accessions: " + original_network.getSizesStr());
+		}
+		
 		if (STRING_weights) {
 			if (!original_network.isWeighted())
 				System.out.println("Retrieving data from STRING to add weights to network ...");
 			else
 				System.out.println("Retrieving data from STRING to re-weight network ...");
 			original_network = original_network.getAsSTRINGWeighted(false);
-			System.out.println(original_network.getSizesStr());
+			System.out.println("Size after adding weights: " + original_network.getSizesStr());
 		}
 		
 		// gathering data that will always be needed
@@ -288,8 +310,8 @@ public class PPIXpress {
 			}
 			
 			// output
-			constr.getPPIN().writePPIN(output_folder + sample_no + "_ppin.tsv");
-			match_files += " " + sample_no + "_ppin.tsv";
+			constr.getPPIN().writePPIN(output_folder + sample_no + "_ppin.txt");
+			match_files += " " + sample_no + "_ppin.txt";
 			
 			String out = "-> " + constr.getPPIN().getSizesStr() + " (threshold: " + threshold;
 			
@@ -301,8 +323,13 @@ public class PPIXpress {
 			System.out.flush();
 			
 			if (output_DDINs) {
-				constr.getDDIN().writeDDIN(output_folder + sample_no + "_ddin.tsv");
-				match_files += " " + sample_no + "_ddin.tsv";
+				constr.getDDIN().writeDDIN(output_folder + sample_no + "_ddin.txt");
+				match_files += " " + sample_no + "_ddin.txt";
+			}
+			
+			if (output_major_transcripts) {
+				constr.writeProteinToAssumedTranscriptMap(output_folder + sample_no + "_major-transcripts.txt");
+				match_files += " " + sample_no + "_major-transcripts.txt";
 			}
 			
 			matching_files_output.add(match_files);
