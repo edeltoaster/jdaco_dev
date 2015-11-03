@@ -84,7 +84,7 @@ public class PPIXpress_GUI {
 	private JCheckBox chckbxPercentile;
 	private JButton btnReset;
 	private JComboBox<String> comboBox_server;
-	private JButton btnIntAct;
+	private JButton btnRetrieve;
 	
 	/**
 	 * Launch the application.
@@ -534,10 +534,10 @@ public class PPIXpress_GUI {
 		lblSpecificExpressionData.setBounds(330, 130, 256, 30);
 		frmPpixpress.getContentPane().add(lblSpecificExpressionData);
 		
-		btnIntAct = new JButton("from IntAct");
-		btnIntAct.addActionListener(new ActionListener() {
+		btnRetrieve = new JButton("retrieve data");
+		btnRetrieve.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				final String taxon_id = (String)JOptionPane.showInputDialog(frmPpixpress,"organism taxon:", "IntAct retrieval", JOptionPane.PLAIN_MESSAGE, null, null, "9606");
+				final String taxon_id = (String)JOptionPane.showInputDialog(frmPpixpress,"organism taxon:", "iRefIndex/IntAct retrieval", JOptionPane.PLAIN_MESSAGE, null, null, "9606");
 				
 				if (taxon_id == null)
 					return;
@@ -546,7 +546,7 @@ public class PPIXpress_GUI {
 			    compute_thread = new Thread() {
 			    	public void run() {
 			    		try {
-			    			load_intact(taxon_id);;
+			    			retrieve_network(taxon_id);;
 			    			computing = false;
 			    			progressBar.setValue(0);
 			    			setActivity(true);
@@ -561,7 +561,7 @@ public class PPIXpress_GUI {
 							} catch (InterruptedException exc) {
 							}
 			    			stream_output.println("");
-			    			stream_output.println("IntAct retrieval aborted.");
+			    			stream_output.println("Network retrieval aborted.");
 			    			progressBar.setValue(0);
 			    			setActivity(true);
 			    			progressBar.setIndeterminate(false);
@@ -583,7 +583,7 @@ public class PPIXpress_GUI {
 					} catch (InterruptedException exc) {
 					}
 	    			stream_output.println("");
-	    			stream_output.println("IntAct retrieval aborted.");
+	    			stream_output.println("Network retrieval aborted.");
 	    			progressBar.setValue(0);
 	    			setActivity(true);
 	    			progressBar.setIndeterminate(false);
@@ -597,9 +597,9 @@ public class PPIXpress_GUI {
 			    	original_ppin = null;
 			}
 		});
-		btnIntAct.setBounds(166, 40, 124, 40);
-		frmPpixpress.getContentPane().add(btnIntAct);
-		activiy_changing_components.add(btnIntAct);
+		btnRetrieve.setBounds(166, 40, 124, 40);
+		frmPpixpress.getContentPane().add(btnRetrieve);
+		activiy_changing_components.add(btnRetrieve);
 		
 		JLabel lblLoadProteinInteraction = new JLabel("Load protein interaction data");
 		lblLoadProteinInteraction.setBounds(55, 5, 200, 40);
@@ -812,12 +812,17 @@ public class PPIXpress_GUI {
 			c.setEnabled(active);
 	}
 	
-	public void load_intact(String taxon_id) {
+	public void retrieve_network(String taxon_id) {
 		setActivity(false);
-		stream_output.print("Retrieving IntAct interaction network for taxon " + taxon_id + " ... ");
+		stream_output.print("Retrieving IntAct interaction data for taxon " + taxon_id + " ... ");
 		original_ppin = DataQuery.getIntActNetwork(taxon_id, stream_output);
-		original_network_path = "IntAct, taxon:" + taxon_id;
 		stream_output.println("done.");
+		
+		stream_output.print("Retrieving iRefIndex interaction data for taxon " + taxon_id + " ... ");
+		original_ppin = original_ppin.mergeAllIAs(DataQuery.getIRefIndexNetwork(taxon_id, stream_output));
+		stream_output.println("done.");
+		
+		original_network_path = "IntAct/iRefIndex (only physical interactions), taxon:" + taxon_id;
 	    text_ppin.setText("Complete network: " + original_network_path + System.getProperty("line.separator") + "Size: " + original_ppin.getSizesStr());
 	}
 	
