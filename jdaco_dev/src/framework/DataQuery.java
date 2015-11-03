@@ -880,12 +880,13 @@ public class DataQuery {
 		try {
 			URL server = new URL("ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact.zip");
 			URLConnection connection = server.openConnection();
-			long size = (long) (connection.getContentLengthLong() * 9.97); // approximation, gzip etc ...
 			
 			// read and build pipe
 			ZipInputStream zis = new ZipInputStream(connection.getInputStream());
-			
 			ZipEntry file_in_zip = null;
+			
+			// for percentage output
+			long size = (long) (connection.getContentLengthLong() * 9.97); // approximation, gzip etc ...
 			long read = 0;
 			int line_sep_len = System.getProperty("line.separator").getBytes().length;
 			byte state = 0;
@@ -960,14 +961,25 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Retrieves current iRefIndex network for a given organism, prints feedback to ps; if there is no data for the taxon, an empty network is returned
+	 * Retrieves current iRefIndex network of physical interactions for a given organism;  if there is no data for the taxon, an empty network is returned
 	 * @param taxon_id
 	 * @return
 	 */
 	public static PPIN getIRefIndexNetwork(String taxon_id) {
+		return getIRefIndexNetwork(taxon_id, null);
+	}
+	
+	/**
+	 * Retrieves current iRefIndex network of physical interactions for a given organism, prints feedback to ps;  if there is no data for the taxon, an empty network is returned
+	 * @param taxon_id
+	 * @param ps
+	 * @return
+	 */
+	public static PPIN getIRefIndexNetwork(String taxon_id, PrintStream ps) {
 		
 		StringBuilder output = new StringBuilder();
 		String line = null;
+		
 		try {
 			// get actual filename
 			URL server = new URL("http://irefindex.org/download/irefindex/data/current/psi_mitab/MITAB2.6/");
@@ -989,16 +1001,38 @@ public class DataQuery {
 			// use the knowledge of the filename to get the data
 			server = new URL("http://irefindex.org/download/irefindex/data/current/psi_mitab/MITAB2.6/" + net_file);
 			connection = server.openConnection();
+			output = new StringBuilder();
 			
 			// read and build pipe
 			ZipInputStream zis = new ZipInputStream(connection.getInputStream());
-			
 			ZipEntry file_in_zip = null;
-			output = new StringBuilder();
+			
+			
+			// for percentage output
+			long size = (long) (connection.getContentLengthLong() * 9.97); // approximation, gzip etc ...
+			long read = 0;
+			int line_sep_len = System.getProperty("line.separator").getBytes().length;
+			byte state = 0;
+			
 			while ( (file_in_zip = zis.getNextEntry()) != null)
 				if (file_in_zip.getName().endsWith(".txt")) {
 					datastream = new BufferedReader(new InputStreamReader(zis));
 					while ( (line = datastream.readLine()) != null ) {
+						read += line.getBytes().length + line_sep_len;
+						
+						// for output
+						if (ps != null) {
+							if (state == 0 && read > 0.24 * size) {
+								state = 1;
+								ps.print("25% ... ");
+							} else if (state == 1 && read > 0.49 * size) {
+								state = 2;
+								ps.print("50% ... ");
+							} else if (state == 2 && read > 0.74 * size) {
+								state = 3;
+								ps.print("75% ... ");
+							}
+						}
 						
 						// actual parsing
 						if (line.isEmpty() || line.startsWith("#"))
@@ -1012,7 +1046,15 @@ public class DataQuery {
 						// both proteins must be given as uniprot accs
 						if (!p1[0].equals("uniprotkb") || !p2[0].equals("uniprotkb"))
 							continue;
+						// both proteins must be from organism
+						if (!temp[9].contains(taxon_id) || !temp[10].contains(taxon_id))
+							continue;
 						
+						// no unclear and unwanted interaction types
+						String type = temp[11];
+						if (!type.equals("MI:0914(association)") && !type.equals("MI:0407(direct interaction)") && !type.equals("MI:0914(association)") && !type.equals("MI:0195(covalent binding)") && !type.equals("MI:0915(physical association)") && !type.equals("MI:0000(psi-mi:\"MI:0407\")"))
+							continue;
+
 						output.append(p1[1].split("-")[0] + " " + p2[1].split("-")[0] + "\n");
 					}
 					datastream.close();
@@ -1029,7 +1071,7 @@ public class DataQuery {
 			} catch (InterruptedException e1) {
 			}
 			
-			return getIRefIndexNetwork(taxon_id);
+			return getIRefIndexNetwork(taxon_id, ps);
 		}
 		
 		// convert
