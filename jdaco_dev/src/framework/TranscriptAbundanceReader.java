@@ -126,6 +126,47 @@ public class TranscriptAbundanceReader {
 	}
 	
 	/**
+	 * Reads Kallisto output files of transcripts (gzipped also fine, ending .gz assumed there)
+	 * and allow all only transcripts with transcripts above TPM threshold.
+	 * @param file
+	 * @param threshold
+	 * @return map of transcript -> TPM (if a transcript/gene above > threshold)
+	 */
+	public static Map<String, Float> readKallistoFile(String file, double threshold) {
+		Map<String, Float> transcript_abundance = new HashMap<>();
+		
+		try {
+			BufferedReader in = null;
+			if (file.endsWith(".gz"))
+				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+			else
+				in = new BufferedReader(new FileReader(file));
+			
+			while (in.ready()) {
+				// parse
+				String line = in.readLine();
+				
+				if (line.startsWith("target_id")) //
+					continue;
+				
+				String[] split = line.split("\\s+");
+				String transcript = split[0];
+				float tpm = Float.parseFloat(split[4]);
+				
+				if (tpm <= threshold)
+					continue;
+				
+				transcript_abundance.put(transcript, tpm);
+			}
+			in.close();
+		} catch (Exception e) {
+			System.err.println("Problem while trying to parse Kallisto file.");
+		}
+		
+		return transcript_abundance;
+	}
+	
+	/**
 	 * Reads GTF files of genes or transcripts (gzipped also fine, ending .gz assumed there) as from Cufflinks/ENCODE
 	 * and allow all only transcripts/genes with transcripts above threshold or if a gene file is parsed genes above threshold.
 	 * @param file
@@ -689,9 +730,16 @@ public class TranscriptAbundanceReader {
 					continue;
 				String[] split = line.split("\\t");
 				
-				
-				// assume GTF output due to length
-				if (split.length == 9) {
+				// should be Kallisto
+				if (split.length == 5) {
+					if (!second_row) {
+						second_row = true;
+						continue;
+					}
+					char type = getEnsemblIDType(split[0]);
+					return "Kallisto " + type;
+					
+				} else if (split.length == 9) { // assume GTF output due to length
 					String temp = split[2];
 					if (temp.equals("gene"))
 						return "GTF G";
@@ -712,7 +760,7 @@ public class TranscriptAbundanceReader {
 					// assume type from header
 					if (line.startsWith("gene_id"))
 						return "RSEM G";
-					if (line.startsWith("transcript_id"))
+					else if (line.startsWith("transcript_id"))
 						return "RSEM T";
 					
 				} else {
