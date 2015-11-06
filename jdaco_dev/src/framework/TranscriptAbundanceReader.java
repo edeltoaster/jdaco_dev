@@ -126,18 +126,18 @@ public class TranscriptAbundanceReader {
 	}
 	
 	/**
-	 * Reads Kallisto output files of transcripts (gzipped also fine, ending .gz assumed there)
-	 * and allow all only transcripts with transcripts above TPM threshold.
+	 * Reads Kallisto output files of genes/transcripts (gzipped also fine, ending .gz assumed there)
+	 * and allow all only genes/transcripts with genes/transcripts above TPM threshold.
 	 * @param file
 	 * @param threshold
-	 * @return map of transcript -> TPM (if a transcript/gene above > threshold)
+	 * @return map of genes/transcript -> TPM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readKallistoFile(String file, double threshold) {
 		Map<String, Float> transcript_abundance = new HashMap<>();
 		
 		try {
 			BufferedReader in = null;
-			if (file.endsWith(".gz"))
+			if (file.endsWith(".gz") || file.endsWith(".gzip"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
 				in = new BufferedReader(new FileReader(file));
@@ -164,6 +164,41 @@ public class TranscriptAbundanceReader {
 		}
 		
 		return transcript_abundance;
+	}
+	
+	/**
+	 * Reads Kallisto output files of transcripts (gzipped also fine, ending .gz assumed there)
+	 * and allow all only transcripts above TPM threshold, convert to gene abundances.
+	 * @param file
+	 * @param threshold
+	 * @return map of genes -> TPM (for all transcripts above > threshold)
+	 */
+	public static Map<String, Float> readKallistoTranscriptsAsGenes(String file, double threshold, String organism_database) {
+		
+		Map<String, Float> abundance = readKallistoFile(file, threshold);
+		Map<String, String> transcript_to_gene = new HashMap<String, String>();
+			
+		// get association by query
+		for (String[] data:DataQuery.getGenesTranscriptsProteins(organism_database)) {
+			String gene = data[0];
+			String transcript = data[1];
+			transcript_to_gene.put(transcript, gene);
+		}
+			
+		Map<String, Float> gene_abundance = new HashMap<String, Float>();
+		for (String transcript:abundance.keySet()) {
+			if (!transcript_to_gene.containsKey(transcript))
+				continue;
+			String gene = transcript_to_gene.get(transcript);
+				
+			// gene = sum of all its transcripts
+			if (!gene_abundance.containsKey(gene))
+				gene_abundance.put(gene, 0f);
+			gene_abundance.put(gene, gene_abundance.get(gene) + abundance.get(transcript));
+				
+		}
+		
+		return gene_abundance;
 	}
 	
 	/**
@@ -926,6 +961,14 @@ public class TranscriptAbundanceReader {
 				abundance = TranscriptAbundanceReader.readTCGAIsoformRSEMAsGenes(path, threshold);
 			else
 				abundance = TranscriptAbundanceReader.readTCGAIsoformRSEM(path, threshold);
+			
+		} else if (type.equals("Kallisto G")) {
+			abundance = TranscriptAbundanceReader.readKallistoFile(path, threshold);
+		} else if (type.equals("Kallisto T")) {
+			if (gene_level_only)
+				abundance = TranscriptAbundanceReader.readKallistoTranscriptsAsGenes(path, threshold, organism_database);
+			else
+				abundance = TranscriptAbundanceReader.readKallistoFile(path, threshold);
 		}
 		
 		return abundance;
