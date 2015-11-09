@@ -61,7 +61,7 @@ public class NetworkBuilder {
 			String transcript = naming[1];
 			String protein = naming[2];
 			if (!this.transcript_to_proteins.containsKey(transcript))
-				this.transcript_to_proteins.put(transcript, new LinkedList<>());
+				this.transcript_to_proteins.put(transcript, new LinkedList<String>());
 			this.transcript_to_proteins.get(transcript).add(protein);
 		}
 		
@@ -69,20 +69,20 @@ public class NetworkBuilder {
 		this.holistic_protein_domain_composition_map.keySet().retainAll(proteins);
 		for (String protein:proteins) {
 			if (!this.holistic_protein_domain_composition_map.containsKey(protein))
-				this.holistic_protein_domain_composition_map.put(protein, new HashSet<>());
+				this.holistic_protein_domain_composition_map.put(protein, new HashSet<String>());
 		}
 		
 		// temporary stored mapping
 		Map<String, List<String>> domain_map = new HashMap<>();
 		for (String protein:proteins) {
-			holistic_protein_to_domains.put(protein, new LinkedList<>());
+			holistic_protein_to_domains.put(protein, new LinkedList<String>());
 			for (String domain_type:this.holistic_protein_domain_composition_map.get(protein)) {
 				String domain_id = domain_type+"|"+protein;
 				holistic_protein_to_domains.get(protein).add(domain_id);
 				// add relations
 				holistic_domain_to_protein.put(domain_id, protein);
 				if (!domain_map.containsKey(domain_type))
-					domain_map.put(domain_type, new LinkedList<>());
+					domain_map.put(domain_type, new LinkedList<String>());
 				domain_map.get(domain_type).add(domain_id);
 			}
 		}
@@ -115,10 +115,10 @@ public class NetworkBuilder {
 						
 						// if all checks passed: add DDI
 						if (!holistic_ddis.containsKey(domain1))
-							holistic_ddis.put(domain1, new LinkedList<>());
+							holistic_ddis.put(domain1, new LinkedList<String>());
 						holistic_ddis.get(domain1).add(domain2);
 						if (!holistic_ddis.containsKey(domain2))
-							holistic_ddis.put(domain2, new LinkedList<>());
+							holistic_ddis.put(domain2, new LinkedList<String>());
 						holistic_ddis.get(domain2).add(domain1);
 					}
 			}
@@ -162,10 +162,10 @@ public class NetworkBuilder {
 					
 					// add FB<->FB interactions
 					if (!holistic_ddis.containsKey(fb1))
-						holistic_ddis.put(fb1, new LinkedList<>());
+						holistic_ddis.put(fb1, new LinkedList<String>());
 					holistic_ddis.get(fb1).add(fb2);
 					if (!holistic_ddis.containsKey(fb2))
-						holistic_ddis.put(fb2, new LinkedList<>());
+						holistic_ddis.put(fb2, new LinkedList<String>());
 					holistic_ddis.get(fb2).add(fb1);
 				}
 			}
@@ -220,18 +220,18 @@ public class NetworkBuilder {
 			String holistic_domain_id = "FB|"+protein; // holistic_domain_id equals domain_id here
 			String domain_id = "0|"+holistic_domain_id;
 			if (this.holistic_ddis.containsKey(holistic_domain_id)) {
-				domain_map.put(holistic_domain_id, new LinkedList<>());
+				domain_map.put(holistic_domain_id, new LinkedList<String>());
 				domain_map.get(holistic_domain_id).add(domain_id);
-				protein_to_domains.put(protein, new LinkedList<>());
+				protein_to_domains.put(protein, new LinkedList<String>());
 				protein_to_domains.get(protein).add(domain_id);
 				domain_to_protein.put(domain_id, protein);
 			} else {
-				protein_to_domains.put(protein, new LinkedList<>());
+				protein_to_domains.put(protein, new LinkedList<String>());
 			}
 			
 			// other domains
 			if (!this.transcript_to_domains.containsKey(protein_to_assumed_transcript.get(protein))) // java 6 compatibility
-				this.transcript_to_domains.put(protein_to_assumed_transcript.get(protein), new LinkedList<>());
+				this.transcript_to_domains.put(protein_to_assumed_transcript.get(protein), new LinkedList<String>());
 			
 			for (String domain_type:this.transcript_to_domains.get(protein_to_assumed_transcript.get(protein))) {
 				holistic_domain_id = domain_type+"|"+protein;
@@ -241,7 +241,7 @@ public class NetworkBuilder {
 				// 2 cases: either first of this kind or n-th, FB domains not accounted for
 				if (!domain_map.containsKey(holistic_domain_id)) {
 					domain_id = "1|"+holistic_domain_id;
-					domain_map.put(holistic_domain_id, new LinkedList<>());
+					domain_map.put(holistic_domain_id, new LinkedList<String>());
 					domain_map.get(holistic_domain_id).add(domain_id);
 				} else {
 					List<String> already_known = domain_map.get(holistic_domain_id);
@@ -273,19 +273,19 @@ public class NetworkBuilder {
 							String protein1 = this.holistic_domain_to_protein.get(holistic_domain_id1);
 							String protein2 = this.holistic_domain_to_protein.get(holistic_domain_id2);
 							if (!ppi_partners.containsKey(protein1))
-								ppi_partners.put(protein1, new HashSet<>());
+								ppi_partners.put(protein1, new HashSet<String>());
 							ppi_partners.get(protein1).add(protein2);
 							if (!ppi_partners.containsKey(protein2))
-								ppi_partners.put(protein2, new HashSet<>());
+								ppi_partners.put(protein2, new HashSet<String>());
 							ppi_partners.get(protein2).add(protein1);
 						}
 						
 						// add actual DDI
 						if (!ddis.containsKey(domain_id1))
-							ddis.put(domain_id1, new LinkedList<>());
+							ddis.put(domain_id1, new LinkedList<String>());
 						ddis.get(domain_id1).add(domain_id2);
 						if (!ddis.containsKey(domain_id2))
-							ddis.put(domain_id2, new LinkedList<>());
+							ddis.put(domain_id2, new LinkedList<String>());
 						ddis.get(domain_id2).add(domain_id1);
 					}
 				
@@ -389,7 +389,7 @@ public class NetworkBuilder {
 			String gene = data[0];
 			String protein = data[2];
 			if (!genes_to_proteins.containsKey(gene))
-				genes_to_proteins.put(gene, new LinkedList<>());
+				genes_to_proteins.put(gene, new LinkedList<String>());
 			genes_to_proteins.get(gene).add(protein);
 		}
 		
@@ -447,7 +447,7 @@ public class NetworkBuilder {
 		for (String protein:proteins) {
 			String transcript = prot_isoform_map.get(protein);
 			int i = 1;
-			protein_to_domains.put(protein, new LinkedList<>());
+			protein_to_domains.put(protein, new LinkedList<String>());
 			if (!transcr_domain_map.containsKey(transcript))
 				continue;
 			for (String domain:transcr_domain_map.get(transcript)) {
@@ -458,7 +458,7 @@ public class NetworkBuilder {
 				domain_to_protein.put(domain_id, protein);
 				// add temporary domain relations
 				if (!domain_map.containsKey(domain))
-					domain_map.put(domain, new LinkedList<>());
+					domain_map.put(domain, new LinkedList<String>());
 				domain_map.get(domain).add(domain_id);
 				i++;
 			}	
@@ -492,10 +492,10 @@ public class NetworkBuilder {
 						
 						// if all checks passed: add DDI
 						if (!ddis.containsKey(domain1))
-							ddis.put(domain1, new LinkedList<>());
+							ddis.put(domain1, new LinkedList<String>());
 						ddis.get(domain1).add(domain2);
 						if (!ddis.containsKey(domain2))
-							ddis.put(domain2, new LinkedList<>());
+							ddis.put(domain2, new LinkedList<String>());
 						ddis.get(domain2).add(domain1);
 					}
 			}
@@ -539,10 +539,10 @@ public class NetworkBuilder {
 					
 					// add FB<->FB interactions
 					if (!ddis.containsKey(fb1))
-						ddis.put(fb1, new LinkedList<>());
+						ddis.put(fb1, new LinkedList<String>());
 					ddis.get(fb1).add(fb2);
 					if (!ddis.containsKey(fb2))
-						ddis.put(fb2, new LinkedList<>());
+						ddis.put(fb2, new LinkedList<String>());
 					ddis.get(fb2).add(fb1);
 				}
 			}

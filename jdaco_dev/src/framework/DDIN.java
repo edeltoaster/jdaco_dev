@@ -82,10 +82,10 @@ public class DDIN {
 				} else { // domain-domain interaction
 					// add to DDI
 					if (!ddis.containsKey(partner1))
-						ddis.put(partner1, new LinkedList<>());
+						ddis.put(partner1, new LinkedList<String>());
 					ddis.get(partner1).add(partner2);
 					if (!ddis.containsKey(partner2))
-						ddis.put(partner2, new LinkedList<>());
+						ddis.put(partner2, new LinkedList<String>());
 					ddis.get(partner2).add(partner1);
 				}
 			}

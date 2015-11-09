@@ -153,7 +153,7 @@ public class PPIN {
 				// every interaction only once
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<>());
+					this.partners.put(p1, new HashSet<String>());
 				}
 				
 				this.partners.get(p1).add(p2);
@@ -161,7 +161,7 @@ public class PPIN {
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<>());
+					this.partners.put(p2, new HashSet<String>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -198,14 +198,14 @@ public class PPIN {
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<>());
+					this.partners.put(p1, new HashSet<String>());
 				}
 				this.partners.get(p1).add(p2);
 				this.w_whole.put(p1, this.w_whole.get(p1) + w);
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<>());
+					this.partners.put(p2, new HashSet<String>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -235,14 +235,14 @@ public class PPIN {
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<>());
+					this.partners.put(p1, new HashSet<String>());
 				}
 				this.partners.get(p1).add(p2);
 				this.w_whole.put(p1, this.w_whole.get(p1) + w);
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<>());
+					this.partners.put(p2, new HashSet<String>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -270,14 +270,14 @@ public class PPIN {
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<>());
+					this.partners.put(p1, new HashSet<String>());
 				}
 				this.partners.get(p1).add(p2);
 				this.w_whole.put(p1, this.w_whole.get(p1) + w);
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<>());
+					this.partners.put(p2, new HashSet<String>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -311,14 +311,14 @@ public class PPIN {
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1)) {
 					this.w_whole.put(p1, 0.0);
-					this.partners.put(p1, new HashSet<>());
+					this.partners.put(p1, new HashSet<String>());
 				}
 				this.partners.get(p1).add(p2);
 				this.w_whole.put(p1, this.w_whole.get(p1) + w);
 				
 				if (!this.partners.containsKey(p2)) {
 					this.w_whole.put(p2, 0.0);
-					this.partners.put(p2, new HashSet<>());
+					this.partners.put(p2, new HashSet<String>());
 				}
 				this.partners.get(p2).add(p1);
 				this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -349,7 +349,7 @@ public class PPIN {
 					// every interaction only once -> add both directions
 					if (!this.partners.containsKey(p1)) {
 						this.w_whole.put(p1, 0.0);
-						this.partners.put(p1, new HashSet<>());
+						this.partners.put(p1, new HashSet<String>());
 					}
 					
 					// interaction already added, don't add weights twice
@@ -361,7 +361,7 @@ public class PPIN {
 					
 					if (!this.partners.containsKey(p2)) {
 						this.w_whole.put(p2, 0.0);
-						this.partners.put(p2, new HashSet<>());
+						this.partners.put(p2, new HashSet<String>());
 					}
 					this.partners.get(p2).add(p1);
 					this.w_whole.put(p2, this.w_whole.get(p2) + w);
@@ -410,12 +410,12 @@ public class PPIN {
 				
 				// every interaction only once -> add both directions
 				if (!this.partners.containsKey(p1n))
-					this.partners.put(p1n, new HashSet<>());
+					this.partners.put(p1n, new HashSet<String>());
 				
 				this.partners.get(p1n).add(p2n);
 				
 				if (!this.partners.containsKey(p2n))
-					this.partners.put(p2n, new HashSet<>());
+					this.partners.put(p2n, new HashSet<String>());
 				
 				this.partners.get(p2n).add(p1n);
 				
@@ -784,7 +784,7 @@ public class PPIN {
 				if (all_interactions.containsKey(protein1)) {
 					all_interactions.get(protein1).add(protein2);
 				} else {
-					all_interactions.put(protein1, new HashSet<>());
+					all_interactions.put(protein1, new HashSet<String>());
 					all_interactions.get(protein1).add(protein2);
 				}
 				
@@ -792,7 +792,7 @@ public class PPIN {
 				if (all_interactions.containsKey(protein2)) {
 					all_interactions.get(protein2).add(protein1);
 				} else {
-					all_interactions.put(protein2, new HashSet<>());
+					all_interactions.put(protein2, new HashSet<String>());
 					all_interactions.get(protein2).add(protein1);
 				}
 			}

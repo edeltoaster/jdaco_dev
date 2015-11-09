@@ -696,12 +696,12 @@ public class DataQuery {
 			String transcript = array[1];
 			
 			if (!holistic_protein_domain_mapping.containsKey(protein))
-				holistic_protein_domain_mapping.put(protein, new HashSet<>());
+				holistic_protein_domain_mapping.put(protein, new HashSet<String>());
 			
 			if (transcript_domain_mapping.containsKey(transcript)) {
 				holistic_protein_domain_mapping.get(protein).addAll(transcript_domain_mapping.get(transcript));
 			} else {
-				holistic_protein_domain_mapping.get(protein).addAll(new LinkedList<>());
+				holistic_protein_domain_mapping.get(protein).addAll(new LinkedList<String>());
 			}
 			
 		}
@@ -724,7 +724,7 @@ public class DataQuery {
 			if (transcript_domain_mapping.containsKey(isoform)) {
 				isoform_protein_domain_mapping.put(protein, new HashSet<>(transcript_domain_mapping.get(isoform)));
 			} else {
-				isoform_protein_domain_mapping.put(protein, new HashSet<>());
+				isoform_protein_domain_mapping.put(protein, new HashSet<String>());
 			}
 			
 		}
@@ -1350,9 +1350,9 @@ public class DataQuery {
 				String d1 = temp[0];
 				String d2 = temp[1];
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<>());
+					ddis.put(d1, new HashSet<String>());
 				if (!ddis.containsKey(d2))
-					ddis.put(d2, new HashSet<>());
+					ddis.put(d2, new HashSet<String>());
 				ddis.get(d1).add(d2);
 				ddis.get(d2).add(d1);
 			}
@@ -1391,9 +1391,9 @@ public class DataQuery {
 				String d1 = temp[0];
 				String d2 = temp[1];
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<>());
+					ddis.put(d1, new HashSet<String>());
 				if (!ddis.containsKey(d2))
-					ddis.put(d2, new HashSet<>());
+					ddis.put(d2, new HashSet<String>());
 				ddis.get(d1).add(d2);
 				ddis.get(d2).add(d1);
 			}
@@ -1472,9 +1472,9 @@ public class DataQuery {
 				String d1 = temp[0];
 				String d2 = temp[2];
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<>());
+					ddis.put(d1, new HashSet<String>());
 				if (!ddis.containsKey(d2))
-					ddis.put(d2, new HashSet<>());
+					ddis.put(d2, new HashSet<String>());
 				ddis.get(d1).add(d2);
 				ddis.get(d2).add(d1);
 			}
@@ -1497,7 +1497,7 @@ public class DataQuery {
 				String[] temp = line.split("\\s+");
 				String d1 = temp[0];
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<>());
+					ddis.put(d1, new HashSet<String>());
 				ddis.get(d1).add(d1);
 			}
 			
@@ -1580,9 +1580,9 @@ public class DataQuery {
 				String d2 = temp[4].split("\\.")[0];
 				
 				if (!ddis.containsKey(d1))
-					ddis.put(d1, new HashSet<>());
+					ddis.put(d1, new HashSet<String>());
 				if (!ddis.containsKey(d2))
-					ddis.put(d2, new HashSet<>());
+					ddis.put(d2, new HashSet<String>());
 				ddis.get(d1).add(d2);
 				ddis.get(d2).add(d1);
 			}

@@ -88,6 +88,8 @@ public class PPIXpress_GUI {
 	private JButton btnReset;
 	private JComboBox<String> comboBox_server;
 	private JButton btnRetrieve;
+	private JCheckBox chckbxOutputMajorTranscripts;
+	private JCheckBox chckbxUpdateUniprotAccs;
 	
 	/**
 	 * Launch the application.
@@ -449,7 +451,7 @@ public class PPIXpress_GUI {
 		text_output.setEditable(false);
 		stream_output = new PrintStream(new CustomOutputStream(text_output));
 		
-		JCheckBox chckbxOutputMajorTranscripts = new JCheckBox("output major transcripts");
+		chckbxOutputMajorTranscripts = new JCheckBox("output major transcripts");
 		chckbxOutputMajorTranscripts.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxOutputMajorTranscripts.isSelected())
@@ -462,7 +464,7 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(chckbxOutputMajorTranscripts);
 		activiy_changing_components.add(chckbxOutputMajorTranscripts);
 		
-		JCheckBox chckbxUpdateUniprotAccs = new JCheckBox("update UniProt accessions");
+		chckbxUpdateUniprotAccs = new JCheckBox("update UniProt accessions");
 		chckbxUpdateUniprotAccs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxUpdateUniprotAccs.isSelected())
