@@ -25,7 +25,7 @@ public class build_diff_networks {
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(folder, "-ppin.txt.gz")) {
 			String pre = f.getAbsolutePath().split("-ppin")[0];
 			String donor = f.getName().split("-")[2];
-			ConstructedNetworks cn = new ConstructedNetworks(pre + "-ppin.txt.gz", pre + "-ddin.txt.gz", pre + "-map.txt.gz", "homo_sapiens_core_81_38", true);
+			ConstructedNetworks cn = new ConstructedNetworks(pre + "-ppin.txt.gz", pre + "-map.txt.gz");
 			
 			data.put(donor, cn);
 		}

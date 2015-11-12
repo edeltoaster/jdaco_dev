@@ -48,6 +48,25 @@ public class ConstructedNetworks {
 		this.isoform_based = isoform_based;
 	}
 
+	/**
+	 * Constructor used by RewiringDetector
+	 * @param ppi
+	 * @param protein_to_assumed_isoform
+	 * @param isoform_based
+	 */
+	public ConstructedNetworks(String ppi_file, String protein_to_assumed_transcript_file) {
+		this.ppi = new PPIN(ppi_file);
+		this.ddi = null;
+		
+		this.protein_to_assumed_transcript = new HashMap<String, String>();
+		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
+			String[] spl = s.trim().split("\\s+");
+			this.protein_to_assumed_transcript.put(spl[0], spl[1]);
+		}
+		
+		this.db = null;
+		this.isoform_based = true;
+	}
 	
 	/**
 	 * Constructor to built object from files
