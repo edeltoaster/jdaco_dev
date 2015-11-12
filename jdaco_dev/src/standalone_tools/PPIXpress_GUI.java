@@ -518,6 +518,8 @@ public class PPIXpress_GUI {
 				setActivity(true);
 				computing = false;
 				progressBar.setValue(0);
+				
+				Runtime.getRuntime().gc();
 			}
 		});
 		btnReset.setBounds(483, 370, 117, 50);
