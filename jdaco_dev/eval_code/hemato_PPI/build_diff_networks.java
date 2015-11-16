@@ -15,7 +15,8 @@ import framework.StrPair;
 public class build_diff_networks {
 	
 	static double FDR = 0.05;
-	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
+	//static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
+	static String network_folder = "/Users/tho/Desktop/BLUEPRINT_networks/";
 	static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets/";
 	
 	public static void process(String network_folder, String results_folder) {

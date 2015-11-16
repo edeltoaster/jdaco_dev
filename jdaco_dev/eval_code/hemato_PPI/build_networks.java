@@ -20,6 +20,13 @@ public class build_networks {
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
 	
+	public static void loadAndStoreReferenceNetwork(String network_out) {
+		PPIN ppin = DataQuery.getIntActNetwork("9606");
+		ppin = ppin.mergeAllIAs(DataQuery.getIRefIndexNetwork("9606"));
+		ppin = ppin.updateUniprotAccessions();
+		ppin.writePPIN(network_out);
+	}
+	
 	public static void preprocess() {
 		for (String s:Utilities.readEntryFile("eval_code/hemato_PPI/cell_types.txt")) {
 			if (s.startsWith("#"))
@@ -28,12 +35,12 @@ public class build_networks {
 			folder_type_map.put(spl[0], spl[1]);
 		}
 		
-		System.out.println("Original PPIN: " + "mixed_data/human_merged_6_Oct_15.tsv.gz");
+		System.out.println("Original PPIN: " + "mixed_data/human_merged_nov_16.txt.gz");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		System.out.println("3did:" + DataQuery.get3didVersion());
 		System.out.println("iPfam:" + DataQuery.getIPfamVersion());
 		
-		original_ppin = new PPIN("mixed_data/human_merged_6_Oct_15.tsv.gz");
+		original_ppin = new PPIN("mixed_data/human_merged_nov_16.txt.gz");
 		builder = new NetworkBuilder(original_ppin);
 	}
 	
@@ -97,6 +104,9 @@ public class build_networks {
 	}
 	
 	public static void main(String[] args) {
+		//loadAndStoreReferenceNetwork("mixed_data/human_merged_nov_16.txt.gz");
+		//System.exit(0);
+		
 		preprocess();
 		
 		process(0.0);
