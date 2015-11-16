@@ -1,5 +1,6 @@
 package framework;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -160,5 +161,32 @@ public class ConstructedNetworks {
 		String[] split = this.db.split("_");
 		return split[split.length-1];
 	}
-
+	
+	/*
+	 * General purpose helpers
+	 */
+	
+	/**
+	 * Reads all matching PPIXpress output pairs of PPINs/major transcripts from a certain folder: 
+	 * [folder]/[sample-string]_ppin.txt(.gz) and [folder]/[sample-string]_major-transcripts.txt(.gz)
+	 * Assumes the standard file endings "_ppin.txt(.gz) and _major-transcripts.txt(.gz)".
+	 * @param folder
+	 * @return
+	 */
+	public static Map<String, ConstructedNetworks> readNetworks(String folder) {
+		Map<String, ConstructedNetworks> data = new HashMap<>();
+		
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(folder, "_ppin.txt")) {
+			String gz = "";
+			if (f.getName().endsWith(".gz"))
+				gz = ".gz";
+			String pre = f.getAbsolutePath().split("_ppin")[0];
+			String sample = f.getName().split("_ppin")[0];
+			ConstructedNetworks cn = new ConstructedNetworks(pre + "_ppin.txt" + gz, pre + "_major-transcripts.txt" + gz);
+			
+			data.put(sample, cn);
+		}
+		
+		return data;
+	}
 }

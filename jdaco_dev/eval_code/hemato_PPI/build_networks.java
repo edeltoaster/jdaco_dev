@@ -63,16 +63,16 @@ public class build_networks {
 				new File(out_path).mkdir();
 			
 			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readRSEMTranscriptsTPM(path, TPM_threshold));
-			cn.getPPIN().writePPIN(out_path + file_name + "-ppin.txt.gz");
-			cn.getDDIN().writeDDIN(out_path + file_name + "-ddin.txt.gz");
-			cn.writeProteinToAssumedTranscriptMap(out_path + file_name + "-map.txt.gz");
+			cn.getPPIN().writePPIN(out_path + file_name + "_ppin.txt.gz");
+			cn.getDDIN().writeDDIN(out_path + file_name + "_ddin.txt.gz");
+			cn.writeProteinToAssumedTranscriptMap(out_path + file_name + "_major-transcripts.txt.gz");
 			
 			// write path of network to data_map
 			if (!data_map.containsKey(cell_type)) {
 				data_map.put(cell_type, new LinkedList<>());
 			}
 			
-			data_map.get(cell_type).add(out_path + file_name + "-ppin.txt.gz");
+			data_map.get(cell_type).add(out_path + file_name + "_ppin.txt.gz");
 		}
 		
 		System.out.println();

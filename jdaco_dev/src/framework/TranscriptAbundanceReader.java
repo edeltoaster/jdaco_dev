@@ -699,9 +699,10 @@ public class TranscriptAbundanceReader {
 	}
 	
 	
-	/**
+	/*
 	 * some little helpers
 	 */
+	
 	
 	/**
 	 * Infers from the Ensembl identifier if it is a (T)ranscript, (G)ene or (P)rotein.

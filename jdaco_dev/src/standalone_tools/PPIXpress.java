@@ -26,6 +26,7 @@ public class PPIXpress {
 	private static double percentile = -1;
 	private static String output_folder;
 	private static String organism_database;
+	private static boolean compress_output = false;
 	
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
@@ -42,6 +43,7 @@ public class PPIXpress {
 		System.out.println("	-g : only use gene abundances (default: transcript abundance)");
 		System.out.println("	-d : also output underlying domain-domain interaction network(s) (default: no)");
 		System.out.println("	-m : also output major transcript per protein (default: no)");
+		System.out.println("	-c : use gzip-compression on output (default: no)");
 		System.out.println("	-t=[threshold] : only take transcripts/genes with an expression above [threshold] into account (default: 1.0)");
 		System.out.println("	-tp=[percentile] : only take transcripts/genes with an expression above the [percentile]-th percentile into account (default: overrides option above)");
 		System.out.println("	-w : add weights using STRING, interactions that are not in STRING are discarded");
@@ -106,6 +108,10 @@ public class PPIXpress {
 			// output major transcript per protein
 			else if (arg.equals("-m"))
 				output_major_transcripts = true;
+			
+			// compress output
+			else if (arg.equals("-c"))
+				compress_output = true;
 			
 			// update outdated UniProt accessions
 			else if (arg.equals("-u"))
@@ -201,7 +207,7 @@ public class PPIXpress {
 			printHelp();
 		}
 		
-		// parse commandline and set all parameters
+		// parse cmd-line and set all parameters
 		parseInput(args);
 		
 		// check if output-folder exists, otherwise create it
@@ -312,8 +318,12 @@ public class PPIXpress {
 			}
 			
 			// output
-			constr.getPPIN().writePPIN(output_folder + sample_no + "_ppin.txt");
-			match_files += " " + sample_no + "_ppin.txt";
+			
+			String file_suffix = "_ppin.txt";
+			if (compress_output)
+				file_suffix += ".gz";
+			constr.getPPIN().writePPIN(output_folder + sample_no + file_suffix);
+			match_files += " " + sample_no + file_suffix;
 			
 			String out = "-> " + constr.getPPIN().getSizesStr() + " (threshold: " + threshold;
 			
@@ -325,13 +335,19 @@ public class PPIXpress {
 			System.out.flush();
 			
 			if (output_DDINs) {
-				constr.getDDIN().writeDDIN(output_folder + sample_no + "_ddin.txt");
-				match_files += " " + sample_no + "_ddin.txt";
+				file_suffix = "_ddin.txt";
+				if (compress_output)
+					file_suffix += ".gz";
+				constr.getDDIN().writeDDIN(output_folder + sample_no + file_suffix);
+				match_files += " " + sample_no + file_suffix;
 			}
 			
 			if (output_major_transcripts) {
-				constr.writeProteinToAssumedTranscriptMap(output_folder + sample_no + "_major-transcripts.txt");
-				match_files += " " + sample_no + "_major-transcripts.txt";
+				file_suffix = "_major-transcripts.txt";
+				if (compress_output)
+					file_suffix += ".gz";
+				constr.writeProteinToAssumedTranscriptMap(output_folder + sample_no + file_suffix);
+				match_files += " " + sample_no + file_suffix;
 			}
 			
 			matching_files_output.add(match_files);

@@ -57,7 +57,7 @@ public class Utilities {
 	}
 	
 	/**
-	 * Given a directory (path) and a filename, 
+	 * Given a directory [path] and a filename, 
 	 * returns the absolute paths of all files in any directory below the given one with a certain filename.
 	 * Skips hidden dirs/files and the ones starting with a dot.
 	 * @param path
@@ -78,7 +78,7 @@ public class Utilities {
 	}
 	
 	/**
-	 * Given a directory (path) and a filename, 
+	 * Given a directory [path] and a filename, 
 	 * returns the absolute paths of all files in any directory below the given one starting with a certain prefix.
 	 * Skips hidden dirs/files and the ones starting with a dot.
 	 * @param path
@@ -99,8 +99,8 @@ public class Utilities {
 	}
 	
 	/**
-	 * Given a directory (path) and a filename, 
-	 * returns the absolute paths of all files in any directory below the given one ending with a certain suffix.
+	 * Given a directory [path] and a filename, 
+	 * returns the absolute paths of all files in any directory below the given one ending with a certain suffix or the suffix + ".gz".
 	 * Skips hidden dirs/files and the ones starting with a dot.
 	 * @param path
 	 * @param filename
@@ -108,9 +108,9 @@ public class Utilities {
 	 */
 	public static List<File> getAllSuffixMatchingFilesInSubfolders(String path, String suffix) {
 		List<File> paths = new LinkedList<>();
-		
+		String gz_suffix = suffix + ".gz";
 		for (File f:listDirectoriesAndFiles(new File(path))) {
-			if (f.getName().endsWith(suffix))
+			if (f.getName().endsWith(suffix) || f.getName().endsWith(gz_suffix))
 				paths.add(f);
 		}
 		
@@ -162,7 +162,12 @@ public class Utilities {
 		}
 	}
 	
-	// stats helpers
+	
+	/*
+	 * Stats helpers
+	 */
+	
+	
 	public static double getMean(Collection<Double> data) {
 		double sum = 0;
 		for (Double d:data)
@@ -185,7 +190,12 @@ public class Utilities {
 		return Math.sqrt(getVariance(data));
 	}
 	
-	// permutation helpers
+	
+	/*
+	 * Permutation helpers
+	 */
+	
+	
 	/**
 	 * Builds all permutations of the integers 0...n-1 (of size n) according to the Steinhaus–Johnson–Trotter algorithm
 	 * @param size
