@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,46 +12,36 @@ import framework.ConstructedNetworks;
 import framework.Utilities;
 import framework.RewiringDetector;
 
-public class rand_diff_networks {
+public class rand_intra_group_diff_networks {
 	
 	static double FDR = 0.05;
 	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
 	static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets/";
-	
-	public static Map<String, ConstructedNetworks> readNetworks(String folder) {
-		Map<String, ConstructedNetworks> data = new HashMap<>();
-		
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(folder, "-ppin.txt.gz")) {
-			String pre = f.getAbsolutePath().split("-ppin")[0];
-			String donor = f.getName().split("-")[2];
-			ConstructedNetworks cn = new ConstructedNetworks(pre + "-ppin.txt.gz", pre + "-map.txt.gz");
-			
-			data.put(donor, cn);
-		}
-		
-		return data;
-	}
+	static int iterations = 5;
 	
 	public static void process(String network_folder, String results_folder) {
 		
 		new File(results_folder).mkdir();
 		
-		System.out.println("Analysis for " + network_folder + ", writing to " + results_folder);
+		System.out.println("Analysis for " + network_folder);
 		
 		for (File f:new File(network_folder).listFiles()) {
 			
 			if (!f.isDirectory())
 				continue;
 			
-			System.out.println(f.getAbsolutePath());
 			String state1 = f.getName();
 			String path = f.getAbsolutePath() + "/";
-			System.out.println("Processing " + state1);
-			Map<String, ConstructedNetworks> all_networks = readNetworks(path);
+			
+			Map<String, ConstructedNetworks> all_networks = ConstructedNetworks.readNetworks(path);
 			List<String> network_list = new ArrayList<>(all_networks.keySet());
 			
+			System.out.println("Processing " + state1 + ", " + network_list.size() + " samples");
+			
 			// randomize
-			for (int i=0; i<3;i++) {
+			List<Double> P_rews = new LinkedList<>();
+			List<Double> diff_IAs = new LinkedList<>();
+			for (int i=0; i<iterations; i++) {
 				Map<String, ConstructedNetworks> g1 = new HashMap<>();
 				Map<String, ConstructedNetworks> g2 = new HashMap<>();
 				Collections.shuffle(network_list);
@@ -62,11 +53,17 @@ public class rand_diff_networks {
 					else
 						g2.put(s, all_networks.get(s));
 				}
+				
 				RewiringDetector rd = new RewiringDetector(g1, g2, FDR);
-				double P_rew_rounded = (double)Math.round(Utilities.getMean(rd.getP_rews().values()) * 1000d) / 1000d;
-				System.out.println(rd.getP_rews().size()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getInteractionReasonsMap().size() + " dIAs" );
+				P_rews.add( Utilities.getMean(rd.getP_rews().values()) );
+				diff_IAs.add( (double) rd.getInteractionReasonsCountMap().keySet().size());
 			}
 			
+			double P_rew_rounded = (double) Math.round(Utilities.getMean(P_rews) * 1000d) / 1000d;
+			double P_rew_std_rounded = (double) Math.round(Utilities.getStd(P_rews) * 1000d) / 1000d;
+			double IAs_rounded = (double) Math.round(Utilities.getMean(diff_IAs) * 10d) / 10d;
+			double IAs_std_rounded = (double) Math.round(Utilities.getStd(diff_IAs) * 10d) / 10d;
+			System.out.println("P_rew: " + P_rew_rounded + "+-" + P_rew_std_rounded + " , " + IAs_rounded + "+-" + IAs_std_rounded);
 			System.out.println();
 		}
 	}
@@ -75,6 +72,7 @@ public class rand_diff_networks {
 		
 		new File(results_root).mkdir();
 		
+		System.out.println(iterations + " iterations");
 		for (File f:new File(network_folder).listFiles()) {
 			
 			if (!f.isDirectory())

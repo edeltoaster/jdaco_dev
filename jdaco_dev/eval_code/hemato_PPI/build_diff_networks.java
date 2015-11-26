@@ -15,8 +15,7 @@ import framework.StrPair;
 public class build_diff_networks {
 	
 	static double FDR = 0.05;
-	//static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
-	static String network_folder = "/Users/tho/Desktop/BLUEPRINT_networks/";
+	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
 	static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets/";
 	
 	public static void process(String network_folder, String results_folder) {
@@ -53,7 +52,7 @@ public class build_diff_networks {
 			Map<String, List<StrPair>> alt_splice_switches = rd.determineAltSplicingSwitches(true);
 			Utilities.writeEntries(alt_splice_switches.keySet(), results_folder + state1 + "_" + state2 + "_AS_proteins.txt");
 			AS_proteins.addAll(alt_splice_switches.keySet());
-			double P_rew_rounded = (double)Math.round(Utilities.getMean(rd.getP_rews().values()) * 1000d) / 1000d;
+			double P_rew_rounded = (double) Math.round( Utilities.getMean(rd.getP_rews().values() ) * 1000d) / 1000d;
 			System.out.println(rd.getP_rews().size()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getInteractionReasonsMap().size() + " dIAs" );
 			
 			System.out.println(alt_splice_switches.keySet().size() + " alt. spliced proteins that affect " + alt_splice_switches.values().stream().mapToInt(e->e.size()).sum() + " interactions.");
