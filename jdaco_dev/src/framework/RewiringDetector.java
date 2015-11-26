@@ -36,6 +36,7 @@ public class RewiringDetector {
 	private Map<StrPair, Boolean> interaction_direction_map = new HashMap<>();
 	private Map<StrPair, Map<String, List<String>>> interaction_reasons_map = new HashMap<>();
 	private Map<StrPair, Map<String, Integer>> interaction_reasons_count_map = new HashMap<>();
+	private Map<StrPair, Double> interaction_alt_splicing_fraction_map = new HashMap<>();
 	private Map<StrPair, List<String>> interaction_sorted_reasons_map = new HashMap<>();
 	
 	/**
@@ -51,7 +52,23 @@ public class RewiringDetector {
 		String p2 = interaction.getR();
 		Map<String, String> m1 = group1.get(sample1).getProteinToAssumedTranscriptMap();
 		Map<String, String> m2 = group2.get(sample2).getProteinToAssumedTranscriptMap();
+		PPIN ppin1 = group1.get(sample1).getPPIN();
+		PPIN ppin2 = group2.get(sample2).getPPIN();
+		
 		List<String> reasons = new LinkedList<>();
+		
+		// pre-check1: is a change found in the network-pair?
+		if (ppin1.getWeights().containsKey(interaction) == ppin2.getWeights().containsKey(interaction))
+			return "no_change";
+		
+		// pre-check2: is the specific change found in the network-pair?
+		if (addition) { // interaction should not be in sample1 but in sample2; otherwise -> opposing change (no change already caught)
+			if ( !(!ppin1.getWeights().containsKey(interaction) && ppin2.getWeights().containsKey(interaction)) )
+				return "opposing_change";
+		} else { // vice versa
+			if ( !(ppin1.getWeights().containsKey(interaction) && !ppin2.getWeights().containsKey(interaction)) )
+				return "opposing_change";
+		}
 		
 		// check protein-level
 		if (addition) { // interaction found in sample2 but not sample1 -> maybe one or both proteins not expressed in sample1?
@@ -78,11 +95,39 @@ public class RewiringDetector {
 			reasons.add( p2 + "(" + m1.get(p2) + "->" + m2.get(p2) + ")");
 		}
 		
-		// note that there was no change observed
-		if (reasons.size() == 0)
-			return "no_change";
-		
 		return String.join("/", reasons);
+	}
+	
+	/**
+	 * For all relevant reasons_counts determined for a protein pair, 
+	 * determines the fraction of relevant alternative splicing events. (1-this fraction=fraction of differential gene expression)
+	 * If both interaction partners show changes, they contribute equally (a half count each) to the full count.
+	 * @param reasons_count
+	 * @return
+	 */
+	private double determineAltSplicingFraction(Map<String, Integer> reasons_count) {
+		
+		double all_events = 0.0;
+		double alt_splicing_events = 0.0;
+		
+		for (String reason:reasons_count.keySet()) {
+			double current_count = reasons_count.get(reason);
+			
+			// change could be in one or both proteins
+			String[] contributions = reason.split("/");
+			
+			// full count if only one protein changed, half of counts for the reason of the individual changes if both changed
+			for (String ind_reasons:contributions) {
+				
+				if (ind_reasons.contains("->"))
+					alt_splicing_events += current_count / contributions.length;
+				
+				if (!ind_reasons.endsWith("_change")) // no_change / oppposing_change
+					all_events += current_count / contributions.length;
+			}
+		}
+		
+		return alt_splicing_events / all_events;
 	}
 	
 	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR) {
@@ -241,6 +286,9 @@ public class RewiringDetector {
 				
 				this.interaction_reasons_count_map.put(pair, reasons_count);
 				
+				// compute ratio of differential gene/transcript expression
+				this.interaction_alt_splicing_fraction_map.put(pair, determineAltSplicingFraction(reasons_count));
+				
 				List<String> sorted_reasons = new LinkedList<>(reasons.keySet());
 				sorted_reasons.sort((e2,e1) -> reasons_count.get(e1).compareTo(reasons_count.get(e2)));
 				sorted_reasons.replaceAll(e->e + ":" + reasons_count.get(e));
@@ -308,7 +356,7 @@ public class RewiringDetector {
 		int groupwise_comparisons = this.group1.size() * this.group2.size();
 		
 		// header
-		to_write.add("Protein1 Protein2 Type Count Probability p-val p-val_adj Reasons");
+		to_write.add("Protein1 Protein2 Type Count Probability p-val p-val_adj Reasons AS_fraction");
 		for (StrPair pair:this.significantly_rewired_interactions) {
 			
 			String sign = "-";
@@ -318,9 +366,11 @@ public class RewiringDetector {
 			double v = this.differential_network.get(pair);
 			double p = this.interaction_p_map.get(pair);
 			List<String> sorted_reasons = this.interaction_sorted_reasons_map.get(pair);
+			double AS_fraction = this.interaction_alt_splicing_fraction_map.get(pair);
 			
 			to_write.add(pair.getL() + " " + pair.getR() + " " + sign + " " 
-			        + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + " " + this.rawp2adjp.get(p) + " " + String.join(",", sorted_reasons));
+			        + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p + 
+			        " " + this.rawp2adjp.get(p) + " " + String.join(",", sorted_reasons) + " " + AS_fraction);
 		}
 		
 		Utilities.writeEntries(to_write, diffnet_out_path);
@@ -339,8 +389,8 @@ public class RewiringDetector {
 			
 			for (String unprocessed_reason:this.interaction_sorted_reasons_map.get(pair)) {
 			
-				// if very different reasons for this change: skip
-				if (unprocessed_reason.startsWith("no_change"))
+				// if no/wrong kind of change: skip
+				if (unprocessed_reason.startsWith("no_") || unprocessed_reason.startsWith("opp"))
 					continue;
 				
 				for (String s:unprocessed_reason.split("/")) {
