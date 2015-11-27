@@ -34,7 +34,7 @@ public class Utilities {
 		HashSet<String> input = new HashSet<>();
 		try {
 			BufferedReader in = null;
-			if (in_file.endsWith(".gz"))
+			if (in_file.endsWith(".gz") || in_file.endsWith(".gzip"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(in_file))));
 			else
 				in = new BufferedReader(new FileReader(in_file));
@@ -147,7 +147,7 @@ public class Utilities {
 		try {
 			
 			BufferedWriter bw = null;
-			if (file.endsWith(".gz"))
+			if (file.endsWith(".gz") || file.endsWith(".gzip"))
 				bw = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(file))));
 			else
 				bw = new BufferedWriter(new FileWriter(file));
