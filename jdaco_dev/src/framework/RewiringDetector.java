@@ -19,7 +19,7 @@ import org.apache.commons.math3.stat.inference.BinomialTest;
 public class RewiringDetector {
 
 	private static BinomialTest binom_test = new BinomialTest();
-	private int no_threads = Math.min(Runtime.getRuntime().availableProcessors()/2, 1); // assuming HT/SMT systems
+	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	private Map<String, ConstructedNetworks> group1;
 	private Map<String, ConstructedNetworks> group2;
 	private double FDR;

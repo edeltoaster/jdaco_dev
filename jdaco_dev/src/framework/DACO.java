@@ -26,7 +26,7 @@ public class DACO {
 	
 	// collections for calculations need to be thread-safe
 	private Set<HashSet<String>> temp_results = Collections.newSetFromMap(new ConcurrentHashMap<>());
-	private int number_of_threads = Runtime.getRuntime().availableProcessors() / 2;
+	private int number_of_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1);
 	private ThreadPoolExecutor pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 	private int max_depth_of_search = 10;
 	private double pair_building_threshold = 0.75;
