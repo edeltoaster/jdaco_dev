@@ -95,12 +95,14 @@ public class PPICompare {
 		// do
 		System.out.print("Processing " + path_group1 + " vs " + path_group2 + " : ");
 		RewiringDetector rd = new RewiringDetector(group1, group2, FDR);
-		Map<String, List<StrPair>> alt_splice_switches = rd.determineAltSplicingSwitches(true);
+		Map<String, List<StrPair>> major_alt_splice_switches = rd.determineAltSplicingSwitches(true, false);
+		Map<String, List<StrPair>> all_alt_splice_switches = rd.determineAltSplicingSwitches(false, true);
 		double P_rew_rounded = (double)Math.round(Utilities.getMean(rd.getP_rews().values()) * 1000d) / 1000d;
 		
 		// some output
 		System.out.println(rd.getP_rews().size()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getInteractionReasonsMap().size() + " dIAs" );
-		System.out.println(alt_splice_switches.keySet().size() + " alt. spliced proteins that affect " + alt_splice_switches.values().stream().mapToInt(e->e.size()).sum() + " interactions.");
+		System.out.println(major_alt_splice_switches.keySet().size() + " alt. spliced proteins are the major reason that affect " + Utilities.getValueSetFromMultimap(major_alt_splice_switches).size() + " diff. interactions.");
+		System.out.println(all_alt_splice_switches.keySet().size() + " alt. spliced proteins contribute to a change in the " + Utilities.getValueSetFromMultimap(all_alt_splice_switches).size() + " diff. interactions that are mainly driven by AS events.");
 		
 		// check if output-folder exists, otherwise create it
 		File f = new File(output_folder);
@@ -108,7 +110,8 @@ public class PPICompare {
 			f.mkdir();
 		
 		rd.writeDiffnet(output_folder + "differential_net.txt");
-		Utilities.writeEntries(alt_splice_switches.keySet(), output_folder + "AS_proteins.txt");
+		Utilities.writeEntries(major_alt_splice_switches.keySet(), output_folder + "major_AS_proteins.txt");
+		Utilities.writeEntries(all_alt_splice_switches.keySet(), output_folder + "contributing_AS_proteins.txt");
 		
 	}
 }

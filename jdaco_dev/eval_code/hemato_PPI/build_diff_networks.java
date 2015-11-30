@@ -1,11 +1,9 @@
 package hemato_PPI;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import framework.ConstructedNetworks;
 import framework.Utilities;
@@ -23,21 +21,32 @@ public class build_diff_networks {
 		new File(results_folder).mkdir();
 		
 		System.out.println("Analysis for " + network_folder + ", writing to " + results_folder);
+		System.out.println();
 		
 		// define relations
 		List<String[]> relations = new LinkedList<String[]>();
 		relations.add(new String[]{"HSC", "MPP"});
+		
 		relations.add(new String[]{"MPP", "CMP"});
 		relations.add(new String[]{"MPP", "CLP"});
+		
 		relations.add(new String[]{"CMP", "MEP"});
 		relations.add(new String[]{"CMP", "GMP"});
+		
 		relations.add(new String[]{"MEP", "MK"});
 		relations.add(new String[]{"MEP", "EB"});
+		
 		relations.add(new String[]{"GMP", "N"});
 		relations.add(new String[]{"GMP", "M"});
+		
 		relations.add(new String[]{"CLP", "CD4"});
 		
-		Set<String> AS_proteins = new HashSet<>();
+		// additional relations
+		relations.add(new String[]{"CMP", "CLP"});
+		relations.add(new String[]{"MEP", "GMP"});
+		relations.add(new String[]{"MK", "EB"});
+		relations.add(new String[]{"N", "M"});
+		
 		for (String[] s:relations) {
 			String state1 = s[0];
 			String state2 = s[1];
@@ -49,17 +58,22 @@ public class build_diff_networks {
 			System.out.print("Processing " + state1 + " vs " + state2 + " : ");
 			rd.writeDiffnet(results_folder + state1 + "_" + state2 + ".txt");
 			
-			Map<String, List<StrPair>> alt_splice_switches = rd.determineAltSplicingSwitches(true);
-			Utilities.writeEntries(alt_splice_switches.keySet(), results_folder + state1 + "_" + state2 + "_AS_proteins.txt");
-			AS_proteins.addAll(alt_splice_switches.keySet());
+			Map<String, List<StrPair>> major_alt_splice_switches = rd.determineAltSplicingSwitches(true, false);
+			Utilities.writeEntries(major_alt_splice_switches.keySet(), results_folder + state1 + "_" + state2 + "_major_AS_proteins.txt");
+			
+			Map<String, List<StrPair>> all_alt_splice_switches = rd.determineAltSplicingSwitches(false, true);
+			Utilities.writeEntries(all_alt_splice_switches.keySet(), results_folder + state1 + "_" + state2 + "_contributing_AS_proteins.txt");
+			
 			
 			double P_rew_rounded = (double) Math.round( Utilities.getMean(rd.getP_rews().values() ) * 1000d) / 1000d;
 			System.out.println(rd.getP_rews().size()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getInteractionReasonsMap().size() + " dIAs" );
 			
-			System.out.println(alt_splice_switches.keySet().size() + " alt. spliced proteins that affect " + alt_splice_switches.values().stream().mapToInt(e->e.size()).sum() + " interactions.");
+			System.out.println(major_alt_splice_switches.keySet().size() + " alt. spliced proteins are the major reason that affect " + Utilities.getValueSetFromMultimap(major_alt_splice_switches).size() + " diff. interactions.");
+			System.out.println(all_alt_splice_switches.keySet().size() + " alt. spliced proteins contribute to a change in the " + Utilities.getValueSetFromMultimap(all_alt_splice_switches).size() + " diff. interactions that are mainly driven by AS events.");
+			System.out.println();
 		}
 		
-		Utilities.writeEntries(AS_proteins, results_folder + "all_AS_proteins.txt");
+		System.out.println();
 		System.out.println();
 	}
 	

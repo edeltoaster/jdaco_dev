@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -25,7 +27,13 @@ import java.util.zip.GZIPOutputStream;
  * @author Thorsten Will
  */
 public class Utilities {
-	// IO tools
+	
+	
+	/*
+	 * IO helpers
+	 */
+	
+	
 	/**
 	 * Reads text file line by line with, for example, proteins (also works for .gz)
 	 * @param in_file
@@ -165,7 +173,7 @@ public class Utilities {
 	
 	
 	/*
-	 * Stats helpers
+	 * Statistic helpers
 	 */
 	
 	
@@ -243,4 +251,16 @@ public class Utilities {
 		return new_list_of_lists;
 	}
 	
+	/*
+	 * Collection helpers
+	 */
+	
+	public static <K, V> Set<V> getValueSetFromMultimap(Map<K, List<V>> map) {
+		Set<V> value_set = new HashSet<>();
+		
+		for (List<V> collection:map.values())
+			value_set.addAll(collection);
+		
+		return value_set;
+	}
 }

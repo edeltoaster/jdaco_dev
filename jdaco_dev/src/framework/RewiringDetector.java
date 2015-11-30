@@ -378,23 +378,41 @@ public class RewiringDetector {
 	
 	/**
 	 * Outputs a map of proteins and affected interactions where alternative splicing events of those proteins are the reasons for a difference regarding specific interactions.
-	 * A boolean switch defines if only the most appearing reason is counted or every instance
+	 * The first boolean switch specifies if only the most appearing reason is counted or every instance, 
+	 * the second switch if the interaction should be only be counted if it is mainly (at least 50%) driven by AS events.
 	 * @param only_major
 	 * @return
 	 */
-	public Map<String, List<StrPair>> determineAltSplicingSwitches(boolean only_major) {
+	public Map<String, List<StrPair>> determineAltSplicingSwitches(boolean only_major, boolean only_mainly_AS) {
 		Map<String, List<StrPair>> relevant_subset = new HashMap<>();
 		
 		for (StrPair pair: this.interaction_sorted_reasons_map.keySet()) {
 			
-			for (String unprocessed_reason:this.interaction_sorted_reasons_map.get(pair)) {
+			// if specified, kicks all diff. interactions that are not mainly (at least 50%) driven by AS events
+			if (only_mainly_AS && this.interaction_alt_splicing_fraction_map.get(pair) < 0.5)
+				continue;
 			
+			int count_last = 0;
+			for (String unprocessed_reason:this.interaction_sorted_reasons_map.get(pair)) {
+				String preprocessed_reason = unprocessed_reason.split(":")[0];
+				
+				if (only_major) {
+					int count = this.interaction_reasons_count_map.get(pair).get(preprocessed_reason);
+					
+					// only major reason or any reason that appears equally often
+					if (count < count_last)
+						break;
+					
+					count_last = count;
+				}
+					
+				
 				// if no/wrong kind of change: skip
-				if (unprocessed_reason.startsWith("no_") || unprocessed_reason.startsWith("opp"))
+				if (preprocessed_reason.startsWith("no_") || preprocessed_reason.startsWith("opp"))
 					continue;
 				
-				for (String s:unprocessed_reason.split("/")) {
-					String[] split_temp = s.split(":")[0].split("\\(");
+				for (String s:preprocessed_reason.split("/")) {
+					String[] split_temp = s.split("\\(");
 					String protein = split_temp[0];
 					String reason = split_temp[1].substring(0, split_temp[1].length() - 1);
 					
@@ -403,13 +421,11 @@ public class RewiringDetector {
 							relevant_subset.put(protein, new LinkedList<>());
 						relevant_subset.get(protein).add(pair);
 					}
-				}
+				} // within reason split
 				
-				if (only_major)
-					break;
-				
-			}
-		}
+			} // reasons iteration
+			
+		} // per interaction iteration
 		
 		return relevant_subset;
 	}
