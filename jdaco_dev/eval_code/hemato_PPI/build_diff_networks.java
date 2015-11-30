@@ -54,7 +54,7 @@ public class build_diff_networks {
 			Map<String, ConstructedNetworks> g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
 			Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
 			
-			RewiringDetector rd = new RewiringDetector(g1, g2, FDR);
+			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, 3);
 			System.out.print("Processing " + state1 + " vs " + state2 + " : ");
 			rd.writeDiffnet(results_folder + state1 + "_" + state2 + ".txt");
 			
