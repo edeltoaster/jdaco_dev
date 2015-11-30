@@ -52,6 +52,7 @@ public class build_diff_networks {
 			Map<String, List<StrPair>> alt_splice_switches = rd.determineAltSplicingSwitches(true);
 			Utilities.writeEntries(alt_splice_switches.keySet(), results_folder + state1 + "_" + state2 + "_AS_proteins.txt");
 			AS_proteins.addAll(alt_splice_switches.keySet());
+			
 			double P_rew_rounded = (double) Math.round( Utilities.getMean(rd.getP_rews().values() ) * 1000d) / 1000d;
 			System.out.println(rd.getP_rews().size()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getInteractionReasonsMap().size() + " dIAs" );
 			

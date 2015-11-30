@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -174,6 +175,22 @@ public class Utilities {
 			sum += d;
 		
 		return sum / data.size();
+	}
+	
+	public static double getMedian(Collection<Double> data) {
+		List<Double> listed_data = new ArrayList<>(data);
+		
+		// sorts in ascending order
+		Collections.sort(listed_data);
+		
+		int middle = listed_data.size() / 2;
+		
+		// if there is a middle element, take that; otherwise return mean of the two elements in the middle
+		if (listed_data.size() % 2 == 1) {
+			return listed_data.get(middle);
+		} else {
+			return (listed_data.get(middle-1) + listed_data.get(middle)) / 2.0;
+		}
 	}
 	
 	public static double getVariance(Collection<Double> data) {
