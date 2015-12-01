@@ -157,8 +157,8 @@ public class BRCAdiff {
 			normal_nodes.add((double) normal_net.getSizes()[0]);
 			normal_edges.add((double) normal_net.getSizes()[1]);
 			
-			Set<StrPair> added_interactions = tumor_net.removeAllIAs(normal_net).getInteractions();
-			Set<StrPair> lost_interactions = normal_net.removeAllIAs(tumor_net).getInteractions();
+			Set<StrPair> added_interactions = tumor_net.removeAll(normal_net).getInteractions();
+			Set<StrPair> lost_interactions = normal_net.removeAll(tumor_net).getInteractions();
 			
 			P_rew.add( ((double)added_interactions.size()+ lost_interactions.size())/Math.min(tumor_net.getSizes()[1], normal_net.getSizes()[1]));
 			
@@ -254,8 +254,8 @@ public class BRCAdiff {
 			normal_nodes.add((double) normal_net.getSizes()[0]);
 			normal_edges.add((double) normal_net.getSizes()[1]);
 			
-			Set<StrPair> added_interactions = tumor_net.removeAllIAs(normal_net).getInteractions();
-			Set<StrPair> lost_interactions = normal_net.removeAllIAs(tumor_net).getInteractions();
+			Set<StrPair> added_interactions = tumor_net.removeAll(normal_net).getInteractions();
+			Set<StrPair> lost_interactions = normal_net.removeAll(tumor_net).getInteractions();
 			
 			P_rew.add( ((double)added_interactions.size()+ lost_interactions.size())/Math.min(tumor_net.getSizes()[1], normal_net.getSizes()[1]));
 			

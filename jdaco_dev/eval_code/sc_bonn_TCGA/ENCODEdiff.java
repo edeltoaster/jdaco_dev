@@ -211,8 +211,8 @@ public class ENCODEdiff {
 		for (PPIN ppin1:group1) {
 			
 			for (PPIN ppin2:group2) {
-				Set<StrPair> added_interactions = ppin2.removeAllIAs(ppin1).getInteractions();
-				Set<StrPair> lost_interactions = ppin1.removeAllIAs(ppin2).getInteractions();
+				Set<StrPair> added_interactions = ppin2.removeAll(ppin1).getInteractions();
+				Set<StrPair> lost_interactions = ppin1.removeAll(ppin2).getInteractions();
 				P_rew.add( ((double)added_interactions.size()+ lost_interactions.size())/Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]));
 				// count
 				for (StrPair pair:added_interactions) {

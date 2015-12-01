@@ -225,7 +225,7 @@ public class PPIXpress {
 			System.out.println("done.");
 			
 			System.out.print("Retrieving iRefIndex interaction data for taxon " + taxon_id + " ... ");
-			original_network = original_network.mergeAllIAs(DataQuery.getIRefIndexNetwork(taxon_id, System.out));
+			original_network = original_network.mergeAll(DataQuery.getIRefIndexNetwork(taxon_id, System.out));
 			System.out.println("done.");
 		} else {
 			System.out.println("Reading " + original_network_path + " (may take some time if ID conversion is necessary) ... ");

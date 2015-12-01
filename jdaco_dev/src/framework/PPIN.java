@@ -460,19 +460,27 @@ public class PPIN {
 	}
 
 	/**
-	 * Returns all interactions as a set of StrPair
+	 * Returns all interactions as a new set of StrPair
 	 * @return
 	 */
 	public Set<StrPair> getInteractions() {
 		return new HashSet<StrPair>(this.weights.keySet());
 	}
 	
+	/**
+	 * Returns all interactions as the keyset of the weight datastructure
+	 * @return
+	 */
+	public Set<StrPair> getInteractionsFast() {
+		return this.weights.keySet();
+	}
+	
 	public HashMap<StrPair, Double> getWeights() {
-		return weights;
+		return this.weights;
 	}
 	
 	public HashMap<String, Double> getWholeWeights() {
-		return w_whole;
+		return this.w_whole;
 	}
 	
 	public boolean isWeighted() {
@@ -681,13 +689,71 @@ public class PPIN {
 		return P_sampled / no_samples;
 	}
 	
-	// set-like operations
+	/**
+	 * Retrieves a map of changes in Uniprot accessions and constructs an updated network from the current network that is then returned
+	 * @return a new PPIN where accessions are updated
+	 */
+	public PPIN updateUniprotAccessions() {
+		return new PPIN(this, true);
+	}
+	
+	public double getPairWeight(String protein1, String protein2) {
+		if (this.getPartners().get(protein1).contains(protein2))
+			return this.getWeights().get(new StrPair(protein1, protein2));
+		
+		return 0.0;
+	}
+	
+	/*
+	 * set-like operations on interactions
+	 */
+	
+	/**
+	 * Returns the set of interactions where all interactions from the given PPIN are removed
+	 * @param other_ppin
+	 * @return
+	 */
+	public Set<StrPair> removeAllIAs(PPIN other_ppin) {
+		// get new Set object of interactions
+		Set<StrPair> difference = getInteractions();
+		difference.removeAll(other_ppin.getInteractionsFast());
+		return difference;
+	}
+	
+	/**
+	 * Returns the set of interactions where only interactions that are also in the given PPIN are retained
+	 * @param other_ppin
+	 * @return
+	 */
+	public Set<StrPair> retainAllIAs(PPIN other_ppin) {
+		// get new Set object of interactions
+		Set<StrPair> intersection = getInteractions();
+		intersection.retainAll(other_ppin.getInteractionsFast());
+		return intersection;
+	}
+	
+	/**
+	 * Returns the union of interactions between this and the given PPIN
+	 * @param other_ppin
+	 * @return
+	 */
+	public Set<StrPair> mergeAllIAs(PPIN other_ppin) {
+		// get new Set object of interactions
+		Set<StrPair> union = getInteractions();
+		union.addAll(other_ppin.getInteractionsFast());
+		return union;
+	}
+	
+	/*
+	 * set-like operations on PPINs 
+	 */
+	
 	/**
 	 * Returns a new PPIN where all interactions from the given PPIN are removed
 	 * @param other_ppin
 	 * @return
 	 */
-	public PPIN removeAllIAs(PPIN other_ppin) {
+	public PPIN removeAll(PPIN other_ppin) {
 		Map< String, Set<String>> supported_interactions = new HashMap<String, Set<String>>();
 		
 		// do a deep copy
@@ -718,11 +784,11 @@ public class PPIN {
 	}
 	
 	/**
-	 * Returns a new PPIN where only interactions from the given PPIN are retain
+	 * Returns a new PPIN where only interactions that are also in the given PPIN are retained
 	 * @param other_ppin
 	 * @return
 	 */
-	public PPIN retainAllIAs(PPIN other_ppin) {
+	public PPIN retainAll(PPIN other_ppin) {
 		Map< String, Set<String>> supported_interactions = new HashMap<>();
 		
 		// do a deep copy
@@ -767,7 +833,7 @@ public class PPIN {
 	 * @param other_ppin
 	 * @return
 	 */
-	public PPIN mergeAllIAs(PPIN other_ppin) {
+	public PPIN mergeAll(PPIN other_ppin) {
 		Map< String, Set<String>> all_interactions = new HashMap<>();
 		
 		// do a deep copy
@@ -798,20 +864,5 @@ public class PPIN {
 			}
 		
 		return new PPIN(all_interactions);
-	}
-	
-	/**
-	 * Retrieves a map of changes in Uniprot accessions and constructs an updated network from the current network that is then returned
-	 * @return a new PPIN where accessions are updated
-	 */
-	public PPIN updateUniprotAccessions() {
-		return new PPIN(this, true);
-	}
-	
-	public double getPairWeight(String protein1, String protein2) {
-		if (this.getPartners().get(protein1).contains(protein2))
-			return this.getWeights().get(new StrPair(protein1, protein2));
-		
-		return 0.0;
 	}
 }

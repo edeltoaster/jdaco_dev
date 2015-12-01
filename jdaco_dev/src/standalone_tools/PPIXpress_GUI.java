@@ -879,7 +879,7 @@ public class PPIXpress_GUI {
 		stream_output.println("done.");
 		
 		stream_output.print("Retrieving iRefIndex interaction data for taxon " + taxon_id + " ... ");
-		original_ppin = original_ppin.mergeAllIAs(DataQuery.getIRefIndexNetwork(taxon_id, stream_output));
+		original_ppin = original_ppin.mergeAll(DataQuery.getIRefIndexNetwork(taxon_id, stream_output));
 		stream_output.println("done.");
 		
 		original_network_path = "IntAct/iRefIndex (only physical interactions), taxon:" + taxon_id;

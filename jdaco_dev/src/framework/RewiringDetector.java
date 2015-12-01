@@ -474,9 +474,9 @@ public class RewiringDetector {
 		public Object[] call() throws Exception {
 			PPIN ppin1 = group1.get(sample1).getPPIN();
 			PPIN ppin2 = group2.get(sample2).getPPIN();
-			Set<StrPair> added_interactions = ppin2.removeAllIAs(ppin1).getInteractions();
-			Set<StrPair> lost_interactions = ppin1.removeAllIAs(ppin2).getInteractions();
-			double denominator = (double) ppin1.mergeAllIAs(ppin2).getSizes()[1];
+			Set<StrPair> added_interactions = ppin2.removeAllIAs(ppin1);
+			Set<StrPair> lost_interactions = ppin1.removeAllIAs(ppin2);
+			double denominator = (double) ppin1.mergeAllIAs(ppin2).size();
 
 			if (strict_denominator)
 				denominator = Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]);

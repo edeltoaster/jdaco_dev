@@ -57,10 +57,10 @@ public class compareTissuePPINs {
 			PPIN abundance_network = sample_mapping.get(sample)[0];
 			PPIN splice_network = sample_mapping.get(sample)[1];
 			
-			core_abundance_network = core_abundance_network.retainAllIAs(abundance_network);
+			core_abundance_network = core_abundance_network.retainAll(abundance_network);
 			core_abundance_proteins.retainAll(abundance_network.getProteins());
 			
-			core_splice_network = core_splice_network.retainAllIAs(splice_network);
+			core_splice_network = core_splice_network.retainAll(splice_network);
 			core_splice_proteins.retainAll(splice_network.getProteins());
 			
 		}
@@ -93,10 +93,10 @@ public class compareTissuePPINs {
 				PPIN other_abundance_network = sample_mapping.get(other_sample)[0];
 				PPIN other_splice_network = sample_mapping.get(other_sample)[1];
 				
-				abundance_network = abundance_network.removeAllIAs(other_abundance_network);
+				abundance_network = abundance_network.removeAll(other_abundance_network);
 				abundance_proteins.removeAll(other_abundance_network.getProteins());
 				
-				splice_network = splice_network.removeAllIAs(other_splice_network);
+				splice_network = splice_network.removeAll(other_splice_network);
 				splice_proteins.removeAll(other_splice_network.getProteins());
 			}
 			

@@ -22,7 +22,7 @@ public class build_networks {
 	
 	public static void loadAndStoreReferenceNetwork(String network_out) {
 		PPIN ppin = DataQuery.getIntActNetwork("9606");
-		ppin = ppin.mergeAllIAs(DataQuery.getIRefIndexNetwork("9606"));
+		ppin = ppin.mergeAll(DataQuery.getIRefIndexNetwork("9606"));
 		ppin = ppin.updateUniprotAccessions();
 		ppin.writePPIN(network_out);
 	}

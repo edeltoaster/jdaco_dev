@@ -606,7 +606,7 @@ public class NetworkBuilder {
 				DDI_backed.add(new StrPair(temp1[1], temp2[1]));
 			}
 		
-		return DDI_backed.size() / (double) this.original_ppi.getInteractions().size();
+		return DDI_backed.size() / (double) this.original_ppi.getInteractionsFast().size();
 	}
 	
 	/**
