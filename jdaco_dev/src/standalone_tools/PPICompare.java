@@ -93,7 +93,7 @@ public class PPICompare {
 		}
 		
 		// do
-		System.out.print("Processing " + path_group1 + " vs " + path_group2 + " : ");
+		System.out.print("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") : ");
 		RewiringDetector rd = new RewiringDetector(group1, group2, FDR);
 		Map<String, List<StrPair>> major_alt_splice_switches = rd.determineAltSplicingSwitches(true, false);
 		Map<String, List<StrPair>> all_alt_splice_switches = rd.determineAltSplicingSwitches(false, true);
