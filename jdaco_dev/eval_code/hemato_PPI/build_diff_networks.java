@@ -15,8 +15,8 @@ public class build_diff_networks {
 	
 	static double FDR = 0.05;
 	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
-	//static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets/";
-	static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets_filtered/";
+	static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets/";
+	//static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets_filtered/";
 	
 	public static Map<String, ConstructedNetworks> filterVenous(Map<String, ConstructedNetworks> input) {
 		Map<String, ConstructedNetworks> filtered = new HashMap<String, ConstructedNetworks>();
@@ -63,10 +63,10 @@ public class build_diff_networks {
 			String state1 = s[0];
 			String state2 = s[1];
 			
-			//Map<String, ConstructedNetworks> g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
-			//Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
-			Map<String, ConstructedNetworks> g1 = filterVenous(ConstructedNetworks.readNetworks(network_folder + state1 + "/"));
-			Map<String, ConstructedNetworks> g2 = filterVenous(ConstructedNetworks.readNetworks(network_folder + state2 + "/"));
+			Map<String, ConstructedNetworks> g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
+			Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
+			//Map<String, ConstructedNetworks> g1 = filterVenous(ConstructedNetworks.readNetworks(network_folder + state1 + "/"));
+			//Map<String, ConstructedNetworks> g2 = filterVenous(ConstructedNetworks.readNetworks(network_folder + state2 + "/"));
 			
 			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, 4);
 			System.out.print("Processing " + state1 + " (" + g1.keySet().size() + ") vs " + state2 + " (" + g2.keySet().size() + ") : ");

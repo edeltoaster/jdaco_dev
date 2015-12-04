@@ -2,9 +2,11 @@ package hemato_PPI;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import framework.ConstructedNetworks;
 import framework.DataQuery;
@@ -25,6 +27,96 @@ public class build_networks {
 		ppin = ppin.mergeAll(DataQuery.getIRefIndexNetwork("9606"));
 		ppin = ppin.updateUniprotAccessions();
 		ppin.writePPIN(network_out);
+		System.out.println(ppin.getSizesStr());
+	}
+	
+	public static Set<String> checkExpressedGenes(List<Map<String, Float>> gene_data) {
+		
+		// count across all samples
+		Map<String, Integer> count_map = new HashMap<>();
+		for (Map<String, Float> expr:gene_data) {
+			for (String s:expr.keySet()) {
+				if (!count_map.containsKey(s))
+					count_map.put(s, 1);
+				else
+					count_map.put(s, count_map.get(s)+1);
+			}
+		}
+		
+		Set<String> result = new HashSet<>();
+		
+		// org. publication counts transcripts only if at least in 2 samples
+		for (String s:count_map.keySet()) {
+			int count = count_map.get(s);
+			if (count > 1)
+				result.add(s);
+		}
+		
+		return result;
+	}
+	
+	public static Set<String> checkExpressedProtCodingTranscripts(List<Map<String, Float>> transcr_data) {
+		
+		Set<String> pc_trans = new HashSet<>();
+		for (String[] d:DataQuery.getGenesTranscriptsProteins(DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"))) {
+			pc_trans.add(d[1]);
+		}
+		
+		// count across all samples
+		Map<String, Integer> count_map = new HashMap<>();
+		for (Map<String, Float> expr:transcr_data) {
+			for (String s:expr.keySet()) {
+				if (!pc_trans.contains(s))
+					continue;
+				if (!count_map.containsKey(s))
+					count_map.put(s, 1);
+				else
+					count_map.put(s, count_map.get(s)+1);
+			}
+		}
+		
+		Set<String> result = new HashSet<>();
+		
+		// org. publication counts transcripts only if at least in 2 samples
+		for (String s:count_map.keySet()) {
+			int count = count_map.get(s);
+			if (count > 1)
+				result.add(s);
+		}
+		
+		return result;
+	}
+	
+	public static Set<String> checkExpressedProtCodingGenes(List<Map<String, Float>> gene_data) {
+		
+		Set<String> pc_genes = new HashSet<>();
+		for (String[] d:DataQuery.getGenesTranscriptsProteins(DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"))) {
+			pc_genes.add(d[0]);
+		}
+		
+		// count across all samples
+		Map<String, Integer> count_map = new HashMap<>();
+		for (Map<String, Float> expr:gene_data) {
+			for (String s:expr.keySet()) {
+				if (!pc_genes.contains(s))
+					continue;
+				if (!count_map.containsKey(s))
+					count_map.put(s, 1);
+				else
+					count_map.put(s, count_map.get(s)+1);
+			}
+		}
+		
+		Set<String> result = new HashSet<>();
+		
+		// org. publication counts transcripts only if at least in 2 samples
+		for (String s:count_map.keySet()) {
+			int count = count_map.get(s);
+			if (count > 1)
+				result.add(s);
+		}
+		
+		return result;
 	}
 	
 	public static void preprocess() {
@@ -35,12 +127,12 @@ public class build_networks {
 			folder_type_map.put(spl[0], spl[1]);
 		}
 		
-		System.out.println("Original PPIN: " + "mixed_data/human_merged_nov_16.txt.gz");
+		System.out.println("Original PPIN: " + "mixed_data/human_merged_dec_4.txt.gz");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		System.out.println("3did:" + DataQuery.get3didVersion());
 		System.out.println("iPfam:" + DataQuery.getIPfamVersion());
 		
-		original_ppin = new PPIN("mixed_data/human_merged_nov_16.txt.gz");
+		original_ppin = new PPIN("mixed_data/human_merged_dec_4.txt.gz");
 		builder = new NetworkBuilder(original_ppin);
 	}
 	
@@ -52,7 +144,8 @@ public class build_networks {
 		new File(network_folder).mkdir();
 		
 		Map<String, List<String>> data_map = new HashMap<>();
-		
+		List<Map<String, Float>> gene_abundance_data = new LinkedList<>();
+		List<Map<String, Float>> pc_transcr_abundance_data = new LinkedList<>();
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(BLUEPRINT_expr_folder, ".rsem.tsv.gz")) {
 			String path = f.getAbsolutePath();
 			String[] path_split = path.split("/");
@@ -69,7 +162,10 @@ public class build_networks {
 			if (!new File(out_path).exists())
 				new File(out_path).mkdir();
 			
-			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readRSEMTranscriptsTPM(path, TPM_threshold));
+			Map<String, Float> transcr_expr = TranscriptAbundanceReader.readRSEMTranscriptsTPM(path, TPM_threshold);
+			Map<String, Float> gene_expr = TranscriptAbundanceReader.readRSEMGenesTPM(path, TPM_threshold);
+			
+			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(transcr_expr);
 			cn.getPPIN().writePPIN(out_path + file_name + "_ppin.txt.gz");
 			cn.getDDIN().writeDDIN(out_path + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(out_path + file_name + "_major-transcripts.txt.gz");
@@ -80,6 +176,12 @@ public class build_networks {
 			}
 			
 			data_map.get(cell_type).add(out_path + file_name + "_ppin.txt.gz");
+			
+			// store expression data for all in publication
+			if (cell_type.equals("CD4") || cell_type.equals("N") || cell_type.equals("M"))
+				continue;
+			gene_abundance_data.add(gene_expr);
+			pc_transcr_abundance_data.add(transcr_expr);
 		}
 		
 		System.out.println();
@@ -100,20 +202,22 @@ public class build_networks {
 			System.out.println(cell_type + ": " + data_map.get(cell_type).size() + " samples");
 			System.out.println("Size: " + (int) Utilities.getMean(no_proteins) + "+-" + (int) Utilities.getStd(no_proteins) + " / " + (int) Utilities.getMean(no_interactions) + "+-" + (int) Utilities.getStd(no_interactions));
 		}
+		
+		System.out.println();
+		System.out.println(checkExpressedGenes(gene_abundance_data).size() + " expressed genes according to counting as in BLUEPRINT paper.");
+		System.out.println(checkExpressedProtCodingGenes(gene_abundance_data).size() + " expressed prot-c. genes according to counting as in BLUEPRINT paper.");
+		System.out.println(checkExpressedGenes(pc_transcr_abundance_data).size() + " expressed prot-coding transcr. according to counting as in BLUEPRINT paper.");
 		System.out.println();
 	}
 	
 	public static void main(String[] args) {
-		//loadAndStoreReferenceNetwork("mixed_data/human_merged_nov_16.txt.gz");
+		//loadAndStoreReferenceNetwork("mixed_data/human_merged_dec_4.txt.gz");
 		//System.exit(0);
 		
 		preprocess();
 		
-		process(0.0);
 		process(0.03125);
-		process(0.1);
-		process(0.3);
-		process(0.5);
+		// more ... ?
 		process(1.0);
 	}
 }
