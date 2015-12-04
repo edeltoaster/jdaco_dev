@@ -216,8 +216,13 @@ public class build_networks {
 		
 		preprocess();
 		
+		new File(network_folder_pre).mkdir();
+		
+		process(0.0);
 		process(0.03125);
-		// more ... ?
+		process(0.1);
+		process(0.2);
+		process(0.3);
 		process(1.0);
 	}
 }
