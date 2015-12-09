@@ -51,6 +51,7 @@ public class build_diff_networks {
 		relations.add(new String[]{"GMP", "N"});
 		relations.add(new String[]{"GMP", "M"});
 		
+		relations.add(new String[]{"CLP", "NK"});
 		relations.add(new String[]{"CLP", "CD4"});
 		
 		// additional relations
@@ -58,6 +59,7 @@ public class build_diff_networks {
 		relations.add(new String[]{"MEP", "GMP"});
 		relations.add(new String[]{"MK", "EB"});
 		relations.add(new String[]{"N", "M"});
+		relations.add(new String[]{"NK", "CD4"});
 		
 		for (String[] s:relations) {
 			String state1 = s[0];

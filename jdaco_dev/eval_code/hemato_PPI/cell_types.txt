@@ -8,4 +8,5 @@ erythroblast EB
 CD34-negative_CD41-positive_CD42-positive_megakaryocyte_cell MK
 mature_neutrophil N
 CD14-positive_CD16-negative_classical_monocyte M
+cytotoxic_CD56-dim_natural_killer_cell NK
 CD4-positive_alpha-beta_T_cell CD4
