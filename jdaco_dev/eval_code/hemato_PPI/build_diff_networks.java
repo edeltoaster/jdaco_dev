@@ -96,6 +96,9 @@ public class build_diff_networks {
 //			}
 //			
 //			Utilities.writeEntries(count_distr, results_folder + state1 + "_" + state2 + "_raw_count_distr.txt");
+			List<String> minReasons = rd.calcMinMostLikelyReasons();
+			System.out.println(minReasons.size() + " alterations can explain all significant changes.");
+			Utilities.writeEntries(minReasons, results_folder + state1 + "_" + state2 + "_min_reasons.txt");
 		}
 		
 		System.out.println();

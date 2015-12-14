@@ -487,4 +487,50 @@ public class RewiringDetector {
 		}
 
 	}
+	
+	public List<String> calcMinMostLikelyReasons() {
+		
+		Map<String, Set<StrPair>> reason_IA_map = new HashMap<>();
+		Map<String, Integer> reason_count_map = new HashMap<>();
+		
+		// fills datastructures, afterwards we know which reasons affect which interactions and each reasons occurance is counted to give it an importance score
+		for (StrPair IA:this.interaction_reasons_count_map.keySet()) {
+			Map<String, Integer> count_map = this.interaction_reasons_count_map.get(IA);
+			
+			for (String reason:count_map.keySet()) {
+				if (reason.startsWith("no_") || reason.startsWith("opp")) // kick non-helpful reasons
+					continue;
+				for (String ex_reason:reason.split("/")) {
+					
+					if (!reason_IA_map.containsKey(ex_reason))
+						reason_IA_map.put(ex_reason, new HashSet<StrPair>());
+					reason_IA_map.get(ex_reason).add(IA);
+					
+					if (!reason_count_map.containsKey(ex_reason))
+						reason_count_map.put(ex_reason, 0);
+					reason_count_map.put(ex_reason, reason_count_map.get(ex_reason) + count_map.get(reason));
+				}
+			}
+		}
+		
+		List<String> reasons = new ArrayList<>(reason_IA_map.keySet());
+		reasons.sort((String s1, String s2) -> reason_count_map.get(s2).compareTo(reason_count_map.get(s1))); // sorts from highest to lowest
+		
+		Set<StrPair> unsatisfied_IAs = new HashSet<>(this.interaction_reasons_map.keySet());
+		List<String> result = new LinkedList<>();
+		
+		for (String reason:reasons) {
+			int to_sat_pre = unsatisfied_IAs.size();
+			unsatisfied_IAs.removeAll(reason_IA_map.get(reason));
+			int to_sat_post = unsatisfied_IAs.size();
+			
+			if (to_sat_pre != to_sat_post)
+				result.add(reason + ":" + reason_count_map.get(reason));
+			
+			if (to_sat_post == 0)
+				break;
+		}
+		
+		return result;
+	}
 }
