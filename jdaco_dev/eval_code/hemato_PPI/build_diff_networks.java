@@ -86,6 +86,11 @@ public class build_diff_networks {
 			
 			System.out.println(major_alt_splice_switches.keySet().size() + " alt. spliced proteins are the major reason that affect " + Utilities.getValueSetFromMultimap(major_alt_splice_switches).size() + " diff. interactions.");
 			System.out.println(all_alt_splice_switches.keySet().size() + " alt. spliced proteins contribute to a change in the " + Utilities.getValueSetFromMultimap(all_alt_splice_switches).size() + " diff. interactions that are mainly driven by AS events.");
+			
+			List<String> minReasons = rd.calcMinMostLikelyReasons();
+			System.out.println(minReasons.size() + " alterations can explain all significant changes.");
+			Utilities.writeEntries(minReasons, results_folder + state1 + "_" + state2 + "_min_reasons.txt");
+			
 			System.out.println();
 			
 //			// distribution of unfiltered changes
@@ -96,9 +101,6 @@ public class build_diff_networks {
 //			}
 //			
 //			Utilities.writeEntries(count_distr, results_folder + state1 + "_" + state2 + "_raw_count_distr.txt");
-			List<String> minReasons = rd.calcMinMostLikelyReasons();
-			System.out.println(minReasons.size() + " alterations can explain all significant changes.");
-			Utilities.writeEntries(minReasons, results_folder + state1 + "_" + state2 + "_min_reasons.txt");
 		}
 		
 		System.out.println();
