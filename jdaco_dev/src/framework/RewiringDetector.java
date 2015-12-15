@@ -488,7 +488,12 @@ public class RewiringDetector {
 
 	}
 	
-	public List<String> calcMinMostLikelyReasons() {
+	/**
+	 * Heuristically calculates the smallest set of reasons necessary to explain all changes,
+	 * output as a list of strings PROTEIN(difference):count
+	 * @return
+	 */
+	public List<String> getMinMostLikelyReasons() {
 		
 		Map<String, Set<StrPair>> reason_IA_map = new HashMap<>();
 		Map<String, Integer> reason_count_map = new HashMap<>();
