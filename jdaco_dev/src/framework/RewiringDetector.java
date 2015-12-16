@@ -488,6 +488,83 @@ public class RewiringDetector {
 
 	}
 	
+	public void writeProteinAttributes(String out_path) {
+		
+		// determine all proteins in diffnet
+		Set<String> proteins = new HashSet<>();
+		for (StrPair pair:this.significantly_rewired_interactions) {
+			proteins.add(pair.getL());
+			proteins.add(pair.getR());
+		}
+		
+		// determine entries
+		Map<String, Integer> reasons_count_map = determineReasonCountMap();
+		List<String> min_mostlikely_reasons = getMinMostLikelyReasons();
+		
+		Map<String, Integer> expr_reasons = new HashMap<>();
+		Map<String, Integer> AS_reasons = new HashMap<>();
+		// prefill datastructures
+		for (String protein:proteins) {
+			expr_reasons.put(protein, 0);
+			AS_reasons.put(protein, 0);
+		}
+		
+		// fill data
+		for (String reason:reasons_count_map.keySet()) {
+			
+			String protein = reason.split("\\(")[0];
+			
+			// distinguish between just expression and alternative splicing
+			if (reason.contains("->")) {
+				AS_reasons.put(protein, AS_reasons.get(protein) + reasons_count_map.get(reason));
+			} else {
+				expr_reasons.put(protein, expr_reasons.get(protein) + reasons_count_map.get(reason));
+			}
+		}
+		
+		Set<String> min_mostl_reason_proteins = new HashSet<>();
+		for (String reason:min_mostlikely_reasons) {
+			String protein = reason.split("\\(")[0];
+			min_mostl_reason_proteins.add(protein);
+		}
+		
+		/*
+		 * prepare output
+		 */
+		
+		List<String> to_write = new LinkedList<>();
+		to_write.add("Protein in_min_reasons expr_count AS_count");
+		
+		for (String protein:proteins) {
+			String min_reasons = "no";
+			if (min_mostl_reason_proteins.contains(protein))
+				min_reasons = "yes";
+			to_write.add(protein + " " + min_reasons + " " + expr_reasons.get(protein) + " " + AS_reasons.get(protein));
+		}
+		
+		Utilities.writeEntries(to_write, out_path);
+	}
+	
+	private Map<String, Integer> determineReasonCountMap() {
+		Map<String, Integer> reason_count_map = new HashMap<>();
+		
+		// basically the same code as in the heuristic
+		for (StrPair IA:this.interaction_reasons_count_map.keySet()) {
+			Map<String, Integer> count_map = this.interaction_reasons_count_map.get(IA);
+			for (String reason:count_map.keySet()) {
+				if (reason.startsWith("no_") || reason.startsWith("opp")) // kick non-helpful reasons
+					continue;
+				for (String ex_reason:reason.split("/")) {
+					if (!reason_count_map.containsKey(ex_reason))
+						reason_count_map.put(ex_reason, 0);
+					reason_count_map.put(ex_reason, reason_count_map.get(ex_reason) + count_map.get(reason));
+				}
+			}
+		}
+		
+		return reason_count_map;
+	}
+	
 	/**
 	 * Heuristically calculates the smallest set of reasons necessary to explain all changes,
 	 * output as a list of strings PROTEIN(difference):count

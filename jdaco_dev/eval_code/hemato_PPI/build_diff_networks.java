@@ -90,7 +90,7 @@ public class build_diff_networks {
 			List<String> minReasons = rd.getMinMostLikelyReasons();
 			System.out.println(minReasons.size() + " alterations can explain all significant changes.");
 			Utilities.writeEntries(minReasons, results_folder + state1 + "_" + state2 + "_min_reasons.txt");
-			
+			rd.writeProteinAttributes(results_folder + state1 + "_" + state2 + "_protein_attributes.txt");
 			System.out.println();
 			
 //			// distribution of unfiltered changes
