@@ -24,6 +24,7 @@ public class RewiringDetector {
 	private Map<String, ConstructedNetworks> group2;
 	private double FDR;
 	private boolean strict_denominator = false;
+	private String organism_database = null;
 
 	private Map<String, Double> g1_nodes = new HashMap<>();
 	private Map<String, Double> g2_nodes = new HashMap<>();
@@ -488,6 +489,24 @@ public class RewiringDetector {
 
 	}
 	
+	/**
+	 * Determines matching Ensembl organism database from one of the networks
+	 * @return
+	 */
+	private String getAppropriateOrganismDatabase() {
+		
+		// only determine once
+		if (organism_database == null) {
+			for (ConstructedNetworks cn:this.group1.values()) {
+				PPIN ppin = cn.getPPIN();
+				this.organism_database = DataQuery.getEnsemblOrganismDatabaseFromProteins(ppin.getProteins());
+				break;
+			}
+		}
+		
+		return this.organism_database;
+	}
+	
 	public void writeProteinAttributes(String out_path) {
 		
 		// determine all proteins in diffnet
@@ -503,16 +522,20 @@ public class RewiringDetector {
 		
 		Map<String, Integer> expr_reasons = new HashMap<>();
 		Map<String, Integer> AS_reasons = new HashMap<>();
+		Map<String, Integer> all_reasons = new HashMap<>();
+		
 		// prefill datastructures
 		for (String protein:proteins) {
 			expr_reasons.put(protein, 0);
 			AS_reasons.put(protein, 0);
+			all_reasons.put(protein, 0);
 		}
 		
 		// fill data
 		for (String reason:reasons_count_map.keySet()) {
 			
 			String protein = reason.split("\\(")[0];
+			all_reasons.put(protein, all_reasons.get(protein) + reasons_count_map.get(reason));
 			
 			// distinguish between just expression and alternative splicing
 			if (reason.contains("->")) {
@@ -528,18 +551,27 @@ public class RewiringDetector {
 			min_mostl_reason_proteins.add(protein);
 		}
 		
+		// naming data
+		Map<String, String> gene_to_name = DataQuery.getGenesCommonNames(getAppropriateOrganismDatabase());
+		Map<String, String> up_to_name = new HashMap<>();
+		for (String[] data:DataQuery.getGenesTranscriptsProteins(this.organism_database)) {
+			String gene = data[0];
+			String protein = data[2];
+			up_to_name.put(protein, gene_to_name.get(gene));
+		}
+		
 		/*
 		 * prepare output
 		 */
 		
 		List<String> to_write = new LinkedList<>();
-		to_write.add("Protein in_min_reasons expr_count AS_count");
+		to_write.add("Protein gene_name in_min_reasons overall_count expr_count AS_count");
 		
 		for (String protein:proteins) {
 			String min_reasons = "no";
 			if (min_mostl_reason_proteins.contains(protein))
 				min_reasons = "yes";
-			to_write.add(protein + " " + min_reasons + " " + expr_reasons.get(protein) + " " + AS_reasons.get(protein));
+			to_write.add(protein + " " + up_to_name.get(protein) + " " + min_reasons + " " + all_reasons.get(protein) + " " + expr_reasons.get(protein) + " " + AS_reasons.get(protein));
 		}
 		
 		Utilities.writeEntries(to_write, out_path);

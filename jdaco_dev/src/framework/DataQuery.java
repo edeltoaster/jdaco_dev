@@ -53,10 +53,11 @@ public class DataQuery {
 	private static Map<String, Map<String, String>> cache_isoformtranscr = new HashMap<>();
 	private static Map<String,Map<String, List<String>>> cache_transcrdom = new HashMap<>();
 	private static Map<String, Map<String, List<String>>> cache_ensembl_proteins = new HashMap<>();
+	private static Map<String, Map<String, String>> cache_ensembl_names = new HashMap<>();
 	private static Map<String, String> cache_db = new HashMap<>();
 	private static Map<String, PPIN> cache_STRING = new HashMap<>();
 	private static Map<String, Map<String, String>> cache_ucsc = new HashMap<>();
-	private static Map<String, String> cache_Esembl_db = new HashMap<>();
+	private static Map<String, String> cache_ensembl_db = new HashMap<>();
 	private static List<String[]> cache_HGNC;
 	private static Map<String, String> uniprot_sec_accs;
 	private static String uniprot_release;
@@ -211,8 +212,8 @@ public class DataQuery {
 	 */
 	public static String getEnsemblOrganismDatabaseFromName(String organism) {
 		
-		if (DataQuery.cache_Esembl_db.containsKey(organism))
-			return DataQuery.cache_Esembl_db.get(organism);
+		if (DataQuery.cache_ensembl_db.containsKey(organism))
+			return DataQuery.cache_ensembl_db.get(organism);
 		
 		String query = "'"+organism.split(" ")[0].toLowerCase()+"\\_"+organism.split(" ")[1].toLowerCase()+"\\_core\\_%\\_%'";
 		String db = "";
@@ -251,7 +252,7 @@ public class DataQuery {
 			return getEnsemblOrganismDatabaseFromName(organism);
 		}
 		
-		DataQuery.cache_Esembl_db.put(organism, db);
+		DataQuery.cache_ensembl_db.put(organism, db);
 		
 		return db;
 	}
@@ -301,7 +302,7 @@ public class DataQuery {
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id, xref.dbprimary_acc "
 					+ "FROM gene, transcript, translation, object_xref, xref "
-					+ "WHERE gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
+					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
 			while (rs.next()) {
 				String[] row = {rs.getString(1), rs.getString(2), rs.getString(3)};
 				associations.add(row);
@@ -327,33 +328,31 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Queries Ensembl for association of UniProt Accs. to transcripts and genes
+	 * Queries Ensembl for association of Enseml genes with their common names as given in Entrez (for compatibility)
 	 * @param organism_core_database
-	 * @returnreturn list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
 	 */
-	public static List<String[]> getTest(String organism_core_database) {
+	public static Map<String, String> getGenesCommonNames(String organism_core_database) {
 		
-		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
-			return DataQuery.cache_genestransprots.get(organism_core_database);
-		List<String[]> associations = new LinkedList<>();
+		// return directly if in cache
+		if (DataQuery.cache_ensembl_names.containsKey(organism_core_database))
+			return DataQuery.cache_ensembl_names.get(organism_core_database);
+		
+		Map<String,String> gene_to_names = new HashMap<>();
 		try {
 			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
-			ResultSet rs = st.executeQuery("SELECT xref.dbprimary_acc, xref.external_db_id='2200' "
-					+ "FROM gene, transcript, translation, object_xref, xref "
-					//+ "WHERE gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
-					+ "WHERE gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id");
+			ResultSet rs = st.executeQuery("SELECT gene.stable_id, xref.display_label "
+					+ "FROM gene, object_xref, xref "
+					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='1300'");
 			while (rs.next()) {
-				System.out.println(rs.getString(1) + " " + rs.getString(2) + " " + rs.getString(3));
-				//String[] row = {rs.getString(1), rs.getString(2), rs.getString(3)};
-				//associations.add(row);
+				gene_to_names.put(rs.getString(1), rs.getString(2));
 			}
 			connection.close();
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
-			
+			e.printStackTrace();
 			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get transcript data from ENSEMBL in 10 seconds ..." );
 			try {
 				Thread.sleep(10000);
@@ -362,11 +361,13 @@ public class DataQuery {
 			
 			DataQuery.switchServer();
 			
-			return getGenesTranscriptsProteins(organism_core_database);
+			return getGenesCommonNames(organism_core_database);
 		}
 		
-		DataQuery.cache_genestransprots.put(organism_core_database, associations);
-		return associations;
+		// store in cache
+		DataQuery.cache_ensembl_names.put(organism_core_database, gene_to_names);
+		
+		return gene_to_names;
 	}
 	
 	/**
@@ -376,7 +377,6 @@ public class DataQuery {
 	 */
 	public static Map<String, List<String>> getEnsemblToAllUniprotProteins(String organism_core_database) {
 		
-		// cache
 		// return directly if in cache
 		if (DataQuery.cache_ensembl_proteins.containsKey(organism_core_database))
 			return DataQuery.cache_ensembl_proteins.get(organism_core_database);
@@ -597,7 +597,7 @@ public class DataQuery {
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, xref.dbprimary_acc, translation_attrib.value "
 					+ "FROM transcript, translation, object_xref, xref, translation_attrib "
 					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200' "
-					+ "AND translation.translation_id = translation_attrib.translation_id AND translation_attrib.attrib_type_id = '167'");
+					+ "AND transcript.biotype = 'protein_coding' AND translation.translation_id = translation_attrib.translation_id AND translation_attrib.attrib_type_id = '167'");
 			
 			while (rs.next()) {
 				String transcript = rs.getString(1);
@@ -652,7 +652,7 @@ public class DataQuery {
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, protein_feature.hit_name, protein_feature.hit_start, protein_feature.hit_end "
 					+ "FROM transcript, translation, protein_feature, analysis "
-					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=protein_feature.translation_id AND protein_feature.analysis_id = analysis.analysis_id AND analysis.logic_name = 'Pfam'");
+					+ "WHERE transcript.biotype = 'protein_coding' AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=protein_feature.translation_id AND protein_feature.analysis_id = analysis.analysis_id AND analysis.logic_name = 'Pfam'");
 			while (rs.next()) {
 				if (!transcript_domain_mapping.containsKey(rs.getString(1)))
 					transcript_domain_mapping.put(rs.getString(1), new LinkedList<String>());
@@ -1604,5 +1604,11 @@ public class DataQuery {
 		}
 
 		return ddis;
+	}
+	
+	public static void main(String[] args) {
+		String db = getEnsemblOrganismDatabaseFromName("homo sapiens");
+		System.out.println(db);
+		System.out.println(getGenesTranscriptsProteins(db));
 	}
 }

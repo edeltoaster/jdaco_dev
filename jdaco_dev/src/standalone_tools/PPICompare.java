@@ -120,6 +120,7 @@ public class PPICompare {
 		Utilities.writeEntries(major_alt_splice_switches.keySet(), output_folder + "major_AS_proteins.txt");
 		Utilities.writeEntries(all_alt_splice_switches.keySet(), output_folder + "contributing_AS_proteins.txt");
 		Utilities.writeEntries(minReasons, output_folder + "min_reasons.txt");
+		rd.writeProteinAttributes(output_folder + "protein_attributes.txt");
 		
 	}
 }
