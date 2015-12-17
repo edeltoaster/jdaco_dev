@@ -364,10 +364,18 @@ public class RewiringDetector {
 		return P_rews;
 	}
 
+	/**
+	 * Returns the COMPLETE differential network, not only the significant rewiring events
+	 * @return
+	 */
 	public Map<StrPair, Double> getDifferentialNetwork() {
 		return differential_network;
 	}
 
+	public List<StrPair> getSignificantlyRewiredInteractions() {
+		return this.significantly_rewired_interactions;
+	}
+	
 	public Map<StrPair, Map<String, List<String>>> getInteractionReasonsMap() {
 		return interaction_reasons_map;
 	}
