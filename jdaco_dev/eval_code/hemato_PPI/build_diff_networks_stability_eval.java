@@ -2,7 +2,6 @@ package hemato_PPI;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,27 +17,31 @@ public class build_diff_networks_stability_eval {
 	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
 	static int max_iter = 5;
 	
-	public static Map<String, ConstructedNetworks> readNetworks(String folder, int samples_to_kick) {
-		Map<String, ConstructedNetworks> data = new HashMap<>();
+	public static List<List<String>> permutateSamples(Map<String, ConstructedNetworks> data) {
 		
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(folder, "_ppin.txt")) {
-			String gz = "";
-			if (f.getName().endsWith(".gz"))
-				gz = ".gz";
-			String pre = f.getAbsolutePath().split("_ppin")[0];
-			String sample = f.getName().split("_ppin")[0];
-			ConstructedNetworks cn = new ConstructedNetworks(pre + "_ppin.txt" + gz, pre + "_major-transcripts.txt" + gz);
-			
-			data.put(sample, cn);
+		List<String> samples = new ArrayList<>(data.keySet());
+		List<List<String>> sample_permutations = new LinkedList<>();
+		
+		for (List<Integer> perm:Utilities.getAllIntPermutations(samples.size())) {
+			List<String> temp = new LinkedList<>();
+			for (int i:perm) {
+				temp.add(samples.get(i));
+			}
+			sample_permutations.add(temp);
 		}
 		
-		for (int i=0; i<samples_to_kick; i++) {
-			List<String> rlist = new ArrayList<>(data.keySet());
-			Collections.shuffle(rlist);
-			data.remove(rlist.get(0));
-		}
+		return sample_permutations;
+	}
+	
+	public static List<Map<String, ConstructedNetworks>> buildPermutatedData(String folder) {
+		Map<String, ConstructedNetworks> all_data = ConstructedNetworks.readNetworks(folder);
 		
-		return data;
+		List<Map<String, ConstructedNetworks>> output = new LinkedList<>();
+		
+		// get sublists
+		permutateSamples(all_data);
+		
+		return output;
 	}
 	
 	public static Map<String, ConstructedNetworks> filterVenous(Map<String, ConstructedNetworks> input) {
@@ -94,22 +97,12 @@ public class build_diff_networks_stability_eval {
 			System.out.println(rd.getSignificantlyRewiredInteractions().size());
 			
 
-			for (int i=0; i<max_iter; i++) {
-				g1 = readNetworks(network_folder + state1 + "/", 1);
-				g2 = readNetworks(network_folder + state2 + "/", 1);
-				
-				if (g1.size() < 3 && g2.size() < 3)
-					continue;
-				else if (g1.size() < 3)
-					g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
-				else if (g2.size() < 3)
-					g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
-				
-				rd = new RewiringDetector(g1, g2, FDR, 4);
-				
-				System.out.println(g1.keySet().size() + " " + g2.keySet().size() + " " + rd.getSignificantlyRewiredInteractions().size());
-			}
-			
+			for (Map<String, ConstructedNetworks> s1 :buildPermutatedData(network_folder + state1 + "/"))
+				for (Map<String, ConstructedNetworks> s2 :buildPermutatedData(network_folder + state2 + "/")) {
+					rd = new RewiringDetector(s1, s2, FDR, 4);
+					
+					System.out.println(g1.keySet().size() + " " + g2.keySet().size() + " " + rd.getSignificantlyRewiredInteractions().size());
+				}	
 		}
 		
 		System.out.println();
