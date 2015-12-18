@@ -13,8 +13,9 @@ import framework.StrPair;
 public class build_diff_network {
 	
 	static double FDR = 0.05;
-	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BRCA_networks/";
-	static String results_root = "/Users/tho/Desktop/BRCA_diffnets/";
+	// needs to be run on server
+	static String network_folder = "BRCA_networks/";
+	static String results_root = "BRCA_diffnets/";
 	
 	public static void process(String network_folder, String results_folder) {
 		
@@ -31,11 +32,13 @@ public class build_diff_network {
 			String state1 = s[0];
 			String state2 = s[1];
 			
+			System.out.println("read data");
 			Map<String, ConstructedNetworks> g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
 			Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
 			
-			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, 4);
-			System.out.print("Processing " + state1 + " (" + g1.keySet().size() + ") vs " + state2 + " (" + g2.keySet().size() + ") : ");
+			System.out.println("start processing");
+			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, 32, System.out);
+			
 			rd.writeDiffnet(results_folder + state1 + "_" + state2 + ".txt");
 			
 			Map<String, List<StrPair>> major_alt_splice_switches = rd.determineAltSplicingSwitches(true, false);

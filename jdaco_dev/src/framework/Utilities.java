@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -263,4 +264,33 @@ public class Utilities {
 		
 		return value_set;
 	}
+	
+	/**
+	 * Breaks a list into chunks; for best performance, input should be an ArrayList
+	 * @param input
+	 * @param chunkSize
+	 * @return
+	 */
+    public static <T> List<List<T>> partitionListIntoChunks(List<T> input, int chunkSize) {
+    	// implementation from http://stackoverflow.com/questions/12026885/common-util-to-break-a-list-into-batch
+        int inputSize = input.size();
+        int chunkCount = (int) Math.ceil(inputSize / (double) chunkSize);
+
+        Map<Integer, List<T>> map = new HashMap<>(chunkCount);
+        List<List<T>> chunks = new ArrayList<>(chunkCount);
+
+        for (int i = 0; i < inputSize; i++) {
+
+            map.computeIfAbsent(i / chunkSize, (ignore) -> {
+
+                List<T> chunk = new ArrayList<>();
+                chunks.add(chunk);
+                return chunk;
+
+            }).add(input.get(i));
+        }
+
+        return chunks;
+    }
+    
 }

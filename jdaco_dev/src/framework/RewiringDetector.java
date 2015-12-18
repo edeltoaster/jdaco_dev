@@ -1,5 +1,6 @@
 package framework;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,7 +26,8 @@ public class RewiringDetector {
 	private double FDR;
 	private boolean strict_denominator = false;
 	private String organism_database = null;
-
+	private PrintStream verbose;
+	
 	private Map<String, Double> g1_nodes = new HashMap<>();
 	private Map<String, Double> g2_nodes = new HashMap<>();
 	private Map<String, Double> g1_edges = new HashMap<>();
@@ -146,6 +148,17 @@ public class RewiringDetector {
 		this.assessRewiring();
 	}
 	
+	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR, int no_threads, PrintStream verbose) {
+		this.group1 = group1;
+		this.group2 = group2;
+		this.FDR = FDR;
+		this.no_threads = no_threads;
+		this.verbose = verbose;
+		
+		this.determineGroupwiseDifferences();
+		this.assessRewiring();
+	}
+	
 	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR) {
 		this.group1 = group1;
 		this.group2 = group2;
@@ -195,36 +208,77 @@ public class RewiringDetector {
 		}
 
 		// parallel assessment of pairwise differences
-		List<PPIComparatorTask> comparison_calculations = new LinkedList<>();
+		List<PPIComparatorTask> comparison_calculations = new ArrayList<>( (this.group1.keySet().size()*this.group2.keySet().size()) );
 		for (String sample1:this.group1.keySet())
-			for (String sample2:group2.keySet())
+			for (String sample2:this.group2.keySet())
 				comparison_calculations.add(new PPIComparatorTask(sample1, sample2));
 
 		ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
-
-		try {
-			for (Future<Object[]> f:es.invokeAll(comparison_calculations)) {
-				Object[] obj = f.get();
-
-				// added interactions
-				for (StrPair pair: (Set<StrPair>) obj[0]) {
-					if(!overall_added.containsKey(pair))
-						overall_added.put(pair, 0);
-					overall_added.put(pair, overall_added.get(pair) + 1 );
+		
+		// for small sample sizes, compute directly
+		if (comparison_calculations.size() < 1000) {
+			try {
+				for (Future<Object[]> f:es.invokeAll(comparison_calculations)) {
+					Object[] obj = f.get();
+	
+					// added interactions
+					for (StrPair pair: (Set<StrPair>) obj[0]) {
+						if(!overall_added.containsKey(pair))
+							overall_added.put(pair, 0);
+						overall_added.put(pair, overall_added.get(pair) + 1 );
+					}
+	
+					// lost interactions
+					for (StrPair pair: (Set<StrPair>) obj[1]) {
+						if(!overall_lost.containsKey(pair))
+							overall_lost.put(pair, 0);
+						overall_lost.put(pair, overall_lost.get(pair) + 1 );
+					}
+	
 				}
-
-				// lost interactions
-				for (StrPair pair: (Set<StrPair>) obj[1]) {
-					if(!overall_lost.containsKey(pair))
-						overall_lost.put(pair, 0);
-					overall_lost.put(pair, overall_lost.get(pair) + 1 );
-				}
-
+			} catch (Exception e1) {
+				System.err.println("Problem during assessment of groupwise differences.");
+				e1.printStackTrace();
+				System.exit(1);
 			}
-		} catch (Exception e1) {
-			System.err.println("Problem during assessment of groupwise differences.");
-			e1.printStackTrace();
-			System.exit(1);
+		} else { // for large sample sizes: do chunks
+			int n = 0;
+			int s = 0;
+			int all = comparison_calculations.size();
+			for (List<PPIComparatorTask> temp_calculations:Utilities.partitionListIntoChunks(comparison_calculations, 1000)) {
+				try {
+					if (this.verbose != null) {
+						this.verbose.println(n + ": " + s + " / " + all);
+						this.verbose.flush();
+					}
+					n++;
+					s += temp_calculations.size();
+					for (Future<Object[]> f:es.invokeAll(temp_calculations)) {
+						Object[] obj = f.get();
+		
+						// added interactions
+						for (StrPair pair: (Set<StrPair>) obj[0]) {
+							if(!overall_added.containsKey(pair))
+								overall_added.put(pair, 0);
+							overall_added.put(pair, overall_added.get(pair) + 1 );
+						}
+		
+						// lost interactions
+						for (StrPair pair: (Set<StrPair>) obj[1]) {
+							if(!overall_lost.containsKey(pair))
+								overall_lost.put(pair, 0);
+							overall_lost.put(pair, overall_lost.get(pair) + 1 );
+						}
+		
+					}
+				} catch (Exception e1) {
+					System.err.println("Problem during assessment of groupwise differences.");
+					e1.printStackTrace();
+					System.exit(1);
+				}
+				
+				Runtime.getRuntime().gc();
+			}
 		}
 		es.shutdown();
 
