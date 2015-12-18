@@ -1,7 +1,6 @@
-package hemato_PPI;
+package PPIComp_eval;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,22 +10,11 @@ import framework.Utilities;
 import framework.RewiringDetector;
 import framework.StrPair;
 
-public class build_diff_networks {
+public class build_diff_network {
 	
 	static double FDR = 0.05;
-	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
-	static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets/";
-	//static String results_root = "/Users/tho/Desktop/BLUEPRINT_diffnets_filtered/";
-	
-	public static Map<String, ConstructedNetworks> filterVenous(Map<String, ConstructedNetworks> input) {
-		Map<String, ConstructedNetworks> filtered = new HashMap<String, ConstructedNetworks>();
-		for (String sample:input.keySet()) {
-			if (sample.startsWith("Venous"))
-				continue;
-			filtered.put(sample, input.get(sample));
-		}
-		return filtered;
-	}
+	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BRCA_networks/";
+	static String results_root = "/Users/tho/Desktop/BRCA_diffnets/";
 	
 	public static void process(String network_folder, String results_folder) {
 		
@@ -37,29 +25,7 @@ public class build_diff_networks {
 		
 		// define relations
 		List<String[]> relations = new LinkedList<String[]>();
-		relations.add(new String[]{"HSC", "MPP"});
-		
-		relations.add(new String[]{"MPP", "CMP"});
-		relations.add(new String[]{"MPP", "CLP"});
-		
-		relations.add(new String[]{"CMP", "MEP"});
-		relations.add(new String[]{"CMP", "GMP"});
-		
-		relations.add(new String[]{"MEP", "MK"});
-		relations.add(new String[]{"MEP", "EB"});
-		
-		relations.add(new String[]{"GMP", "N"});
-		relations.add(new String[]{"GMP", "M"});
-		
-		relations.add(new String[]{"CLP", "NK"});
-		relations.add(new String[]{"CLP", "CD4"});
-		
-		// additional relations
-		relations.add(new String[]{"CMP", "CLP"});
-		relations.add(new String[]{"MEP", "GMP"});
-		relations.add(new String[]{"MK", "EB"});
-		relations.add(new String[]{"N", "M"});
-		relations.add(new String[]{"NK", "CD4"});
+		relations.add(new String[]{"normal", "tumor"});
 		
 		for (String[] s:relations) {
 			String state1 = s[0];
@@ -67,8 +33,6 @@ public class build_diff_networks {
 			
 			Map<String, ConstructedNetworks> g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
 			Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
-			//Map<String, ConstructedNetworks> g1 = filterVenous(ConstructedNetworks.readNetworks(network_folder + state1 + "/"));
-			//Map<String, ConstructedNetworks> g2 = filterVenous(ConstructedNetworks.readNetworks(network_folder + state2 + "/"));
 			
 			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, 4);
 			System.out.print("Processing " + state1 + " (" + g1.keySet().size() + ") vs " + state2 + " (" + g2.keySet().size() + ") : ");
@@ -92,6 +56,7 @@ public class build_diff_networks {
 			Utilities.writeEntries(minReasons, results_folder + state1 + "_" + state2 + "_min_reasons.txt");
 			rd.writeProteinAttributes(results_folder + state1 + "_" + state2 + "_protein_attributes.txt");
 			System.out.println();
+
 		}
 		
 		System.out.println();
