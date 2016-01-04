@@ -55,7 +55,7 @@ public class PPIXpress_GUI {
 	private static double percentile = -1;
 	private static String output_folder;
 	private static String organism_database;
-
+	private static boolean compress_output = false;
 	
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
@@ -90,6 +90,7 @@ public class PPIXpress_GUI {
 	private JButton btnRetrieve;
 	private JCheckBox chckbxOutputMajorTranscripts;
 	private JCheckBox chckbxUpdateUniprotAccs;
+	private JCheckBox chckboxCompressOutput;
 	
 	/**
 	 * Launch the application.
@@ -366,7 +367,7 @@ public class PPIXpress_GUI {
 					output_DDINs = false;
 			}
 		});
-		chckbxOutputDdins.setBounds(680, 385, 132, 30);
+		chckbxOutputDdins.setBounds(680, 379, 132, 30);
 		frmPpixpress.getContentPane().add(chckbxOutputDdins);
 		
 		chckbxGenelevelOnly = new JCheckBox("gene-level only");
@@ -460,7 +461,7 @@ public class PPIXpress_GUI {
 					output_major_transcripts = false;
 			}
 		});
-		chckbxOutputMajorTranscripts.setBounds(680, 407, 205, 30);
+		chckbxOutputMajorTranscripts.setBounds(680, 400, 205, 30);
 		frmPpixpress.getContentPane().add(chckbxOutputMajorTranscripts);
 		activiy_changing_components.add(chckbxOutputMajorTranscripts);
 		
@@ -476,6 +477,11 @@ public class PPIXpress_GUI {
 		chckbxUpdateUniprotAccs.setBounds(74, 112, 220, 30);
 		frmPpixpress.getContentPane().add(chckbxUpdateUniprotAccs);
 		activiy_changing_components.add(chckbxUpdateUniprotAccs);
+		
+		chckboxCompressOutput = new JCheckBox("compress output");
+		chckboxCompressOutput.setBounds(680, 421, 205, 30);
+		frmPpixpress.getContentPane().add(chckboxCompressOutput);
+		activiy_changing_components.add(chckboxCompressOutput);
 		
 		btnReset = new JButton("Reset");
 		activiy_changing_components.add(btnReset);
