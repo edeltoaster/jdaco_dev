@@ -71,7 +71,7 @@ public class build_diff_network {
 		
 		new File(results_root).mkdir();
 		
-		for (File f:new File(network_folder).listFiles()) {
+		for (File f:Utilities.listDirectoriesAndFilesWithinFolder(new File(network_folder))) {
 			
 			if (!f.isDirectory())
 				continue;

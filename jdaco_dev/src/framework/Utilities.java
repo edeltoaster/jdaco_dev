@@ -77,7 +77,7 @@ public class Utilities {
 	public static List<File> getAllMatchingFilesInSubfolders(String path, String filename) {
 		List<File> paths = new LinkedList<>();
 		
-		for (File f:listDirectoriesAndFiles(new File(path))) {
+		for (File f:listAllFilesWithinFolder(new File(path))) {
 			if (f.getName().equals(filename))
 				paths.add(f);
 		}
@@ -98,7 +98,7 @@ public class Utilities {
 	public static List<File> getAllPrefixMatchingFilesInSubfolders(String path, String prefix) {
 		List<File> paths = new LinkedList<>();
 		
-		for (File f:listDirectoriesAndFiles(new File(path))) {
+		for (File f:listAllFilesWithinFolder(new File(path))) {
 			if (f.getName().startsWith(prefix))
 				paths.add(f);
 		}
@@ -119,7 +119,7 @@ public class Utilities {
 	public static List<File> getAllSuffixMatchingFilesInSubfolders(String path, String suffix) {
 		List<File> paths = new LinkedList<>();
 		String gz_suffix = suffix + ".gz";
-		for (File f:listDirectoriesAndFiles(new File(path))) {
+		for (File f:listAllFilesWithinFolder(new File(path))) {
 			if (f.getName().endsWith(suffix) || f.getName().endsWith(gz_suffix))
 				paths.add(f);
 		}
@@ -130,21 +130,37 @@ public class Utilities {
 	}
 	
 	/**
-	 * Lists all files in any folder within the given directory
+	 * Recursively lists all files in any folder within the given directory, excludes hidden files/dirs and those starting with a dot
 	 * @param path
 	 * @return
 	 */
-	private static List<File> listDirectoriesAndFiles(File path) {
+	public static List<File> listAllFilesWithinFolder(File path) {
 		List<File> paths = new LinkedList<>();
 
 		for (File f:path.listFiles()) {
 			if (f.isHidden() || f.getName().startsWith("."))
 				continue;
 			if (f.isDirectory())
-				paths.addAll(listDirectoriesAndFiles(f));
+				paths.addAll(listAllFilesWithinFolder(f));
 			else if (f.isFile()) {
 				paths.add(f);
 			}
+		}
+		return paths;
+	}
+	
+	/**
+	 * Lists files and folders within the given directory, excludes hidden files/dirs and those starting with a dot
+	 * @param path
+	 * @return
+	 */
+	public static List<File> listDirectoriesAndFilesWithinFolder(File path) {
+		List<File> paths = new LinkedList<>();
+
+		for (File f:path.listFiles()) {
+			if (f.isHidden() || f.getName().startsWith("."))
+				continue;
+			paths.add(f);
 		}
 		return paths;
 	}

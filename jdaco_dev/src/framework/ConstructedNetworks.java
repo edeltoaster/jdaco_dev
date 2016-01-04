@@ -175,7 +175,6 @@ public class ConstructedNetworks {
 	 */
 	public static Map<String, ConstructedNetworks> readNetworks(String folder) {
 		Map<String, ConstructedNetworks> data = new HashMap<>();
-		
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(folder, "_ppin.txt")) {
 			String gz = "";
 			if (f.getName().endsWith(".gz"))
