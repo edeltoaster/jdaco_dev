@@ -23,17 +23,15 @@ public class RewiringDetector {
 	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	private Map<String, ConstructedNetworks> group1;
 	private Map<String, ConstructedNetworks> group2;
+	private double P_rew;
+	private double P_rew_std;
 	private double FDR;
 	private boolean strict_denominator = false;
 	private String organism_database = null;
 	private PrintStream verbose;
 	
-	private Map<String, Double> g1_nodes = new HashMap<>();
-	private Map<String, Double> g2_nodes = new HashMap<>();
-	private Map<String, Double> g1_edges = new HashMap<>();
-	private Map<String, Double> g2_edges = new HashMap<>();
-	private Map<String, Double> P_rews = new HashMap<>();
-
+	private List<Double> P_rews_temp = new LinkedList<>();
+	
 	// all detected changes
 	private Map<StrPair, Double> differential_network = new HashMap<>();
 	private Map<Double, Double> rawp2adjp = new HashMap<>();
@@ -194,29 +192,15 @@ public class RewiringDetector {
 		Map<StrPair, Integer> overall_added = new HashMap<>();
 		Map<StrPair, Integer> overall_lost = new HashMap<>();
 
-		// sizes / edges
-		for (String sample:this.group1.keySet()) {
-			PPIN ppin = this.group1.get(sample).getPPIN();
-			this.g1_nodes.put(sample, (double) ppin.getSizes()[0]);
-			this.g1_edges.put(sample, (double) ppin.getSizes()[1]);
-		}
-
-		for (String sample:this.group2.keySet()) {
-			PPIN ppin = this.group2.get(sample).getPPIN();
-			this.g2_nodes.put(sample, (double) ppin.getSizes()[0]);
-			this.g2_edges.put(sample, (double) ppin.getSizes()[1]);
-		}
-
 		// parallel assessment of pairwise differences
 		List<PPIComparatorTask> comparison_calculations = new ArrayList<>( (this.group1.keySet().size()*this.group2.keySet().size()) );
 		for (String sample1:this.group1.keySet())
 			for (String sample2:this.group2.keySet())
 				comparison_calculations.add(new PPIComparatorTask(sample1, sample2));
 
-		ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
-		
 		// for small sample sizes, compute directly
 		if (comparison_calculations.size() < 1000) {
+			ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
 			try {
 				for (Future<Object[]> f:es.invokeAll(comparison_calculations)) {
 					Object[] obj = f.get();
@@ -241,11 +225,13 @@ public class RewiringDetector {
 				e1.printStackTrace();
 				System.exit(1);
 			}
+			es.shutdown();
 		} else { // for large sample sizes: do chunks
 			int n = 0;
 			int s = 0;
 			int all = comparison_calculations.size();
 			for (List<PPIComparatorTask> temp_calculations:Utilities.partitionListIntoChunks(comparison_calculations, 1000)) {
+				ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
 				try {
 					if (this.verbose != null) {
 						this.verbose.println(n + ": " + s + " / " + all);
@@ -276,12 +262,13 @@ public class RewiringDetector {
 					e1.printStackTrace();
 					System.exit(1);
 				}
-				
+				// enforcing to cleanup as much as possible
+				es.shutdown();
+				es = null;
 				Runtime.getRuntime().gc();
 			}
 		}
-		es.shutdown();
-
+		
 		// fill differential network
 		for (StrPair pair:overall_added.keySet())
 			this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0.0) + overall_added.get(pair));
@@ -296,20 +283,25 @@ public class RewiringDetector {
 	private void assessRewiring() {
 		Map<StrPair, Double> test_map = new HashMap<>();
 		Map<Double, LinkedList<StrPair>> p2pair = new HashMap<>();
-		double P_rew = Utilities.getMean(this.P_rews.values());
+		
+		// compute P_rew statistics and delete temporary data
+		this.P_rew = Utilities.getMean(this.P_rews_temp);
+		this.P_rew_std = Utilities.getStd(this.P_rews_temp);
+		this.P_rews_temp.clear();
+		this.P_rews_temp = null;
 
 		// workaround: can happen in VERY FEW cases
-		if (P_rew > 1.0) {
+		if (this.P_rew > 1.0) {
 			System.err.println("P_rew too high, less strict denominator is advised.");
 			return;
 		}
 
-		int groupwise_comparisons = this.group1.size() * this.group2.size();
+		int groupwise_comparisons = this.getNumberOfComparisons();
 
 		for (StrPair pair:this.differential_network.keySet()) {
 			int v = (int) Math.abs(this.differential_network.get(pair));
 
-			double raw_p = binom_test.binomialTest(groupwise_comparisons, v, P_rew, AlternativeHypothesis.GREATER_THAN);
+			double raw_p = binom_test.binomialTest(groupwise_comparisons, v, this.P_rew, AlternativeHypothesis.GREATER_THAN);
 			test_map.put(pair, raw_p);
 			if (!p2pair.containsKey(raw_p))
 				p2pair.put(raw_p, new LinkedList<>());
@@ -398,26 +390,18 @@ public class RewiringDetector {
 		return FDR;
 	}
 
-	public Map<String, Double> getG1Nodes() {
-		return g1_nodes;
+	public double getP_rew() {
+		return P_rew;
 	}
-
-	public Map<String, Double> getG2Nodes() {
-		return g2_nodes;
+	
+	public double getP_rew_std() {
+		return P_rew_std;
 	}
-
-	public Map<String, Double> getG1Edges() {
-		return g1_edges;
+	
+	public int getNumberOfComparisons() {
+		return this.group1.size() * this.group2.size();
 	}
-
-	public Map<String, Double> getG2Edges() {
-		return g2_edges;
-	}
-
-	public Map<String, Double> getP_rews() {
-		return P_rews;
-	}
-
+	
 	/**
 	 * Returns the COMPLETE differential network, not only the significant rewiring events
 	 * @return
@@ -544,7 +528,7 @@ public class RewiringDetector {
 			if (strict_denominator)
 				denominator = Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]);
 
-			P_rews.put(sample1 + "-" + sample2, ( (double) added_interactions.size() + lost_interactions.size() ) / denominator);
+			P_rews_temp.add( ( (double) added_interactions.size() + lost_interactions.size() ) / denominator );
 
 			return new Object[]{added_interactions, lost_interactions};
 		}

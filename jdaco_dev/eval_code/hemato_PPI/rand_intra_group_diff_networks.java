@@ -55,7 +55,7 @@ public class rand_intra_group_diff_networks {
 				}
 				
 				RewiringDetector rd = new RewiringDetector(g1, g2, FDR);
-				P_rews.add( Utilities.getMean(rd.getP_rews().values()) );
+				P_rews.add( rd.getP_rew() );
 				diff_IAs.add( (double) rd.getInteractionReasonsCountMap().keySet().size());
 			}
 			
