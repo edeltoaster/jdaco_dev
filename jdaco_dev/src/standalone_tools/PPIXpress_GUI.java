@@ -479,6 +479,14 @@ public class PPIXpress_GUI {
 		activiy_changing_components.add(chckbxUpdateUniprotAccs);
 		
 		chckboxCompressOutput = new JCheckBox("compress output");
+		chckboxCompressOutput.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (chckboxCompressOutput.isSelected())
+					compress_output = true;
+				else
+					compress_output = false;
+			}
+		});
 		chckboxCompressOutput.setBounds(680, 421, 205, 30);
 		frmPpixpress.getContentPane().add(chckboxCompressOutput);
 		activiy_changing_components.add(chckboxCompressOutput);
@@ -503,6 +511,9 @@ public class PPIXpress_GUI {
 				
 				update_UniProt = false;
 				chckbxUpdateUniprotAccs.setSelected(false);
+				
+				compress_output = false;
+				chckboxCompressOutput.setSelected(false);
 				
 				original_network_path = null;
 				text_ppin.setText("");
@@ -801,7 +812,11 @@ public class PPIXpress_GUI {
 		
 		int step_size = 50 / input_files.size();
 		
-		// process samples
+		
+		/*
+		 * process samples
+		 */
+		
 		int sample_no = 1;
 		matching_files_output.clear();
 		for (String path:input_files) {
@@ -837,9 +852,16 @@ public class PPIXpress_GUI {
 				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance);
 			}
 			
-			// output
-			constr.getPPIN().writePPIN(output_folder + sample_no + "_ppin.txt");
-			match_files += " " + sample_no + "_ppin.txt";
+			
+			/*
+			 * write output
+			 */
+			
+			String file_suffix = "_ppin.txt";
+			if (compress_output)
+				file_suffix += ".gz";
+			constr.getPPIN().writePPIN(output_folder + sample_no + file_suffix);
+			match_files += " " + sample_no + file_suffix;
 			
 			String out = "-> " + constr.getPPIN().getSizesStr() + " (threshold: " + threshold;
 			
@@ -854,13 +876,19 @@ public class PPIXpress_GUI {
 			stream_output.println(out);
 			
 			if (output_DDINs) {
-				constr.getDDIN().writeDDIN(output_folder + sample_no + "_ddin.txt");
-				match_files += " " + sample_no + "_ddin.txt";
+				file_suffix = "_ddin.txt";
+				if (compress_output)
+					file_suffix += ".gz";
+				constr.getDDIN().writeDDIN(output_folder + sample_no + file_suffix);
+				match_files += " " + sample_no + file_suffix;
 			}
 			
 			if (output_major_transcripts) {
-				constr.writeProteinToAssumedTranscriptMap(output_folder + sample_no + "_major-transcripts.txt");
-				match_files += " " + sample_no + "_major-transcripts.txt";
+				file_suffix = "_major-transcripts.txt";
+				if (compress_output)
+					file_suffix += ".gz";
+				constr.writeProteinToAssumedTranscriptMap(output_folder + sample_no + file_suffix);
+				match_files += " " + sample_no + file_suffix;
 			}
 			
 			matching_files_output.add(match_files);

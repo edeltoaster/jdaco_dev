@@ -290,7 +290,11 @@ public class PPIXpress {
 		System.out.println(Math.round(builder.getMappingPercentage() * 10000)/100.0 +"% of protein interactions could be associated with at least one non-artificial domain interaction." );
 		System.out.flush();
 		
-		// process samples
+		
+		/*
+		 * process samples
+		 */
+		
 		int sample_no = 1;
 		for (String path:input_files) {
 			String match_files = path;
@@ -317,7 +321,10 @@ public class PPIXpress {
 				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance);
 			}
 			
-			// output
+			
+			/*
+			 * write output 
+			 */
 			
 			String file_suffix = "_ppin.txt";
 			if (compress_output)
