@@ -248,8 +248,9 @@ public class RewiringDetector {
 					}
 					n++;
 					s += temp_calculations.size();
+					Object[] obj = null;
 					for (Future<Object[]> f:es.invokeAll(temp_calculations)) {
-						Object[] obj = f.get();
+						obj = f.get();
 		
 						// added interactions
 						for (StrPair pair: (Set<StrPair>) obj[0]) {
@@ -272,6 +273,7 @@ public class RewiringDetector {
 						obj[0] = null;
 						obj[1] = null;
 						obj[2] = null;
+						obj = null;
 					}
 				} catch (Exception e1) {
 					System.err.println("Problem during assessment of groupwise differences.");
@@ -286,6 +288,11 @@ public class RewiringDetector {
 			}
 		}
 		
+		if (this.verbose != null) {
+			this.verbose.println("Building complete differential network ...");
+			this.verbose.flush();
+		}
+		
 		// fill differential network
 		for (StrPair pair:overall_added.keySet())
 			this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0.0) + overall_added.get(pair));
@@ -298,6 +305,12 @@ public class RewiringDetector {
 	}
 
 	private void assessRewiring() {
+		
+		if (this.verbose != null) {
+			this.verbose.println("Assessing significance of rewiring ...");
+			this.verbose.flush();
+		}
+		
 		Map<StrPair, Double> test_map = new HashMap<>();
 		Map<Double, LinkedList<StrPair>> p2pair = new HashMap<>();
 		
