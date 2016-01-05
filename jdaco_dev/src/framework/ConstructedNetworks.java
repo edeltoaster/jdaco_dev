@@ -186,6 +186,9 @@ public class ConstructedNetworks {
 			data.put(sample, cn);
 		}
 		
+		// clean memory before objects are not "young" anymore
+		System.gc();
+		
 		return data;
 	}
 }
