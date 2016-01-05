@@ -27,7 +27,7 @@ public class RewiringDetector {
 	private double P_rew_std;
 	private double FDR;
 	private boolean strict_denominator = false;
-	private String organism_database = null;
+	private String organism_database;
 	private PrintStream verbose;
 	
 	private List<Double> P_rews_temp = new LinkedList<>();
@@ -221,14 +221,20 @@ public class RewiringDetector {
 					
 					// P_rew
 					P_rews_temp.add((double) obj[2]);
-	
+					
+					// helping GC
+					obj[0] = null;
+					obj[1] = null;
+					obj[2] = null;
 				}
 			} catch (Exception e1) {
 				System.err.println("Problem during assessment of groupwise differences.");
 				e1.printStackTrace();
 				System.exit(1);
 			}
+			
 			es.shutdown();
+			
 		} else { // for large sample sizes: do chunks
 			int n = 0;
 			int s = 0;
@@ -261,13 +267,18 @@ public class RewiringDetector {
 						
 						// P_rew
 						P_rews_temp.add((double) obj[2]);
-		
+						
+						// helping GC
+						obj[0] = null;
+						obj[1] = null;
+						obj[2] = null;
 					}
 				} catch (Exception e1) {
 					System.err.println("Problem during assessment of groupwise differences.");
 					e1.printStackTrace();
 					System.exit(1);
 				}
+				
 				// enforcing to cleanup as much as possible
 				es.shutdown();
 				es = null;

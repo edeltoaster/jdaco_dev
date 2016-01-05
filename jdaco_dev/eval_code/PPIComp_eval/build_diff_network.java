@@ -12,6 +12,7 @@ import framework.StrPair;
 
 public class build_diff_network {
 	
+	static int no_threads = 32;
 	static double FDR = 0.05;
 	// needs to be run on server
 	static String network_folder = "BRCA_networks/";
@@ -37,7 +38,7 @@ public class build_diff_network {
 			Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
 			
 			System.out.println("start processing");
-			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, 32, System.out);
+			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, no_threads, System.out);
 			
 			System.out.println("start output");
 			rd.writeDiffnet(results_folder + state1 + "_" + state2 + ".txt");

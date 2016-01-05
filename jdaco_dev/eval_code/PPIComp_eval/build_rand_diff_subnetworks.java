@@ -15,6 +15,7 @@ import framework.StrPair;
 
 public class build_rand_diff_subnetworks {
 	
+	static int no_threads = 32;
 	static double FDR = 0.05;
 	static double fraction = 0.5;
 	static int min_size = 3;
@@ -67,7 +68,7 @@ public class build_rand_diff_subnetworks {
 				Map<String, ConstructedNetworks> g2s = getRandomSubset(g2, min_size, fraction);
 				
 				System.out.println("start RD calculations for " + i);
-				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, 32, System.out);
+				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, System.out);
 				
 				System.out.println("start output of " + i);
 				rd.writeDiffnet(results_folder + run_id + ".txt");
