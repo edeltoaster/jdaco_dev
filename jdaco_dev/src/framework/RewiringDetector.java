@@ -218,6 +218,9 @@ public class RewiringDetector {
 							overall_lost.put(pair, 0);
 						overall_lost.put(pair, overall_lost.get(pair) + 1 );
 					}
+					
+					// P_rew
+					P_rews_temp.add((double) obj[2]);
 	
 				}
 			} catch (Exception e1) {
@@ -255,6 +258,9 @@ public class RewiringDetector {
 								overall_lost.put(pair, 0);
 							overall_lost.put(pair, overall_lost.get(pair) + 1 );
 						}
+						
+						// P_rew
+						P_rews_temp.add((double) obj[2]);
 		
 					}
 				} catch (Exception e1) {
@@ -528,9 +534,7 @@ public class RewiringDetector {
 			if (strict_denominator)
 				denominator = Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]);
 
-			P_rews_temp.add( ( (double) added_interactions.size() + lost_interactions.size() ) / denominator );
-
-			return new Object[]{added_interactions, lost_interactions};
+			return new Object[]{added_interactions, lost_interactions, ( (double) added_interactions.size() + lost_interactions.size() ) / denominator};
 		}
 
 	}
