@@ -33,7 +33,7 @@ public class RewiringDetector {
 	private List<Double> P_rews_temp = new LinkedList<>();
 	
 	// all detected changes
-	private Map<StrPair, Double> differential_network = new HashMap<>();
+	private Map<StrPair, Integer> differential_network = new HashMap<>();
 	private Map<Double, Double> rawp2adjp = new HashMap<>();
 
 	// only stored for significant detected changes
@@ -77,6 +77,8 @@ public class RewiringDetector {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
+		this.no_threads = no_threads;
+		this.verbose = verbose;
 		
 		this.determineGroupwiseDifferences();
 		this.assessRewiring();
@@ -103,9 +105,7 @@ public class RewiringDetector {
 	
 	@SuppressWarnings("unchecked")
 	private void determineGroupwiseDifferences() {
-		Map<StrPair, Integer> overall_added = new HashMap<>();
-		Map<StrPair, Integer> overall_lost = new HashMap<>();
-
+		
 		// parallel assessment of pairwise differences
 		List<PPIComparatorTask> comparison_calculations = new ArrayList<>( getNumberOfComparisons() );
 		for (String sample1:this.group1.keySet())
@@ -120,18 +120,12 @@ public class RewiringDetector {
 					Object[] obj = f.get();
 	
 					// added interactions
-					for (StrPair pair: (Set<StrPair>) obj[0]) {
-						if(!overall_added.containsKey(pair))
-							overall_added.put(pair, 0);
-						overall_added.put(pair, overall_added.get(pair) + 1 );
-					}
-	
+					for (StrPair pair: (Set<StrPair>) obj[0]) 
+						this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0) + 1);
+					
 					// lost interactions
-					for (StrPair pair: (Set<StrPair>) obj[1]) {
-						if(!overall_lost.containsKey(pair))
-							overall_lost.put(pair, 0);
-						overall_lost.put(pair, overall_lost.get(pair) + 1 );
-					}
+					for (StrPair pair: (Set<StrPair>) obj[1])
+						this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0) - 1);
 					
 					// P_rew
 					P_rews_temp.add((double) obj[2]);
@@ -167,18 +161,12 @@ public class RewiringDetector {
 						obj = f.get();
 		
 						// added interactions
-						for (StrPair pair: (Set<StrPair>) obj[0]) {
-							if(!overall_added.containsKey(pair))
-								overall_added.put(pair, 0);
-							overall_added.put(pair, overall_added.get(pair) + 1 );
-						}
-		
+						for (StrPair pair: (Set<StrPair>) obj[0]) 
+							this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0) + 1);
+						
 						// lost interactions
-						for (StrPair pair: (Set<StrPair>) obj[1]) {
-							if(!overall_lost.containsKey(pair))
-								overall_lost.put(pair, 0);
-							overall_lost.put(pair, overall_lost.get(pair) + 1 );
-						}
+						for (StrPair pair: (Set<StrPair>) obj[1])
+							this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0) - 1);
 						
 						// P_rew
 						P_rews_temp.add((double) obj[2]);
@@ -206,16 +194,9 @@ public class RewiringDetector {
 			this.verbose.println("Building complete differential network ...");
 			this.verbose.flush();
 		}
-		
-		// fill differential network
-		for (StrPair pair:overall_added.keySet())
-			this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0.0) + overall_added.get(pair));
-
-		for (StrPair pair:overall_lost.keySet())
-			this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0.0) - overall_lost.get(pair));
 
 		// clean from zeros (results of +1 and -1 ...)
-		this.differential_network.entrySet().removeIf( e -> e.getValue().equals(0.0));
+		this.differential_network.entrySet().removeIf( e -> e.getValue().equals(0));
 	}
 
 	private void assessRewiring() {
@@ -243,7 +224,7 @@ public class RewiringDetector {
 		int groupwise_comparisons = this.getNumberOfComparisons();
 
 		for (StrPair pair:this.differential_network.keySet()) {
-			int v = (int) Math.abs(this.differential_network.get(pair));
+			int v = Math.abs(this.differential_network.get(pair));
 
 			double raw_p = binom_test.binomialTest(groupwise_comparisons, v, this.P_rew, AlternativeHypothesis.GREATER_THAN);
 			test_map.put(pair, raw_p);
@@ -433,8 +414,8 @@ public class RewiringDetector {
 	 * Returns the COMPLETE differential network, not only the significant rewiring events
 	 * @return
 	 */
-	public Map<StrPair, Double> getDifferentialNetwork() {
-		return differential_network;
+	public Map<StrPair, Integer> getDifferentialNetwork() {
+		return this.differential_network;
 	}
 
 	public List<StrPair> getSignificantlyRewiredInteractions() {
@@ -463,7 +444,7 @@ public class RewiringDetector {
 			if (this.interaction_direction_map.get(pair))
 				sign = "+";
 
-			double v = this.differential_network.get(pair);
+			int v = this.differential_network.get(pair);
 			double p = this.interaction_p_map.get(pair);
 			List<String> sorted_reasons = this.interaction_sorted_reasons_map.get(pair);
 			double AS_fraction = this.interaction_alt_splicing_fraction_map.get(pair);
