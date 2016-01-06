@@ -381,7 +381,7 @@ public class RewiringDetector {
 						String reason = checkReason(addition, pair, sample1, sample2);
 						if (!reasons.containsKey(reason))
 							reasons.put(reason, new LinkedList<>());
-						reasons.get(reason).add(sample1 + "-" + sample2);
+						reasons.get(reason).add(sample1 + "-" + sample2); // TODO: check and eliminate
 					}
 
 				this.interaction_reasons_map.put(pair, reasons);

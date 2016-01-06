@@ -51,8 +51,8 @@ public class DDIN {
 		Map<String, List<String>> ddis = new HashMap<>();
 		
 		// read file
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -90,12 +90,17 @@ public class DDIN {
 				}
 			}
 			
-			in.close();
 		} catch (Exception e) {
 			if (e instanceof FileNotFoundException)
 				System.err.println("Problem while opening domain interaction network " + file + ".");
 			else
 				System.err.println("Problem while parsing domain interaction network " + file + ".");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+				// no output necessary at this point
+			}
 		}
 		
 		this.ddis = new HashMap<>();

@@ -63,8 +63,8 @@ public class PPIN {
 	 * @param cutoff
 	 */
 	private void readPPINFile(String file, double cutoff) {
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -73,10 +73,10 @@ public class PPIN {
 			// parsing
 			processPPINInput(in, cutoff);
 			
-			in.close();
 		} catch (Exception e) {
 			System.err.println("Problem while opening/parsing " + file + ".");
 		}
+		// stream is always closed in processPPINInput()
 	}
 	
 	/**
@@ -169,9 +169,14 @@ public class PPIN {
 				this.weights.put(new StrPair(p1, p2), w);
 			}
 			
-			in.close();
 		} catch (Exception e) {
 			System.err.println("Problem while parsing protein interaction network.");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+				// any output not helpful
+			}
 		}
 	}
 	

@@ -42,8 +42,8 @@ public class Utilities {
 	 */
 	public static HashSet<String> readEntryFile(String in_file) {
 		HashSet<String> input = new HashSet<>();
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (in_file.endsWith(".gz") || in_file.endsWith(".gzip"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(in_file))));
 			else
@@ -55,12 +55,18 @@ public class Utilities {
 					continue;
 				input.add(line.trim());
 			}
-			in.close();
+			
 		} catch (Exception e) {
 			if (e instanceof FileNotFoundException)
 				System.err.println("Problem while opening file " + in_file + ".");
 			else
 				System.err.println("Problem while parsing file " + in_file + ".");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+				// not helpful to have any output here
+			}
 		}
 		
 		return input;
@@ -170,9 +176,8 @@ public class Utilities {
 	 * @param file
 	 */
 	public static void writeEntries(Collection<String> data, String file) {
+		BufferedWriter bw = null;
 		try {
-			
-			BufferedWriter bw = null;
 			if (file.endsWith(".gz") || file.endsWith(".gzip"))
 				bw = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(file))));
 			else
@@ -185,6 +190,12 @@ public class Utilities {
 			bw.close();
 		} catch (IOException e) {
 			System.err.println("Problem while trying to write " + file);
+		} finally {
+			try {
+				bw.close();
+			} catch (Exception e) {
+				// not helpful to add something here
+			}
 		}
 	}
 	

@@ -2,6 +2,7 @@ package framework;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -70,11 +71,12 @@ public class DataQuery {
 	public static String getOrganismFromUniprot(String uniprot_acc) {
 		
 		String organism = "";
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("http://www.uniprot.org/uniprot/"+uniprot_acc+".txt");
 			URLConnection connection = server.openConnection();
 			// read
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -86,7 +88,7 @@ public class DataQuery {
 					break;
 				}
 			}
-			datastream.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("UniProt");
@@ -98,6 +100,13 @@ public class DataQuery {
 				e1.printStackTrace();
 			}
 			return getOrganismFromUniprot(uniprot_acc);
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+				// no output worthwhile
+			}
 		}
 		
 		return organism;
@@ -111,12 +120,13 @@ public class DataQuery {
 	public static String getTaxonFromUniprot(String uniprot_acc) {
 		
 		String taxon = "";
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("http://www.uniprot.org/uniprot/"+uniprot_acc+".txt");
 			URLConnection connection = server.openConnection();
 			
 			// read
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -129,7 +139,7 @@ public class DataQuery {
 					break;
 				}
 			}
-			datastream.close();
+
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("UniProt");
@@ -140,6 +150,13 @@ public class DataQuery {
 			} catch (InterruptedException e1) {
 			}
 			return getTaxonFromUniprot(uniprot_acc);
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (IOException e) {
+				// no output necessary
+			}
 		}
 		
 		return taxon;
@@ -173,12 +190,13 @@ public class DataQuery {
 	public static String getOrganismFromTaxon(String taxon_id) {
 		
 		String organism = "";
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("http://www.uniprot.org/taxonomy/"+taxon_id+".rdf");
 			URLConnection connection = server.openConnection();
 			
 			// read
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -189,7 +207,7 @@ public class DataQuery {
 				organism = organism.replace("</scientificName>", "");
 				break;
 			}
-			datastream.close();
+
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("UniProt");
@@ -200,6 +218,13 @@ public class DataQuery {
 			} catch (InterruptedException e1) {
 			}
 			return getOrganismFromTaxon(taxon_id);
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+				// no output necessary
+			}
 		}
 		
 		return organism;
@@ -217,8 +242,9 @@ public class DataQuery {
 		
 		String query = "'"+organism.split(" ")[0].toLowerCase()+"\\_"+organism.split(" ")[1].toLowerCase()+"\\_core\\_%\\_%'";
 		String db = "";
+		Connection connection = null;
 		try {
-			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("show databases like "+query);
@@ -236,7 +262,7 @@ public class DataQuery {
 						break; // db will be the right one or the newest
 				}
 			}
-			connection.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
@@ -250,6 +276,13 @@ public class DataQuery {
 			DataQuery.switchServer();
 			
 			return getEnsemblOrganismDatabaseFromName(organism);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+				// no output necessary
+			}
 		}
 		
 		DataQuery.cache_ensembl_db.put(organism, db);
@@ -296,8 +329,10 @@ public class DataQuery {
 		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
 			return DataQuery.cache_genestransprots.get(organism_core_database);
 		List<String[]> associations = new LinkedList<>();
+		
+		Connection connection = null;
 		try {
-			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id, xref.dbprimary_acc "
@@ -307,7 +342,7 @@ public class DataQuery {
 				String[] row = {rs.getString(1), rs.getString(2), rs.getString(3)};
 				associations.add(row);
 			}
-			connection.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
@@ -321,6 +356,12 @@ public class DataQuery {
 			DataQuery.switchServer();
 			
 			return getGenesTranscriptsProteins(organism_core_database);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		DataQuery.cache_genestransprots.put(organism_core_database, associations);
@@ -338,8 +379,9 @@ public class DataQuery {
 			return DataQuery.cache_ensembl_names.get(organism_core_database);
 		
 		Map<String,String> gene_to_names = new HashMap<>();
+		Connection connection = null;
 		try {
-			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, xref.display_label "
@@ -348,7 +390,7 @@ public class DataQuery {
 			while (rs.next()) {
 				gene_to_names.put(rs.getString(1), rs.getString(2));
 			}
-			connection.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
@@ -362,6 +404,12 @@ public class DataQuery {
 			DataQuery.switchServer();
 			
 			return getGenesCommonNames(organism_core_database);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		// store in cache
@@ -382,9 +430,9 @@ public class DataQuery {
 			return DataQuery.cache_ensembl_proteins.get(organism_core_database);
 		
 		Map<String, List<String>> ensembl_to_uniprot = new HashMap<>();
-		
+		Connection connection = null;
 		try {
-			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT translation.stable_id, xref.dbprimary_acc "
@@ -395,7 +443,7 @@ public class DataQuery {
 					ensembl_to_uniprot.put(rs.getString(1), new LinkedList<String>());
 				ensembl_to_uniprot.get(rs.getString(1)).add(rs.getString(2));
 			}
-			connection.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
@@ -409,6 +457,11 @@ public class DataQuery {
 			DataQuery.switchServer();
 			
 			return getEnsemblToAllUniprotProteins(organism_core_database);
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		// store in cache
@@ -430,12 +483,13 @@ public class DataQuery {
 		
 		// queries HGNC
 		List<String[]> entries = new LinkedList<>();
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("http://www.genenames.org/cgi-bin/download?col=gd_app_sym&col=md_prot_id&col=md_ensembl_id&status=Approved&status_opt=2&where=&order_by=gd_app_sym_sort&format=text&limit=&submit=submit");
 			URLConnection connection = server.openConnection();
 			
 			// read
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -446,7 +500,7 @@ public class DataQuery {
 					temp = new String[]{temp[0],"",""};
 				entries.add(temp);
 			}
-			datastream.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("HGNC");
@@ -458,6 +512,12 @@ public class DataQuery {
 			}
 			
 			return getHGNCProteinsGenes();
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		// store
@@ -487,12 +547,13 @@ public class DataQuery {
 		String query_xml = "<!DOCTYPE Query><Query client=\"true\" processor=\"TSV\" limit=\"-1\" header=\"1\"><Dataset name=\"uniprot\" config=\"uniprot_config\"><Filter name=\"ensembl_id\" value=\"" + genes + "\" filter_list=\"\"/><Filter name=\"entry_type\" value=\"Swiss-Prot\" filter_list=\"\"/><Attribute name=\"accession\"/><Attribute name=\"ensembl_id\"/></Dataset></Query>";
 		Map<String, String> up_ens_map = new HashMap<>();
 		
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("http://www.biomart.org/biomart/martservice?query="+ URLEncoder.encode(query_xml, "UTF-8"));
 			URLConnection connection = server.openConnection();
 			
 			// read
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -507,7 +568,7 @@ public class DataQuery {
 				String ens = temp[1];
 				up_ens_map.put(ens, up);
 			}
-			datastream.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("BioMART");
@@ -519,7 +580,14 @@ public class DataQuery {
 			}
 			
 			return getUniprotFromEnsemblGenes(ensembl_genes);
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
 		}
+		
 		return up_ens_map;
 	}
 	
@@ -539,8 +607,9 @@ public class DataQuery {
 		for (String data[]:getGenesTranscriptsProteins(organism_core_database)) 
 			allowed_transcript.add(data[1]);
 		
+		Connection connection = null;
 		try {
-			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/" + organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/" + organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, xref.dbprimary_acc "
@@ -555,7 +624,7 @@ public class DataQuery {
 				
 				ucsc_to_ensembl.put(ucsc, transcript);
 			}
-			connection.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
@@ -569,6 +638,12 @@ public class DataQuery {
 			DataQuery.switchServer();
 			
 			return getUSCStoTranscriptMap(organism_core_database);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		// add to cache
@@ -590,8 +665,9 @@ public class DataQuery {
 		Map<String, String> longest_transcript = new HashMap<>();
 		Map<String, Integer> longest_length = new HashMap<>();
 		
+		Connection connection = null;
 		try {
-			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, xref.dbprimary_acc, translation_attrib.value "
@@ -615,7 +691,7 @@ public class DataQuery {
 				}
 				
 			}
-			connection.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
@@ -629,6 +705,12 @@ public class DataQuery {
 			DataQuery.switchServer();
 			
 			return getIsoformTranscriptsOfProteins(organism_core_database);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		DataQuery.cache_isoformtranscr.put(organism_core_database, longest_transcript);
@@ -646,8 +728,9 @@ public class DataQuery {
 			return DataQuery.cache_transcrdom.get(organism_core_database);
 		
 		Map <String, List<String>> transcript_domain_mapping = new HashMap<>();
+		Connection connection = null;
 		try {
-			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, protein_feature.hit_name, protein_feature.hit_start, protein_feature.hit_end "
@@ -658,7 +741,7 @@ public class DataQuery {
 					transcript_domain_mapping.put(rs.getString(1), new LinkedList<String>());
 				transcript_domain_mapping.get(rs.getString(1)).add(rs.getString(2));
 			}
-			connection.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
@@ -672,6 +755,12 @@ public class DataQuery {
 			DataQuery.switchServer();
 			
 			return getTranscriptsDomains(organism_core_database);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		// sort for faster checks later
@@ -742,12 +831,13 @@ public class DataQuery {
 	public static Set<String> getProteinsWithGO(String GO_id, String taxon, boolean include_IEA, boolean only_experimental) {
 		
 		Set<String> entries = new HashSet<>();
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("http://www.ebi.ac.uk/QuickGO/GAnnotation?format=tsv&gz=true&limit=-1&db=UniProtKB&tax="+ taxon +"&goid=" + GO_id);
 			URLConnection connection = server.openConnection();
 			
 			// read
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())));
+			datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -763,7 +853,7 @@ public class DataQuery {
 					continue;
 				entries.add(temp[1]);
 			}
-			datastream.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("QuickGO");
@@ -775,6 +865,12 @@ public class DataQuery {
 			}
 			
 			return getProteinsWithGO(GO_id, taxon, include_IEA, only_experimental);
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		return entries;
@@ -806,6 +902,7 @@ public class DataQuery {
 		String organism_core_database = getEnsemblOrganismDatabaseFromName(getOrganismFromTaxon(taxon_id));
 		Map<String, List<String>> ensembl_to_uniprots = DataQuery.getEnsemblToAllUniprotProteins(organism_core_database);
 		
+		BufferedReader datastream = null;
 		try {
 			// URL is version-dependent
 			String version = DataQuery.STRING_version.split("\\.")[0];
@@ -815,7 +912,7 @@ public class DataQuery {
 			URLConnection connection = server.openConnection();
 			
 			// read and build pipe
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())));
+			datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -832,7 +929,7 @@ public class DataQuery {
 					for (String up2:ensembl_to_uniprots.get(protein2))
 						output.append(up1 + " " + up2 + " " + P + "\n");
 			}
-			datastream.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("STRING");
@@ -844,9 +941,15 @@ public class DataQuery {
 			}
 			
 			return getSTRINGNetwork(taxon_id);
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
 		}
 		
-		// convert
+		// convert, stream is closed in PPIN constructor
 		InputStream inputStream = new ByteArrayInputStream(output.toString().getBytes(Charset.forName("UTF-8")));
 		
 		// build
@@ -877,12 +980,13 @@ public class DataQuery {
 		
 		StringBuilder output = new StringBuilder();
 		String line = null;
+		ZipInputStream zis = null;
 		try {
 			URL server = new URL("ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact.zip");
 			URLConnection connection = server.openConnection();
 			
 			// read and build pipe
-			ZipInputStream zis = new ZipInputStream(connection.getInputStream());
+			zis = new ZipInputStream(connection.getInputStream());
 			ZipEntry file_in_zip = null;
 			
 			// for percentage output
@@ -938,7 +1042,7 @@ public class DataQuery {
 					datastream.close();
 					break;
 				}
-			zis.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("IntAct");
@@ -950,9 +1054,15 @@ public class DataQuery {
 			}
 			
 			return getIntActNetwork(taxon_id, ps);
+			
+		} finally {
+			try {
+				zis.close();
+			} catch (Exception e) {
+			}
 		}
 		
-		// convert
+		// convert, stream closed in PPIN constructor
 		InputStream inputStream = new ByteArrayInputStream(output.toString().getBytes(Charset.forName("UTF-8")));
 		
 		// build
@@ -980,6 +1090,7 @@ public class DataQuery {
 		StringBuilder output = new StringBuilder();
 		String line = null;
 		
+		ZipInputStream zis = null;
 		try {
 			// get actual filename
 			URL server = new URL("http://irefindex.org/download/irefindex/data/current/psi_mitab/MITAB2.6/");
@@ -1004,7 +1115,7 @@ public class DataQuery {
 			output = new StringBuilder();
 			
 			// read and build pipe
-			ZipInputStream zis = new ZipInputStream(connection.getInputStream());
+			zis = new ZipInputStream(connection.getInputStream());
 			ZipEntry file_in_zip = null;
 			
 			
@@ -1057,10 +1168,9 @@ public class DataQuery {
 
 						output.append(p1[1].split("-")[0] + " " + p2[1].split("-")[0] + "\n");
 					}
-					datastream.close();
 					break;
 				}
-			zis.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("iRefIndex");
@@ -1072,9 +1182,15 @@ public class DataQuery {
 			}
 			
 			return getIRefIndexNetwork(taxon_id, ps);
+			
+		} finally {
+			try {
+				zis.close();
+			} catch (Exception e) {
+			}
 		}
 		
-		// convert
+		// convert, stream closed in PPIN constructor
 		InputStream inputStream = new ByteArrayInputStream(output.toString().getBytes(Charset.forName("UTF-8")));
 		
 		// build
@@ -1094,12 +1210,13 @@ public class DataQuery {
 			return DataQuery.uniprot_sec_accs;
 		
 		Map<String, String> sec_to_primary = new HashMap<>();
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("ftp://ftp.uniprot.org/pub/databases/uniprot/knowledgebase/docs/sec_ac.txt");
 			URLConnection connection = server.openConnection();
 			
 			// read and build pipe
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
 			
 			boolean no_data_yet = true;
@@ -1123,7 +1240,7 @@ public class DataQuery {
 				String[] temp = line.trim().split("\\s+");
 				sec_to_primary.put(temp[0], temp[1]);
 			}
-			datastream.close();
+			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("UniProt");
@@ -1135,6 +1252,12 @@ public class DataQuery {
 			}
 			
 			return getUniprotSecondaryAccMap();
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
 		}
 			
 		// write to cache
@@ -1332,8 +1455,10 @@ public class DataQuery {
 	 */
 	public static HashMap<String, HashSet<String>> getDOMINE() {
 		HashMap<String, HashSet<String>> ddis = new HashMap<>();
+		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(DataQuery.class.getResourceAsStream("/data/DOMINE_2.0_HC.txt.gz"))));
+			in = new BufferedReader(new InputStreamReader(new GZIPInputStream(DataQuery.class.getResourceAsStream("/data/DOMINE_2.0_HC.txt.gz"))));
 			while (in.ready()) {
 				String line = in.readLine();
 				if (line.startsWith("PFAM1"))
@@ -1357,10 +1482,16 @@ public class DataQuery {
 				ddis.get(d2).add(d1);
 			}
 			
-			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+			
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
+		
 		return ddis;
 	}
 	
@@ -1375,8 +1506,9 @@ public class DataQuery {
 		if (stricter_local_DDIs)
 			threshold = 0.329;
 		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(DataQuery.class.getResourceAsStream("/data/IDDI_1.0_90.txt.gz"))));
+			in = new BufferedReader(new InputStreamReader(new GZIPInputStream(DataQuery.class.getResourceAsStream("/data/IDDI_1.0_90.txt.gz"))));
 			while (in.ready()) {
 				String line = in.readLine();
 				if (line.startsWith("PFAM1"))
@@ -1398,10 +1530,16 @@ public class DataQuery {
 				ddis.get(d2).add(d1);
 			}
 			
-			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+			
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
+		
 		return ddis;
 	}
 	
@@ -1410,12 +1548,14 @@ public class DataQuery {
 	 */
 	public static String getIPfamVersion() {
 		String version_string = "";
+		
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("ftp://selab.janelia.org/pub/ipfam/Current_Release/relnotes.txt");
 			URLConnection connection = server.openConnection();
 			
 			// read
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -1428,7 +1568,7 @@ public class DataQuery {
 					break;
 				}
 			}
-			datastream.close();
+
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("iPfam");
@@ -1441,6 +1581,12 @@ public class DataQuery {
 			}
 			
 			return getIPfamVersion();
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		return version_string;
@@ -1454,12 +1600,13 @@ public class DataQuery {
 
 		HashMap<String, HashSet<String>> ddis = new HashMap<>();
 		
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("ftp://selab.janelia.org/pub/ipfam/Current_Release/heterodomain_interaction.csv");
 			URLConnection connection = server.openConnection();
 			
 			// read
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -1500,9 +1647,7 @@ public class DataQuery {
 					ddis.put(d1, new HashSet<String>());
 				ddis.get(d1).add(d1);
 			}
-			
-			datastream.close();
-			
+						
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("iPfam");
@@ -1515,6 +1660,12 @@ public class DataQuery {
 			}
 			
 			return getIPfam();
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		return ddis;
@@ -1526,6 +1677,7 @@ public class DataQuery {
 	public static String get3didVersion() {
 		String version_string = "unknown";
 		Date date = null;
+		
 		try {
 			URL server = new URL("http://3did.irbbarcelona.org/download/" + DataQuery.specific_3did_release + "/3did_flat.gz");
 			URLConnection connection = server.openConnection();
@@ -1542,7 +1694,7 @@ public class DataQuery {
 			}
 			
 			return get3didVersion();
-		}
+		} 
 		
 		if (date != null) {
 			String[] temp = date.toString().split("\\s+");
@@ -1560,12 +1712,13 @@ public class DataQuery {
 		
 		HashMap<String, HashSet<String>> ddis = new HashMap<>();
 		
+		BufferedReader datastream = null;
 		try {
 			URL server = new URL("http://3did.irbbarcelona.org/download/" + DataQuery.specific_3did_release + "/3did_flat.gz");
 			URLConnection connection = server.openConnection();
 			
 			// read
-			BufferedReader datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())));
+			datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -1587,8 +1740,6 @@ public class DataQuery {
 				ddis.get(d2).add(d1);
 			}
 			
-			datastream.close();
-			
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("3did");
@@ -1601,14 +1752,14 @@ public class DataQuery {
 			}
 			
 			return get3did();
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
 		}
 
 		return ddis;
-	}
-	
-	public static void main(String[] args) {
-		String db = getEnsemblOrganismDatabaseFromName("homo sapiens");
-		System.out.println(db);
-		System.out.println(getGenesTranscriptsProteins(db));
 	}
 }

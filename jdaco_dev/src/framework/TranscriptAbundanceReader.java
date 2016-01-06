@@ -28,8 +28,8 @@ public class TranscriptAbundanceReader {
 		Map<String, Float> transcript_abundance = new HashMap<>();
 		Map<String, Float> gene_abundance = new HashMap<>();
 		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -54,9 +54,14 @@ public class TranscriptAbundanceReader {
 					gene_abundance.put(gene, 0f);
 				gene_abundance.put(gene, gene_abundance.get(gene) + fpkm);
 			}
-			in.close();
+			
 		} catch (Exception e) {
 			System.err.println("Problem while trying to parse Cufflinks FPKM file.");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		if (return_gene_level)
@@ -79,8 +84,8 @@ public class TranscriptAbundanceReader {
 		int transcript_index = 0;
 		int gene_index = 1;
 		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -114,9 +119,14 @@ public class TranscriptAbundanceReader {
 					gene_abundance.put(gene, 0f);
 				gene_abundance.put(gene, gene_abundance.get(gene) + tpm);
 			}
-			in.close();
+			
 		} catch (Exception e) {
 			System.err.println("Problem while trying to parse RSEM file.");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		if (return_gene_level)
@@ -135,8 +145,8 @@ public class TranscriptAbundanceReader {
 	public static Map<String, Float> readKallistoFile(String file, double threshold) {
 		Map<String, Float> transcript_abundance = new HashMap<>();
 		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz") || file.endsWith(".gzip"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -158,9 +168,14 @@ public class TranscriptAbundanceReader {
 				
 				transcript_abundance.put(transcript, tpm);
 			}
-			in.close();
+
 		} catch (Exception e) {
 			System.err.println("Problem while trying to parse Kallisto file.");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		return transcript_abundance;
@@ -213,8 +228,8 @@ public class TranscriptAbundanceReader {
 		Map<String, Float> transcript_abundance = new HashMap<>();
 		Map<String, Float> gene_abundance = new HashMap<>();
 		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -272,9 +287,14 @@ public class TranscriptAbundanceReader {
 					gene_abundance.put(gene, 0f);
 				gene_abundance.put(gene, gene_abundance.get(gene) + fpkm);
 			}
-			in.close();
+
 		} catch (Exception e) {
 			System.err.println("Problem while trying to parse Gencode GTF file.");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		if (return_gene_level)
@@ -295,8 +315,8 @@ public class TranscriptAbundanceReader {
 		Map<String, Float> transcript_abundance = new HashMap<>();
 		int max_sample_count = 1;
 		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -357,10 +377,15 @@ public class TranscriptAbundanceReader {
 				
 				transcript_abundance.put(transcript, fpkm);
 			}
-			in.close();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		transcript_abundance.put("no_samples", (float) max_sample_count);
@@ -390,8 +415,8 @@ public class TranscriptAbundanceReader {
 	public static Map<String, Float> readExpressionFile(String file, double threshold, String organism_database, boolean header) {
 		Map<String, Float> abundance = new HashMap<>();
 		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -415,9 +440,14 @@ public class TranscriptAbundanceReader {
 				
 				abundance.put(transcript, expr);
 			}
-			in.close();
+
 		} catch (Exception e) {
 			System.err.println("Problem while trying to parse expression file.");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		if (organism_database != null) {
@@ -521,8 +551,8 @@ public class TranscriptAbundanceReader {
 		String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
 		Map<String, String> ucsc_to_ensembl = DataQuery.getUSCStoTranscriptMap(db);
 		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -550,9 +580,14 @@ public class TranscriptAbundanceReader {
 				abundance.put(transcript, Math.max(abundance.get(transcript), rsem) );
 				
 			}
-			in.close();
+
 		} catch (Exception e) {
 			System.err.println("Problem while trying to parse TCGA file.");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		// if gene-level wanted: convert
@@ -615,8 +650,9 @@ public class TranscriptAbundanceReader {
 				continue;
 			HGCN_to_ensembl.put(entry[0], entry[2]);
 		}
+		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -638,9 +674,14 @@ public class TranscriptAbundanceReader {
 				if (HGCN_to_ensembl.containsKey(HGCN))
 					gene_abundance.put(HGCN_to_ensembl.get(HGCN), rsem);
 			}
-			in.close();
+
 		} catch (Exception e) {
 			System.err.println("Problem while trying to parse TCGA file.");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		return gene_abundance;
@@ -750,10 +791,12 @@ public class TranscriptAbundanceReader {
 	 * @return type of file
 	 */
 	public static String inferTranscriptAbundanceFileType(String file) {
+		
+		BufferedReader in = null;
 		try {
 			boolean second_row = false;
 			String may_be = "";
-			BufferedReader in = null;
+			
 			if (file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
 			else
@@ -838,10 +881,15 @@ public class TranscriptAbundanceReader {
 				}
 				
 			}
-			in.close();
+			
 		} catch (Exception e) {
 			System.err.println("Problem while trying to infer type of expression file.");
 			return "unknown";
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		return "unknown";

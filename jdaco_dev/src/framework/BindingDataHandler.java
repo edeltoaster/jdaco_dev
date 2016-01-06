@@ -73,8 +73,9 @@ public class BindingDataHandler {
 	 * @param fimo_outputfile
 	 */
 	private void readFIMO(String fimo_outputfile, Collection<String> expressed_TFs, double p_threshold, Collection<String> acc_targets) {
+		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (fimo_outputfile.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(fimo_outputfile))));
 			else
@@ -123,10 +124,15 @@ public class BindingDataHandler {
 				target_to_TFs.get(target).add(tf);
 			}
 			
-			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
+			
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 		
 		// sort binding data -> ensures every list is sorted

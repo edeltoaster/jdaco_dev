@@ -45,8 +45,9 @@ public class DACOResultSet {
 	 * @param daco_out_file
 	 */
 	private void readResultCSV(String daco_out_file) {
+		
+		BufferedReader in = null;
 		try {
-			BufferedReader in = null;
 			if (daco_out_file.endsWith(".gz"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(daco_out_file))));
 			else
@@ -60,6 +61,12 @@ public class DACOResultSet {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
+			
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 	
