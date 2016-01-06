@@ -40,7 +40,6 @@ public class RewiringDetector {
 	private List<StrPair> significantly_rewired_interactions = new LinkedList<>();
 	private Map<StrPair, Double> interaction_p_map = new HashMap<>();
 	private Map<StrPair, Boolean> interaction_direction_map = new HashMap<>();
-	private Map<StrPair, Map<String, List<String>>> interaction_reasons_map = new HashMap<>();
 	private Map<StrPair, Map<String, Integer>> interaction_reasons_count_map = new HashMap<>();
 	private Map<StrPair, Double> interaction_alt_splicing_fraction_map = new HashMap<>();
 	private Map<StrPair, List<String>> interaction_sorted_reasons_map = new HashMap<>();
@@ -374,29 +373,21 @@ public class RewiringDetector {
 				}
 				this.interaction_direction_map.put(pair, addition);
 
-				// check the exact reason for the difference between all samples
-				Map<String, List<String>> reasons = new HashMap<>();
+				// check the exact reason for the difference between all samples and count them
+				Map<String, Integer> reasons_count = new HashMap<>();
 				for (String sample1:this.group1.keySet())
 					for (String sample2:this.group2.keySet()) {
 						String reason = checkReason(addition, pair, sample1, sample2);
-						if (!reasons.containsKey(reason))
-							reasons.put(reason, new LinkedList<>());
-						reasons.get(reason).add(sample1 + "-" + sample2); // TODO: check and eliminate
+						reasons_count.put(reason, reasons_count.getOrDefault(reason, 0) + 1);
 					}
-
-				this.interaction_reasons_map.put(pair, reasons);
-
-				// building sorted (descending) reasons-string for output
-				Map<String, Integer> reasons_count = new HashMap<>();
-				for (String reason: reasons.keySet())
-					reasons_count.put(reason, reasons.get(reason).size());
-
+				
 				this.interaction_reasons_count_map.put(pair, reasons_count);
 
 				// compute ratio of differential gene/transcript expression
 				this.interaction_alt_splicing_fraction_map.put(pair, determineAltSplicingFraction(reasons_count));
-
-				List<String> sorted_reasons = new LinkedList<>(reasons.keySet());
+				
+				// building sorted (descending) reasons-string for output
+				List<String> sorted_reasons = new LinkedList<>(reasons_count.keySet());
 				sorted_reasons.sort((e2,e1) -> reasons_count.get(e1).compareTo(reasons_count.get(e2)));
 				sorted_reasons.replaceAll(e->e + ":" + reasons_count.get(e));
 
@@ -442,10 +433,6 @@ public class RewiringDetector {
 
 	public List<StrPair> getSignificantlyRewiredInteractions() {
 		return this.significantly_rewired_interactions;
-	}
-	
-	public Map<StrPair, Map<String, List<String>>> getInteractionReasonsMap() {
-		return interaction_reasons_map;
 	}
 
 	public Map<StrPair, Map<String, Integer>> getInteractionReasonsCountMap() {
@@ -704,7 +691,7 @@ public class RewiringDetector {
 		List<String> reasons = new ArrayList<>(reason_IA_map.keySet());
 		reasons.sort((String s1, String s2) -> reason_count_map.get(s2).compareTo(reason_count_map.get(s1))); // sorts from highest to lowest
 		
-		Set<StrPair> unsatisfied_IAs = new HashSet<>(this.interaction_reasons_map.keySet());
+		Set<StrPair> unsatisfied_IAs = new HashSet<>(this.interaction_reasons_count_map.keySet());
 		List<String> result = new LinkedList<>();
 		
 		for (String reason:reasons) {

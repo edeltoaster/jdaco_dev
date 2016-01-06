@@ -184,6 +184,8 @@ public class ConstructedNetworks {
 			ConstructedNetworks cn = new ConstructedNetworks(pre + "_ppin.txt" + gz, pre + "_major-transcripts.txt" + gz);
 			
 			data.put(sample, cn);
+			if (data.size()==5)
+				break;
 		}
 		
 		// clean memory before objects are not "young" anymore
