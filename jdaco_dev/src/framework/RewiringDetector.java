@@ -189,11 +189,6 @@ public class RewiringDetector {
 				System.gc();
 			}
 		}
-		
-		if (this.verbose != null) {
-			this.verbose.println("Building complete differential network ...");
-			this.verbose.flush();
-		}
 
 		// clean from zeros (results of +1 and -1 ...)
 		this.differential_network.entrySet().removeIf( e -> e.getValue().equals(0));
@@ -247,6 +242,11 @@ public class RewiringDetector {
 			k++;
 		}
 
+		if (this.verbose != null) {
+			this.verbose.println("Evaluating significantly rewired interactions ...");
+			this.verbose.flush();
+		}
+		
 		k = 1;
 		p_values = new LinkedList<>(new HashSet<>(p_values));
 		Collections.sort(p_values);
