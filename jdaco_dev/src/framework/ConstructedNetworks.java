@@ -1,6 +1,5 @@
 package framework;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,21 +18,6 @@ public class ConstructedNetworks {
 	private final boolean isoform_based;
 	
 	/**
-	 * Constructor to built object from files, protein_to_assumed_isoform will be empty
-	 * @param ppi_file
-	 * @param ddi_file
-	 * @param db
-	 * @param isoform_based
-	 */
-	public ConstructedNetworks(String ppi_file, String ddi_file, String db, boolean isoform_based) {
-		this.ppi = new PPIN(ppi_file);
-		this.ddi = new DDIN(ddi_file);
-		this.protein_to_assumed_transcript = new HashMap<>();
-		this.db = db;
-		this.isoform_based = isoform_based;
-	}
-	
-	/**
 	 * Constructor used by NetworkBuilder
 	 * @param ppi
 	 * @param ddi
@@ -47,26 +31,6 @@ public class ConstructedNetworks {
 		this.protein_to_assumed_transcript = protein_to_assumed_transcript;
 		this.db = db;
 		this.isoform_based = isoform_based;
-	}
-
-	/**
-	 * Constructor used by RewiringDetector
-	 * @param ppi
-	 * @param protein_to_assumed_isoform
-	 * @param isoform_based
-	 */
-	public ConstructedNetworks(String ppi_file, String protein_to_assumed_transcript_file) {
-		this.ppi = new PPIN(ppi_file);
-		this.ddi = null;
-		
-		this.protein_to_assumed_transcript = new HashMap<String, String>();
-		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
-			String[] spl = s.trim().split("\\s+");
-			this.protein_to_assumed_transcript.put(spl[0], spl[1]);
-		}
-		
-		this.db = null;
-		this.isoform_based = true;
 	}
 	
 	/**
@@ -161,36 +125,51 @@ public class ConstructedNetworks {
 		String[] split = this.db.split("_");
 		return split[split.length-1];
 	}
-	
-	/*
-	 * General purpose helpers
-	 */
-	
-	/**
-	 * Reads all matching PPIXpress output pairs of PPINs/major transcripts from a certain folder: 
-	 * [folder]/[sample-string]_ppin.txt(.gz) and [folder]/[sample-string]_major-transcripts.txt(.gz)
-	 * Assumes the standard file endings "_ppin.txt(.gz) and _major-transcripts.txt(.gz)".
-	 * @param folder
-	 * @return
-	 */
-	public static Map<String, ConstructedNetworks> readNetworks(String folder) {
-		Map<String, ConstructedNetworks> data = new HashMap<>();
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(folder, "_ppin.txt")) {
-			String gz = "";
-			if (f.getName().endsWith(".gz"))
-				gz = ".gz";
-			String pre = f.getAbsolutePath().split("_ppin")[0];
-			String sample = f.getName().split("_ppin")[0];
-			ConstructedNetworks cn = new ConstructedNetworks(pre + "_ppin.txt" + gz, pre + "_major-transcripts.txt" + gz);
-			
-			data.put(sample, cn);
-			if (data.size()==5)
-				break;
-		}
-		
-		// clean memory before objects are not "young" anymore
-		System.gc();
-		
-		return data;
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((db == null) ? 0 : db.hashCode());
+		result = prime * result + ((ddi == null) ? 0 : ddi.hashCode());
+		result = prime * result + (isoform_based ? 1231 : 1237);
+		result = prime * result + ((ppi == null) ? 0 : ppi.hashCode());
+		result = prime * result
+				+ ((protein_to_assumed_transcript == null) ? 0 : protein_to_assumed_transcript.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ConstructedNetworks other = (ConstructedNetworks) obj;
+		if (db == null) {
+			if (other.db != null)
+				return false;
+		} else if (!db.equals(other.db))
+			return false;
+		if (ddi == null) {
+			if (other.ddi != null)
+				return false;
+		} else if (!ddi.equals(other.ddi))
+			return false;
+		if (isoform_based != other.isoform_based)
+			return false;
+		if (ppi == null) {
+			if (other.ppi != null)
+				return false;
+		} else if (!ppi.equals(other.ppi))
+			return false;
+		if (protein_to_assumed_transcript == null) {
+			if (other.protein_to_assumed_transcript != null)
+				return false;
+		} else if (!protein_to_assumed_transcript.equals(other.protein_to_assumed_transcript))
+			return false;
+		return true;
 	}
 }

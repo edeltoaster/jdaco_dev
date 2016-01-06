@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import framework.ConstructedNetworks;
 import framework.RewiringDetector;
+import framework.RewiringDetectorSample;
 import framework.StrPair;
 import framework.Utilities;
 
@@ -17,8 +17,8 @@ public class PPICompare {
 	
 	private static String path_group1;
 	private static String path_group2;
-	private static Map<String, ConstructedNetworks> group1;
-	private static Map<String, ConstructedNetworks> group2;
+	private static Map<String, RewiringDetectorSample> group1;
+	private static Map<String, RewiringDetectorSample> group2;
 	private static String output_folder;
 	private static double FDR = 0.05;
 	
@@ -56,13 +56,13 @@ public class PPICompare {
 				path_group1 = arg;
 				if (!path_group1.endsWith("/"))
 					path_group1 += "/";
-				group1 = ConstructedNetworks.readNetworks(path_group1);
+				group1 = RewiringDetectorSample.readNetworks(path_group1);
 			}
 			else if (group2 == null) {
 				path_group2 = arg;
 				if (!path_group2.endsWith("/"))
 					path_group2 += "/";
-				group2 = ConstructedNetworks.readNetworks(path_group2);
+				group2 = RewiringDetectorSample.readNetworks(path_group2);
 			}
 			
 			// set output-folder

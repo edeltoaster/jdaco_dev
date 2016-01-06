@@ -181,7 +181,7 @@ public class JDACO {
 		DACO daco = new DACO(ddin, ppin, no_threads, max_depth, pair_threshold, prob_threshold, out, compute_timeout);
 		
 		// some enforced cleaning, just in case :-)
-		Runtime.getRuntime().gc();
+		System.gc();
 		
 		// carry out computation
 		long start = System.currentTimeMillis();

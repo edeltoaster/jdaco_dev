@@ -199,4 +199,29 @@ public class DDIN {
 		int[] sizes = this.getSizes();
 		return sizes[0] + " proteins / " + sizes[1] + " domains / " + sizes[2] + " interactions";
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((ddis == null) ? 0 : ddis.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DDIN other = (DDIN) obj;
+		if (ddis == null) {
+			if (other.ddis != null)
+				return false;
+		} else if (!ddis.equals(other.ddis))
+			return false;
+		return true;
+	}
 }

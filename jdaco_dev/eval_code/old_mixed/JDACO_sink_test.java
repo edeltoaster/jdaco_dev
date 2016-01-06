@@ -26,7 +26,7 @@ public class JDACO_sink_test {
 	static String out_folder = "PrePPI_spl_d6_med_min2/";
 	
 	public static void process(String sample, String path) {
-		Runtime.getRuntime().gc();
+		System.gc();
 		System.out.println("Processing " + sample);
 		
 		// build networks
@@ -38,7 +38,7 @@ public class JDACO_sink_test {
 				
 		System.out.println("starting DACO");
 		DACO daco_exec = new DACO(networks, no_threads, depth, pair_thr, prob_thr, null);
-		Runtime.getRuntime().gc();
+		System.gc();
 		DACOResultSet res = daco_exec.batchGrowPairs(bdh.getTFsWithBindingData());
 		System.out.println(res.getResult().size() + " complexes found.");
 		res.writeCSV(out_folder + "DACO_res/" + sample +".csv");

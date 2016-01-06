@@ -10,6 +10,7 @@ import java.util.Map;
 import framework.ConstructedNetworks;
 import framework.Utilities;
 import framework.RewiringDetector;
+import framework.RewiringDetectorSample;
 
 public class build_diff_networks_stability_eval {
 	
@@ -17,7 +18,7 @@ public class build_diff_networks_stability_eval {
 	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/";
 	static int max_iter = 5;
 	
-	public static List<List<String>> permutateSamples(Map<String, ConstructedNetworks> data) {
+	public static List<List<String>> permutateSamples(Map<String, RewiringDetectorSample> data) {
 		
 		List<String> samples = new ArrayList<>(data.keySet());
 		List<List<String>> sample_permutations = new LinkedList<>();
@@ -33,10 +34,10 @@ public class build_diff_networks_stability_eval {
 		return sample_permutations;
 	}
 	
-	public static List<Map<String, ConstructedNetworks>> buildPermutatedData(String folder) {
-		Map<String, ConstructedNetworks> all_data = ConstructedNetworks.readNetworks(folder);
+	public static List<Map<String, RewiringDetectorSample>> buildPermutatedData(String folder) {
+		Map<String, RewiringDetectorSample> all_data = RewiringDetectorSample.readNetworks(folder);
 		
-		List<Map<String, ConstructedNetworks>> output = new LinkedList<>();
+		List<Map<String, RewiringDetectorSample>> output = new LinkedList<>();
 		
 		// get sublists
 		permutateSamples(all_data);
@@ -89,17 +90,17 @@ public class build_diff_networks_stability_eval {
 			String state1 = s[0];
 			String state2 = s[1];
 			
-			Map<String, ConstructedNetworks> g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
-			Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
+			Map<String, RewiringDetectorSample> g1 = RewiringDetectorSample.readNetworks(network_folder + state1 + "/");
+			Map<String, RewiringDetectorSample> g2 = RewiringDetectorSample.readNetworks(network_folder + state2 + "/");
 			
 			System.out.print("Processing " + state1 + " (" + g1.keySet().size() + ") vs " + state2 + " (" + g2.keySet().size() + ") : ");
-			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, 4);
+			RewiringDetector rd = new RewiringDetector(g1, g2, FDR);
 			System.out.println(rd.getSignificantlyRewiredInteractions().size());
 			
 
-			for (Map<String, ConstructedNetworks> s1 :buildPermutatedData(network_folder + state1 + "/"))
-				for (Map<String, ConstructedNetworks> s2 :buildPermutatedData(network_folder + state2 + "/")) {
-					rd = new RewiringDetector(s1, s2, FDR, 4);
+			for (Map<String, RewiringDetectorSample> s1 :buildPermutatedData(network_folder + state1 + "/"))
+				for (Map<String, RewiringDetectorSample> s2 :buildPermutatedData(network_folder + state2 + "/")) {
+					rd = new RewiringDetector(s1, s2, FDR);
 					
 					System.out.println(g1.keySet().size() + " " + g2.keySet().size() + " " + rd.getSignificantlyRewiredInteractions().size());
 				}	

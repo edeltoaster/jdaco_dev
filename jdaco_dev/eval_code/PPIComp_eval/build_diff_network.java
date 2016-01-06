@@ -5,15 +5,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import framework.ConstructedNetworks;
 import framework.Utilities;
 import framework.RewiringDetector;
+import framework.RewiringDetectorSample;
 import framework.StrPair;
 
 public class build_diff_network {
 	
 	static int no_threads = 32;
 	static double FDR = 0.05;
+	
 	// needs to be run on server
 	static String network_folder = "BRCA_networks/";
 	static String results_root = "BRCA_diffnets/";
@@ -34,8 +35,8 @@ public class build_diff_network {
 			String state2 = s[1];
 			
 			System.out.println("read data");
-			Map<String, ConstructedNetworks> g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
-			Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
+			Map<String, RewiringDetectorSample> g1 = RewiringDetectorSample.readNetworks(network_folder + state1 + "/");
+			Map<String, RewiringDetectorSample> g2 = RewiringDetectorSample.readNetworks(network_folder + state2 + "/");
 			
 			System.out.println("start processing");
 			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, no_threads, System.out);

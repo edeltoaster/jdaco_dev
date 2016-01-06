@@ -60,6 +60,27 @@ public class BindingSite implements Comparable<BindingSite> {
 		}
 	}
 
+	public int getLeft() {
+		return left;
+	}
+
+	public int getRight() {
+		return right;
+	}
+
+	public boolean isPlusStrand() {
+		return plus_strand;
+	}
+	
+	/**
+	 * Return readable String-repr. of an BS array
+	 * @param bss
+	 * @return
+	 */
+	public static String getBSArray(BindingSite[] bss) {
+		return Arrays.asList(bss).toString();
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -86,26 +107,5 @@ public class BindingSite implements Comparable<BindingSite> {
 		if (right != other.right)
 			return false;
 		return true;
-	}
-
-	public int getLeft() {
-		return left;
-	}
-
-	public int getRight() {
-		return right;
-	}
-
-	public boolean isPlusStrand() {
-		return plus_strand;
-	}
-	
-	/**
-	 * Return readable String-repr. of an BS array
-	 * @param bss
-	 * @return
-	 */
-	public static String getBSArray(BindingSite[] bss) {
-		return Arrays.asList(bss).toString();
 	}
 }

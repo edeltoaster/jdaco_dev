@@ -21,8 +21,8 @@ public class RewiringDetector {
 
 	private static BinomialTest binom_test = new BinomialTest();
 	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
-	private Map<String, ConstructedNetworks> group1;
-	private Map<String, ConstructedNetworks> group2;
+	private Map<String, RewiringDetectorSample> group1;
+	private Map<String, RewiringDetectorSample> group2;
 	private double P_rew;
 	private double P_rew_std;
 	private double FDR;
@@ -43,156 +43,71 @@ public class RewiringDetector {
 	private Map<StrPair, Map<String, Integer>> interaction_reasons_count_map = new HashMap<>();
 	private Map<StrPair, Double> interaction_alt_splicing_fraction_map = new HashMap<>();
 	private Map<StrPair, List<String>> interaction_sorted_reasons_map = new HashMap<>();
-
-	/**
-	 * For a given change in an interaction, check for the reason in both samples and return a report
-	 * @param addition
-	 * @param interaction
-	 * @param sample1
-	 * @param sample2
-	 * @return
-	 */
-	private String checkReason(boolean addition, StrPair interaction, String sample1, String sample2) {
-		String p1 = interaction.getL();
-		String p2 = interaction.getR();
-		Map<String, String> m1 = group1.get(sample1).getProteinToAssumedTranscriptMap();
-		Map<String, String> m2 = group2.get(sample2).getProteinToAssumedTranscriptMap();
-		PPIN ppin1 = group1.get(sample1).getPPIN();
-		PPIN ppin2 = group2.get(sample2).getPPIN();
-
-		List<String> reasons = new LinkedList<>();
-
-		// pre-check1: is a change found in the network-pair?
-		if (ppin1.getWeights().containsKey(interaction) == ppin2.getWeights().containsKey(interaction))
-			return "no_change";
-
-		// pre-check2: is the specific change found in the network-pair?
-		if (addition) { // interaction should not be in sample1 but in sample2; otherwise -> opposing change (no change already caught)
-			if ( !(!ppin1.getWeights().containsKey(interaction) && ppin2.getWeights().containsKey(interaction)) )
-				return "opposing_change";
-		} else { // vice versa
-			if ( !(ppin1.getWeights().containsKey(interaction) && !ppin2.getWeights().containsKey(interaction)) )
-				return "opposing_change";
-		}
-
-		// check protein-level
-		if (addition) { // interaction found in sample2 but not sample1 -> maybe one or both proteins not expressed in sample1?
-			if (!m1.containsKey(p1) && m2.containsKey(p1))
-				reasons.add(p1 + "(gain)");
-			if (!m1.containsKey(p2) && m2.containsKey(p2))
-				reasons.add(p2 + "(gain)");
-		} else { // vice versa
-			if (!m2.containsKey(p1) && m1.containsKey(p1))
-				reasons.add(p1 + "(loss)");
-			if (!m2.containsKey(p2) && m1.containsKey(p2))
-				reasons.add(p2 + "(loss)");
-		}
-
-		if (reasons.size() != 0)
-			return String.join("/", reasons);
-
-		// else: check on transcript-level
-		if (m1.containsKey(p1) && m2.containsKey(p1) && !m1.get(p1).equals(m2.get(p1))) {
-			reasons.add( p1 + "(" + m1.get(p1) + "->" + m2.get(p1) + ")");
-		}
-
-		if (m1.containsKey(p2) && m2.containsKey(p2) && !m1.get(p2).equals(m2.get(p2))) {
-			reasons.add( p2 + "(" + m1.get(p2) + "->" + m2.get(p2) + ")");
-		}
-
-		return String.join("/", reasons);
-	}
-
-	/**
-	 * For all relevant reasons_counts determined for a protein pair,
-	 * determines the fraction of relevant alternative splicing events. (1-this fraction=fraction of differential gene expression)
-	 * If both interaction partners show changes, they contribute equally (a half count each) to the full count.
-	 * @param reasons_count
-	 * @return
-	 */
-	private double determineAltSplicingFraction(Map<String, Integer> reasons_count) {
-
-		double all_events = 0.0;
-		double alt_splicing_events = 0.0;
-
-		for (String reason:reasons_count.keySet()) {
-			double current_count = reasons_count.get(reason);
-
-			// change could be in one or both proteins
-			String[] contributions = reason.split("/");
-
-			// full count if only one protein changed, half of counts for the reason of the individual changes if both changed
-			for (String ind_reasons:contributions) {
-
-				if (ind_reasons.contains("->"))
-					alt_splicing_events += current_count / contributions.length;
-
-				if (!ind_reasons.endsWith("_change")) // no_change / oppposing_change
-					all_events += current_count / contributions.length;
-			}
-		}
-
-		return alt_splicing_events / all_events;
-	}
 	
-	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR, int no_threads) {
-		this.group1 = group1;
-		this.group2 = group2;
-		this.FDR = FDR;
-		this.no_threads = no_threads;
-		
-		this.determineGroupwiseDifferences();
-		this.assessRewiring();
-	}
-	
-	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR, int no_threads, PrintStream verbose) {
+	/**
+	 * Most powerful constructor
+	 * @param group1
+	 * @param group2
+	 * @param FDR
+	 * @param no_threads
+	 * @param verbose
+	 * @param strict_denominator
+	 */
+	public RewiringDetector(Map<String, RewiringDetectorSample> group1, Map<String, RewiringDetectorSample> group2, double FDR, int no_threads, PrintStream verbose, boolean strict_denominator) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
 		this.no_threads = no_threads;
 		this.verbose = verbose;
+		this.strict_denominator = strict_denominator;
 		
 		this.determineGroupwiseDifferences();
 		this.assessRewiring();
 	}
 	
-	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR) {
+	/**
+	 * Custom constructor
+	 * @param group1
+	 * @param group2
+	 * @param FDR
+	 * @param no_threads
+	 * @param verbose
+	 */
+	public RewiringDetector(Map<String, RewiringDetectorSample> group1, Map<String, RewiringDetectorSample> group2, double FDR, int no_threads, PrintStream verbose) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
-
+		
 		this.determineGroupwiseDifferences();
 		this.assessRewiring();
 	}
 	
-	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR, int no_threads, boolean strict_denominator) {
+	/**
+	 * Simple constructor
+	 * @param group1
+	 * @param group2
+	 * @param FDR
+	 */
+	public RewiringDetector(Map<String, RewiringDetectorSample> group1, Map<String, RewiringDetectorSample> group2, double FDR) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
-		this.no_threads = no_threads;
-		this.strict_denominator = strict_denominator;
-
+		
 		this.determineGroupwiseDifferences();
 		this.assessRewiring();
 	}
 	
-	public RewiringDetector(Map<String, ConstructedNetworks> group1, Map<String, ConstructedNetworks> group2, double FDR, boolean strict_denominator) {
-		this.group1 = group1;
-		this.group2 = group2;
-		this.FDR = FDR;
-		this.strict_denominator = strict_denominator;
-
-		this.determineGroupwiseDifferences();
-		this.assessRewiring();
-	}
-
+	/*
+	 * major init functions
+	 */
+	
 	@SuppressWarnings("unchecked")
 	private void determineGroupwiseDifferences() {
 		Map<StrPair, Integer> overall_added = new HashMap<>();
 		Map<StrPair, Integer> overall_lost = new HashMap<>();
 
 		// parallel assessment of pairwise differences
-		List<PPIComparatorTask> comparison_calculations = new ArrayList<>( (this.group1.keySet().size()*this.group2.keySet().size()) );
+		List<PPIComparatorTask> comparison_calculations = new ArrayList<>( getNumberOfComparisons() );
 		for (String sample1:this.group1.keySet())
 			for (String sample2:this.group2.keySet())
 				comparison_calculations.add(new PPIComparatorTask(sample1, sample2));
@@ -283,7 +198,7 @@ public class RewiringDetector {
 				// enforcing to cleanup as much as possible
 				es.shutdown();
 				es = null;
-				Runtime.getRuntime().gc();
+				System.gc();
 			}
 		}
 		
@@ -397,13 +312,104 @@ public class RewiringDetector {
 			}
 		}
 	}
-	// initial preprocessing up to here
+	
+	
+	/**
+	 * For a given change in an interaction, check for the reason in both samples and return a report
+	 * @param addition
+	 * @param interaction
+	 * @param sample1
+	 * @param sample2
+	 * @return
+	 */
+	private String checkReason(boolean addition, StrPair interaction, String sample1, String sample2) {
+		String p1 = interaction.getL();
+		String p2 = interaction.getR();
+		Map<String, String> m1 = group1.get(sample1).getProteinToAssumedTranscriptMap();
+		Map<String, String> m2 = group2.get(sample2).getProteinToAssumedTranscriptMap();
+		Set<StrPair> i1 = group1.get(sample1).getInteractions();
+		Set<StrPair> i2 = group2.get(sample2).getInteractions();
 
-	public Map<String, ConstructedNetworks> getGroup1() {
+		List<String> reasons = new LinkedList<>();
+
+		// pre-check1: is a change found in the network-pair?
+		if (i1.contains(interaction) == i2.contains(interaction))
+			return "no_change";
+
+		// pre-check2: is the specific change found in the network-pair?
+		if (addition) { // interaction should not be in sample1 but in sample2; otherwise -> opposing change (no change already caught)
+			if ( !(!i1.contains(interaction) && i2.contains(interaction)) )
+				return "opposing_change";
+		} else { // vice versa
+			if ( !(i1.contains(interaction) && !i2.contains(interaction)) )
+				return "opposing_change";
+		}
+
+		// check protein-level
+		if (addition) { // interaction found in sample2 but not sample1 -> maybe one or both proteins not expressed in sample1?
+			if (!m1.containsKey(p1) && m2.containsKey(p1))
+				reasons.add(p1 + "(gain)");
+			if (!m1.containsKey(p2) && m2.containsKey(p2))
+				reasons.add(p2 + "(gain)");
+		} else { // vice versa
+			if (!m2.containsKey(p1) && m1.containsKey(p1))
+				reasons.add(p1 + "(loss)");
+			if (!m2.containsKey(p2) && m1.containsKey(p2))
+				reasons.add(p2 + "(loss)");
+		}
+
+		if (reasons.size() != 0)
+			return String.join("/", reasons);
+
+		// else: check on transcript-level
+		if (m1.containsKey(p1) && m2.containsKey(p1) && !m1.get(p1).equals(m2.get(p1))) {
+			reasons.add( p1 + "(" + m1.get(p1) + "->" + m2.get(p1) + ")");
+		}
+
+		if (m1.containsKey(p2) && m2.containsKey(p2) && !m1.get(p2).equals(m2.get(p2))) {
+			reasons.add( p2 + "(" + m1.get(p2) + "->" + m2.get(p2) + ")");
+		}
+
+		return String.join("/", reasons);
+	}
+
+	/**
+	 * For all relevant reasons_counts determined for a protein pair,
+	 * determines the fraction of relevant alternative splicing events. (1-this fraction=fraction of differential gene expression)
+	 * If both interaction partners show changes, they contribute equally (a half count each) to the full count.
+	 * @param reasons_count
+	 * @return
+	 */
+	private double determineAltSplicingFraction(Map<String, Integer> reasons_count) {
+
+		double all_events = 0.0;
+		double alt_splicing_events = 0.0;
+
+		for (String reason:reasons_count.keySet()) {
+			double current_count = reasons_count.get(reason);
+
+			// change could be in one or both proteins
+			String[] contributions = reason.split("/");
+
+			// full count if only one protein changed, half of counts for the reason of the individual changes if both changed
+			for (String ind_reasons:contributions) {
+
+				if (ind_reasons.contains("->"))
+					alt_splicing_events += current_count / contributions.length;
+
+				if (!ind_reasons.endsWith("_change")) // no_change / oppposing_change
+					all_events += current_count / contributions.length;
+			}
+		}
+
+		return alt_splicing_events / all_events;
+	}
+
+	public Map<String, RewiringDetectorSample> getGroup1() {
 		return group1;
 	}
 
-	public Map<String, ConstructedNetworks> getGroup2() {
+	public Map<String, RewiringDetectorSample> getGroup2() {
 		return group2;
 	}
 
@@ -536,14 +542,22 @@ public class RewiringDetector {
 
 		@Override
 		public Object[] call() throws Exception {
-			PPIN ppin1 = group1.get(sample1).getPPIN();
-			PPIN ppin2 = group2.get(sample2).getPPIN();
-			Set<StrPair> added_interactions = ppin2.removeAllIAs(ppin1);
-			Set<StrPair> lost_interactions = ppin1.removeAllIAs(ppin2);
-			double denominator = (double) ppin1.mergeAllIAs(ppin2).size();
+			Set<StrPair> i1 = group1.get(sample1).getInteractions();
+			Set<StrPair> i2 = group2.get(sample2).getInteractions();
+			
+			Set<StrPair> added_interactions = new HashSet<>(i2);
+			added_interactions.removeAll(i1);
+			
+			Set<StrPair> lost_interactions = new HashSet<>(i1);
+			lost_interactions.removeAll(i2);
+			
+			Set<StrPair> union = new HashSet<>(i1);
+			union.addAll(i2);
+			double denominator = (double) union.size();
+			union = null;
 
 			if (strict_denominator)
-				denominator = Math.min(ppin1.getSizes()[1], ppin2.getSizes()[1]);
+				denominator = Math.min(i1.size(), i2.size());
 
 			return new Object[]{added_interactions, lost_interactions, ( (double) added_interactions.size() + lost_interactions.size() ) / denominator};
 		}
@@ -558,9 +572,13 @@ public class RewiringDetector {
 		
 		// only determine once
 		if (organism_database == null) {
-			for (ConstructedNetworks cn:this.group1.values()) {
-				PPIN ppin = cn.getPPIN();
-				this.organism_database = DataQuery.getEnsemblOrganismDatabaseFromProteins(ppin.getProteins());
+			for (RewiringDetectorSample rds:this.group1.values()) {
+				Set<String> proteins = new HashSet<>();
+				for (StrPair pair:rds.getInteractions()) {
+					proteins.add(pair.getL());
+					proteins.add(pair.getR());
+				}
+				this.organism_database = DataQuery.getEnsemblOrganismDatabaseFromProteins(proteins);
 				break;
 			}
 		}
@@ -668,7 +686,7 @@ public class RewiringDetector {
 		Map<String, Set<StrPair>> reason_IA_map = new HashMap<>();
 		Map<String, Integer> reason_count_map = new HashMap<>();
 		
-		// fills datastructures, afterwards we know which reasons affect which interactions and each reasons occurance is counted to give it an importance score
+		// fills datastructures, afterwards we know which reasons affect which interactions and each reasons occurrence is counted to give it an importance score
 		for (StrPair IA:this.interaction_reasons_count_map.keySet()) {
 			Map<String, Integer> count_map = this.interaction_reasons_count_map.get(IA);
 			

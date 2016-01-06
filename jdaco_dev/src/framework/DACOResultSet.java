@@ -147,5 +147,29 @@ public class DACOResultSet {
 	public Map<HashSet<String>, LinkedList<HashSet<String>>> getSeedToComplexMap() {
 		return seed_to_complex_map;
 	}
-	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((seed_to_complex_map == null) ? 0 : seed_to_complex_map.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DACOResultSet other = (DACOResultSet) obj;
+		if (seed_to_complex_map == null) {
+			if (other.seed_to_complex_map != null)
+				return false;
+		} else if (!seed_to_complex_map.equals(other.seed_to_complex_map))
+			return false;
+		return true;
+	}
 }

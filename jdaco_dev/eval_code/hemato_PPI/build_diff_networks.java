@@ -9,6 +9,7 @@ import java.util.Map;
 import framework.ConstructedNetworks;
 import framework.Utilities;
 import framework.RewiringDetector;
+import framework.RewiringDetectorSample;
 import framework.StrPair;
 
 public class build_diff_networks {
@@ -65,12 +66,12 @@ public class build_diff_networks {
 			String state1 = s[0];
 			String state2 = s[1];
 			
-			Map<String, ConstructedNetworks> g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
-			Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
+			Map<String, RewiringDetectorSample> g1 = RewiringDetectorSample.readNetworks(network_folder + state1 + "/");
+			Map<String, RewiringDetectorSample> g2 = RewiringDetectorSample.readNetworks(network_folder + state2 + "/");
 			//Map<String, ConstructedNetworks> g1 = filterVenous(ConstructedNetworks.readNetworks(network_folder + state1 + "/"));
 			//Map<String, ConstructedNetworks> g2 = filterVenous(ConstructedNetworks.readNetworks(network_folder + state2 + "/"));
 			
-			RewiringDetector rd = new RewiringDetector(g1, g2, FDR, 4);
+			RewiringDetector rd = new RewiringDetector(g1, g2, FDR);
 			System.out.print("Processing " + state1 + " (" + g1.keySet().size() + ") vs " + state2 + " (" + g2.keySet().size() + ") : ");
 			rd.writeDiffnet(results_folder + state1 + "_" + state2 + ".txt");
 			

@@ -8,9 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import framework.ConstructedNetworks;
 import framework.Utilities;
 import framework.RewiringDetector;
+import framework.RewiringDetectorSample;
 import framework.StrPair;
 
 public class build_rand_diff_subnetworks {
@@ -25,8 +25,8 @@ public class build_rand_diff_subnetworks {
 	static String network_folder = "BRCA_networks/";
 	static String results_root = "BRCA_diffnets/";
 	
-	public static Map<String, ConstructedNetworks> getRandomSubset(Map<String, ConstructedNetworks> data, int min_size, double fraction) {
-		Map<String, ConstructedNetworks> subset = new HashMap<String, ConstructedNetworks>();
+	public static Map<String, RewiringDetectorSample> getRandomSubset(Map<String, RewiringDetectorSample> data, int min_size, double fraction) {
+		Map<String, RewiringDetectorSample> subset = new HashMap<>();
 		int sample_size = Math.max(min_size, (int) fraction * data.size());
 		
 		List<String> samples = new ArrayList<>(data.keySet());
@@ -56,16 +56,16 @@ public class build_rand_diff_subnetworks {
 			String state2 = s[1];
 			
 			System.out.println("read data");
-			Map<String, ConstructedNetworks> g1 = ConstructedNetworks.readNetworks(network_folder + state1 + "/");
-			Map<String, ConstructedNetworks> g2 = ConstructedNetworks.readNetworks(network_folder + state2 + "/");
+			Map<String, RewiringDetectorSample> g1 = RewiringDetectorSample.readNetworks(network_folder + state1 + "/");
+			Map<String, RewiringDetectorSample> g2 = RewiringDetectorSample.readNetworks(network_folder + state2 + "/");
 			
 			for (int i=1;i<=iterations;i++) {
 				String run_id = state1 + "_" + state2 + "_" + i;
 				System.out.println("start iteration " + i);
 				
 				System.out.println("start sampling for " + i);
-				Map<String, ConstructedNetworks> g1s = getRandomSubset(g1, min_size, fraction);
-				Map<String, ConstructedNetworks> g2s = getRandomSubset(g2, min_size, fraction);
+				Map<String, RewiringDetectorSample> g1s = getRandomSubset(g1, min_size, fraction);
+				Map<String, RewiringDetectorSample> g2s = getRandomSubset(g2, min_size, fraction);
 				
 				System.out.println("start RD calculations for " + i);
 				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, System.out);

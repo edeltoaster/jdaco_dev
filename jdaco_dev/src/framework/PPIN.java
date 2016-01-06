@@ -870,4 +870,140 @@ public class PPIN {
 		
 		return new PPIN(all_interactions);
 	}
+	
+	/*
+	 * further related helpers
+	 */
+	
+	public static Set<StrPair> readInteractionsFromPPINFile(String file) {
+		return readInteractionsFromPPINFile(file, 0.0);
+	}
+	
+	public static Set<StrPair> readInteractionsFromPPINFile(String file, double cutoff) {
+		BufferedReader in = null;
+		Set<StrPair> interactions = null;
+		try {
+			if (file.endsWith(".gz"))
+				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+			else
+				in = new BufferedReader(new FileReader(file));
+			
+			// parsing
+			interactions = processPPINInputAsSet(in, cutoff);
+			
+		} catch (Exception e) {
+			System.err.println("Problem while opening/parsing " + file + ".");
+		}
+		// stream is always closed in processPPINInput()
+		
+		return interactions;
+	}
+	
+	private static Set<StrPair> processPPINInputAsSet(BufferedReader in, double cutoff) {
+		boolean check = true;
+		Map<String, String> conversion_map = null;
+		
+		Set<StrPair> interactions = new HashSet<>();
+		try {
+			while (in.ready()) {
+				String line = in.readLine();
+				
+				// skip first line
+				if (line == null || line.startsWith("Protein1") || line.isEmpty() || line.startsWith("#"))
+					continue;
+				String[] split = line.split("\\s+");
+				String p1 = split[0];
+				String p2 = split[1];
+				
+				// check if Uniprot or other, implemented: HGNC
+				if (check) {
+					
+					// check if Uniprot
+					if (!p1.matches("[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}")) {
+						
+						// check for ensembl GENES: general, yeast, fruitfly, c.elegans
+						if ( (p1.length() > 6 && p1.startsWith("ENS") || p1.startsWith("YDL") || p1.startsWith("FBgn") || p1.startsWith("WBGene")) ) {
+							System.out.println("Retrieving ENSEMBL conversion data ... ");
+							Set<String> test_set = new HashSet<>();
+							test_set.add(p1);
+							test_set.add(p2);
+							
+							String org_db = DataQuery.getEnsemblOrganismDatabaseFromProteins(DataQuery.getUniprotFromEnsemblGenes(test_set).values());
+							if (org_db.equals("")) {
+								System.err.println("None of the ENSEMBL genes in the first row of the PPIN data could be mapped to an organism.");
+								return interactions;
+							}
+							
+							conversion_map = new HashMap<>();
+							for (String[] temp:DataQuery.getGenesTranscriptsProteins(org_db)) {
+								conversion_map.put(temp[0], temp[2]);
+							}
+						} else {// otherwise assume HGNC, build map
+							System.out.println("Retrieving HGNC conversion data ... ");
+							conversion_map = new HashMap<>();
+							for (String[] temp:DataQuery.getHGNCProteinsGenes()) {
+								conversion_map.put(temp[0], temp[1]);
+							}
+						}
+					}
+					check = false;
+				} 
+				
+				if (conversion_map != null) {
+					p1 = conversion_map.get(p1);
+					p2 = conversion_map.get(p2);
+					if (p1.equals("") || p2.equals(""))
+						continue;
+				}
+				
+				double w = 1.0;
+				
+				if (split.length == 3) {
+					w = Double.parseDouble(split[2]);
+				}
+				
+				// no self-interactions and a certain cutoff
+				if (p1.equals(p2) || w < cutoff) 
+					continue;
+				
+				interactions.add(new StrPair(p1, p2));
+			}
+			
+		} catch (Exception e) {
+			System.err.println("Problem while parsing protein interaction network.");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+				// any output not helpful
+			}
+		}
+		
+		return interactions;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((weights == null) ? 0 : weights.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PPIN other = (PPIN) obj;
+		if (weights == null) {
+			if (other.weights != null)
+				return false;
+		} else if (!weights.equals(other.weights))
+			return false;
+		return true;
+	}
 }

@@ -8,9 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import framework.ConstructedNetworks;
 import framework.Utilities;
 import framework.RewiringDetector;
+import framework.RewiringDetectorSample;
 
 public class rand_intra_group_diff_networks {
 	
@@ -33,7 +33,7 @@ public class rand_intra_group_diff_networks {
 			String state1 = f.getName();
 			String path = f.getAbsolutePath() + "/";
 			
-			Map<String, ConstructedNetworks> all_networks = ConstructedNetworks.readNetworks(path);
+			Map<String, RewiringDetectorSample> all_networks = RewiringDetectorSample.readNetworks(path);
 			List<String> network_list = new ArrayList<>(all_networks.keySet());
 			
 			System.out.println("Processing " + state1 + ", " + network_list.size() + " samples");
@@ -42,8 +42,8 @@ public class rand_intra_group_diff_networks {
 			List<Double> P_rews = new LinkedList<>();
 			List<Double> diff_IAs = new LinkedList<>();
 			for (int i=0; i<iterations; i++) {
-				Map<String, ConstructedNetworks> g1 = new HashMap<>();
-				Map<String, ConstructedNetworks> g2 = new HashMap<>();
+				Map<String, RewiringDetectorSample> g1 = new HashMap<>();
+				Map<String, RewiringDetectorSample> g2 = new HashMap<>();
 				Collections.shuffle(network_list);
 				
 				for (int j=0;j<network_list.size();j++) {
