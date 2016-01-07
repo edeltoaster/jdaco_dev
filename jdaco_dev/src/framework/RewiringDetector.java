@@ -437,7 +437,7 @@ public class RewiringDetector {
 	public void writeDiffnet(String diffnet_out_path) {
 
 		List<String> to_write = new LinkedList<>();
-		int groupwise_comparisons = this.group1.size() * this.group2.size();
+		int groupwise_comparisons = getNumberOfComparisons();
 
 		// header
 		to_write.add("Protein1 Protein2 Type Count Probability p-val p-val_adj Reasons AS_fraction");
@@ -447,13 +447,13 @@ public class RewiringDetector {
 			if (this.interaction_direction_map.get(pair))
 				sign = "+";
 
-			int v = this.differential_network.get(pair);
+			double v = Math.abs(this.differential_network.get(pair));
 			double p = this.interaction_p_map.get(pair);
 			List<String> sorted_reasons = this.interaction_sorted_reasons_map.get(pair);
 			double AS_fraction = this.interaction_alt_splicing_fraction_map.get(pair);
 
 			to_write.add(pair.getL() + " " + pair.getR() + " " + sign + " "
-			        + (int) Math.abs(v) + " " + Math.abs(v / groupwise_comparisons) + " " + p +
+			        + (int) v + " " + v / groupwise_comparisons + " " + p +
 			        " " + this.rawp2adjp.get(p) + " " + String.join(",", sorted_reasons) + " " + AS_fraction);
 		}
 
