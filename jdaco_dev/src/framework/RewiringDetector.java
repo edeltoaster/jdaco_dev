@@ -30,6 +30,7 @@ public class RewiringDetector {
 	private double P_rew_std;
 	private double FDR;
 	private boolean strict_denominator = false;
+	private boolean only_diffnet = false;
 	private String organism_database;
 	private PrintStream verbose;
 	
@@ -55,14 +56,16 @@ public class RewiringDetector {
 	 * @param no_threads
 	 * @param verbose
 	 * @param strict_denominator
+	 * @param only_diffnet -> many features not usable
 	 */
-	public RewiringDetector(Map<String, RewiringDetectorSample> group1, Map<String, RewiringDetectorSample> group2, double FDR, int no_threads, PrintStream verbose, boolean strict_denominator) {
+	public RewiringDetector(Map<String, RewiringDetectorSample> group1, Map<String, RewiringDetectorSample> group2, double FDR, int no_threads, PrintStream verbose, boolean strict_denominator, boolean only_diffnet) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
 		this.no_threads = no_threads;
 		this.verbose = verbose;
 		this.strict_denominator = strict_denominator;
+		this.only_diffnet = only_diffnet;
 		
 		this.determineGroupwiseDifferences();
 		this.assessRewiring();
@@ -123,8 +126,8 @@ public class RewiringDetector {
 			}
 		
 		// build worker objects from chunks that are at most max_in_thread_iterations big, but at least are well distributed
-		List<PPIComparatorTask> comparison_calculations = new ArrayList<>( (overall_comparisons / Math.min(this.max_in_thread_iterations, overall_comparisons / this.no_threads)) );
-		for ( List<String[]> temp:Utilities.partitionListIntoChunks(comparisons, Math.min(this.max_in_thread_iterations, overall_comparisons / this.no_threads)) )
+		List<PPIComparatorTask> comparison_calculations = new ArrayList<>( (overall_comparisons / Math.min(this.max_in_thread_iterations, Math.max(overall_comparisons / this.no_threads, 1))) );
+		for ( List<String[]> temp:Utilities.partitionListIntoChunks(comparisons, Math.min(this.max_in_thread_iterations, Math.max(overall_comparisons / this.no_threads, 1))) )
 			comparison_calculations.add(new PPIComparatorTask(temp));
 		comparisons = null;
 		
@@ -260,7 +263,10 @@ public class RewiringDetector {
 					addition = true;
 				}
 				this.interaction_direction_map.put(pair, addition);
-				reason_calculations.add(new ReasonEvalTask(pair, addition));
+				
+				// reasoning part can be bypassed
+				if (!this.only_diffnet)
+					reason_calculations.add(new ReasonEvalTask(pair, addition));
 				
 				k++;
 			}
@@ -268,6 +274,10 @@ public class RewiringDetector {
 		
 		// sort list of significantly rewired interactions
 		this.significantly_rewired_interactions.sort( (e2,e1) -> Integer.compare(Math.abs(this.differential_network.get(e1)), Math.abs(this.differential_network.get(e2))) );
+		
+		// reasoning part can be bypassed
+		if (this.only_diffnet)
+			return;
 		
 		// calculate and store reasons
 		ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
