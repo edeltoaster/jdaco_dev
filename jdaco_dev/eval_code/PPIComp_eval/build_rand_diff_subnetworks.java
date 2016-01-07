@@ -64,7 +64,7 @@ public class build_rand_diff_subnetworks {
 				Map<String, RewiringDetectorSample> g1s = getRandomSubset(g1, min_size, fraction);
 				Map<String, RewiringDetectorSample> g2s = getRandomSubset(g2, min_size, fraction);
 				
-				System.out.println("start RD calculations for " + i + "(" + g1s.size()*g2s.size() + "comparisons).");
+				System.out.println("start RD calculations for " + i + " (" + g1s.size()*g2s.size() + " comparisons).");
 				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, System.out, false, true);
 				
 				double P_rew_rounded = (double) Math.round( rd.getP_rew() * 1000d) / 1000d;
