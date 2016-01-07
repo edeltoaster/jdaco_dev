@@ -21,6 +21,7 @@ import org.apache.commons.math3.stat.inference.BinomialTest;
 public class RewiringDetector {
 
 	private final int max_in_thread_iterations = 500;
+	private final int max_thread_cycles = 2;
 	private final BinomialTest binom_test = new BinomialTest();
 	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	private final Map<String, RewiringDetectorSample> group1;
@@ -112,24 +113,28 @@ public class RewiringDetector {
 		 * preparations and distribution of work
 		 */
 		
-		List<String[]> comparisons = new ArrayList<>( getNumberOfComparisons() );
+		// build all comparison pairs
+		int overall_comparisons = getNumberOfComparisons();
+		List<String[]> comparisons = new ArrayList<>(overall_comparisons);
 		for (String sample1:this.group1.keySet())
 			for (String sample2:this.group2.keySet()) {
 				String[] sample_pair = new String[]{sample1, sample2};
 				comparisons.add(sample_pair);
 			}
 		
-		List<PPIComparatorTask> comparison_calculations = new LinkedList<>();
-		for (List<String[]> temp:Utilities.partitionListIntoChunks(comparisons, this.no_threads))
+		// build worker objects from chunks that are at most max_in_thread_iterations big, but at least are well distributed
+		List<PPIComparatorTask> comparison_calculations = new ArrayList<>( (overall_comparisons / Math.min(this.max_in_thread_iterations, overall_comparisons / this.no_threads)) );
+		for ( List<String[]> temp:Utilities.partitionListIntoChunks(comparisons, Math.min(this.max_in_thread_iterations, overall_comparisons / this.no_threads)) )
 			comparison_calculations.add(new PPIComparatorTask(temp));
+		comparisons = null;
 		
 		/*
 		 * calculations
 		 */
 		
 		try {
-			// after a certain amount of tasks, memory is cleared up
-			for (List<PPIComparatorTask> temp_calculations:Utilities.partitionListIntoChunks(comparison_calculations, this.max_in_thread_iterations)) {
+			// after max_thread_cycles of no_threads workers, memory is cleared up and a report is given
+			for (List<PPIComparatorTask> temp_calculations:Utilities.partitionListIntoChunks(comparison_calculations, this.max_thread_cycles * this.no_threads)) {
 				
 				ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
 				
@@ -155,7 +160,7 @@ public class RewiringDetector {
 				}
 				long end = System.currentTimeMillis();
 				
-				// occasionally encouraged heap cleaning
+				// some occasionally encouraged heap cleaning
 				es.shutdown();
 				es = null;
 				System.gc();
@@ -173,7 +178,6 @@ public class RewiringDetector {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		comparison_calculations = null;
 		
 		// clean from zeros (results of +1 and -1 ...)
 		this.differential_network.entrySet().removeIf( e -> e.getValue().equals(0));
@@ -659,7 +663,11 @@ public class RewiringDetector {
 		return result;
 	}
 	
-	// helper class for faster comparison
+	
+	/*
+	 * Helper classes for parallel processing
+	 */
+	
 	class PPIComparatorTask implements Callable<Object[]> {
 		private List<String[]> comparisons;
 
