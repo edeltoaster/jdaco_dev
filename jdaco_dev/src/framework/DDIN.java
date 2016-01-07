@@ -33,11 +33,11 @@ public class DDIN {
 	
 	public DDIN(Map<String, List<String>> ddis, Map<String, List<String>> protein_to_domains, Map<String, String> domain_to_protein) {
 		// transform to right data structures
-		this.ddis = new HashMap<>();
+		this.ddis = new HashMap<>(ddis.keySet().size());
 		for (String domain:ddis.keySet())
 			this.ddis.put(domain, ddis.get(domain).toArray(new String[ddis.get(domain).size()]));
 		
-		this.protein_to_domains = new HashMap<String, String[]>();
+		this.protein_to_domains = new HashMap<String, String[]>(protein_to_domains.keySet().size());
 		for (String protein:protein_to_domains.keySet())
 			this.protein_to_domains.put(protein, protein_to_domains.get(protein).toArray(new String[protein_to_domains.get(protein).size()]));
 		
@@ -103,11 +103,11 @@ public class DDIN {
 			}
 		}
 		
-		this.ddis = new HashMap<>();
+		this.ddis = new HashMap<>(ddis.keySet().size());
 		for (String domain:ddis.keySet())
 			this.ddis.put(domain, ddis.get(domain).toArray(new String[ddis.get(domain).size()]));
 		
-		this.protein_to_domains = new HashMap<>();
+		this.protein_to_domains = new HashMap<>(protein_to_domains.keySet().size());
 		for (String protein:protein_to_domains.keySet())
 			this.protein_to_domains.put(protein, protein_to_domains.get(protein).toArray(new String[protein_to_domains.get(protein).size()]));
 		

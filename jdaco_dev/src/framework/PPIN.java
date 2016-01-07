@@ -22,9 +22,9 @@ import java.util.zip.GZIPInputStream;
 public class PPIN {
 	
 	// okay with many threads since only written once
-	private HashMap<String, Set<String>> partners = new HashMap<>();
-	private HashMap<StrPair, Double> weights = new HashMap<>();
-	private HashMap<String, Double> w_whole = new HashMap<>();
+	private HashMap<String, Set<String>> partners = new HashMap<>(1024);
+	private HashMap<StrPair, Double> weights = new HashMap<>(8192);
+	private HashMap<String, Double> w_whole = new HashMap<>(1024);
 	private boolean is_weighted = false;
 	
 	/**

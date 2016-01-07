@@ -21,7 +21,7 @@ public class RewiringDetectorSample {
 	 */
 	public RewiringDetectorSample(String ppin_file, String protein_to_assumed_transcript_file) {
 		this.interactions = PPIN.readInteractionsFromPPINFile(ppin_file);
-		this.protein_to_assumed_transcript = new HashMap<String, String>();
+		this.protein_to_assumed_transcript = new HashMap<String, String>(1024);
 		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
 			String[] spl = s.trim().split("\\s+");
 			this.protein_to_assumed_transcript.put(spl[0], spl[1]);

@@ -45,7 +45,7 @@ public class ConstructedNetworks {
 		this.ppi = new PPIN(ppi_file);
 		this.ddi = new DDIN(ddi_file);
 		
-		this.protein_to_assumed_transcript = new HashMap<String, String>();
+		this.protein_to_assumed_transcript = new HashMap<String, String>(1024);
 		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
 			String[] spl = s.trim().split("\\s+");
 			this.protein_to_assumed_transcript.put(spl[0], spl[1]);

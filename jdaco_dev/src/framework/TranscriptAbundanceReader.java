@@ -25,8 +25,8 @@ public class TranscriptAbundanceReader {
 	 * @return map of gene/transcript -> FPKM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readCufflinksFPKMFile(String file, double threshold, boolean return_gene_level) {
-		Map<String, Float> transcript_abundance = new HashMap<>();
-		Map<String, Float> gene_abundance = new HashMap<>();
+		Map<String, Float> transcript_abundance = new HashMap<>(1024);
+		Map<String, Float> gene_abundance = new HashMap<>(1024);
 		
 		BufferedReader in = null;
 		try {
@@ -79,8 +79,8 @@ public class TranscriptAbundanceReader {
 	 * @return map of gene/transcript -> TPM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readRSEMFile(String file, double threshold, boolean return_gene_level) {
-		Map<String, Float> transcript_abundance = new HashMap<>();
-		Map<String, Float> gene_abundance = new HashMap<>();
+		Map<String, Float> transcript_abundance = new HashMap<>(1024);
+		Map<String, Float> gene_abundance = new HashMap<>(1024);
 		int transcript_index = 0;
 		int gene_index = 1;
 		
@@ -143,7 +143,7 @@ public class TranscriptAbundanceReader {
 	 * @return map of genes/transcript -> TPM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readKallistoFile(String file, double threshold) {
-		Map<String, Float> transcript_abundance = new HashMap<>();
+		Map<String, Float> transcript_abundance = new HashMap<>(1024);
 		
 		BufferedReader in = null;
 		try {
@@ -191,7 +191,7 @@ public class TranscriptAbundanceReader {
 	public static Map<String, Float> readKallistoTranscriptsAsGenes(String file, double threshold, String organism_database) {
 		
 		Map<String, Float> abundance = readKallistoFile(file, threshold);
-		Map<String, String> transcript_to_gene = new HashMap<String, String>();
+		Map<String, String> transcript_to_gene = new HashMap<String, String>(1024);
 			
 		// get association by query
 		for (String[] data:DataQuery.getGenesTranscriptsProteins(organism_database)) {
@@ -200,7 +200,7 @@ public class TranscriptAbundanceReader {
 			transcript_to_gene.put(transcript, gene);
 		}
 			
-		Map<String, Float> gene_abundance = new HashMap<String, Float>();
+		Map<String, Float> gene_abundance = new HashMap<String, Float>(1024);
 		for (String transcript:abundance.keySet()) {
 			if (!transcript_to_gene.containsKey(transcript))
 				continue;
@@ -225,8 +225,8 @@ public class TranscriptAbundanceReader {
 	 * @return map of gene/transcript -> FPKM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readGencodeGTFFile(String file, double threshold, boolean return_gene_level) {
-		Map<String, Float> transcript_abundance = new HashMap<>();
-		Map<String, Float> gene_abundance = new HashMap<>();
+		Map<String, Float> transcript_abundance = new HashMap<>(1024);
+		Map<String, Float> gene_abundance = new HashMap<>(1024);
 		
 		BufferedReader in = null;
 		try {
@@ -312,7 +312,7 @@ public class TranscriptAbundanceReader {
 	 * @return map of transcript/no_samples -> RPKM/FPKM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readCSHLData(String file) {
-		Map<String, Float> transcript_abundance = new HashMap<>();
+		Map<String, Float> transcript_abundance = new HashMap<>(1024);
 		int max_sample_count = 1;
 		
 		BufferedReader in = null;
@@ -413,7 +413,7 @@ public class TranscriptAbundanceReader {
 	 * @return map of gene/transcript -> expression (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readExpressionFile(String file, double threshold, String organism_database, boolean header) {
-		Map<String, Float> abundance = new HashMap<>();
+		Map<String, Float> abundance = new HashMap<>(1024);
 		
 		BufferedReader in = null;
 		try {
@@ -451,7 +451,7 @@ public class TranscriptAbundanceReader {
 		}
 		
 		if (organism_database != null) {
-			Map<String, String> transcript_to_gene = new HashMap<String, String>();
+			Map<String, String> transcript_to_gene = new HashMap<String, String>(1024);
 			
 			// get association by query
 			for (String[] data:DataQuery.getGenesTranscriptsProteins(organism_database)) {
@@ -547,7 +547,7 @@ public class TranscriptAbundanceReader {
 	 * @return map Ensembl transcript or gene -> RSEM (if transcript > threshold)
 	 */
 	public static Map<String, Float> readTCGAIsoformRSEMFile(String file, double transcript_threshold, boolean return_gene_level) {
-		Map<String, Float> abundance = new HashMap<>();
+		Map<String, Float> abundance = new HashMap<>(1024);
 		String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
 		Map<String, String> ucsc_to_ensembl = DataQuery.getUSCStoTranscriptMap(db);
 		
@@ -593,7 +593,7 @@ public class TranscriptAbundanceReader {
 		// if gene-level wanted: convert
 		if (return_gene_level) {
 			// get association by query
-			Map<String, String> transcript_to_gene = new HashMap<>();
+			Map<String, String> transcript_to_gene = new HashMap<>(1024);
 			for (String[] data:DataQuery.getGenesTranscriptsProteins(db)) {
 				String gene = data[0];
 				String transcript = data[1];
@@ -643,8 +643,8 @@ public class TranscriptAbundanceReader {
 	 * @return Ensembl gene -> RSEM (if > threshold)
 	 */
 	public static Map<String, Float> readTCGAGeneRSEM(String file, double threshold) {
-		Map<String, Float> gene_abundance = new HashMap<>();
-		Map<String, String> HGCN_to_ensembl = new HashMap<>();
+		Map<String, Float> gene_abundance = new HashMap<>(1024);
+		Map<String, String> HGCN_to_ensembl = new HashMap<>(1024);
 		for (String[] entry:DataQuery.getHGNCProteinsGenes()) {
 			if (entry[2].equals(""))
 				continue;
@@ -723,7 +723,7 @@ public class TranscriptAbundanceReader {
 	 */
 	public static Set<String> getProteinAbundanceFromTCGAGeneRSEM(String file, double threshold) {
 		Set<String> expressed_HGCN = readTCGAGeneRSEM(file, threshold).keySet();
-		Set<String> expressed_proteins = new HashSet<>();
+		Set<String> expressed_proteins = new HashSet<>(1024);
 		
 		Map<String, String> HGCN_to_up = new HashMap<>();
 		for (String[] entry:DataQuery.getHGNCProteinsGenes()) {
@@ -907,12 +907,12 @@ public class TranscriptAbundanceReader {
 		int datasets = data.size();
 		
 		// find all genes/transcripts that were noted
-		Set<String> transcripts = new HashSet<>();
+		Set<String> transcripts = new HashSet<>(1024);
 		for (Map<String, Float> d:data) {
 			transcripts.addAll(d.keySet());
 		}
 		
-		Map<String, Float> temp_abundances = new HashMap<>();
+		Map<String, Float> temp_abundances = new HashMap<>(1024);
 		for (String s:transcripts) {
 			float expr = 0;
 			for (Map<String, Float> d:data)
@@ -921,7 +921,7 @@ public class TranscriptAbundanceReader {
 		}
 		
 		// filter for genes/transcripts that meet the threshold after averaging
-		Map<String, Float> final_abundances = new HashMap<>();
+		Map<String, Float> final_abundances = new HashMap<>(1024);
 		for (String s:temp_abundances.keySet()) {
 			float avg_expr = temp_abundances.get(s);
 			if (avg_expr <= threshold)

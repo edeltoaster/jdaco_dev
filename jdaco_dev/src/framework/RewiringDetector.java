@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -19,10 +20,11 @@ import org.apache.commons.math3.stat.inference.BinomialTest;
 
 public class RewiringDetector {
 
-	private static BinomialTest binom_test = new BinomialTest();
+	private final int max_in_thread_iterations = 500;
+	private final BinomialTest binom_test = new BinomialTest();
 	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
-	private Map<String, RewiringDetectorSample> group1;
-	private Map<String, RewiringDetectorSample> group2;
+	private final Map<String, RewiringDetectorSample> group1;
+	private final Map<String, RewiringDetectorSample> group2;
 	private double P_rew;
 	private double P_rew_std;
 	private double FDR;
@@ -106,90 +108,67 @@ public class RewiringDetector {
 	@SuppressWarnings("unchecked")
 	private void determineGroupwiseDifferences() {
 		
-		// parallel assessment of pairwise differences
-		List<PPIComparatorTask> comparison_calculations = new ArrayList<>( getNumberOfComparisons() );
+		/*
+		 * preparations and distribution of work
+		 */
+		
+		List<String[]> comparisons = new ArrayList<>( getNumberOfComparisons() );
 		for (String sample1:this.group1.keySet())
-			for (String sample2:this.group2.keySet())
-				comparison_calculations.add(new PPIComparatorTask(sample1, sample2));
+			for (String sample2:this.group2.keySet()) {
+				String[] sample_pair = new String[]{sample1, sample2};
+				comparisons.add(sample_pair);
+			}
+		
+		List<PPIComparatorTask> comparison_calculations = new LinkedList<>();
+		for (List<String[]> temp:Utilities.partitionListIntoChunks(comparisons, this.no_threads))
+			comparison_calculations.add(new PPIComparatorTask(temp));
+		
+		/*
+		 * calculations
+		 */
+		
+		try {
+			// after a certain amount of tasks, memory is cleared up
+			for (List<PPIComparatorTask> temp_calculations:Utilities.partitionListIntoChunks(comparison_calculations, this.max_in_thread_iterations)) {
+				ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
+				
+				// compute and collect results
+				Object[] obj = null;
+				for (Future<Object[]> f:es.invokeAll(temp_calculations)) {
+					obj = f.get();
 
-		// for small sample sizes, compute directly
-		if (comparison_calculations.size() < 1000) {
-			ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
-			try {
-				for (Future<Object[]> f:es.invokeAll(comparison_calculations)) {
-					Object[] obj = f.get();
-	
-					// added interactions
-					for (StrPair pair: (Set<StrPair>) obj[0]) 
-						this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0) + 1);
-					
-					// lost interactions
-					for (StrPair pair: (Set<StrPair>) obj[1])
-						this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0) - 1);
-					
+					// collect results
+					for (Entry<StrPair, Integer> entry:((Map<StrPair, Integer>) obj[0]).entrySet())
+						this.differential_network.put(entry.getKey(), this.differential_network.getOrDefault(entry.getKey(), 0) + entry.getValue());
+
 					// P_rew
-					P_rews_temp.add((double) obj[2]);
-					
+					P_rews_temp.addAll((List<Double>) obj[1]);
+
 					// helping GC
 					obj[0] = null;
 					obj[1] = null;
-					obj[2] = null;
-				}
-			} catch (Exception e1) {
-				System.err.println("Problem during assessment of groupwise differences.");
-				e1.printStackTrace();
-				System.exit(1);
-			}
-			
-			es.shutdown();
-			
-		} else { // for large sample sizes: do chunks
-			int n = 0;
-			int s = 0;
-			int all = comparison_calculations.size();
-			for (List<PPIComparatorTask> temp_calculations:Utilities.partitionListIntoChunks(comparison_calculations, 1000)) {
-				ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
-				try {
-					if (this.verbose != null) {
-						this.verbose.println(n + ": " + s + " / " + all);
-						this.verbose.flush();
-					}
-					n++;
-					s += temp_calculations.size();
-					Object[] obj = null;
-					for (Future<Object[]> f:es.invokeAll(temp_calculations)) {
-						obj = f.get();
-		
-						// added interactions
-						for (StrPair pair: (Set<StrPair>) obj[0]) 
-							this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0) + 1);
-						
-						// lost interactions
-						for (StrPair pair: (Set<StrPair>) obj[1])
-							this.differential_network.put(pair, this.differential_network.getOrDefault(pair, 0) - 1);
-						
-						// P_rew
-						P_rews_temp.add((double) obj[2]);
-						
-						// helping GC
-						obj[0] = null;
-						obj[1] = null;
-						obj[2] = null;
-						obj = null;
-					}
-				} catch (Exception e1) {
-					System.err.println("Problem during assessment of groupwise differences.");
-					e1.printStackTrace();
-					System.exit(1);
+					obj = null;
 				}
 				
-				// enforcing to cleanup as much as possible
+				// occasional cleaning up
 				es.shutdown();
 				es = null;
 				System.gc();
+				
+				// optional feedback
+				if (this.verbose != null) {
+					this.verbose.println(P_rews_temp.size() + " / " + getNumberOfComparisons() + " comparisons finished.");
+					this.verbose.flush();
+				}
 			}
+			
+		} catch (Exception e) {
+			System.err.println("Problem during assessment of groupwise differences.");
+			e.printStackTrace();
+			System.exit(1);
 		}
-
+		comparison_calculations = null;
+		
 		// clean from zeros (results of +1 and -1 ...)
 		this.differential_network.entrySet().removeIf( e -> e.getValue().equals(0));
 	}
@@ -511,40 +490,6 @@ public class RewiringDetector {
 		return relevant_subset;
 	}
 
-	// helper class for faster comparison
-	class PPIComparatorTask implements Callable<Object[]> {
-		private String sample1;
-		private String sample2;
-
-		public PPIComparatorTask(String sample1, String sample2) {
-			this.sample1 = sample1;
-			this.sample2 = sample2;
-		}
-
-		@Override
-		public Object[] call() throws Exception {
-			Set<StrPair> i1 = group1.get(sample1).getInteractions();
-			Set<StrPair> i2 = group2.get(sample2).getInteractions();
-			
-			Set<StrPair> added_interactions = new HashSet<>(i2);
-			added_interactions.removeAll(i1);
-			
-			Set<StrPair> lost_interactions = new HashSet<>(i1);
-			lost_interactions.removeAll(i2);
-			
-			Set<StrPair> union = new HashSet<>(i1);
-			union.addAll(i2);
-			double denominator = (double) union.size();
-			union = null;
-
-			if (strict_denominator)
-				denominator = Math.min(i1.size(), i2.size());
-
-			return new Object[]{added_interactions, lost_interactions, ( (double) added_interactions.size() + lost_interactions.size() ) / denominator};
-		}
-
-	}
-	
 	/**
 	 * Determines matching Ensembl organism database from one of the networks
 	 * @return
@@ -706,5 +651,49 @@ public class RewiringDetector {
 		}
 		
 		return result;
+	}
+	
+	// helper class for faster comparison
+	class PPIComparatorTask implements Callable<Object[]> {
+		private List<String[]> comparisons;
+
+		public PPIComparatorTask(List<String[]> comparisons) {
+			this.comparisons = comparisons;
+		}
+
+		@Override
+		public Object[] call() throws Exception {
+
+			Map<StrPair, Integer> diff_temp = new HashMap<>(4096); // less number of size-change events
+			List<Double> P_rews_temp = new ArrayList<>(comparisons.size());
+
+			for (String[] samples:comparisons) {
+				Set<StrPair> i1 = group1.get(samples[0]).getInteractions();
+				Set<StrPair> i2 = group2.get(samples[1]).getInteractions();
+
+				Set<StrPair> added_interactions = new HashSet<>(i2);
+				added_interactions.removeAll(i1);
+
+				for (StrPair pair:added_interactions)
+					diff_temp.put(pair, diff_temp.getOrDefault(pair, 0) + 1 );
+
+				Set<StrPair> lost_interactions = new HashSet<>(i1);
+				lost_interactions.removeAll(i2);
+
+				for (StrPair pair:lost_interactions)
+					diff_temp.put(pair, diff_temp.getOrDefault(pair, 0) - 1 );
+
+				Set<StrPair> union = new HashSet<>(i1);
+				union.addAll(i2);
+				double denominator = (double) union.size();
+
+				if (strict_denominator)
+					denominator = Math.min(i1.size(), i2.size());
+
+				P_rews_temp.add(( (double) added_interactions.size() + lost_interactions.size() ) / denominator );
+			}
+
+			return new Object[]{diff_temp, P_rews_temp};
+		}
 	}
 }
