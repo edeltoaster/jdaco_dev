@@ -183,6 +183,7 @@ public class RewiringDetector {
 		this.differential_network.entrySet().removeIf( e -> e.getValue().equals(0));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void assessRewiring() {
 		
 		if (this.verbose != null) {
@@ -239,6 +240,8 @@ public class RewiringDetector {
 		k = 1;
 		p_values = new LinkedList<>(new HashSet<>(p_values));
 		Collections.sort(p_values);
+		
+		List<ReasonEvalTask> reason_calculations = new LinkedList<>();
 		for (double p:p_values) {
 			if (k > largest_k) { // remaining ones not deemed significant
 				// reset counter for output
@@ -257,30 +260,34 @@ public class RewiringDetector {
 					addition = true;
 				}
 				this.interaction_direction_map.put(pair, addition);
-
-				// check the exact reason for the difference between all samples and count them
-				Map<String, Integer> reasons_count = new HashMap<>();
-				for (String sample1:this.group1.keySet())
-					for (String sample2:this.group2.keySet()) {
-						String reason = checkReason(addition, pair, sample1, sample2);
-						reasons_count.put(reason, reasons_count.getOrDefault(reason, 0) + 1);
-					}
+				reason_calculations.add(new ReasonEvalTask(pair, addition));
 				
-				this.interaction_reasons_count_map.put(pair, reasons_count);
-
-				// compute ratio of differential gene/transcript expression
-				this.interaction_alt_splicing_fraction_map.put(pair, determineAltSplicingFraction(reasons_count));
-				
-				// building sorted (descending) reasons-string for output
-				List<String> sorted_reasons = new LinkedList<>(reasons_count.keySet());
-				sorted_reasons.sort((e2,e1) -> reasons_count.get(e1).compareTo(reasons_count.get(e2)));
-				sorted_reasons.replaceAll(e->e + ":" + reasons_count.get(e));
-
-				this.interaction_sorted_reasons_map.put(pair, sorted_reasons);
-
 				k++;
 			}
 		}
+		
+		// calculate and store reasons
+		ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
+		try {
+			Object[] obj = null;
+			for (Future<Object[]> f:es.invokeAll(reason_calculations)) {
+				obj = f.get();
+				StrPair pair = (StrPair) obj[0];
+				this.interaction_reasons_count_map.put(pair, (Map<String,Integer>) obj[1]);
+				this.interaction_sorted_reasons_map.put(pair, (List<String>) obj[2]);
+				this.interaction_alt_splicing_fraction_map.put(pair, (double) obj[3]);
+			}
+		} catch (Exception e) {
+			System.err.println("Problem during evaluation of rewiring reasons.");
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		// cleanup
+		reason_calculations = null;
+		es.shutdown();
+		es = null;
+		System.gc();
 	}
 	
 	
@@ -708,6 +715,35 @@ public class RewiringDetector {
 			}
 
 			return new Object[]{diff_temp, P_rews_temp};
+		}
+	}
+	
+	class ReasonEvalTask implements Callable<Object[]> {
+		private StrPair pair;
+		private boolean addition;
+
+		public ReasonEvalTask(StrPair pair, boolean addition) {
+			this.pair = pair;
+			this.addition = addition;
+		}
+
+		@Override
+		public Object[] call() throws Exception {
+			// check the exact reason for the difference between all samples and count them
+			Map<String, Integer> reasons_count = new HashMap<>();
+			for (String sample1:group1.keySet())
+				for (String sample2:group2.keySet()) {
+					String reason = checkReason(addition, pair, sample1, sample2);
+					reasons_count.put(reason, reasons_count.getOrDefault(reason, 0) + 1);
+				}
+			
+			// building sorted (descending) reasons-string for output
+			List<String> sorted_reasons = new ArrayList<>(reasons_count.keySet());
+			sorted_reasons.sort((e2,e1) -> reasons_count.get(e1).compareTo(reasons_count.get(e2)));
+			sorted_reasons.replaceAll(e->e + ":" + reasons_count.get(e));
+			
+			// return everything
+			return new Object[]{pair, reasons_count, sorted_reasons, determineAltSplicingFraction(reasons_count)};
 		}
 	}
 }
