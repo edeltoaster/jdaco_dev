@@ -15,7 +15,7 @@ import framework.StrPair;
 
 public class build_rand_diff_subnetworks {
 	
-	static int no_threads = 32;
+	static int no_threads = 48;
 	static double FDR = 0.05;
 	static double fraction = 0.5;
 	static int min_size = 3;

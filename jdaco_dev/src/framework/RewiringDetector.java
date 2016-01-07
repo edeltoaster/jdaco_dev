@@ -130,34 +130,40 @@ public class RewiringDetector {
 		try {
 			// after a certain amount of tasks, memory is cleared up
 			for (List<PPIComparatorTask> temp_calculations:Utilities.partitionListIntoChunks(comparison_calculations, this.max_in_thread_iterations)) {
+				
 				ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
 				
 				// compute and collect results
+				double tasks = 0;
 				Object[] obj = null;
+				long start = System.currentTimeMillis();
 				for (Future<Object[]> f:es.invokeAll(temp_calculations)) {
 					obj = f.get();
 
-					// collect results
+					// collect diffnet results
 					for (Entry<StrPair, Integer> entry:((Map<StrPair, Integer>) obj[0]).entrySet())
 						this.differential_network.put(entry.getKey(), this.differential_network.getOrDefault(entry.getKey(), 0) + entry.getValue());
 
-					// P_rew
+					// collect individual P_rews
 					P_rews_temp.addAll((List<Double>) obj[1]);
+					tasks += ((List<Double>) obj[1]).size();
 
-					// helping GC
+					// some manual help for the GC
 					obj[0] = null;
 					obj[1] = null;
 					obj = null;
 				}
+				long end = System.currentTimeMillis();
 				
-				// occasional cleaning up
+				// occasionally encouraged heap cleaning
 				es.shutdown();
 				es = null;
 				System.gc();
 				
 				// optional feedback
 				if (this.verbose != null) {
-					this.verbose.println(P_rews_temp.size() + " / " + getNumberOfComparisons() + " comparisons finished.");
+					double per_task_duration = (end-start) / tasks;
+					this.verbose.println(P_rews_temp.size() + " / " + getNumberOfComparisons() + " comparisons finished ("+ ((int) per_task_duration) + "ms per task, " + ( (int) ((per_task_duration*(getNumberOfComparisons()-P_rews_temp.size()))/1000/60) ) + "min left) ...");
 					this.verbose.flush();
 				}
 			}
@@ -189,7 +195,7 @@ public class RewiringDetector {
 		this.P_rews_temp.clear();
 		this.P_rews_temp = null;
 
-		// workaround: can happen in VERY FEW cases
+		// catch this, encourage to use default methodology
 		if (this.P_rew > 1.0) {
 			System.err.println("P_rew too high, less strict denominator is advised.");
 			return;

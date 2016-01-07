@@ -12,7 +12,7 @@ import framework.StrPair;
 
 public class build_diff_network {
 	
-	static int no_threads = 32;
+	static int no_threads = 48;
 	static double FDR = 0.05;
 	
 	// needs to be run on server
