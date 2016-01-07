@@ -26,7 +26,7 @@ public class build_rand_diff_subnetworks {
 	
 	public static Map<String, RewiringDetectorSample> getRandomSubset(Map<String, RewiringDetectorSample> data, int min_size, double fraction) {
 		Map<String, RewiringDetectorSample> subset = new HashMap<>();
-		int sample_size = Math.max(min_size, (int) fraction * data.size());
+		int sample_size = Math.max(min_size, (int) (fraction * data.size()));
 		
 		List<String> samples = new ArrayList<>(data.keySet());
 		Collections.shuffle(samples);
@@ -60,16 +60,13 @@ public class build_rand_diff_subnetworks {
 			
 			for (int i=1;i<=iterations;i++) {
 				//String run_id = state1 + "_" + state2 + "_" + i;
-				System.out.println("start iteration " + i);
 				
-				System.out.println("start sampling for " + i);
 				Map<String, RewiringDetectorSample> g1s = getRandomSubset(g1, min_size, fraction);
 				Map<String, RewiringDetectorSample> g2s = getRandomSubset(g2, min_size, fraction);
 				
-				System.out.println("start RD calculations for " + i);
+				System.out.println("start RD calculations for " + i + "(" + g1s.size()*g2s.size() + "comparisons).");
 				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, System.out, false, true);
 				
-				System.out.println("start output of " + i);
 				double P_rew_rounded = (double) Math.round( rd.getP_rew() * 1000d) / 1000d;
 				System.out.println(rd.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getSignificantlyRewiredInteractions().size() + " dIAs" );
 			}
