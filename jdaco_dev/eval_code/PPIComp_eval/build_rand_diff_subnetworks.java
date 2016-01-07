@@ -11,7 +11,6 @@ import java.util.Map;
 import framework.Utilities;
 import framework.RewiringDetector;
 import framework.RewiringDetectorSample;
-import framework.StrPair;
 
 public class build_rand_diff_subnetworks {
 	
@@ -60,7 +59,7 @@ public class build_rand_diff_subnetworks {
 			Map<String, RewiringDetectorSample> g2 = RewiringDetectorSample.readNetworks(network_folder + state2 + "/");
 			
 			for (int i=1;i<=iterations;i++) {
-				String run_id = state1 + "_" + state2 + "_" + i;
+				//String run_id = state1 + "_" + state2 + "_" + i;
 				System.out.println("start iteration " + i);
 				
 				System.out.println("start sampling for " + i);
@@ -68,28 +67,11 @@ public class build_rand_diff_subnetworks {
 				Map<String, RewiringDetectorSample> g2s = getRandomSubset(g2, min_size, fraction);
 				
 				System.out.println("start RD calculations for " + i);
-				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, System.out);
+				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, System.out, false, true);
 				
 				System.out.println("start output of " + i);
-				rd.writeDiffnet(results_folder + run_id + ".txt");
-				
-				Map<String, List<StrPair>> major_alt_splice_switches = rd.determineAltSplicingSwitches(true, false);
-				Utilities.writeEntries(major_alt_splice_switches.keySet(), results_folder + run_id + "_major_AS_proteins.txt");
-				
-				Map<String, List<StrPair>> all_alt_splice_switches = rd.determineAltSplicingSwitches(false, true);
-				Utilities.writeEntries(all_alt_splice_switches.keySet(), results_folder + run_id + "_contributing_AS_proteins.txt");
-				
-				
 				double P_rew_rounded = (double) Math.round( rd.getP_rew() * 1000d) / 1000d;
-				System.out.println(rd.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getInteractionReasonsCountMap().size() + " dIAs" );
-				
-				System.out.println(major_alt_splice_switches.keySet().size() + " alt. spliced proteins are the major reason that affect " + Utilities.getValueSetFromMultimap(major_alt_splice_switches).size() + " diff. interactions.");
-				System.out.println(all_alt_splice_switches.keySet().size() + " alt. spliced proteins contribute to a change in the " + Utilities.getValueSetFromMultimap(all_alt_splice_switches).size() + " diff. interactions that are mainly driven by AS events.");
-				
-				List<String> minReasons = rd.getMinMostLikelyReasons();
-				System.out.println(minReasons.size() + " alterations can explain all significant changes.");
-				Utilities.writeEntries(minReasons, results_folder + run_id + "_min_reasons.txt");
-				System.out.println();
+				System.out.println(rd.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getSignificantlyRewiredInteractions().size() + " dIAs" );
 			}
 
 		}
