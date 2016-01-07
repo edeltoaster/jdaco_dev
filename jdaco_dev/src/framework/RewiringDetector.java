@@ -40,7 +40,7 @@ public class RewiringDetector {
 	private Map<Double, Double> rawp2adjp = new HashMap<>();
 
 	// only stored for significant detected changes
-	private List<StrPair> significantly_rewired_interactions = new LinkedList<>();
+	private List<StrPair> significantly_rewired_interactions = new LinkedList<>(); // sorted by importance, important ones first
 	private Map<StrPair, Double> interaction_p_map = new HashMap<>();
 	private Map<StrPair, Boolean> interaction_direction_map = new HashMap<>();
 	private Map<StrPair, Map<String, Integer>> interaction_reasons_count_map = new HashMap<>();
@@ -266,6 +266,9 @@ public class RewiringDetector {
 			}
 		}
 		
+		// sort list of significantly rewired interactions
+		this.significantly_rewired_interactions.sort( (e2,e1) -> Integer.compare(Math.abs(this.differential_network.get(e1)), Math.abs(this.differential_network.get(e2))) );
+		
 		// calculate and store reasons
 		ExecutorService es = Executors.newFixedThreadPool(this.no_threads);
 		try {
@@ -413,7 +416,11 @@ public class RewiringDetector {
 	public Map<StrPair, Integer> getDifferentialNetwork() {
 		return this.differential_network;
 	}
-
+	
+	/**
+	 * Returns a sorted listed of significantly rewired interactions (high to low)
+	 * @return
+	 */
 	public List<StrPair> getSignificantlyRewiredInteractions() {
 		return this.significantly_rewired_interactions;
 	}
