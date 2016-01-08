@@ -17,7 +17,7 @@ public class build_diff_network {
 	
 	// needs to be run on server
 	static String network_folder = "BRCA_networks/";
-	static String results_root = "BRCA_diffnets/";
+	static String results_root = "BRCA_diffnet/";
 	
 	public static void process(String network_folder, String results_folder) {
 		
