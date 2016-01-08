@@ -44,8 +44,6 @@ public class build_rand_diff_subnetworks {
 	
 	public static void process(String network_folder, String results_folder) {
 		
-		new File(results_folder).mkdir();
-		
 		System.out.println("read data");
 		Map<String, RewiringDetectorSample> g1 = RewiringDetectorSample.readNetworks(network_folder + "normal/");
 		Map<String, RewiringDetectorSample> g2 = RewiringDetectorSample.readNetworks(network_folder + "tumor/");
@@ -84,7 +82,7 @@ public class build_rand_diff_subnetworks {
 				
 				List<String> temp = new LinkedList<>();
 				for (StrPair pair:rd.getSignificantlyRewiredInteractions())
-					temp.add(pair.getL() + pair.getR());
+					temp.add(pair.getL() + " " + pair.getR());
 				Utilities.writeEntries(temp, results_folder + run_id + "_rew_IAs.txt.gz");
 				
 			}

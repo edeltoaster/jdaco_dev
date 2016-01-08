@@ -1,6 +1,7 @@
 package PPIComp_eval;
 
 import java.io.File;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,15 +17,12 @@ public class build_diff_network {
 	static double FDR = 0.05;
 	
 	// needs to be run on server
-	static String network_folder = "BRCA_networks/";
+	static String network_folder = "BRCA_networks/1.0/";
 	static String results_root = "BRCA_diffnet/";
 	
 	public static void process(String network_folder, String results_folder) {
 		
-		new File(results_folder).mkdir();
-		
 		System.out.println("Analysis for " + network_folder + ", writing to " + results_folder);
-		System.out.println();
 		
 		// define relations
 		List<String[]> relations = new LinkedList<String[]>();
@@ -61,27 +59,16 @@ public class build_diff_network {
 			System.out.println(minReasons.size() + " alterations can explain all significant changes.");
 			Utilities.writeEntries(minReasons, results_folder + state1 + "_" + state2 + "_min_reasons.txt");
 			rd.writeProteinAttributes(results_folder + state1 + "_" + state2 + "_protein_attributes.txt");
-			System.out.println();
-
 		}
-		
-		System.out.println();
-		System.out.println();
 	}
 	
 	public static void main(String[] args) {
+		System.out.println("BRCA_diff_network on " + new Date());
+		System.out.println("no_threads:" + no_threads + ", FDR:" + FDR);
 		
 		new File(results_root).mkdir();
 		
-		for (File f:Utilities.listDirectoriesAndFilesWithinFolder(new File(network_folder))) {
-			
-			if (!f.isDirectory())
-				continue;
-			
-			String threshold_results = f.getName();
-			process(f.getAbsolutePath() + "/", results_root + threshold_results + "/");
-			
-		}
+		process(network_folder, results_root);
 		
 	}
 }
