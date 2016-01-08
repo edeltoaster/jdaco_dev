@@ -39,6 +39,8 @@ public class PPIXpress {
 	public static void printHelp() {
 		System.out.println("usage: java -jar PPIXpress.jar ([OPTIONS]) [INPUT-NETWORK] [OUTPUT-FOLDER] [EXPR-INPUT1] ([EXPR-INPUT2] ...)");
 		
+		System.out.println();
+		
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-g : only use gene abundances (default: transcript abundance)");
 		System.out.println("	-d : also output underlying domain-domain interaction network(s) (default: no)");
@@ -53,13 +55,19 @@ public class PPIXpress {
 		System.out.println("	-e : extend MySQL timeout to 5 min (default: 3 min)");
 		System.out.println("	-s=[US, UK, AS, 'specific URL'] : change initial server, note that US and asian mirrors only store the last two releases (default: US)");
 		
+		System.out.println();
+		
 		System.out.println("[INPUT-NETWORK] :");
 		System.out.println("	Any protein-protein interaction network in SIF-format: Protein1 Protein2 (weight).");
 		System.out.println("	Proteins are assumed to be given as UniProt or HGNC accessions.");
 		System.out.println("	Alternatively: use taxon:[organism taxon] to automatically retrieve current IntAct and iRefIndex data for an organism.");
 		
+		System.out.println();
+		
 		System.out.println("[OUTPUT-FOLDER] :");
 		System.out.println("	The outcome is written to this folder. If it does not exist, it is created.");
+		
+		System.out.println();
 		
 		System.out.println("[INPUT1] ([INPUT2] ...) :");
 		System.out.println("	Arbitrary number of samples to process.");
@@ -77,6 +85,8 @@ public class PPIXpress {
 		System.out.println("	- simple textfiles with transcript and expression per line");
 		System.out.println("	- simple textfile with gene and expression per line");
 		System.out.println("	Transcripts/Genes besides TCGA are assumed to be given as Ensembl identifiers.");
+		
+		System.out.println();
 		
 		System.exit(0);
 	}

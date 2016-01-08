@@ -141,8 +141,12 @@ public class Utilities {
 	 * @return
 	 */
 	public static List<File> listAllFilesWithinFolder(File path) {
+	
 		List<File> paths = new LinkedList<>();
-
+		
+		if (path == null || !path.exists())
+			return paths;
+		
 		for (File f:path.listFiles()) {
 			if (f.isHidden() || f.getName().startsWith("."))
 				continue;

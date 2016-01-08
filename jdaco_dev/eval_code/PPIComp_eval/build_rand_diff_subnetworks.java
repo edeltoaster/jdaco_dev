@@ -2,13 +2,14 @@ package PPIComp_eval;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import framework.Utilities;
 import framework.RewiringDetector;
@@ -19,13 +20,20 @@ public class build_rand_diff_subnetworks {
 	
 	static int no_threads = 48;
 	static double FDR = 0.05;
-	static List<Double> fractions = Arrays.asList(0.01, 0.05, 0.1, 0.3, 0.5);
 	static int min_size = 3;
-	static int iterations = 3;
+	static Map<Double, Integer> fraction_iteration = new TreeMap<>();
 	
 	// needs to be run on server
 	static String network_folder = "BRCA_networks/1.0/";
 	static String results_root = "BRCA_rand_diffnets/";
+	
+	public static void defineParameters() {
+		fraction_iteration.put(0.01, 160);
+		fraction_iteration.put(0.05, 80);
+		fraction_iteration.put(0.1, 40);
+		fraction_iteration.put(0.25, 20);
+		fraction_iteration.put(0.5, 10);
+	}
 	
 	public static Map<String, RewiringDetectorSample> getRandomSubset(Map<String, RewiringDetectorSample> data, int min_size, double fraction) {
 		Map<String, RewiringDetectorSample> subset = new HashMap<>();
@@ -48,7 +56,9 @@ public class build_rand_diff_subnetworks {
 		Map<String, RewiringDetectorSample> g1 = RewiringDetectorSample.readNetworks(network_folder + "normal/");
 		Map<String, RewiringDetectorSample> g2 = RewiringDetectorSample.readNetworks(network_folder + "tumor/");
 		
-		for (double fraction:fractions) {
+		for (Entry<Double, Integer> entry:fraction_iteration.entrySet()) {
+			double fraction = entry.getKey();
+			int iterations = entry.getValue();
 			
 			System.out.println("Analysis for " + fraction + " fraction:");
 			List<String> num_facts = new ArrayList<>(iterations);
@@ -89,14 +99,18 @@ public class build_rand_diff_subnetworks {
 			
 			Utilities.writeEntries(num_facts, results_folder + "facts_" + fraction + ".txt");
 			System.out.println();
+			num_facts = null;
+			System.gc();
 		}
 	}
 	
 	public static void main(String[] args) {
 		
+		defineParameters();
+		
 		System.out.println("rand_diff_subnetworks on " + new Date());
 		System.out.println("no_threads:" + no_threads + ", FDR:" + FDR + ", min_size:" + min_size);
-		System.out.println("fractions:" + fractions + ", iterations:" + iterations);
+		System.out.println("fractions/iterations: " + fraction_iteration);
 		
 		new File(results_root).mkdir();
 

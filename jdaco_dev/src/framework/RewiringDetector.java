@@ -241,7 +241,7 @@ public class RewiringDetector {
 		}
 		
 		k = 1;
-		p_values = new LinkedList<>(new HashSet<>(p_values));
+		p_values = new ArrayList<>(new HashSet<>(p_values));
 		Collections.sort(p_values);
 		
 		List<ReasonEvalTask> reason_calculations = new LinkedList<>();
