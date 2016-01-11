@@ -28,11 +28,12 @@ public class build_rand_diff_subnetworks {
 	static String results_root = "BRCA_rand_diffnets/";
 	
 	public static void defineParameters() {
-		fraction_iteration.put(0.01, 160);
-		fraction_iteration.put(0.05, 80);
-		fraction_iteration.put(0.1, 40);
-		fraction_iteration.put(0.25, 20);
-		fraction_iteration.put(0.5, 10);
+		fraction_iteration.put(0.005, 100);
+		fraction_iteration.put(0.01, 100);
+		fraction_iteration.put(0.05, 100);
+		fraction_iteration.put(0.1, 100);
+		fraction_iteration.put(0.25, 100);
+		fraction_iteration.put(0.5, 100);
 	}
 	
 	public static Map<String, RewiringDetectorSample> getRandomSubset(Map<String, RewiringDetectorSample> data, int min_size, double fraction) {
