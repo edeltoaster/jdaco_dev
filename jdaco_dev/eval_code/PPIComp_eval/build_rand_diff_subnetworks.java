@@ -21,10 +21,9 @@ import framework.StrPair;
 public class build_rand_diff_subnetworks {
 	
 	static int no_threads = 48;
-	static double FDR = 0.05;
 	static int min_size = 3;
 	static Map<Double, Integer> fraction_iteration = new TreeMap<>();
-	
+	static double[] FDRs = new double[]{0.01, 0.05};
 	static HashMap<Set<String>, Set<Set<String>>> sample_map;
 	
 	// needs to be run on server
@@ -63,7 +62,7 @@ public class build_rand_diff_subnetworks {
 		Map<String, RewiringDetectorSample> g2 = RewiringDetectorSample.readNetworks(network_folder + "tumor/");
 		
 		List<String> num_facts = new LinkedList<>();
-		num_facts.add("fraction iteration g1_size g2_size P_Rew P_rew_std diff_IAs");
+		num_facts.add("fraction iteration fdr g1_size g2_size P_Rew P_rew_std diff_IAs");
 		
 		for (Entry<Double, Integer> entry:fraction_iteration.entrySet()) {
 			double fraction = entry.getKey();
@@ -73,7 +72,6 @@ public class build_rand_diff_subnetworks {
 			sample_map = new HashMap<>(); // reset
 			long start = System.currentTimeMillis();
 			for (int i=1;i<=iterations;i++) {
-				String run_id = fraction + "_" + i;
 				
 				// check that every pair never occurs twice
 				Map<String, RewiringDetectorSample> g1s = null;
@@ -91,28 +89,31 @@ public class build_rand_diff_subnetworks {
 				}
 				
 				sample_map.getOrDefault(g1s.keySet(), new HashSet<>()).add(g2s.keySet());
-				
-				System.out.println("start RD calculations for " + i + " (" + g1s.size()*g2s.size() + " comparisons).");
-				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, null, false, true);
-				
-				/*
-				 * collect some facts and build output
-				 */
-				
-				double P_rew = rd.getP_rew();
-				double P_rew_std = rd.getP_rew_std();
-				String out_temp = String.join(" ", new String[]{Double.toString(fraction), Integer.toString(i), Integer.toString(g1s.size()), Integer.toString(g2s.size()), 
-						Double.toString(P_rew), Double.toString(P_rew_std), Integer.toString(rd.getSignificantlyRewiredInteractions().size())});
-				System.out.println(out_temp);
-				System.out.flush();
-				num_facts.add(out_temp);
-				
-				List<String> temp = new LinkedList<>();
-				for (StrPair pair:rd.getSignificantlyRewiredInteractions())
-					temp.add(pair.getL() + " " + pair.getR());
-				Utilities.writeEntries(temp, results_folder + run_id + "_rew_IAs.txt.gz");
+				String run_id = fraction + "_" + i;
 				Utilities.writeEntries(g1s.keySet(), results_folder + run_id + "_g1s.txt.gz");
 				Utilities.writeEntries(g2s.keySet(), results_folder + run_id + "_g2s.txt.gz");
+				
+				for (double fdr:FDRs) {
+					System.out.println("start RD calculations for " + i + " (" + g1s.size()*g2s.size() + " comparisons), FDR: " + fdr);
+					RewiringDetector rd = new RewiringDetector(g1s, g2s, fdr, no_threads, null, false, true);
+					
+					/*
+					 * collect some facts and build output
+					 */
+					
+					double P_rew = rd.getP_rew();
+					double P_rew_std = rd.getP_rew_std();
+					String out_temp = String.join(" ", new String[]{Double.toString(fraction), Integer.toString(i), Double.toString(fdr), Integer.toString(g1s.size()), Integer.toString(g2s.size()), 
+							Double.toString(P_rew), Double.toString(P_rew_std), Integer.toString(rd.getSignificantlyRewiredInteractions().size())});
+					System.out.println(out_temp);
+					System.out.flush();
+					num_facts.add(out_temp);
+					
+					List<String> temp = new LinkedList<>();
+					for (StrPair pair:rd.getSignificantlyRewiredInteractions())
+						temp.add(pair.getL() + " " + pair.getR());
+					Utilities.writeEntries(temp, results_folder + run_id + "_" + fdr + "_rew_IAs.txt.gz");
+				}
 			}
 			
 			long duration_minutes = (System.currentTimeMillis() - start) / 1000 / 60;
@@ -129,7 +130,7 @@ public class build_rand_diff_subnetworks {
 		defineParameters();
 		
 		System.out.println("rand_diff_subnetworks on " + new Date());
-		System.out.println("no_threads:" + no_threads + ", FDR:" + FDR + ", min_size:" + min_size);
+		System.out.println("no_threads:" + no_threads + ", FDR(s): 0.01 and 0.05" + ", min_size:" + min_size);
 		System.out.println("fractions/iterations: " + fraction_iteration);
 		
 		new File(results_root).mkdir();
