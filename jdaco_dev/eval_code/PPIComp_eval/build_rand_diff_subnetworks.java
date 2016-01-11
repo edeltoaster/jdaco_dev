@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 import framework.Utilities;
@@ -23,17 +25,20 @@ public class build_rand_diff_subnetworks {
 	static int min_size = 3;
 	static Map<Double, Integer> fraction_iteration = new TreeMap<>();
 	
+	static HashMap<Set<String>, Set<Set<String>>> sample_map;
+	
 	// needs to be run on server
 	static String network_folder = "BRCA_networks/1.0/";
 	static String results_root = "BRCA_rand_diffnets/";
 	
 	public static void defineParameters() {
-		fraction_iteration.put(0.005, 100);
-		fraction_iteration.put(0.01, 100);
-		fraction_iteration.put(0.05, 100);
-		fraction_iteration.put(0.1, 100);
-		fraction_iteration.put(0.25, 100);
-		fraction_iteration.put(0.5, 100);
+		fraction_iteration.put(0.0025, 100); // 3 / 3
+		fraction_iteration.put(0.005, 100); // 3 / 5
+		fraction_iteration.put(0.01, 100); // 3 / 10
+		fraction_iteration.put(0.05, 100); // 5 / 54
+		fraction_iteration.put(0.1, 100); // 11 / 109
+		fraction_iteration.put(0.25, 100); // 28 / 273
+		fraction_iteration.put(0.5, 100); // 56 / 547
 	}
 	
 	public static Map<String, RewiringDetectorSample> getRandomSubset(Map<String, RewiringDetectorSample> data, int min_size, double fraction) {
@@ -65,12 +70,27 @@ public class build_rand_diff_subnetworks {
 			int iterations = entry.getValue();
 			System.out.println();
 			System.out.println("Analysis for " + fraction + " fraction:");
+			sample_map = new HashMap<>(); // reset
 			long start = System.currentTimeMillis();
 			for (int i=1;i<=iterations;i++) {
 				String run_id = fraction + "_" + i;
 				
-				Map<String, RewiringDetectorSample> g1s = getRandomSubset(g1, min_size, fraction);
-				Map<String, RewiringDetectorSample> g2s = getRandomSubset(g2, min_size, fraction);
+				// check that every pair never occurs twice
+				Map<String, RewiringDetectorSample> g1s = null;
+				Map<String, RewiringDetectorSample> g2s = null;
+				
+				while (g1s == null || g2s == null) {
+					g1s = getRandomSubset(g1, min_size, fraction);
+					g2s = getRandomSubset(g2, min_size, fraction);
+					
+					if (sample_map.containsKey(g1s.keySet()))
+						if (sample_map.get(g1s.keySet()).contains(g2s.keySet())) {
+							g1s = null;
+							g2s = null;
+						}
+				}
+				
+				sample_map.getOrDefault(g1s.keySet(), new HashSet<>()).add(g2s.keySet());
 				
 				System.out.println("start RD calculations for " + i + " (" + g1s.size()*g2s.size() + " comparisons).");
 				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, null, false, true);
