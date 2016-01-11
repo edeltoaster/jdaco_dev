@@ -56,14 +56,15 @@ public class build_rand_diff_subnetworks {
 		Map<String, RewiringDetectorSample> g1 = RewiringDetectorSample.readNetworks(network_folder + "normal/");
 		Map<String, RewiringDetectorSample> g2 = RewiringDetectorSample.readNetworks(network_folder + "tumor/");
 		
+		List<String> num_facts = new LinkedList<>();
+		num_facts.add("fraction iteration g1_size g2_size P_Rew P_rew_std diff_IAs");
+		
 		for (Entry<Double, Integer> entry:fraction_iteration.entrySet()) {
 			double fraction = entry.getKey();
 			int iterations = entry.getValue();
-			
+			System.out.println();
 			System.out.println("Analysis for " + fraction + " fraction:");
-			List<String> num_facts = new ArrayList<>(iterations);
-			num_facts.add("run_id g1_size g2_size P_Rew P_rew_std diff_IAs");
-			
+			long start = System.currentTimeMillis();
 			for (int i=1;i<=iterations;i++) {
 				String run_id = fraction + "_" + i;
 				
@@ -71,35 +72,33 @@ public class build_rand_diff_subnetworks {
 				Map<String, RewiringDetectorSample> g2s = getRandomSubset(g2, min_size, fraction);
 				
 				System.out.println("start RD calculations for " + i + " (" + g1s.size()*g2s.size() + " comparisons).");
-				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, System.out, false, true);
+				RewiringDetector rd = new RewiringDetector(g1s, g2s, FDR, no_threads, null, false, true);
 				
 				/*
-				 * some output
-				 */
-				
-				double P_rew_rounded = (double) Math.round( rd.getP_rew() * 1000d) / 1000d;
-				System.out.println(rd.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getSignificantlyRewiredInteractions().size() + " dIAs" );
-				
-				
-				/*
-				 * collect some facts
+				 * collect some facts and build output
 				 */
 				
 				double P_rew = rd.getP_rew();
 				double P_rew_std = rd.getP_rew_std();
-				num_facts.add(String.join(" ", new String[]{run_id, Integer.toString(g1.size()), Integer.toString(g2.size()), 
-						Double.toString(P_rew), Double.toString(P_rew_std), Integer.toString(rd.getSignificantlyRewiredInteractions().size())}));
+				String out_temp = String.join(" ", new String[]{Double.toString(fraction), Integer.toString(i), Integer.toString(g1s.size()), Integer.toString(g2s.size()), 
+						Double.toString(P_rew), Double.toString(P_rew_std), Integer.toString(rd.getSignificantlyRewiredInteractions().size())});
+				System.out.println(out_temp);
+				System.out.flush();
+				num_facts.add(out_temp);
 				
 				List<String> temp = new LinkedList<>();
 				for (StrPair pair:rd.getSignificantlyRewiredInteractions())
 					temp.add(pair.getL() + " " + pair.getR());
 				Utilities.writeEntries(temp, results_folder + run_id + "_rew_IAs.txt.gz");
-				
+				Utilities.writeEntries(g1s.keySet(), results_folder + run_id + "_g1s.txt.gz");
+				Utilities.writeEntries(g2s.keySet(), results_folder + run_id + "_g2s.txt.gz");
 			}
 			
-			Utilities.writeEntries(num_facts, results_folder + "facts_" + fraction + ".txt");
-			System.out.println();
-			num_facts = null;
+			long duration_minutes = (System.currentTimeMillis() - start) / 1000 / 60;
+			
+			Utilities.writeEntries(num_facts, results_folder + "facts.txt");
+			System.out.println(iterations + " iterations for " + fraction + " took " + duration_minutes + " min.");
+			System.out.flush();
 			System.gc();
 		}
 	}
