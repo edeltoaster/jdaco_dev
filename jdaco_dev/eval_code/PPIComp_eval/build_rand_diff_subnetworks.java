@@ -110,8 +110,12 @@ public class build_rand_diff_subnetworks {
 					num_facts.add(out_temp);
 					
 					List<String> temp = new LinkedList<>();
-					for (StrPair pair:rd.getSignificantlyRewiredInteractions())
-						temp.add(pair.getL() + " " + pair.getR());
+					for (StrPair pair:rd.getSignificantlyRewiredInteractions()) {
+						String sign = "-";
+						if (rd.getInteractionDiectionMap().get(pair))
+							sign = "+";
+						temp.add(pair.getL() + " " + pair.getR() + " " + sign);
+					}
 					Utilities.writeEntries(temp, results_folder + run_id + "_" + fdr + "_rew_IAs.txt.gz");
 				}
 			}

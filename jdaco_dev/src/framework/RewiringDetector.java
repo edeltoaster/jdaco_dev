@@ -439,6 +439,9 @@ public class RewiringDetector {
 		return interaction_reasons_count_map;
 	}
 
+	public Map<StrPair, Boolean> getInteractionDiectionMap() {
+		return this.interaction_direction_map;
+	}
 
 	/**
 	 * Write information about the differential network to a Cytoscape-usable file
