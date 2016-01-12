@@ -16,14 +16,13 @@ import java.util.TreeMap;
 import framework.Utilities;
 import framework.RewiringDetector;
 import framework.RewiringDetectorSample;
-import framework.StrPair;
 
 public class build_rand_diff_subnetworks {
 	
 	static int no_threads = 48;
 	static int min_size = 3;
 	static Map<Double, Integer> fraction_iteration = new TreeMap<>();
-	static double[] FDRs = new double[]{0.01, 0.05};
+	static double[] FDRs = new double[]{0.05};
 	static HashMap<Set<String>, Set<Set<String>>> sample_map;
 	
 	// needs to be run on server
@@ -109,14 +108,7 @@ public class build_rand_diff_subnetworks {
 					System.out.flush();
 					num_facts.add(out_temp);
 					
-					List<String> temp = new LinkedList<>();
-					for (StrPair pair:rd.getSignificantlyRewiredInteractions()) {
-						String sign = "-";
-						if (rd.getInteractionDiectionMap().get(pair))
-							sign = "+";
-						temp.add(pair.getL() + " " + pair.getR() + " " + sign);
-					}
-					Utilities.writeEntries(temp, results_folder + run_id + "_" + fdr + "_rew_IAs.txt.gz");
+					rd.writeDiffnet(results_folder + run_id + "_" + fdr + "_diffnet.txt.gz");
 				}
 			}
 			
@@ -134,7 +126,7 @@ public class build_rand_diff_subnetworks {
 		defineParameters();
 		
 		System.out.println("rand_diff_subnetworks on " + new Date());
-		System.out.println("no_threads:" + no_threads + ", FDR(s): 0.01 and 0.05" + ", min_size:" + min_size);
+		System.out.println("no_threads:" + no_threads + ", FDR(s): 0.05" + ", min_size:" + min_size);
 		System.out.println("fractions/iterations: " + fraction_iteration);
 		
 		new File(results_root).mkdir();

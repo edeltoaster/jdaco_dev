@@ -462,8 +462,8 @@ public class RewiringDetector {
 
 			double v = Math.abs(this.differential_network.get(pair));
 			double p = this.interaction_p_map.get(pair);
-			List<String> sorted_reasons = this.interaction_sorted_reasons_map.get(pair);
-			double AS_fraction = this.interaction_alt_splicing_fraction_map.get(pair);
+			List<String> sorted_reasons = this.interaction_sorted_reasons_map.getOrDefault(pair, new ArrayList<>(0));
+			double AS_fraction = this.interaction_alt_splicing_fraction_map.getOrDefault(pair, 0.0);
 
 			to_write.add(pair.getL() + " " + pair.getR() + " " + sign + " "
 			        + (int) v + " " + v / groupwise_comparisons + " " + p +
