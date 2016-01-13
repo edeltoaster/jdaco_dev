@@ -462,7 +462,11 @@ public class RewiringDetector {
 
 			double v = Math.abs(this.differential_network.get(pair));
 			double p = this.interaction_p_map.get(pair);
-			List<String> sorted_reasons = this.interaction_sorted_reasons_map.getOrDefault(pair, new ArrayList<>(0));
+			List<String> sorted_reasons = this.interaction_sorted_reasons_map.getOrDefault(pair, new ArrayList<>(1));
+			
+			if (only_diffnet)
+				sorted_reasons.add("-");
+			
 			double AS_fraction = this.interaction_alt_splicing_fraction_map.getOrDefault(pair, 0.0);
 
 			to_write.add(pair.getL() + " " + pair.getR() + " " + sign + " "
@@ -607,7 +611,7 @@ public class RewiringDetector {
 		 */
 		
 		List<String> to_write = new LinkedList<>();
-		to_write.add("Protein gene_name in_min_reasons overall_count expr_count AS_count AS_fraction");
+		to_write.add("protein gene_name in_min_reasons overall_count expr_count AS_count AS_fraction");
 		
 		for (String protein:proteins) {
 			String min_reasons = "no";
