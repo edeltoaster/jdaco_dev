@@ -60,7 +60,7 @@ public class PPIXpress {
 		System.out.println("[INPUT-NETWORK] :");
 		System.out.println("	Any protein-protein interaction network in SIF-format: Protein1 Protein2 (weight).");
 		System.out.println("	Proteins are assumed to be given as UniProt or HGNC accessions.");
-		System.out.println("	Alternatively: use taxon:[organism taxon] to automatically retrieve current IntAct and iRefIndex data for an organism.");
+		System.out.println("	Alternatively: use taxon:[organism taxon] to automatically retrieve current mentha or IntAct data for an organism.");
 		
 		System.out.println();
 		
@@ -230,13 +230,16 @@ public class PPIXpress {
 		PPIN original_network = null;
 		if (original_network_path.startsWith("taxon:")) {
 			String taxon_id = original_network_path.split(":")[1];
-			System.out.print("Retrieving IntAct interaction data for taxon " + taxon_id + " ... ");
-			original_network = DataQuery.getIntActNetwork(taxon_id, System.out);
+			System.out.print("Retrieving mentha interaction data for taxon " + taxon_id + " ... ");
+			original_network = DataQuery.getMenthaNetwork(taxon_id, System.out);
+			
+			if (original_network.getSizes()[0] == 0) {
+				System.out.println("no interaction data for taxon " + taxon_id + " available in mentha.");
+				System.out.print("Retrieving IntAct interaction data instead ... ");
+				original_network = DataQuery.getIntActNetwork(taxon_id, System.out);
+			}
 			System.out.println("done.");
 			
-			System.out.print("Retrieving iRefIndex interaction data for taxon " + taxon_id + " ... ");
-			original_network = original_network.mergeAll(DataQuery.getIRefIndexNetwork(taxon_id, System.out));
-			System.out.println("done.");
 		} else {
 			System.out.println("Reading " + original_network_path + " (may take some time if ID conversion is necessary) ... ");
 			original_network = new PPIN(original_network_path);

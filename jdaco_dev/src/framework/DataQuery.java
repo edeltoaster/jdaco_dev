@@ -2,6 +2,7 @@ package framework;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -1108,7 +1109,7 @@ public class DataQuery {
 				if (s.startsWith(taxon_id) && s.contains("mitab") && s.endsWith(".txt.zip"))
 					net_file = s;
 			}
-				
+			
 			// use the knowledge of the filename to get the data
 			server = new URL("http://irefindex.org/download/irefindex/data/current/psi_mitab/MITAB2.6/" + net_file);
 			connection = server.openConnection();
@@ -1199,7 +1200,7 @@ public class DataQuery {
 	}
 
 	/**
-	 * Retrieves current Mentha network for a given organism; if there is no data for the taxon, an empty network is returned
+	 * Retrieves current weighted Mentha network for a given organism; if there is no data for the taxon, an empty network is returned
 	 * @param taxon_id
 	 * @return
 	 */
@@ -1208,7 +1209,7 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Retrieves current Mentha network for a given organism, prints feedback to ps;  if there is no data for the taxon, an empty network is returned
+	 * Retrieves current weighted Mentha network for a given organism, prints feedback to ps;  if there is no data for the taxon, an empty network is returned
 	 * @param taxon_id
 	 * @param ps
 	 * @return
@@ -1265,6 +1266,8 @@ public class DataQuery {
 					break;
 				}
 			
+		} catch (FileNotFoundException e) {
+			// data not available -> return empty PPIN
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("Mentha");

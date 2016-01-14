@@ -568,27 +568,31 @@ public class PPIXpress_GUI {
 		lblSever.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblSever.setBounds(650, 349, 61, 30);
 		frmPpixpress.getContentPane().add(lblSever);
+		activiy_changing_components.add(lblSever);
 		
 		JLabel lblProgress = new JLabel("Progress:");
 		lblProgress.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblProgress.setBounds(17, 444, 75, 30);
 		frmPpixpress.getContentPane().add(lblProgress);
 		
-		JLabel lblNewLabel = new JLabel("threshold:");
-		lblNewLabel.setBounds(70, 260, 85, 30);
-		frmPpixpress.getContentPane().add(lblNewLabel);
-		activiy_changing_components.add(lblNewLabel);
-		lblNewLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		JLabel lblthreshold = new JLabel("threshold:");
+		lblthreshold.setBounds(70, 260, 85, 30);
+		frmPpixpress.getContentPane().add(lblthreshold);
+		activiy_changing_components.add(lblthreshold);
+		lblthreshold.setHorizontalAlignment(SwingConstants.RIGHT);
+		activiy_changing_components.add(lblthreshold);
 		
 		JLabel lblReferenceProteinproteinInteaction = new JLabel("reference protein-protein interaction network:");
 		lblReferenceProteinproteinInteaction.setHorizontalAlignment(SwingConstants.LEFT);
 		lblReferenceProteinproteinInteaction.setBounds(330, 10, 414, 30);
 		frmPpixpress.getContentPane().add(lblReferenceProteinproteinInteaction);
+		activiy_changing_components.add(lblReferenceProteinproteinInteaction);
 		
 		JLabel lblSpecificExpressionData = new JLabel("specific expression data:");
 		lblSpecificExpressionData.setHorizontalAlignment(SwingConstants.LEFT);
 		lblSpecificExpressionData.setBounds(330, 160, 256, 30);
 		frmPpixpress.getContentPane().add(lblSpecificExpressionData);
+		activiy_changing_components.add(lblSpecificExpressionData);
 		
 		btnRetrieve = new JButton("from web");
 		btnRetrieve.addActionListener(new ActionListener() {
@@ -660,7 +664,8 @@ public class PPIXpress_GUI {
 		JLabel lblLoadProteinInteraction = new JLabel("Load protein interaction data");
 		lblLoadProteinInteraction.setBounds(55, 5, 220, 40);
 		frmPpixpress.getContentPane().add(lblLoadProteinInteraction);
-
+		activiy_changing_components.add(lblLoadProteinInteraction);
+		
 		// most general
 		System.setErr(stream_output);
 		System.setOut(stream_output);
@@ -907,20 +912,26 @@ public class PPIXpress_GUI {
 	}
 	
 	public void retrieve_network(String taxon_id) {
+		text_ppin.setText("");
 		setActivity(false);
-		stream_output.print("Retrieving IntAct interaction data for taxon " + taxon_id + " ... ");
-		original_ppin = DataQuery.getIntActNetwork(taxon_id, stream_output);
+		stream_output.print("Retrieving mentha interaction data for taxon " + taxon_id + " ... ");
+		original_ppin = DataQuery.getMenthaNetwork(taxon_id, stream_output);
+		original_network_path = "retrieved from mentha, taxon:" + taxon_id;
+		
+		if (original_ppin.getSizes()[0] == 0) {
+			stream_output.println("no interaction data for taxon " + taxon_id + " available in mentha.");
+			stream_output.print("Retrieving IntAct interaction data instead ... ");
+			original_ppin = DataQuery.getIntActNetwork(taxon_id, stream_output);
+			original_network_path = "retrieved from IntAct, taxon:" + taxon_id;
+		}
+		
 		stream_output.println("done.");
 		
-		stream_output.print("Retrieving iRefIndex interaction data for taxon " + taxon_id + " ... ");
-		original_ppin = original_ppin.mergeAll(DataQuery.getIRefIndexNetwork(taxon_id, stream_output));
-		stream_output.println("done.");
-		
-		original_network_path = "IntAct/iRefIndex (only physical interactions), taxon:" + taxon_id;
 	    text_ppin.setText("Complete network: " + original_network_path + System.getProperty("line.separator") + "Size: " + original_ppin.getSizesStr());
 	}
 	
 	public void load_network() {
+		text_ppin.setText("");
 		setActivity(false);
 		stream_output.println("Reading " + original_network_path + " (may take some time if ID conversion is necessary) ... ");
 	    original_ppin = new PPIN(original_network_path);
