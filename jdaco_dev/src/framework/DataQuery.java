@@ -1197,6 +1197,100 @@ public class DataQuery {
 		
 		return new PPIN(new BufferedReader(new InputStreamReader(inputStream)), 0.0);
 	}
+
+	/**
+	 * Retrieves current Mentha network for a given organism; if there is no data for the taxon, an empty network is returned
+	 * @param taxon_id
+	 * @return
+	 */
+	public static PPIN getMenthaNetwork(String taxon_id) {
+		return getMenthaNetwork(taxon_id, null);
+	}
+	
+	/**
+	 * Retrieves current Mentha network for a given organism, prints feedback to ps;  if there is no data for the taxon, an empty network is returned
+	 * @param taxon_id
+	 * @param ps
+	 * @return
+	 */
+	public static PPIN getMenthaNetwork(String taxon_id, PrintStream ps) {
+		
+		StringBuilder output = new StringBuilder();
+		String line = null;
+		ZipInputStream zis = null;
+		try {
+			URL server = new URL("http://mentha.uniroma2.it/dumps/organisms/" + taxon_id + ".zip");
+			URLConnection connection = server.openConnection();
+			
+			// read and build pipe
+			zis = new ZipInputStream(connection.getInputStream());
+			ZipEntry file_in_zip = null;
+			
+			// for percentage output
+			long size = (long) (connection.getContentLengthLong() * 3.6); // approximation
+			long read = 0;
+			int line_sep_len = System.getProperty("line.separator").getBytes().length;
+			byte state = 0;
+			while ( (file_in_zip = zis.getNextEntry()) != null)
+				if (file_in_zip.getName().equals(taxon_id)) {
+					BufferedReader datastream = new BufferedReader(new InputStreamReader(zis));
+					while ( (line = datastream.readLine()) != null ) {
+						read += line.getBytes().length + line_sep_len;
+						
+						// for output
+						if (ps != null) {
+							if (state == 0 && read > 0.24 * size) {
+								state = 1;
+								ps.print("25% ... ");
+							} else if (state == 1 && read > 0.49 * size) {
+								state = 2;
+								ps.print("50% ... ");
+							} else if (state == 2 && read > 0.74 * size) {
+								state = 3;
+								ps.print("75% ... ");
+							}
+						}
+						
+						if (line.startsWith("Protein A") || line.isEmpty() || line.startsWith("#"))
+							continue;
+						
+						String[] temp = line.split(";");
+						String p1 = temp[0];
+						String p2 = temp[2];
+						String score = temp[4];
+						
+						output.append(p1 + " " + p2 + " " + score + "\n");
+					}
+					datastream.close();
+					break;
+				}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("Mentha");
+			
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get interaction data from Mentha in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			return getMenthaNetwork(taxon_id, ps);
+			
+		} finally {
+			try {
+				zis.close();
+			} catch (Exception e) {
+			}
+		}
+		
+		// convert, stream closed in PPIN constructor
+		InputStream inputStream = new ByteArrayInputStream(output.toString().getBytes(Charset.forName("UTF-8")));
+		
+		// build
+		
+		return new PPIN(new BufferedReader(new InputStreamReader(inputStream)), 0.0);
+	}
 	
 	/**
 	 * Retrieves a mapping of secondary to primary accessions from Uniprot,
