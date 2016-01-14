@@ -324,4 +324,30 @@ public class Utilities {
         return chunks;
     }
     
+    /**
+     * Constructs powerset
+     * @param data
+     * @param min
+     * @param max
+     * @return
+     */
+    public static <T> Set<Set<T>> getPowerSet(Set<T> data, int min, int max) {
+    	// implementation adjusted from http://stackoverflow.com/questions/1670862/obtaining-a-powerset-of-a-set-in-java
+    	List<T> list = new ArrayList<T>(data);
+    	int n = list.size();
+
+    	Set<Set<T>> powerSet = new HashSet<Set<T>>();
+
+    	for( long i = 0; i < (1 << n); i++) {
+    	    Set<T> element = new HashSet<T>();
+    	    for( int j = 0; j < n; j++ )
+    	    	if( (i >> j) % 2 == 1 )
+    	    		element.add(list.get(j));
+    	    
+    	    if (element.size() >= min && element.size() <= max)
+    	    	powerSet.add(element); 
+    	}
+
+    	return powerSet;
+    }
 }

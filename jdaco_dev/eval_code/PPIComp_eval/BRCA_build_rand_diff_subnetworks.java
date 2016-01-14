@@ -17,7 +17,7 @@ import framework.Utilities;
 import framework.RewiringDetector;
 import framework.RewiringDetectorSample;
 
-public class build_rand_diff_subnetworks {
+public class BRCA_build_rand_diff_subnetworks {
 	
 	static int no_threads = 48;
 	static int min_size = 3;

@@ -11,7 +11,7 @@ import framework.RewiringDetector;
 import framework.RewiringDetectorSample;
 import framework.StrPair;
 
-public class build_diff_network {
+public class BRCA_build_diff_network {
 	
 	static int no_threads = 48;
 	static double FDR = 0.05;

@@ -13,7 +13,7 @@ import framework.PPIN;
 import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
-public class build_networks {
+public class BRCA_build_networks {
 	static String expr_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BRCA_expr/";
 	static String network_folder_pre = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BRCA_networks/";
 	static Map<String, String> folder_type_map = new HashMap<>();
