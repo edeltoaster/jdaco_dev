@@ -1200,7 +1200,7 @@ public class DataQuery {
 	}
 
 	/**
-	 * Retrieves current weighted Mentha network for a given organism; if there is no data for the taxon, an empty network is returned
+	 * Retrieves current weighted mentha network for a given organism; if there is no data for the taxon, an empty network is returned
 	 * @param taxon_id
 	 * @return
 	 */
@@ -1209,7 +1209,7 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Retrieves current weighted Mentha network for a given organism, prints feedback to ps;  if there is no data for the taxon, an empty network is returned
+	 * Retrieves current weighted mentha network for a given organism, prints feedback to ps;  if there is no data for the taxon, an empty network is returned
 	 * @param taxon_id
 	 * @param ps
 	 * @return
@@ -1272,7 +1272,7 @@ public class DataQuery {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("Mentha");
 			
-			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get interaction data from Mentha in 10 seconds ..." );
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get interaction data from mentha in 10 seconds ..." );
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e1) {
