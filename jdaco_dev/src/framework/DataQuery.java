@@ -25,6 +25,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -46,6 +49,7 @@ public class DataQuery {
 	private static String specific_3did_release = "current";
 	private static int retries = 0;
 	private static int timeout = 3*60; // 3min
+	private static long last_server_change = System.currentTimeMillis(); // holds track of server switches, important for parallel retrieval
 	private static PrintStream err_out = System.err;
 	private static boolean stricter_local_DDIs = false;
 	private static boolean no_local_DDIs = false;
@@ -1406,15 +1410,26 @@ public class DataQuery {
 	 * Switches to another Ensembl server
 	 */
 	public static void switchServer() {
+		
+		long now = System.currentTimeMillis();
+		
+		// ensures that last change is at least 10 seconds ago
+		if ((now - DataQuery.last_server_change) < 10000)
+			return;
+		
+		DataQuery.last_server_change = now;
+		
 		String server1 = "ensembldb.ensembl.org:3306";
 		String server2 = "useastdb.ensembl.org:3306";
 		String server3 = "asiadb.ensembl.org:3306";
+		
 		if (DataQuery.ensembl_mysql.equals(server1))
 			DataQuery.ensembl_mysql = server3;
 		else if (DataQuery.ensembl_mysql.equals(server2))
 			DataQuery.ensembl_mysql = server1;
 		else // server 3
 			DataQuery.ensembl_mysql = server2;
+		
 		err_out.println("ENSEMBL server changed to " + DataQuery.ensembl_mysql + ".");
 	}
 	
@@ -1858,5 +1873,64 @@ public class DataQuery {
 		}
 
 		return ddis;
+	}
+	
+	/*
+	 * parallel versions of some methods for faster Ensembl retrieval in PPIXpress
+	 */
+	
+	public static void preloadEnsemblData(String organism_database) {
+		ExecutorService es = Executors.newFixedThreadPool(3);
+		
+		es.execute(new GTPRunnable(organism_database));
+		es.execute(new IPDRunnable(organism_database));
+		es.execute(new TDRunnable(organism_database));
+		
+		es.shutdown();
+		try {
+			es.awaitTermination(DataQuery.timeout, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	static class GTPRunnable implements Runnable {
+		String organism_database;
+		
+		public GTPRunnable(String organism_database) {
+			this.organism_database = organism_database;
+		}
+		
+		@Override
+		public void run() {
+			DataQuery.getGenesTranscriptsProteins(this.organism_database);
+		}
+	}
+	
+	static class IPDRunnable implements Runnable {
+		String organism_database;
+		
+		public IPDRunnable(String organism_database) {
+			this.organism_database = organism_database;
+		}
+		
+		@Override
+		public void run() {
+			DataQuery.getIsoformProteinDomainMap(this.organism_database);
+		}
+	}
+	
+	static class TDRunnable implements Runnable {
+		String organism_database;
+		
+		public TDRunnable(String organism_database) {
+			this.organism_database = organism_database;
+		}
+		
+		@Override
+		public void run() {
+			DataQuery.getTranscriptsDomains(this.organism_database);
+		}
 	}
 }
