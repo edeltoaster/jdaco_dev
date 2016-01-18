@@ -744,8 +744,8 @@ public class PPIXpress_GUI {
 			progressBar.setValue(0);
 			return;
 		}
-		stream_output.print("33% ... ");
 		
+		stream_output.print("50% ... ");
 		progressBar.setValue(30);
 		
 		DataQuery.getIsoformProteinDomainMap(organism_database);
@@ -754,17 +754,8 @@ public class PPIXpress_GUI {
 			progressBar.setValue(0);
 			return;
 		}
-		stream_output.print("66% ... ");
 		
-		progressBar.setValue(40);
-		
-		DataQuery.getTranscriptsDomains(organism_database);
-		if (!computing) {
-			progressBar.setValue(0);
-			return;
-		}
 		stream_output.println("100%");
-		
 		progressBar.setValue(45);
 		
 		// gathering even more data if necessary

@@ -270,12 +270,9 @@ public class PPIXpress {
 		
 		System.out.print("Retrieving ENSEMBL " + ensembl_version + " data from database " + organism_database + " (may take some minutes) ... ");
 		DataQuery.getGenesTranscriptsProteins(organism_database);
-		System.out.print("33% ... ");
+		System.out.print("50% ... ");
 		System.out.flush();
 		DataQuery.getIsoformProteinDomainMap(organism_database);
-		System.out.print("66% ... ");
-		System.out.flush();
-		DataQuery.getTranscriptsDomains(organism_database);
 		System.out.println("100%");
 		System.out.flush();
 		

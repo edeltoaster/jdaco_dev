@@ -25,9 +25,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -329,7 +330,7 @@ public class DataQuery {
 	 * @param organism_core_database
 	 * @returnreturn list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
 	 */
-	public static List<String[]> getGenesTranscriptsProteins(String organism_core_database) {
+	public static List<String[]> getGenesTranscriptsProteinsSingleQuery(String organism_core_database) {
 		
 		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
 			return DataQuery.cache_genestransprots.get(organism_core_database);
@@ -343,6 +344,105 @@ public class DataQuery {
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id, xref.dbprimary_acc "
 					+ "FROM gene, transcript, translation, object_xref, xref "
 					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
+			while (rs.next()) {
+				String[] row = {rs.getString(1), rs.getString(2), rs.getString(3)};
+				associations.add(row);
+			}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ENSEMBL");
+			
+			//e.printStackTrace();
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get gene/transcript/protein data from ENSEMBL in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			DataQuery.switchServer();
+			
+			return getGenesTranscriptsProteinsSingleQuery(organism_core_database);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
+		}
+		
+		DataQuery.cache_genestransprots.put(organism_core_database, associations);
+		return associations;
+	}
+	
+	/**
+	 * Queries Ensembl for association of UniProt Accs. to transcripts and genes
+	 * @param organism_core_database
+	 * @returnreturn list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
+	 */
+	public static List<String[]> getGenesTranscriptsProteins(String organism_core_database) {
+		
+		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
+			return DataQuery.cache_genestransprots.get(organism_core_database);
+		
+		List<String[]> associations = new LinkedList<>();
+		
+		try {
+			// compute
+			ExecutorService es = Executors.newFixedThreadPool(2);
+			Future<Map<String,List<String>>> t_p = es.submit(new getTranscriptProteinsTask(organism_core_database));
+			Future<Map<String,List<String>>> g_t = es.submit(new getGenesTranscriptsTask(organism_core_database));
+			
+			// get results
+			Map<String,List<String>> transcript_proteins = t_p.get();
+			Map<String,List<String>> gene_transcripts = g_t.get();
+			es.shutdown();
+			
+			// write into array
+			for (String gene:gene_transcripts.keySet())
+				for (String transcript:gene_transcripts.get(gene)) {
+					if (!transcript_proteins.containsKey(transcript))
+						continue;
+					for (String protein:transcript_proteins.get(transcript)) {
+						associations.add(new String[]{gene, transcript, protein});
+					}
+				}
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ENSEMBL");
+			
+			//e.printStackTrace();
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get gene/transcript/protein association from ENSEMBL in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			DataQuery.switchServer();
+			
+			return getGenesTranscriptsProteins(organism_core_database);
+			
+		}
+		
+		DataQuery.cache_genestransprots.put(organism_core_database, associations);
+		return associations;
+	}
+	
+	public static List<String[]> getTranscriptsProteins(String organism_core_database) {
+		
+		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
+			return DataQuery.cache_genestransprots.get(organism_core_database);
+		List<String[]> associations = new LinkedList<>();
+		
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			ResultSet rs = st.executeQuery("SELECT DISTINCT gene.stable_id, transcript.stable_id, xref.dbprimary_acc "
+					+ "FROM gene, transcript, translation, object_xref, xref "
+					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
+			
 			while (rs.next()) {
 				String[] row = {rs.getString(1), rs.getString(2), rs.getString(3)};
 				associations.add(row);
@@ -371,6 +471,7 @@ public class DataQuery {
 		}
 		
 		DataQuery.cache_genestransprots.put(organism_core_database, associations);
+		
 		return associations;
 	}
 	
@@ -393,6 +494,7 @@ public class DataQuery {
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, xref.display_label "
 					+ "FROM gene, object_xref, xref "
 					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='1300'");
+			
 			while (rs.next()) {
 				gene_to_names.put(rs.getString(1), rs.getString(2));
 			}
@@ -444,6 +546,7 @@ public class DataQuery {
 			ResultSet rs = st.executeQuery("SELECT translation.stable_id, xref.dbprimary_acc "
 					+ "FROM translation, object_xref, xref "
 					+ "WHERE translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
+			
 			while (rs.next()) {
 				if (!ensembl_to_uniprot.containsKey(rs.getString(1)))
 					ensembl_to_uniprot.put(rs.getString(1), new LinkedList<String>());
@@ -622,6 +725,7 @@ public class DataQuery {
 					+ "FROM transcript, object_xref, xref "
 					+ "WHERE transcript.transcript_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id "
 					+ "AND xref.external_db_id='11000'");
+			
 			while (rs.next()) {
 				String ucsc = rs.getString(2).split("\\.")[0]; // shear off version number
 				String transcript = rs.getString(1);
@@ -742,6 +846,7 @@ public class DataQuery {
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, protein_feature.hit_name, protein_feature.hit_start, protein_feature.hit_end "
 					+ "FROM transcript, translation, protein_feature, analysis "
 					+ "WHERE transcript.biotype = 'protein_coding' AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=protein_feature.translation_id AND protein_feature.analysis_id = analysis.analysis_id AND analysis.logic_name = 'Pfam'");
+			
 			while (rs.next()) {
 				if (!transcript_domain_mapping.containsKey(rs.getString(1)))
 					transcript_domain_mapping.put(rs.getString(1), new LinkedList<String>());
@@ -813,6 +918,7 @@ public class DataQuery {
 		Map<String, List<String>> transcript_domain_mapping = getTranscriptsDomains(organism_core_database);
 		Map<String, String> isoform_map = getIsoformTranscriptsOfProteins(organism_core_database);
 		Map<String, Set<String>> isoform_protein_domain_mapping = new HashMap<>();
+		
 		for (String protein:isoform_map.keySet()) {
 			String isoform = isoform_map.get(protein);
 			
@@ -1874,5 +1980,76 @@ public class DataQuery {
 		}
 
 		return ddis;
+	}
+	
+	/*
+	 * concurrent functions
+	 */
+	
+	static class getGenesTranscriptsTask implements Callable<Map<String,List<String>>> {
+		final String organism_core_database;
+		
+		public getGenesTranscriptsTask(String organism_core_database) {
+			this.organism_core_database = organism_core_database;
+		}
+		
+		@Override
+		public Map<String, List<String>> call() throws Exception {
+			Map<String,List<String>> gene_transcripts = new HashMap<>();
+			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/" + this.organism_core_database, "anonymous", "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			
+			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id "
+					+ "FROM gene, transcript "
+					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=transcript.gene_id");
+			
+			while (rs.next()) {
+				String[] row = {rs.getString(1), rs.getString(2)};
+				
+				if (!gene_transcripts.containsKey(row[0]))
+					gene_transcripts.put(row[0], new LinkedList<String>());
+				
+				gene_transcripts.get(row[0]).add(row[1]);
+			}
+			
+			connection.close();
+			
+			return gene_transcripts;
+		}
+	}
+	
+	static class getTranscriptProteinsTask implements Callable<Map<String,List<String>>> {
+		final String organism_core_database;
+		
+		public getTranscriptProteinsTask(String organism_core_database) {
+			this.organism_core_database = organism_core_database;
+		}
+		
+		@Override
+		public Map<String, List<String>> call() throws Exception {
+			
+			Map<String,List<String>> transcript_proteins = new HashMap<>();
+			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/" + this.organism_core_database, "anonymous", "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			
+			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, xref.dbprimary_acc "
+					+ "FROM transcript, translation, object_xref, xref "
+					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
+			
+			while (rs.next()) {
+				String[] row = {rs.getString(1), rs.getString(2)};
+				
+				if (!transcript_proteins.containsKey(row[0]))
+					transcript_proteins.put(row[0], new LinkedList<String>());
+				
+				transcript_proteins.get(row[0]).add(row[1]);
+			}
+			
+			connection.close();
+			
+			return transcript_proteins;
+		}
 	}
 }
