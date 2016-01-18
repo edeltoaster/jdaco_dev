@@ -352,6 +352,7 @@ public class DataQuery {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
 			
+			//e.printStackTrace();
 			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get transcript data from ENSEMBL in 10 seconds ..." );
 			try {
 				Thread.sleep(10000);
@@ -1873,64 +1874,5 @@ public class DataQuery {
 		}
 
 		return ddis;
-	}
-	
-	/*
-	 * parallel versions of some methods for faster Ensembl retrieval in PPIXpress
-	 */
-	
-	public static void preloadEnsemblData(String organism_database) {
-		ExecutorService es = Executors.newFixedThreadPool(3);
-		
-		es.execute(new GTPRunnable(organism_database));
-		es.execute(new IPDRunnable(organism_database));
-		es.execute(new TDRunnable(organism_database));
-		
-		es.shutdown();
-		try {
-			es.awaitTermination(DataQuery.timeout, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	static class GTPRunnable implements Runnable {
-		String organism_database;
-		
-		public GTPRunnable(String organism_database) {
-			this.organism_database = organism_database;
-		}
-		
-		@Override
-		public void run() {
-			DataQuery.getGenesTranscriptsProteins(this.organism_database);
-		}
-	}
-	
-	static class IPDRunnable implements Runnable {
-		String organism_database;
-		
-		public IPDRunnable(String organism_database) {
-			this.organism_database = organism_database;
-		}
-		
-		@Override
-		public void run() {
-			DataQuery.getIsoformProteinDomainMap(this.organism_database);
-		}
-	}
-	
-	static class TDRunnable implements Runnable {
-		String organism_database;
-		
-		public TDRunnable(String organism_database) {
-			this.organism_database = organism_database;
-		}
-		
-		@Override
-		public void run() {
-			DataQuery.getTranscriptsDomains(this.organism_database);
-		}
 	}
 }
