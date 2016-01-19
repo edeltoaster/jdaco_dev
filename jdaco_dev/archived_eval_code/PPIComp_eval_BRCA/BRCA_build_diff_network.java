@@ -1,4 +1,4 @@
-package PPIComp_eval;
+package PPIComp_eval_BRCA;
 
 import java.io.File;
 import java.util.Date;

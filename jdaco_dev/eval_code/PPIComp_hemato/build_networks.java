@@ -1,4 +1,4 @@
-package hemato_PPI;
+package PPIComp_hemato;
 
 import java.io.File;
 import java.util.HashMap;
@@ -23,8 +23,8 @@ public class build_networks {
 	static NetworkBuilder builder;
 	
 	public static void loadAndStoreReferenceNetwork(String network_out) {
-		PPIN ppin = DataQuery.getIntActNetwork("9606");
-		ppin = ppin.mergeAll(DataQuery.getIRefIndexNetwork("9606"));
+		PPIN ppin = DataQuery.getMenthaNetwork("9606");
+		System.out.println(ppin.getSizesStr());
 		ppin = ppin.updateUniprotAccessions();
 		ppin.writePPIN(network_out);
 		System.out.println(ppin.getSizesStr());
@@ -150,12 +150,18 @@ public class build_networks {
 			String path = f.getAbsolutePath();
 			String[] path_split = path.split("/");
 			String file_name = path_split[path_split.length-1].split("\\.")[0];
+			
 			String cell_type = path_split[path_split.length-2];
 			
 			if (!folder_type_map.containsKey(cell_type))
 				continue;
 			
 			cell_type = folder_type_map.get(cell_type);
+			
+			// filter N, M, MK, CD4 to venous blood samples
+			if (cell_type.equals("M") || cell_type.equals("N") || cell_type.equals("MK") || cell_type.equals("CD4"))
+				if (file_name.startsWith("Cord"))
+					continue;
 			
 			String out_path = network_folder + cell_type + "/";
 			
@@ -211,7 +217,7 @@ public class build_networks {
 	}
 	
 	public static void main(String[] args) {
-		//loadAndStoreReferenceNetwork("mixed_data/human_merged_dec_4.txt.gz");
+		//loadAndStoreReferenceNetwork("mixed_data/human_mentha_19_jan.txt.gz");
 		//System.exit(0);
 		
 		preprocess();
