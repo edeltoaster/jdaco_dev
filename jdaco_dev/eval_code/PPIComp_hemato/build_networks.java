@@ -22,6 +22,9 @@ public class build_networks {
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
 	
+	static Map<String, List<String>> celltype_sizes = new HashMap<>();
+	static List<String> parameters = new LinkedList<>();
+	
 	public static void loadAndStoreReferenceNetwork(String network_out) {
 		PPIN ppin = DataQuery.getMenthaNetwork("9606");
 		System.out.println(ppin.getSizesStr());
@@ -120,23 +123,25 @@ public class build_networks {
 	}
 	
 	public static void preprocess() {
-		for (String s:Utilities.readEntryFile("eval_code/hemato_PPI/cell_types.txt")) {
+		for (String s:Utilities.readEntryFile("eval_code/PPIComp_hemato/cell_types.txt")) {
 			if (s.startsWith("#"))
 				continue;
 			String[] spl = s.trim().split(" ");
 			folder_type_map.put(spl[0], spl[1]);
 		}
 		
-		System.out.println("Original PPIN: " + "mixed_data/human_merged_dec_4.txt.gz");
+		System.out.println("Original PPIN: " + "mixed_data/human_mentha_19_jan.txt.gz");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		System.out.println("3did:" + DataQuery.get3didVersion());
 		System.out.println("iPfam:" + DataQuery.getIPfamVersion());
 		
-		original_ppin = new PPIN("mixed_data/human_merged_dec_4.txt.gz");
+		original_ppin = new PPIN("mixed_data/human_mentha_19_jan.txt.gz");
 		builder = new NetworkBuilder(original_ppin);
 	}
 	
 	public static void process(double TPM_threshold) {
+		
+		parameters.add(Double.toString(TPM_threshold));
 		
 		System.out.println("BLUEPRINT net-builder, TPM threshold: " + TPM_threshold);
 		String network_folder = network_folder_pre + TPM_threshold + "/";
@@ -204,9 +209,14 @@ public class build_networks {
 				no_interactions.add( (double) sizes[1]);
 			}
 			
+			int prots = (int) Utilities.getMean(no_proteins);
 			System.out.println();
 			System.out.println(cell_type + ": " + data_map.get(cell_type).size() + " samples");
-			System.out.println("Size: " + (int) Utilities.getMean(no_proteins) + "+-" + (int) Utilities.getStd(no_proteins) + " / " + (int) Utilities.getMean(no_interactions) + "+-" + (int) Utilities.getStd(no_interactions));
+			System.out.println("Size: " + prots + "+-" + (int) Utilities.getStd(no_proteins) + " / " + (int) Utilities.getMean(no_interactions) + "+-" + (int) Utilities.getStd(no_interactions));
+			
+			if (!celltype_sizes.containsKey(cell_type))
+				celltype_sizes.put(cell_type, new LinkedList<String>());
+			celltype_sizes.get(cell_type).add(Integer.toString(prots));
 		}
 		
 		System.out.println();
@@ -227,9 +237,21 @@ public class build_networks {
 		process(0.0);
 		process(0.03125);
 		process(0.1);
-		process(0.15);
 		process(0.2);
 		process(0.3);
+		process(0.35);
+		process(0.4);
+		process(0.5);
+		process(0.6);
+		process(0.7);
+		process(0.8);
+		process(0.9);
 		process(1.0);
+		
+		System.out.println();
+		System.out.println("cell_type " + String.join(" ", parameters));
+		
+		for (String cell_type:celltype_sizes.keySet())
+			System.out.println(cell_type + " " + String.join(" ", celltype_sizes.get(cell_type)));
 	}
 }
