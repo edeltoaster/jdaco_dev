@@ -163,8 +163,8 @@ public class build_networks {
 			
 			cell_type = folder_type_map.get(cell_type);
 			
-			// filter N, M, MK, CD4 to venous blood samples
-			if (cell_type.equals("M") || cell_type.equals("N") || cell_type.equals("MK") || cell_type.equals("CD4"))
+			// filter N, M, NK, CD4 to venous blood samples
+			if (cell_type.equals("M") || cell_type.equals("N") || cell_type.equals("NK") || cell_type.equals("CD4"))
 				if (file_name.startsWith("Cord"))
 					continue;
 			
@@ -235,7 +235,7 @@ public class build_networks {
 		new File(network_folder_pre).mkdir();
 		
 		process(0.0);
-		process(0.03125);
+		//process(0.03125);
 		process(0.05);
 		process(0.1);
 		process(0.15);
