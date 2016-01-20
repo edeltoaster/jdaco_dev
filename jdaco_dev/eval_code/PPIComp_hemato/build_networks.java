@@ -130,12 +130,12 @@ public class build_networks {
 			folder_type_map.put(spl[0], spl[1]);
 		}
 		
-		System.out.println("Original PPIN: " + "mixed_data/human_mentha_19_jan.txt.gz");
+		System.out.println("Original PPIN: " + "mixed_data/human_mentha_17_jan.txt.gz");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		System.out.println("3did:" + DataQuery.get3didVersion());
 		System.out.println("iPfam:" + DataQuery.getIPfamVersion());
 		
-		original_ppin = new PPIN("mixed_data/human_mentha_19_jan.txt.gz");
+		original_ppin = new PPIN("mixed_data/human_mentha_17_jan.txt.gz");
 		builder = new NetworkBuilder(original_ppin);
 	}
 	
@@ -236,16 +236,25 @@ public class build_networks {
 		
 		process(0.0);
 		process(0.03125);
+		process(0.05);
 		process(0.1);
+		process(0.15);
 		process(0.2);
+		process(0.25);
 		process(0.3);
 		process(0.35);
 		process(0.4);
+		process(0.45);
 		process(0.5);
+		process(0.55);
 		process(0.6);
+		process(0.65);
 		process(0.7);
+		process(0.75);
 		process(0.8);
+		process(0.85);
 		process(0.9);
+		process(0.95);
 		process(1.0);
 		
 		System.out.println();
