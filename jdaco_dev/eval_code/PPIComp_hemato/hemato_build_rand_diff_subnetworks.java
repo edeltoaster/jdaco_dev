@@ -14,7 +14,7 @@ import framework.RewiringDetectorSample;
 
 public class hemato_build_rand_diff_subnetworks {
 	
-	static int no_threads = 32;
+	static int no_threads = 40;
 	static double fdr = 0.05;
 	static String t1 = "CLP";
 	static String t2 = "CD4";
@@ -33,6 +33,8 @@ public class hemato_build_rand_diff_subnetworks {
 	}
 	
 	public static void process(String network_folder, String results_folder) {
+		
+		new File(results_folder).mkdir();
 		
 		System.out.println("read data");
 		Map<String, RewiringDetectorSample> g1 = RewiringDetectorSample.readNetworks(network_folder + t1 + "/");
@@ -90,7 +92,8 @@ public class hemato_build_rand_diff_subnetworks {
 		System.out.println("no_threads:" + no_threads + ", FDR(s): 0.05");
 		
 		new File(results_root).mkdir();
-
+		
+		
 		process(network_folder + "0.3/", results_root + "0.3/");
 		
 		System.out.println();
