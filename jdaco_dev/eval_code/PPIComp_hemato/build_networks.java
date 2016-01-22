@@ -218,7 +218,8 @@ public class build_networks {
 //		System.out.println(checkExpressedGenes(gene_abundance_data).size() + " expressed genes according to counting as in BLUEPRINT paper.");
 //		System.out.println(checkExpressedProtCodingGenes(gene_abundance_data).size() + " expressed prot-c. genes according to counting as in BLUEPRINT paper.");
 //		System.out.println(checkExpressedGenes(pc_transcr_abundance_data).size() + " expressed prot-coding transcr. according to counting as in BLUEPRINT paper.");
-//		System.out.println();
+		System.out.println();
+		System.out.println();
 	}
 	
 	public static void main(String[] args) {
@@ -230,6 +231,7 @@ public class build_networks {
 		new File(network_folder_pre).mkdir();
 		
 		for (double thr = 0.0; thr <= 1.0; thr += 0.01) {
+			thr = Math.round(thr * 100.0) / 100.0;
 			process(thr);
 		}
 		
