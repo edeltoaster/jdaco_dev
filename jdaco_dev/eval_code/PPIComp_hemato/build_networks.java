@@ -22,7 +22,6 @@ public class build_networks {
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
 	
-	static Map<String, List<String>> celltype_sizes = new HashMap<>();
 	static List<String> parameters = new LinkedList<>();
 	
 	public static void loadAndStoreReferenceNetwork(String network_out) {
@@ -123,7 +122,7 @@ public class build_networks {
 	}
 	
 	public static void preprocess() {
-		for (String s:Utilities.readEntryFile("eval_code/PPIComp_hemato/cell_types.txt")) {
+		for (String s:Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/eval_code/PPIComp_hemato/cell_types.txt")) {
 			if (s.startsWith("#"))
 				continue;
 			String[] spl = s.trim().split(" ");
@@ -135,7 +134,7 @@ public class build_networks {
 		System.out.println("3did:" + DataQuery.get3didVersion());
 		System.out.println("iPfam:" + DataQuery.getIPfamVersion());
 		
-		original_ppin = new PPIN("mixed_data/human_mentha_17_jan.txt.gz");
+		original_ppin = new PPIN("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_mentha_17_jan.txt.gz");
 		builder = new NetworkBuilder(original_ppin);
 	}
 	
@@ -213,17 +212,13 @@ public class build_networks {
 			System.out.println();
 			System.out.println(cell_type + ": " + data_map.get(cell_type).size() + " samples");
 			System.out.println("Size: " + prots + "+-" + (int) Utilities.getStd(no_proteins) + " / " + (int) Utilities.getMean(no_interactions) + "+-" + (int) Utilities.getStd(no_interactions));
-			
-			if (!celltype_sizes.containsKey(cell_type))
-				celltype_sizes.put(cell_type, new LinkedList<String>());
-			celltype_sizes.get(cell_type).add(Integer.toString(prots));
 		}
 		
-		System.out.println();
-		System.out.println(checkExpressedGenes(gene_abundance_data).size() + " expressed genes according to counting as in BLUEPRINT paper.");
-		System.out.println(checkExpressedProtCodingGenes(gene_abundance_data).size() + " expressed prot-c. genes according to counting as in BLUEPRINT paper.");
-		System.out.println(checkExpressedGenes(pc_transcr_abundance_data).size() + " expressed prot-coding transcr. according to counting as in BLUEPRINT paper.");
-		System.out.println();
+//		System.out.println();
+//		System.out.println(checkExpressedGenes(gene_abundance_data).size() + " expressed genes according to counting as in BLUEPRINT paper.");
+//		System.out.println(checkExpressedProtCodingGenes(gene_abundance_data).size() + " expressed prot-c. genes according to counting as in BLUEPRINT paper.");
+//		System.out.println(checkExpressedGenes(pc_transcr_abundance_data).size() + " expressed prot-coding transcr. according to counting as in BLUEPRINT paper.");
+//		System.out.println();
 	}
 	
 	public static void main(String[] args) {
@@ -234,33 +229,9 @@ public class build_networks {
 		
 		new File(network_folder_pre).mkdir();
 		
-		process(0.0);
-		//process(0.03125);
-		process(0.05);
-		process(0.1);
-		process(0.15);
-		process(0.2);
-		process(0.25);
-		process(0.3);
-		process(0.35);
-		process(0.4);
-		process(0.45);
-		process(0.5);
-		process(0.55);
-		process(0.6);
-		process(0.65);
-		process(0.7);
-		process(0.75);
-		process(0.8);
-		process(0.85);
-		process(0.9);
-		process(0.95);
-		process(1.0);
+		for (double thr = 0.0; thr <= 1.0; thr += 0.01) {
+			process(thr);
+		}
 		
-		System.out.println();
-		System.out.println("cell_type " + String.join(" ", parameters));
-		
-		for (String cell_type:celltype_sizes.keySet())
-			System.out.println(cell_type + " " + String.join(" ", celltype_sizes.get(cell_type)));
 	}
 }
