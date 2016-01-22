@@ -20,7 +20,7 @@ public class hemato_build_rand_diff_subnetworks {
 	static String t2 = "CD4";
 	
 	// needs to be run on server
-	static String network_folder = "BLUEPRINT_networks/";
+	static String network_folder = "BLUEPRINT_networks/0.31/";
 	static String results_root = "hemato_eval/";
 	
 	public static Map<String, RewiringDetectorSample> getSubset(Map<String, RewiringDetectorSample> data, Set<String> subset) {
@@ -93,12 +93,7 @@ public class hemato_build_rand_diff_subnetworks {
 		
 		new File(results_root).mkdir();
 		
+		process(network_folder, results_root);
 		
-		process(network_folder + "0.3/", results_root + "0.3/");
-		
-		System.out.println();
-		System.out.println();
-		
-		process(network_folder + "0.35/", results_root + "0.35/");
 	}
 }
