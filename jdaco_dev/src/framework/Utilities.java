@@ -177,9 +177,10 @@ public class Utilities {
 	
 	/**
 	 * Writes entries to a file
+	 * @param <T>
 	 * @param file
 	 */
-	public static void writeEntries(Collection<String> data, String file) {
+	public static <T> void writeEntries(Collection<T> data, String file) {
 		BufferedWriter bw = null;
 		try {
 			if (file.endsWith(".gz") || file.endsWith(".gzip"))
@@ -187,8 +188,8 @@ public class Utilities {
 			else
 				bw = new BufferedWriter(new FileWriter(file));
 			
-			for (String entry:data) {
-				bw.write(entry);
+			for (T entry:data) {
+				bw.write(entry.toString());
 				bw.newLine();
 			}
 			bw.close();

@@ -503,7 +503,7 @@ public class DataQuery {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
 			e.printStackTrace();
-			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get transcript data from ENSEMBL in 10 seconds ..." );
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get common names from ENSEMBL in 10 seconds ..." );
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e1) {

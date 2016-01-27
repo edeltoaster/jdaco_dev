@@ -649,12 +649,26 @@ public class RewiringDetector {
 	 * @return
 	 */
 	public List<String> getMinMostLikelyReasons() {
+		return getMinMostLikelyReasons(null);
+	}
+	
+	/**
+	 * Heuristically calculates the smallest set of reasons necessary to explain all changes of a subset of rewired interactions,
+	 * output as a list of strings PROTEIN(difference):count
+	 * @return
+	 */
+	public List<String> getMinMostLikelyReasons(Set<StrPair> subset) {
 		
 		Map<String, Set<StrPair>> reason_IA_map = new HashMap<>();
 		Map<String, Integer> reason_count_map = new HashMap<>();
 		
 		// fills datastructures, afterwards we know which reasons affect which interactions and each reasons occurrence is counted to give it an importance score
 		for (StrPair IA:this.interaction_reasons_count_map.keySet()) {
+			
+			// if specified, only count rewired interactions of the specified subset
+			if (subset != null && !subset.contains(IA))
+				continue;
+			
 			Map<String, Integer> count_map = this.interaction_reasons_count_map.get(IA);
 			
 			for (String reason:count_map.keySet()) {
@@ -677,6 +691,11 @@ public class RewiringDetector {
 		reasons.sort((String s1, String s2) -> reason_count_map.get(s2).compareTo(reason_count_map.get(s1))); // sorts from highest to lowest
 		
 		Set<StrPair> unsatisfied_IAs = new HashSet<>(this.interaction_reasons_count_map.keySet());
+		
+		// if specified, only account for subset
+		if (subset != null)
+			unsatisfied_IAs.retainAll(subset);
+		
 		List<String> result = new LinkedList<>();
 		
 		for (String reason:reasons) {
