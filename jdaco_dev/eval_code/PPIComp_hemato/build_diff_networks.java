@@ -107,12 +107,13 @@ public class build_diff_networks {
 				Set<StrPair> sign_IA_excl_state3 = new HashSet<>(sign_IA_state3);
 				sign_IA_excl_state3.removeAll(sign_IA_state2);
 				
-				// output to files
-				Utilities.writeEntries(sign_IA_shared, out_path + state2 + "_" + state3 + "_shared.txt");
-				Utilities.writeEntries(sign_IA_excl_state2, out_path + state1 + "_" + state2 + "_excl.txt");
-				Utilities.writeEntries(sign_IA_excl_state3, out_path + state1 + "_" + state3 + "_excl.txt");
+				// better to distinguish between added/lost in later evaluation script
+//				// output to files
+//				Utilities.writeEntries(sign_IA_shared, out_path + state2 + "_" + state3 + "_shared.txt");
+//				Utilities.writeEntries(sign_IA_excl_state2, out_path + state1 + "_" + state2 + "_excl.txt");
+//				Utilities.writeEntries(sign_IA_excl_state3, out_path + state1 + "_" + state3 + "_excl.txt");
 				
-				// also compute and store minReasons of subsets
+				// compute and store minReasons of subsets
 				Utilities.writeEntries(rd1.getMinMostLikelyReasons(sign_IA_shared), out_path + state1 + "_" + state2 + "_shared_min_reasons.txt");
 				Utilities.writeEntries(rd2.getMinMostLikelyReasons(sign_IA_shared), out_path + state1 + "_" + state3 + "_shared_min_reasons.txt");
 				Utilities.writeEntries(rd1.getMinMostLikelyReasons(sign_IA_excl_state2), out_path + state1 + "_" + state2 + "_excl_min_reasons.txt");
