@@ -645,7 +645,7 @@ public class RewiringDetector {
 	
 	/**
 	 * Heuristically calculates the smallest set of reasons necessary to explain all changes,
-	 * output as a list of strings PROTEIN(difference):count
+	 * output as a list of strings PROTEIN(difference)
 	 * @return
 	 */
 	public List<String> getMinMostLikelyReasons() {
@@ -654,7 +654,7 @@ public class RewiringDetector {
 	
 	/**
 	 * Heuristically calculates the smallest set of reasons necessary to explain all changes of a subset of rewired interactions,
-	 * output as a list of strings PROTEIN(difference):count
+	 * output as a list of strings PROTEIN(difference)
 	 * @return
 	 */
 	public List<String> getMinMostLikelyReasons(Set<StrPair> subset) {
@@ -687,8 +687,10 @@ public class RewiringDetector {
 			}
 		}
 		
-		List<String> reasons = new ArrayList<>(reason_IA_map.keySet());
-		reasons.sort((String s1, String s2) -> reason_count_map.get(s2).compareTo(reason_count_map.get(s1))); // sorts from highest to lowest
+		// convert maximum to minimum weight problem
+		int max = Collections.max(reason_count_map.values()) + 1;
+		for (String reason:reason_count_map.keySet())
+			reason_count_map.put(reason, max - reason_count_map.get(reason));
 		
 		Set<StrPair> unsatisfied_IAs = new HashSet<>(this.interaction_reasons_count_map.keySet());
 		
@@ -698,16 +700,33 @@ public class RewiringDetector {
 		
 		List<String> result = new LinkedList<>();
 		
-		for (String reason:reasons) {
-			int to_sat_pre = unsatisfied_IAs.size();
-			unsatisfied_IAs.removeAll(reason_IA_map.get(reason));
-			int to_sat_post = unsatisfied_IAs.size();
+		// while not all rewiring events are explained
+		while (unsatisfied_IAs.size() > 0) {
+			String best_reason = null;
+			double best_weight_per_IA = Double.MAX_VALUE;
+			Set<StrPair> best_additionally_satisfied_IAs = null;
 			
-			if (to_sat_pre != to_sat_post)
-				result.add(reason + ":" + reason_count_map.get(reason));
+			// determine minimum weight per element choice
+			for (String reason:reason_count_map.keySet()) {
+				double weight = reason_count_map.get(reason);
+				Set<StrPair> additionally_satisfied_IAs = new HashSet<>(reason_IA_map.get(reason));
+				additionally_satisfied_IAs.retainAll(unsatisfied_IAs);
+				
+				if (additionally_satisfied_IAs.size() == 0)
+					continue;
+				double weight_per_IA = weight / additionally_satisfied_IAs.size();
+				
+				if (weight_per_IA < best_weight_per_IA) {
+					best_weight_per_IA = weight_per_IA;
+					best_additionally_satisfied_IAs = additionally_satisfied_IAs;
+					best_reason = reason;
+				}
+			}
 			
-			if (to_sat_post == 0)
-				break;
+			// realize locally optimal choice
+			result.add(best_reason);
+			reason_count_map.remove(best_reason);
+			unsatisfied_IAs.removeAll(best_additionally_satisfied_IAs);
 		}
 		
 		return result;
