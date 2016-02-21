@@ -136,6 +136,9 @@ public class build_networks {
 		
 		original_ppin = new PPIN("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_mentha_17_jan.txt.gz");
 		builder = new NetworkBuilder(original_ppin);
+		
+		System.out.println("Proteins mapped: " + builder.getMappingDomainPercentage());
+		System.out.println("PPIs mapped: " + builder.getMappingPercentage());
 	}
 	
 	public static void process(double TPM_threshold) {
