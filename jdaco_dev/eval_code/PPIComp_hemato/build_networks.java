@@ -131,8 +131,8 @@ public class build_networks {
 		
 		System.out.println("Original PPIN: " + "mixed_data/human_mentha_17_jan.txt.gz");
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
-		System.out.println("3did:" + DataQuery.get3didVersion());
-		System.out.println("iPfam:" + DataQuery.getIPfamVersion());
+		System.out.println("3did: " + DataQuery.get3didVersion());
+		System.out.println("iPfam: " + DataQuery.getIPfamVersion());
 		
 		original_ppin = new PPIN("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_mentha_17_jan.txt.gz");
 		builder = new NetworkBuilder(original_ppin);

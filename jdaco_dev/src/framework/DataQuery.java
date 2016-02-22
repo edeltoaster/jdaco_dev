@@ -1773,56 +1773,14 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Returns version of iPfam data
+	 * Returns local version of iPfam data, compatibility function
 	 */
 	public static String getIPfamVersion() {
-		String version_string = "";
-		
-		BufferedReader datastream = null;
-		try {
-			URL server = new URL("ftp://selab.janelia.org/pub/ipfam/Current_Release/relnotes.txt");
-			URLConnection connection = server.openConnection();
-			
-			// read
-			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			String line;
-			
-			while ( (line = datastream.readLine()) != null ) {
-				if (line.isEmpty())
-					continue;
-				line = line.trim();
-				
-				if (line.startsWith("RELEASE")) {
-					version_string = line;
-					break;
-				}
-			}
-
-		} catch (Exception e) {
-			if (DataQuery.retries == 10)
-				terminateRetrieval("iPfam");
-			
-			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get release data from iPfam in 10 seconds ..." );
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-			
-			return getIPfamVersion();
-			
-		} finally {
-			try {
-				datastream.close();
-			} catch (Exception e) {
-			}
-		}
-		
-		return version_string;
+		return "release 1.0";
 	}
 	
 	/**
-	 * Retrieves current iPfam interaction data
+	 * Retrieves local iPfam 1.0 interaction data
 	 * @return interaction data
 	 */
 	public static HashMap<String, HashSet<String>> getIPfam() {
@@ -1831,11 +1789,9 @@ public class DataQuery {
 		
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("ftp://selab.janelia.org/pub/ipfam/Current_Release/heterodomain_interaction.csv");
-			URLConnection connection = server.openConnection();
 			
 			// read
-			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(DataQuery.class.getResourceAsStream("/data/iPfam_1.0_heterodomain_interaction.csv.gz"))));
 			String line;
 			
 			while ( (line = datastream.readLine()) != null ) {
@@ -1857,11 +1813,8 @@ public class DataQuery {
 			
 			datastream.close();
 			
-			server = new URL("ftp://selab.janelia.org/pub/ipfam/Current_Release/homodomain_interaction.csv");
-			connection = server.openConnection();
-			
 			// read
-			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(DataQuery.class.getResourceAsStream("/data/iPfam_1.0_homodomain_interaction.csv.gz"))));
 			
 			while ( (line = datastream.readLine()) != null ) {
 				if (line.isEmpty())
@@ -1878,17 +1831,7 @@ public class DataQuery {
 			}
 						
 		} catch (Exception e) {
-			if (DataQuery.retries == 10)
-				terminateRetrieval("iPfam");
-			
-			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get interaction data from iPfam in 10 seconds ..." );
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-			
-			return getIPfam();
+			e.printStackTrace();
 			
 		} finally {
 			try {
@@ -1899,6 +1842,135 @@ public class DataQuery {
 		
 		return ddis;
 	}
+	
+	// iPfam retrieval (if again updated)
+//	/**
+//	 * Returns version of iPfam data
+//	 */
+//	public static String getIPfamVersion() {
+//		String version_string = "";
+//		
+//		BufferedReader datastream = null;
+//		try {
+//			URL server = new URL("ftp://selab.janelia.org/pub/ipfam/Current_Release/relnotes.txt");
+//			URLConnection connection = server.openConnection();
+//			
+//			// read
+//			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//			String line;
+//			
+//			while ( (line = datastream.readLine()) != null ) {
+//				if (line.isEmpty())
+//					continue;
+//				line = line.trim();
+//				
+//				if (line.startsWith("RELEASE")) {
+//					version_string = line;
+//					break;
+//				}
+//			}
+//
+//		} catch (Exception e) {
+//			if (DataQuery.retries == 10)
+//				terminateRetrieval("iPfam");
+//			
+//			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get release data from iPfam in 10 seconds ..." );
+//			try {
+//				Thread.sleep(10000);
+//			} catch (InterruptedException e1) {
+//				e1.printStackTrace();
+//			}
+//			
+//			return getIPfamVersion();
+//			
+//		} finally {
+//			try {
+//				datastream.close();
+//			} catch (Exception e) {
+//			}
+//		}
+//		
+//		return version_string;
+//	}
+//	
+//	/**
+//	 * Retrieves current iPfam interaction data
+//	 * @return interaction data
+//	 */
+//	public static HashMap<String, HashSet<String>> getIPfam() {
+//
+//		HashMap<String, HashSet<String>> ddis = new HashMap<>();
+//		
+//		BufferedReader datastream = null;
+//		try {
+//			URL server = new URL("ftp://selab.janelia.org/pub/ipfam/Current_Release/heterodomain_interaction.csv");
+//			URLConnection connection = server.openConnection();
+//			
+//			// read
+//			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//			String line;
+//			
+//			while ( (line = datastream.readLine()) != null ) {
+//				if (line.isEmpty())
+//					continue;
+//				if (line.startsWith("family"))
+//					continue;
+//				
+//				String[] temp = line.split("\\s+");
+//				String d1 = temp[0];
+//				String d2 = temp[2];
+//				if (!ddis.containsKey(d1))
+//					ddis.put(d1, new HashSet<String>());
+//				if (!ddis.containsKey(d2))
+//					ddis.put(d2, new HashSet<String>());
+//				ddis.get(d1).add(d2);
+//				ddis.get(d2).add(d1);
+//			}
+//			
+//			datastream.close();
+//			
+//			server = new URL("ftp://selab.janelia.org/pub/ipfam/Current_Release/homodomain_interaction.csv");
+//			connection = server.openConnection();
+//			
+//			// read
+//			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//			
+//			while ( (line = datastream.readLine()) != null ) {
+//				if (line.isEmpty())
+//					continue;
+//				
+//				if (line.startsWith("family"))
+//					continue;
+//				
+//				String[] temp = line.split("\\s+");
+//				String d1 = temp[0];
+//				if (!ddis.containsKey(d1))
+//					ddis.put(d1, new HashSet<String>());
+//				ddis.get(d1).add(d1);
+//			}
+//						
+//		} catch (Exception e) {
+//			if (DataQuery.retries == 10)
+//				terminateRetrieval("iPfam");
+//			
+//			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get interaction data from iPfam in 10 seconds ..." );
+//			try {
+//				Thread.sleep(10000);
+//			} catch (InterruptedException e1) {
+//				e1.printStackTrace();
+//			}
+//			
+//			return getIPfam();
+//			
+//		} finally {
+//			try {
+//				datastream.close();
+//			} catch (Exception e) {
+//			}
+//		}
+//		
+//		return ddis;
+//	}
 	
 	/**
 	 * Returns version of 3did data
