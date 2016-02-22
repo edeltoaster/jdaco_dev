@@ -492,7 +492,7 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(chckboxCompressOutput);
 		activiy_changing_components.add(chckboxCompressOutput);
 		
-		JCheckBox chckbxOnlyLocalDdi = new JCheckBox("only local DDI data");
+		chckbxOnlyLocalDdi = new JCheckBox("only local DDI data");
 		chckbxOnlyLocalDdi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxOnlyLocalDdi.isSelected()) {
