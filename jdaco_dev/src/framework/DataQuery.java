@@ -1576,6 +1576,16 @@ public class DataQuery {
 	}
 	
 	/**
+	 * Retrieve 3did/iPfam and use normal local DDI data
+	 */
+	public static void defaultDDIs() {
+		DataQuery.up2date_DDIs = true;
+		DataQuery.no_local_DDIs = false;
+		if (DataQuery.known_DDIs != null)
+			DataQuery.known_DDIs = null;
+	}
+	
+	/**
 	 * Turn off iPfam retrieval, only local DOMINE/IDDI data used
 	 */
 	public static void localDDIsOnly() {

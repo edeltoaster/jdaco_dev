@@ -82,6 +82,7 @@ public class PPIXpress_GUI {
 	private JButton btnLoadExpressionData;
 	private JCheckBox chckbxSTRING;
 	private JCheckBox chckbxOutputDdins;
+	private JCheckBox chckbxOnlyLocalDdi;
 	private JCheckBox chckbxGenelevelOnly;
 	private JTextField text_threshold;
 	private JCheckBox chckbxPercentile;
@@ -208,11 +209,11 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(btnLoadNetwork);
 		
 		JSeparator separator = new JSeparator();
-		separator.setBounds(5, 145, 890, 20);
+		separator.setBounds(5, 163, 890, 20);
 		frmPpixpress.getContentPane().add(separator);
 		
 		JScrollPane scrollPane_expr = new JScrollPane();
-		scrollPane_expr.setBounds(330, 190, 550, 120);
+		scrollPane_expr.setBounds(330, 200, 550, 125);
 		frmPpixpress.getContentPane().add(scrollPane_expr);
 		
 		text_expr = new JTextArea();
@@ -262,11 +263,11 @@ public class PPIXpress_GUI {
 				}
 			}
 		});
-		btnLoadExpressionData.setBounds(55, 170, 200, 40);
+		btnLoadExpressionData.setBounds(55, 180, 200, 40);
 		frmPpixpress.getContentPane().add(btnLoadExpressionData);
 		
 		JSeparator separator_1 = new JSeparator();
-		separator_1.setBounds(5, 333, 890, 29);
+		separator_1.setBounds(5, 335, 890, 29);
 		frmPpixpress.getContentPane().add(separator_1);
 		
 		btnBuildNetworks = new JButton("Set outputfolder and start processing");
@@ -380,11 +381,11 @@ public class PPIXpress_GUI {
 					gene_level_only = false;
 			}
 		});
-		chckbxGenelevelOnly.setBounds(75, 212, 153, 30);
+		chckbxGenelevelOnly.setBounds(75, 222, 153, 30);
 		frmPpixpress.getContentPane().add(chckbxGenelevelOnly);
 		
 		text_threshold = new JTextField();
-		text_threshold.setBounds(160, 260, 50, 30);
+		text_threshold.setBounds(160, 270, 50, 30);
 		frmPpixpress.getContentPane().add(text_threshold);
 		activiy_changing_components.add(text_threshold);
 		text_threshold.addActionListener(new ActionListener() {
@@ -424,7 +425,7 @@ public class PPIXpress_GUI {
 		
 		chckbxPercentile = new JCheckBox("percentile-based");
 		
-		chckbxPercentile.setBounds(75, 290, 153, 30);
+		chckbxPercentile.setBounds(75, 300, 153, 30);
 		frmPpixpress.getContentPane().add(chckbxPercentile);
 		activiy_changing_components.add(chckbxPercentile);
 		chckbxPercentile.addActionListener(new ActionListener() {
@@ -491,6 +492,22 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(chckboxCompressOutput);
 		activiy_changing_components.add(chckboxCompressOutput);
 		
+		JCheckBox chckbxOnlyLocalDdi = new JCheckBox("only local DDI data");
+		chckbxOnlyLocalDdi.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (chckbxOnlyLocalDdi.isSelected()) {
+					up2date_DDIs = false;
+					DataQuery.localDDIsOnly();
+				} else {
+					up2date_DDIs = true;
+					DataQuery.defaultDDIs();
+				}
+			}
+		});
+		chckbxOnlyLocalDdi.setBounds(74, 134, 220, 30);
+		frmPpixpress.getContentPane().add(chckbxOnlyLocalDdi);
+		activiy_changing_components.add(chckbxOnlyLocalDdi);
+		
 		btnReset = new JButton("Reset");
 		activiy_changing_components.add(btnReset);
 		btnReset.addActionListener(new ActionListener() {
@@ -528,6 +545,9 @@ public class PPIXpress_GUI {
 				chckbxPercentile.setSelected(false);
 				
 				up2date_DDIs = true;
+				chckbxOnlyLocalDdi.setSelected(false);
+				DataQuery.defaultDDIs();
+				
 				output_folder = null;
 				organism_database = null;
 				load_UCSC = false;
@@ -576,7 +596,7 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(lblProgress);
 		
 		JLabel lblthreshold = new JLabel("threshold:");
-		lblthreshold.setBounds(70, 260, 85, 30);
+		lblthreshold.setBounds(70, 270, 85, 30);
 		frmPpixpress.getContentPane().add(lblthreshold);
 		activiy_changing_components.add(lblthreshold);
 		lblthreshold.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -590,7 +610,7 @@ public class PPIXpress_GUI {
 		
 		JLabel lblSpecificExpressionData = new JLabel("specific expression data:");
 		lblSpecificExpressionData.setHorizontalAlignment(SwingConstants.LEFT);
-		lblSpecificExpressionData.setBounds(330, 160, 256, 30);
+		lblSpecificExpressionData.setBounds(330, 170, 256, 30);
 		frmPpixpress.getContentPane().add(lblSpecificExpressionData);
 		activiy_changing_components.add(lblSpecificExpressionData);
 		
