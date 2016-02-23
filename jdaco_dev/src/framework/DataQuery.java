@@ -1631,6 +1631,7 @@ public class DataQuery {
 		
 		HashMap<String, HashSet<String>> domine_ddis = getDOMINE();
 		HashMap<String, HashSet<String>> iddi_ddis = getIDDI();
+		HashMap<String, HashSet<String>> ipfam_ddis = getIPfam();
 		
 		// merge in iddi_ddis
 		for (String domain:domine_ddis.keySet()) {
@@ -1642,21 +1643,21 @@ public class DataQuery {
 			}
 		}
 		
+		// merge iPfam DDIs
+		for (String domain:ipfam_ddis.keySet()) {
+			// merge if there
+			if (iddi_ddis.containsKey(domain)) {
+				iddi_ddis.get(domain).addAll(ipfam_ddis.get(domain));
+			} else { // just add if not there
+				iddi_ddis.put(domain, ipfam_ddis.get(domain));
+			}
+		}
+		
 		if (no_local_DDIs)
 			iddi_ddis.clear();
 		
-		// add iPfam/3did
+		// add current 3did data
 		if (DataQuery.up2date_DDIs) {
-			HashMap<String, HashSet<String>> ipfam_ddis = getIPfam();
-			
-			for (String domain:ipfam_ddis.keySet()) {
-				// merge if there
-				if (iddi_ddis.containsKey(domain)) {
-					iddi_ddis.get(domain).addAll(ipfam_ddis.get(domain));
-				} else { // just add if not there
-					iddi_ddis.put(domain, ipfam_ddis.get(domain));
-				}
-			}
 			
 			HashMap<String, HashSet<String>> did_ddis = get3did();
 			

@@ -802,7 +802,7 @@ public class PPIXpress_GUI {
 				progressBar.setValue(0);
 				return;
 			}
-			stream_output.println("Retrieving current interaction data fom 3did (" + DataQuery.get3didVersion() + ") and iPfam (" + DataQuery.getIPfamVersion() + ") ...");
+			stream_output.println("Retrieving current interaction data fom 3did (" + DataQuery.get3didVersion() + ") ...");
 			DataQuery.getKnownDDIs();
 		}
 		
