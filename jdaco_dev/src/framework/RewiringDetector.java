@@ -617,7 +617,14 @@ public class RewiringDetector {
 			String min_reasons = "no";
 			if (min_mostl_reason_proteins.contains(protein))
 				min_reasons = "yes";
-			to_write.add(protein + " " + up_to_name.get(protein) + " " + min_reasons + " " + all_reasons.get(protein) + " " + expr_reasons.get(protein) + " " + AS_reasons.get(protein) + " " + (((float)AS_reasons.get(protein))/all_reasons.get(protein)));
+			
+			// to account for proteins that never caused something
+			int all_count = all_reasons.get(protein);
+			double AS_frac = 0.0;
+			if (all_count > 0.0)
+				AS_frac = ((float) AS_reasons.get(protein)) / all_count;
+			
+			to_write.add(protein + " " + up_to_name.get(protein) + " " + min_reasons + " " + all_reasons.get(protein) + " " + expr_reasons.get(protein) + " " + AS_reasons.get(protein) + " " + AS_frac);
 		}
 		
 		Utilities.writeEntries(to_write, out_path);
