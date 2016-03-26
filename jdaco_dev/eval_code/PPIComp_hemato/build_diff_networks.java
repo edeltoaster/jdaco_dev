@@ -30,7 +30,7 @@ public class build_diff_networks {
 		relations.add(new String[]{"HSC", "MPP"});
 		relations.add(new String[]{"MPP", "CMP", "CLP"});
 		relations.add(new String[]{"CMP", "MEP", "GMP"});
-		relations.add(new String[]{"MEP", "MK", "EB"});
+		relations.add(new String[]{"MEP", "EB", "MK"});
 		relations.add(new String[]{"GMP", "N", "M"});
 		relations.add(new String[]{"CLP", "CD4"});
 		
