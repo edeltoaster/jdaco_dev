@@ -1020,6 +1020,8 @@ public class TranscriptAbundanceReader {
 				abundance = TranscriptAbundanceReader.readKallistoFile(path, threshold);
 		}
 		
+		// TODO: handling for wrong format!
+		
 		return abundance;
 	}
 	
