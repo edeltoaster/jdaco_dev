@@ -24,7 +24,11 @@ public class RewiringDetectorSample {
 		this.protein_to_assumed_transcript = new HashMap<String, String>(1024);
 		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
 			String[] spl = s.trim().split("\\s+");
-			this.protein_to_assumed_transcript.put(spl[0], spl[1]);
+			
+			if (spl.length == 2)
+				this.protein_to_assumed_transcript.put(spl[0], spl[1]); // TODO: check Q9Y592, had empty transcript in christian's data
+			else
+				this.protein_to_assumed_transcript.put(spl[0], "unknown_transcript");
 		}
 	}
 	

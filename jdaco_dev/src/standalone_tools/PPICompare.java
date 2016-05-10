@@ -109,6 +109,7 @@ public class PPICompare {
 		
 		if (output_folder == null) {
 			System.err.println("Please add an output folder.");
+			
 			System.exit(1);
 		}
 		
@@ -117,7 +118,7 @@ public class PPICompare {
 	
 	public static void main(String[] args) {
 		
-		if (args.length < 3 || args.length > 6) {
+		if (args.length < 3) {
 			printHelp();
 		}
 		
@@ -125,6 +126,7 @@ public class PPICompare {
 		try {
 			parseInput(args);
 		} catch (Exception e){
+			e.printStackTrace();
 			printHelp();
 		}
 		
