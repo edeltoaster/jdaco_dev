@@ -428,53 +428,6 @@ public class DataQuery {
 		return associations;
 	}
 	
-	public static List<String[]> getTranscriptsProteins(String organism_core_database) {
-		
-		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
-			return DataQuery.cache_genestransprots.get(organism_core_database);
-		List<String[]> associations = new LinkedList<>();
-		
-		Connection connection = null;
-		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
-			Statement st = connection.createStatement();
-			st.setQueryTimeout(timeout);
-			ResultSet rs = st.executeQuery("SELECT DISTINCT gene.stable_id, transcript.stable_id, xref.dbprimary_acc "
-					+ "FROM gene, transcript, translation, object_xref, xref "
-					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
-			
-			while (rs.next()) {
-				String[] row = {rs.getString(1), rs.getString(2), rs.getString(3)};
-				associations.add(row);
-			}
-			
-		} catch (Exception e) {
-			if (DataQuery.retries == 10)
-				terminateRetrieval("ENSEMBL");
-			
-			//e.printStackTrace();
-			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get transcript data from ENSEMBL in 10 seconds ..." );
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e1) {
-			}
-			
-			DataQuery.switchServer();
-			
-			return getGenesTranscriptsProteins(organism_core_database);
-			
-		} finally {
-			try {
-				connection.close();
-			} catch (Exception e) {
-			}
-		}
-		
-		DataQuery.cache_genestransprots.put(organism_core_database, associations);
-		
-		return associations;
-	}
-	
 	/**
 	 * Queries Ensembl for association of Enseml genes with their common names as given in Entrez (for compatibility)
 	 * @param organism_core_database
@@ -784,7 +737,8 @@ public class DataQuery {
 					+ "FROM transcript, translation, object_xref, xref, translation_attrib "
 					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200' "
 					+ "AND transcript.biotype = 'protein_coding' AND translation.translation_id = translation_attrib.translation_id AND translation_attrib.attrib_type_id = '167'");
-			
+					// better remove filtering in the future
+			// TODO: think of this in NMD patch
 			while (rs.next()) {
 				String transcript = rs.getString(1);
 				String uniprot = rs.getString(2);
@@ -846,7 +800,8 @@ public class DataQuery {
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, protein_feature.hit_name, protein_feature.hit_start, protein_feature.hit_end "
 					+ "FROM transcript, translation, protein_feature, analysis "
 					+ "WHERE transcript.biotype = 'protein_coding' AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=protein_feature.translation_id AND protein_feature.analysis_id = analysis.analysis_id AND analysis.logic_name = 'Pfam'");
-			
+					// better remove filtering in the future
+			// TODO: rework for NMD patch
 			while (rs.next()) {
 				if (!transcript_domain_mapping.containsKey(rs.getString(1)))
 					transcript_domain_mapping.put(rs.getString(1), new LinkedList<String>());
@@ -2085,7 +2040,7 @@ public class DataQuery {
 			
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id "
 					+ "FROM gene, transcript "
-					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=transcript.gene_id");
+					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=transcript.gene_id"); // TODO: handling of NMD!
 			
 			while (rs.next()) {
 				String[] row = {rs.getString(1), rs.getString(2)};
@@ -2119,7 +2074,8 @@ public class DataQuery {
 			
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, xref.dbprimary_acc "
 					+ "FROM transcript, translation, object_xref, xref "
-					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
+					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id "
+					+ "AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
 			
 			while (rs.next()) {
 				String[] row = {rs.getString(1), rs.getString(2)};

@@ -26,9 +26,9 @@ public class RewiringDetectorSample {
 			String[] spl = s.trim().split("\\s+");
 			
 			if (spl.length == 2)
-				this.protein_to_assumed_transcript.put(spl[0], spl[1]); // TODO: check Q9Y592, had empty transcript in christian's data
+				this.protein_to_assumed_transcript.put(spl[0], spl[1]); 
 			else
-				this.protein_to_assumed_transcript.put(spl[0], "unknown_transcript");
+				this.protein_to_assumed_transcript.put(spl[0], "unknown_transcript"); // NMD transcripts could bring up such artefacts with older versions of PPIXpress
 		}
 	}
 	
