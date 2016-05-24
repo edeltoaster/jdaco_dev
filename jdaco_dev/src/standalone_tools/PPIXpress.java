@@ -36,6 +36,8 @@ public class PPIXpress {
 	private static boolean STRING_weights = false;
 	private static List<String> matching_files_output = new LinkedList<>();
 	
+	// TODO: output of unfiltered network?
+	
 	public static void printHelp() {
 		System.out.println("usage: java -jar PPIXpress.jar ([OPTIONS]) [INPUT-NETWORK] [OUTPUT-FOLDER] [EXPR-INPUT1] ([EXPR-INPUT2] ...)");
 		
