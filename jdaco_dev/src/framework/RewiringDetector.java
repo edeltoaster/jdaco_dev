@@ -348,9 +348,6 @@ public class RewiringDetector {
 				reasons.add(p2 + "(loss)");
 		}
 
-		if (reasons.size() != 0)
-			return String.join("/", reasons);
-
 		// else: check on transcript-level
 		if (m1.containsKey(p1) && m2.containsKey(p1) && !m1.get(p1).equals(m2.get(p1))) {
 			reasons.add( p1 + "(" + m1.get(p1) + "->" + m2.get(p1) + ")");
