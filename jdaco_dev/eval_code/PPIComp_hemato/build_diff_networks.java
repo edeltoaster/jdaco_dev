@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import framework.Utilities;
+import framework.DataQuery;
 import framework.RewiringDetector;
 import framework.RewiringDetectorSample;
 import framework.StrPair;
@@ -33,6 +34,9 @@ public class build_diff_networks {
 		relations.add(new String[]{"MEP", "EB", "MK"});
 		relations.add(new String[]{"GMP", "N", "M"});
 		relations.add(new String[]{"CLP", "CD4"});
+		
+		// study data was build using v83
+		DataQuery.enforceSpecificEnsemblRelease("83");
 		
 		for (String[] s:relations) {
 			

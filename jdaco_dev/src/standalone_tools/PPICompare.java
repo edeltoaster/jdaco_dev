@@ -31,7 +31,7 @@ public class PPICompare {
 		
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-fdr=[FDR] : false discovery rate (default: 0.05)");
-		System.out.println("	-n : no output of protein attribute table (no data retrieval necessary)");
+		System.out.println("	ENSEMBL VERSION?");
 		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
 		
 		System.out.println();
@@ -60,10 +60,6 @@ public class PPICompare {
 			// help needed?
 			if (arg.equals("-h") || arg.equals("-help"))
 				printHelp();
-			
-			// no output of protein attribute table
-			else if (arg.equals("-n"))
-				output_protein_attributes = false;
 			
 			// parse FDR
 			else if (arg.startsWith("-fdr"))
@@ -129,6 +125,9 @@ public class PPICompare {
 			e.printStackTrace();
 			printHelp();
 		}
+		
+		// retrieval with output
+		// TODO: retrieval with output PPIXpress style
 		
 		// some preface
 		System.out.print("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") : ");
