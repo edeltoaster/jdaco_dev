@@ -319,9 +319,16 @@ public class RewiringDetector {
 		Map<String, String> m2 = group2.get(sample2).getProteinToAssumedTranscriptMap();
 		Set<StrPair> i1 = group1.get(sample1).getInteractions();
 		Set<StrPair> i2 = group2.get(sample2).getInteractions();
-
+		
+		// detailed transcript info
+		Map<String, Set<String>> pd1 = group1.get(sample1).getProteinToUsedDomains();
+		Map<String, Set<String>> pd2 = group2.get(sample2).getProteinToUsedDomains();
+		Map<String, Map<String, Set<String>>> ppd1 = group1.get(sample1).getProteinToProteinByDomains();
+		Map<String, Map<String, Set<String>>> ppd2 = group2.get(sample2).getProteinToProteinByDomains();
+		
 		List<String> reasons = new LinkedList<>();
-
+		
+		
 		// pre-check1: is a change found in the network-pair?
 		if (i1.contains(interaction) == i2.contains(interaction))
 			return "no_change";
@@ -348,15 +355,116 @@ public class RewiringDetector {
 				reasons.add(p2 + "(loss)");
 		}
 
-		// check on transcript-level if indications are given
-		// idea: preprocess DDI data in the way protein1 -> domaintype1 -> proteins?
+		
+		/*
+		 * check on transcript-level if indications are given, then go into details
+		 */
+		
+		// first check for relevant splicing of p1
 		if (m1.containsKey(p1) && m2.containsKey(p1) && !m1.get(p1).equals(m2.get(p1))) {
-			reasons.add( p1 + "(" + m1.get(p1) + "->" + m2.get(p1) + ")");
-		}
+			
+			// check details: filter for change
+			boolean has_domains1 = pd1.containsKey(p1);
+			boolean has_domains2 = pd2.containsKey(p1);
+			
+			// if no non-FB domains in neither sample: switch cannot be relevant
+			if (has_domains1 || has_domains2) {
+				
+				Set<String> relevant_changed_domains = null;
+				
+				if (addition) { // addition of an interaction -> relevant domain(s) in group 2 but not in 1
+					if (has_domains1 && has_domains2 && ppd2.get(p1).containsKey(p2)) {
+						relevant_changed_domains = new HashSet<>(pd2.get(p1));
+						relevant_changed_domains.removeAll(pd1.get(p1));
+					} else if (has_domains2 && ppd2.get(p1).containsKey(p2)) {// and consequently no in sample1, vice versa not helpful for an addition
+						relevant_changed_domains = new HashSet<>(pd2.get(p1));
+					}
+				} else { // loss of an interaction -> relevant domain(s) in group 1 but not in 2
+					if (has_domains1 && has_domains2 && ppd1.get(p1).containsKey(p2)) {
+						relevant_changed_domains = new HashSet<>(pd1.get(p1));
+						relevant_changed_domains.removeAll(pd2.get(p1));
+					} else if (has_domains1 && ppd1.get(p1).containsKey(p2)) {// and consequently no in sample2, vice versa not helpful for a loss
+						relevant_changed_domains = new HashSet<>(pd1.get(p1));
+					}
+				}
+				
+				
+				// switch can only be relevant if a definitive change in that direction happened for p1
+				if (relevant_changed_domains != null && relevant_changed_domains.size() > 0) {
+					
+					if (addition) { // addition of an interaction -> relevant domain(s) in group 2 but not in 1
+						
+						// if a domains that then supports the interaction is newly included, then it was a reason
+						relevant_changed_domains.retainAll(ppd2.get(p1).get(p2));
 
+						
+					} else { // loss of an interaction -> relevant domain(s) in group 1 but not in 2
+						
+						// if a domain that maintained the interaction fell away, then it was a reason
+						relevant_changed_domains.retainAll(ppd1.get(p1).get(p2));
+						
+					}
+					
+					if (relevant_changed_domains.size() > 0) {
+						reasons.add( p1 + "(" + m1.get(p1) + "->" + m2.get(p1) + ")");
+					}
+					
+				} // end of relevant domain check loop
+			} // end of domain annotation check loop
+		} // end check for splicing of p1
+		
+		// analogous check for relevant splicing of p2
 		if (m1.containsKey(p2) && m2.containsKey(p2) && !m1.get(p2).equals(m2.get(p2))) {
-			reasons.add( p2 + "(" + m1.get(p2) + "->" + m2.get(p2) + ")");
-		}
+			
+			// check details: filter for change
+			boolean has_domains1 = pd1.containsKey(p2);
+			boolean has_domains2 = pd2.containsKey(p2);
+			
+			// if no non-FB domains in neither sample: switch cannot be relevant
+			if (has_domains1 || has_domains2) {
+				
+				Set<String> relevant_changed_domains = null;
+				
+				if (addition) { // addition of an interaction -> relevant domain(s) in group 2 but not in 1
+					if (has_domains1 && has_domains2 && ppd2.get(p2).containsKey(p1)) {
+						relevant_changed_domains = new HashSet<>(pd2.get(p2));
+						relevant_changed_domains.removeAll(pd1.get(p2));
+					} else if (has_domains2 && ppd2.get(p2).containsKey(p1)) {// and consequently no in sample1, vice versa not helpful for an addition
+						relevant_changed_domains = new HashSet<>(pd2.get(p2));
+					}
+				} else { // loss of an interaction -> relevant domain(s) in group 1 but not in 2
+					if (has_domains1 && has_domains2 && ppd1.get(p2).containsKey(p1)) {
+						relevant_changed_domains = new HashSet<>(pd1.get(p2));
+						relevant_changed_domains.removeAll(pd2.get(p2));
+					} else if (has_domains1 && ppd1.get(p2).containsKey(p1)) {// and consequently no in sample2, vice versa not helpful for a loss
+						relevant_changed_domains = new HashSet<>(pd1.get(p2));
+					}
+				}
+
+				
+				// switch can only be relevant if a definitive change in that direction happened for p2
+				if (relevant_changed_domains != null && relevant_changed_domains.size() > 0) {
+					
+					if (addition) { // addition of an interaction -> relevant domain(s) in group 2 but not in 1
+						
+						// if a domains that then supports the interaction is newly included, then it was a reason
+						relevant_changed_domains.retainAll(ppd2.get(p2).get(p1));
+
+						
+					} else { // loss of an interaction -> relevant domain(s) in group 1 but not in 2
+						
+						// if a domain that maintained the interaction fell away, then it was a reason
+						relevant_changed_domains.retainAll(ppd1.get(p2).get(p1));
+						
+					}
+					
+					if (relevant_changed_domains.size() > 0) {
+						reasons.add( p2 + "(" + m1.get(p2) + "->" + m2.get(p2) + ")");
+					}
+					
+				} // end of relevant domain check loop
+			} // end of domain annotation check loop
+		} // end check for splicing of p2
 
 		return String.join("/", reasons);
 	}
