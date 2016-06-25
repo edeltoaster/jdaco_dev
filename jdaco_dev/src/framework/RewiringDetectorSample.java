@@ -2,25 +2,72 @@ package framework;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Stores interactions and protein_to_assumed_isoform map for a RewiringDetector sample,
- * similar to - but much slicker than - a ConstructedNetworks object
+ * Stores PPI and DDI interactions and protein_to_assumed_isoform map for a RewiringDetector sample,
+ * similar to a ConstructedNetworks object but much slicker and tuned towards PPICompare
  * @author Thorsten Will
  */
 public class RewiringDetectorSample {
 	private final Set<StrPair> interactions;
 	private final Map<String, String> protein_to_assumed_transcript;
 	
+	// sophisticated part of domain interaction data
+	private final Map<String, Set<String>> protein_to_domains; // set of non-FB domains per protein in this network, not in there if no non-FB domain
+	private final Map<String, Map<String, Set<String>>> protein_to_protein_by_domains; // one-sided reachable protein2s over given domains in protein1, not in there if no non-FB domain
+	
 	/**
 	 * Constructor, builds objects from files
 	 * @param ppin_file
+	 * @param ddin_file
 	 * @param protein_to_assumed_transcript_file
 	 */
-	public RewiringDetectorSample(String ppin_file, String protein_to_assumed_transcript_file) {
+	public RewiringDetectorSample(String ppin_file, String ddin_file, String protein_to_assumed_transcript_file) {
+		// set interactome outcome
 		this.interactions = PPIN.readInteractionsFromPPINFile(ppin_file);
+		
+		// build AS-relevant domain info
+		this.protein_to_domains = new HashMap<String, Set<String>>(1024);
+		this.protein_to_protein_by_domains = new HashMap<String,  Map<String, Set<String>>>(1024);
+		DDIN ddin = new DDIN(ddin_file);
+		
+		for (String protein1:ddin.getProtein_to_domains().keySet()) {
+			for (String domain1:ddin.getProtein_to_domains().get(protein1)) {
+				
+				// domains have format 0|FB|Q9UKT9
+				String domain_family = domain1.split("\\|")[1];
+				
+				// only non-FB domains
+				if (domain_family.equals("FB"))
+					continue;
+				
+				// ensure set is initialized and domain_family not yet processed for this protein
+				if (!this.protein_to_domains.containsKey(protein1))
+					this.protein_to_domains.put(protein1, new HashSet<String>(2));
+				else if (this.protein_to_domains.get(protein1).contains(domain_family))
+					continue;
+				
+				this.protein_to_domains.get(protein1).add(domain_family);
+				
+				for (String domain2:ddin.getDDIs().get(domain1)) {
+					String protein2 = ddin.getDomain_to_protein().get(domain2);
+					
+					// ensure underlying datastructure is present, build if not
+					if (!this.protein_to_protein_by_domains.containsKey(protein1))
+						this.protein_to_protein_by_domains.put(protein1, new HashMap<String, Set<String>>(64));
+					if (!this.protein_to_protein_by_domains.get(protein1).containsKey(protein2))
+						this.protein_to_protein_by_domains.get(protein1).put(protein2, new HashSet<>(2));
+					
+					// note that protein2 is reachable from protein1 given that some domains of 1 are present 
+					this.protein_to_protein_by_domains.get(protein1).get(protein2).add(domain_family);
+				}
+			}
+		}
+		
+		// fill protein_to_assumed_transcript
 		this.protein_to_assumed_transcript = new HashMap<String, String>(1024);
 		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
 			String[] spl = s.trim().split("\\s+");
@@ -48,16 +95,31 @@ public class RewiringDetectorSample {
 		return protein_to_assumed_transcript;
 	}
 
+	/**
+	 * Returns a map of proteins in the network and the set of abundant non-FB domain types
+	 * @return
+	 */
+	public Map<String, Set<String>> getProteinToUsedDomains() {
+		return protein_to_domains;
+	}
+
+	/**
+	 * Returns a map of proteins in the network and the proteins that can be connected on the DDIN using which non-F domain types
+	 * @return
+	 */
+	public Map<String, Map<String, Set<String>>> getProteinToProteinByDomains() {
+		return protein_to_protein_by_domains;
+	}
 	
 	
 	/*
 	 * General purpose helpers
 	 */
-	
+
 	/**
 	 * Reads all matching PPIXpress output pairs of PPINs/major transcripts from a certain folder: 
-	 * [folder]/[sample-string]_ppin.txt(.gz) and [folder]/[sample-string]_major-transcripts.txt(.gz)
-	 * Assumes the standard file endings "_ppin.txt(.gz) and _major-transcripts.txt(.gz)".
+	 * [folder]/[sample-string]_ppin.txt(.gz), [folder]/[sample-string]_ddin.txt(.gz) and [folder]/[sample-string]_major-transcripts.txt(.gz)
+	 * Assumes the standard file endings "_ppin.txt(.gz), "_ddin.txt(.gz) and _major-transcripts.txt(.gz)".
 	 * @param folder
 	 * @return
 	 */
@@ -69,7 +131,7 @@ public class RewiringDetectorSample {
 				gz = ".gz";
 			String pre = f.getAbsolutePath().split("_ppin")[0];
 			String sample = f.getName().split("_ppin")[0];
-			RewiringDetectorSample rds = new RewiringDetectorSample(pre + "_ppin.txt" + gz, pre + "_major-transcripts.txt" + gz);
+			RewiringDetectorSample rds = new RewiringDetectorSample(pre + "_ppin.txt" + gz, pre + "_ddin.txt" + gz, pre + "_major-transcripts.txt" + gz);
 			
 			data.put(sample, rds);
 		}

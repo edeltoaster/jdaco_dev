@@ -35,9 +35,6 @@ public class build_diff_networks {
 		relations.add(new String[]{"GMP", "N", "M"});
 		relations.add(new String[]{"CLP", "CD4"});
 		
-		// study data was build using v83
-		DataQuery.enforceSpecificEnsemblRelease("83");
-		
 		for (String[] s:relations) {
 			
 			String out_path = results_folder + String.join("_", s) + "/";
@@ -132,6 +129,8 @@ public class build_diff_networks {
 	}
 	
 	public static void main(String[] args) {
+		// study data was build using v83
+		DataQuery.enforceSpecificEnsemblRelease("83");
 		process(network_folder, results_root);
 	}
 }

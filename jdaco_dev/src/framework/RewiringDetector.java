@@ -32,7 +32,6 @@ public class RewiringDetector {
 	private boolean strict_denominator = false;
 	private boolean only_diffnet = false;
 	private String organism_database;
-	private Map<String, Set<String>> transcript_domains_map = new HashMap<>();
 	private PrintStream verbose;
 	
 	private List<Double> P_rews_temp = new LinkedList<>();
@@ -68,7 +67,6 @@ public class RewiringDetector {
 		this.strict_denominator = strict_denominator;
 		this.only_diffnet = only_diffnet;
 		
-		this.gatherData();
 		this.determineGroupwiseDifferences();
 		this.assessRewiring();
 	}
@@ -88,7 +86,6 @@ public class RewiringDetector {
 		this.no_threads = no_threads;
 		this.verbose = verbose;
 		
-		this.gatherData();
 		this.determineGroupwiseDifferences();
 		this.assessRewiring();
 	}
@@ -104,7 +101,6 @@ public class RewiringDetector {
 		this.group2 = group2;
 		this.FDR = FDR;
 		
-		this.gatherData();
 		this.determineGroupwiseDifferences();
 		this.assessRewiring();
 	}
@@ -112,25 +108,6 @@ public class RewiringDetector {
 	/*
 	 * major init functions
 	 */
-	
-	/**
-	 * Gathers Ensembl annotation data
-	 */
-	private void gatherData() {
-		// set and returns organism database
-		this.getAppropriateOrganismDatabase();
-		
-		// precache data, only needed once for conversion to gene names
-		DataQuery.getGenesCommonNames(this.organism_database);
-		DataQuery.getGenesTranscriptsProteins(this.organism_database);
-
-		// get domain annotation per transcript
-		Map<String, List<String>> tr_d_list = DataQuery.getTranscriptsDomains(this.organism_database);
-		// and convert to sets of domains
-		for (String transcript:tr_d_list.keySet()) 
-			this.transcript_domains_map.put(transcript, new HashSet<>(tr_d_list.get(transcript)));
-		
-	}
 	
 	@SuppressWarnings("unchecked")
 	private void determineGroupwiseDifferences() {
@@ -371,17 +348,14 @@ public class RewiringDetector {
 				reasons.add(p2 + "(loss)");
 		}
 
-		// check on transcript-level: transcripts must be changed 
+		// check on transcript-level if indications are given
+		// idea: preprocess DDI data in the way protein1 -> domaintype1 -> proteins?
 		if (m1.containsKey(p1) && m2.containsKey(p1) && !m1.get(p1).equals(m2.get(p1))) {
-			// ... AND differ in their domain composition
-			if ( !this.transcript_domains_map.getOrDefault(m1.get(p1), new HashSet<String>()).equals(this.transcript_domains_map.getOrDefault(m2.get(p1), new HashSet<String>())) )
-				reasons.add( p1 + "(" + m1.get(p1) + "->" + m2.get(p1) + ")");
+			reasons.add( p1 + "(" + m1.get(p1) + "->" + m2.get(p1) + ")");
 		}
 
 		if (m1.containsKey(p2) && m2.containsKey(p2) && !m1.get(p2).equals(m2.get(p2))) {
-			// ... AND differ in their domain composition
-			if ( !this.transcript_domains_map.getOrDefault(m1.get(p2), new HashSet<String>()).equals(this.transcript_domains_map.getOrDefault(m2.get(p2), new HashSet<String>())) )
-				reasons.add( p2 + "(" + m1.get(p2) + "->" + m2.get(p2) + ")");
+			reasons.add( p2 + "(" + m1.get(p2) + "->" + m2.get(p2) + ")");
 		}
 
 		return String.join("/", reasons);
@@ -564,7 +538,12 @@ public class RewiringDetector {
 		// only determine once
 		if (organism_database == null) {
 			for (RewiringDetectorSample rds:this.group1.values()) {
-				this.organism_database = DataQuery.getEnsemblOrganismDatabaseFromProteins(rds.getProteinToAssumedTranscriptMap().keySet());
+				Set<String> proteins = new HashSet<>();
+				for (StrPair pair:rds.getInteractions()) {
+					proteins.add(pair.getL());
+					proteins.add(pair.getR());
+				}
+				this.organism_database = DataQuery.getEnsemblOrganismDatabaseFromProteins(proteins);
 				break;
 			}
 		}
@@ -616,8 +595,8 @@ public class RewiringDetector {
 			min_mostl_reason_proteins.add(protein);
 		}
 		
-		// naming data will be preloaded
-		Map<String, String> gene_to_name = DataQuery.getGenesCommonNames(this.organism_database);
+		// naming data
+		Map<String, String> gene_to_name = DataQuery.getGenesCommonNames(getAppropriateOrganismDatabase());
 		Map<String, String> up_to_name = new HashMap<>();
 		for (String[] data:DataQuery.getGenesTranscriptsProteins(this.organism_database)) {
 			String gene = data[0];
