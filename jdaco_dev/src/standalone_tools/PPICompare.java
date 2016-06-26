@@ -33,7 +33,7 @@ public class PPICompare {
 		System.out.println("	-fdr=[FDR] : false discovery rate (default: 0.05)");
 		System.out.println("	-n : no output of protein attribute table (no data retrieval necessary)");
 		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
-		
+		// TODO: no reason calculation as option?
 		System.out.println();
 		
 		System.out.println("[GROUPx-FOLDER] :");

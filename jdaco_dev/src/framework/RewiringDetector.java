@@ -360,7 +360,7 @@ public class RewiringDetector {
 		 * check on transcript-level if indications are given, then go into details
 		 */
 		
-		// first check for relevant splicing of p1
+		// first check for relevant splicing of p1: p1 in both samples and Ensembl transcript changed
 		if (m1.containsKey(p1) && m2.containsKey(p1) && !m1.get(p1).equals(m2.get(p1))) {
 			
 			// check details: filter for change
@@ -413,7 +413,7 @@ public class RewiringDetector {
 			} // end of domain annotation check loop
 		} // end check for splicing of p1
 		
-		// analogous check for relevant splicing of p2
+		// analogous check for relevant splicing of p2: only check if p2 in both samples and Ensembl id changed
 		if (m1.containsKey(p2) && m2.containsKey(p2) && !m1.get(p2).equals(m2.get(p2))) {
 			
 			// check details: filter for change
