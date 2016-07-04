@@ -31,6 +31,7 @@ public class PPICompare {
 		
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-fdr=[FDR] : false discovery rate (default: 0.05)");
+		System.out.println("	-n : no output of protein attribute table (no data retrieval necessary)");
 		System.out.println("	-r=[release] : try to use data from a certain Ensembl release, uses newest if specific release not found");		
 		System.out.println("	-s=[US, UK, AS, 'specific URL'] : change initial server, note that US and asian mirrors only store the last two releases (default: US)");
 		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
@@ -65,6 +66,10 @@ public class PPICompare {
 			// parse FDR
 			else if (arg.startsWith("-fdr"))
 				FDR = Double.parseDouble(arg.split("=")[1]);
+			
+			// toggle writing of protein output table
+			else if (arg.equals("-n"))
+				output_protein_attributes = false;
 			
 			// try to enforce a release manually
 			else if (arg.startsWith("-r="))
