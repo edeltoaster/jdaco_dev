@@ -717,7 +717,7 @@ public class RewiringDetector {
 		 */
 		
 		List<String> to_write = new LinkedList<>();
-		to_write.add("protein gene_name in_min_reasons overall_count expr_count AS_count AS_fraction");
+		to_write.add("UniProt_ACC Gene_name Part_of_min_reasons Overall_count Expr_count AS_count AS_fraction");
 		
 		for (String protein:proteins) {
 			String min_reasons = "no";
