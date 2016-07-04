@@ -275,7 +275,7 @@ public class PPIXpress {
 		System.out.print("50% ... ");
 		System.out.flush();
 		DataQuery.getIsoformProteinDomainMap(organism_database);
-		System.out.println("100%");
+		System.out.println("100%.");
 		System.out.flush();
 		
 		// gathering even more data if necessary

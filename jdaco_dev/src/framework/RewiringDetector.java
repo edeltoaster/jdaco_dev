@@ -641,7 +641,7 @@ public class RewiringDetector {
 	 * Determines matching Ensembl organism database from one of the networks
 	 * @return
 	 */
-	private String getAppropriateOrganismDatabase() {
+	public String getAppropriateOrganismDatabase() {
 		
 		// only determine once
 		if (organism_database == null) {

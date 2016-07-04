@@ -775,7 +775,7 @@ public class PPIXpress_GUI {
 			return;
 		}
 		
-		stream_output.println("100%");
+		stream_output.println("100%.");
 		progressBar.setValue(45);
 		
 		// gathering even more data if necessary

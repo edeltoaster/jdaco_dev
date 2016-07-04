@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import framework.DataQuery;
 import framework.RewiringDetector;
 import framework.RewiringDetectorSample;
-import framework.StrPair;
 import framework.Utilities;
 
 /**
@@ -31,9 +31,10 @@ public class PPICompare {
 		
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-fdr=[FDR] : false discovery rate (default: 0.05)");
-		System.out.println("	-n : no output of protein attribute table (no data retrieval necessary)");
+		System.out.println("	-r=[release] : try to use data from a certain Ensembl release, uses newest if specific release not found");		
+		System.out.println("	-s=[US, UK, AS, 'specific URL'] : change initial server, note that US and asian mirrors only store the last two releases (default: US)");
 		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
-		// TODO: no reason calculation as option?
+		
 		System.out.println();
 		
 		System.out.println("[GROUPx-FOLDER] :");
@@ -61,13 +62,26 @@ public class PPICompare {
 			if (arg.equals("-h") || arg.equals("-help"))
 				printHelp();
 			
-			// no output of protein attribute table
-			else if (arg.equals("-n"))
-				output_protein_attributes = false;
-			
 			// parse FDR
 			else if (arg.startsWith("-fdr"))
 				FDR = Double.parseDouble(arg.split("=")[1]);
+			
+			// try to enforce a release manually
+			else if (arg.startsWith("-r="))
+				DataQuery.enforceSpecificEnsemblRelease(arg.split("=")[1]);
+			
+			// server switching
+			else if (arg.startsWith("-s=")){
+				String option = arg.split("=")[1];
+				if (option.equals("UK"))
+					DataQuery.switchServer("ensembldb.ensembl.org:3306");
+				else if (option.equals("US"))
+					DataQuery.switchServer("useastdb.ensembl.org:3306");
+				else if (option.equals("AS"))
+					DataQuery.switchServer("asiadb.ensembl.org:3306");
+				else
+					DataQuery.switchServer(option);
+			}
 			
 			// parse #threads
 			else if (arg.startsWith("-t"))
@@ -135,16 +149,13 @@ public class PPICompare {
 		
 		// actual calculations
 		RewiringDetector rd = new RewiringDetector(group1, group2, FDR, no_threads, null);
-		Map<String, List<StrPair>> major_alt_splice_switches = rd.determineAltSplicingSwitches(true, false);
-		Map<String, List<StrPair>> all_alt_splice_switches = rd.determineAltSplicingSwitches(false, true);
 		double P_rew_rounded = (double) Math.round(rd.getP_rew() * 1000d) / 1000d;
 		List<String> minReasons = rd.getMinMostLikelyReasons();
 		
 		// stdout-output
-		System.out.println(rd.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getSignificantlyRewiredInteractions().size() + " dIAs" );
-		System.out.println(major_alt_splice_switches.keySet().size() + " alt. spliced proteins are the major reason that affect " + Utilities.getValueSetFromMultimap(major_alt_splice_switches).size() + " diff. interactions.");
-		System.out.println(all_alt_splice_switches.keySet().size() + " alt. spliced proteins contribute to a change in the " + Utilities.getValueSetFromMultimap(all_alt_splice_switches).size() + " diff. interactions that are mainly driven by AS events.");
-		System.out.println(minReasons.size() + " alterations can explain all significant changes.");
+		System.out.println(rd.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getSignificantlyRewiredInteractions().size() + " significant rewiring events." );
+		System.out.println(minReasons.size() + " transcriptomic alterations can explain all significant changes.");
+		System.out.flush();
 		
 		/*
 		 * write file-output
@@ -155,13 +166,30 @@ public class PPICompare {
 		if (!f.exists())
 			f.mkdir();
 		
-		rd.writeDiffnet(output_folder + "differential_net.txt");
-		Utilities.writeEntries(major_alt_splice_switches.keySet(), output_folder + "major_AS_proteins.txt");
-		Utilities.writeEntries(all_alt_splice_switches.keySet(), output_folder + "contributing_AS_proteins.txt");
+		// write differential interaction attribute table
+		rd.writeDiffnet(output_folder + "differential_network.txt");
+		
+		// write output of optimization approach
 		Utilities.writeEntries(minReasons, output_folder + "min_reasons.txt");
 		
-		if (output_protein_attributes)
+		// if necessary, write protein attribute table
+		if (output_protein_attributes) {
+			
+			// version output and data retrieval
+			String organism_database = rd.getAppropriateOrganismDatabase();
+			String ensembl_version = organism_database.split("_")[organism_database.split("_").length-2];
+			
+			System.out.print("Retrieving ENSEMBL " + ensembl_version + " data from database " + organism_database + " (may take some minutes) ... ");
+			DataQuery.getGenesCommonNames(organism_database);
+			System.out.print("33% ... ");
+			System.out.flush();
+			
+			DataQuery.getGenesTranscriptsProteins(organism_database);
+			System.out.println("100%.");
+			System.out.flush();
+			
+			// write node table
 			rd.writeProteinAttributes(output_folder + "protein_attributes.txt");
-		
+		}
 	}
 }
