@@ -698,9 +698,12 @@ public class RewiringDetector {
 		}
 		
 		Set<String> min_mostl_reason_proteins = new HashSet<>();
+		HashMap<String, String> min_most_reasons = new HashMap<>();
 		for (String reason:min_mostlikely_reasons) {
 			String protein = reason.split("\\(")[0];
+			String tr_reason = reason.split("\\(")[1];
 			min_mostl_reason_proteins.add(protein);
+			min_most_reasons.put(protein, tr_reason.substring(0, tr_reason.length()-1));
 		}
 		
 		// naming data
@@ -717,20 +720,21 @@ public class RewiringDetector {
 		 */
 		
 		List<String> to_write = new LinkedList<>();
-		to_write.add("UniProt_ACC Gene_name Part_of_min_reasons Overall_count Expr_count AS_count AS_fraction");
+		to_write.add("UniProt_ACC Gene_name Part_of_min_reasons Alteration_type Transcriptomic_alteration Score");
 		
 		for (String protein:proteins) {
 			String min_reasons = "no";
-			if (min_mostl_reason_proteins.contains(protein))
+			String cause = "/";
+			String type = "/";
+			if (min_mostl_reason_proteins.contains(protein)) {
 				min_reasons = "yes";
+				cause = min_most_reasons.get(protein);
+				type = "DE";
+				if (cause.contains("->"))
+					type = "AS";
+			}
 			
-			// to account for proteins that never caused something
-			int all_count = all_reasons.get(protein);
-			double AS_frac = 0.0;
-			if (all_count > 0.0)
-				AS_frac = ((float) AS_reasons.get(protein)) / all_count;
-			
-			to_write.add(protein + " " + up_to_name.get(protein) + " " + min_reasons + " " + all_reasons.get(protein) + " " + expr_reasons.get(protein) + " " + AS_reasons.get(protein) + " " + AS_frac);
+			to_write.add(protein + " " + up_to_name.get(protein) + " " + min_reasons + " " + type + " " + cause + " " + all_reasons.get(protein));
 		}
 		
 		Utilities.writeEntries(to_write, out_path);
