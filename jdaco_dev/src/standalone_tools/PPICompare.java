@@ -39,7 +39,7 @@ public class PPICompare {
 		System.out.println();
 		
 		System.out.println("[GROUPx-FOLDER] :");
-		System.out.println("	Standard PPIXpress-output is read from those folders. PPIN and major transcript files are needed.");
+		System.out.println("	Standard PPIXpress-output is read from those folders. PPIN, DDIN and major transcript files are needed.");
 		
 		System.out.println();
 		
