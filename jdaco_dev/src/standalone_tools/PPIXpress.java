@@ -27,6 +27,7 @@ public class PPIXpress {
 	private static String output_folder;
 	private static String organism_database;
 	private static boolean compress_output = false;
+	private static boolean report_reference = false;
 	
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
@@ -35,8 +36,6 @@ public class PPIXpress {
 	private static boolean update_UniProt = false;
 	private static boolean STRING_weights = false;
 	private static List<String> matching_files_output = new LinkedList<>();
-	
-	// TODO: output of unfiltered network?
 	
 	public static void printHelp() {
 		System.out.println("usage: java -jar PPIXpress.jar ([OPTIONS]) [INPUT-NETWORK] [OUTPUT-FOLDER] [EXPR-INPUT1] ([EXPR-INPUT2] ...)");
@@ -62,7 +61,8 @@ public class PPIXpress {
 		System.out.println("[INPUT-NETWORK] :");
 		System.out.println("	Any protein-protein interaction network in SIF-format: Protein1 Protein2 (weight).");
 		System.out.println("	Proteins are assumed to be given as UniProt or HGNC accessions.");
-		System.out.println("	Alternatively: use taxon:[organism taxon] to automatically retrieve current mentha or IntAct data for an organism.");
+		System.out.println("	Alternatively: use taxon:[organism taxon] to automatically retrieve current mentha or IntAct data for an organism if the taxon is not found in mentha.");
+		System.out.println("	As an example, 'taxon:9606' will retrieve the current mentha PPIN for human.");
 		
 		System.out.println();
 		
@@ -72,7 +72,7 @@ public class PPIXpress {
 		System.out.println();
 		
 		System.out.println("[INPUT1] ([INPUT2] ...) :");
-		System.out.println("	Arbitrary number of samples to process.");
+		System.out.println("	Arbitrary number of samples to process.");		
 		System.out.println("	Usable inputs that are automatically inferred are:");
 		System.out.println("	- Cufflinks : isoform.fpkm_tracking files");
 		System.out.println("	- Cufflinks : gene.fpkm_tracking files");
@@ -87,7 +87,7 @@ public class PPIXpress {
 		System.out.println("	- simple textfiles with transcript and expression per line");
 		System.out.println("	- simple textfile with gene and expression per line");
 		System.out.println("	Transcripts/Genes besides TCGA are assumed to be given as Ensembl identifiers.");
-		
+		System.out.println("	Typing 'reference' instead will return the network data for the reference PPIN (and full DDIN and transcripts) of the mapping-stage.");
 		System.out.println();
 		
 		System.exit(0);
@@ -195,6 +195,12 @@ public class PPIXpress {
 			
 		// check for occuring classes
 		for (String path:input_files) {
+			
+			if (path.equals("reference")) {
+				report_reference = true;
+				continue;
+			}
+			
 			String type = TranscriptAbundanceReader.inferTranscriptAbundanceFileType(path);
 			if (type.equals("TCGA G"))
 				load_HGNC = true;
@@ -210,6 +216,11 @@ public class PPIXpress {
 				System.exit(1);
 			}
 		}
+		
+		// ensure no later processing of this special case
+		if (report_reference)
+			input_files.remove("reference");
+		
 		
 	}
 	
@@ -302,6 +313,36 @@ public class PPIXpress {
 		System.out.println(Math.round(builder.getMappingPercentage() * 10000)/100.0 +"% of protein interactions could be associated with at least one non-artificial domain interaction." );
 		System.out.flush();
 		
+		/*
+		 * optionally output the reference network
+		 */
+		
+		if (report_reference) {
+			ConstructedNetworks constr = NetworkBuilder.constructAssociatedIsoformNetworks(original_network);
+			System.out.print("Building output data for reference network ");
+			
+			String file_suffix = "_ppin.txt";
+			if (compress_output)
+				file_suffix += ".gz";
+			constr.getPPIN().writePPIN(output_folder + "reference" + file_suffix);
+			
+			System.out.println("-> " + constr.getPPIN().getSizesStr());
+			System.out.flush();
+			
+			if (output_DDINs) {
+				file_suffix = "_ddin.txt";
+				if (compress_output)
+					file_suffix += ".gz";
+				constr.getDDIN().writeDDIN(output_folder + "reference" + file_suffix);
+			}
+			
+			if (output_major_transcripts) {
+				file_suffix = "_major-transcripts.txt";
+				if (compress_output)
+					file_suffix += ".gz";
+				constr.writeProteinToAssumedTranscriptMap(output_folder + "reference" + file_suffix);
+			}
+		}
 		
 		/*
 		 * process samples
@@ -332,7 +373,6 @@ public class PPIXpress {
 			} else {
 				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance);
 			}
-			
 			
 			/*
 			 * write output 
@@ -373,6 +413,8 @@ public class PPIXpress {
 			sample_no++;
 		}
 		
-		Utilities.writeEntries(matching_files_output, output_folder + "matching_files.txt"); 
+		// only write if necessary
+		if (matching_files_output.size() > 0)
+			Utilities.writeEntries(matching_files_output, output_folder + "matching_files.txt"); 
 	}
 }
