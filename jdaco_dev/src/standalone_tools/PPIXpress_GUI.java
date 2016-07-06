@@ -56,6 +56,7 @@ public class PPIXpress_GUI {
 	private static String output_folder;
 	private static String organism_database;
 	private static boolean compress_output = false;
+	private static boolean report_reference = false;
 	
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
@@ -89,6 +90,7 @@ public class PPIXpress_GUI {
 	private JButton btnReset;
 	private JComboBox<String> comboBox_server;
 	private JButton btnRetrieve;
+	private JCheckBox chckbxReference;
 	private JCheckBox chckbxOutputMajorTranscripts;
 	private JCheckBox chckbxUpdateUniprotAccs;
 	private JCheckBox chckboxCompressOutput;
@@ -123,7 +125,7 @@ public class PPIXpress_GUI {
 		frmPpixpress = new JFrame();
 		frmPpixpress.setTitle("PPIXpress");
 		frmPpixpress.setResizable(false);
-		frmPpixpress.setBounds(100, 100, 900, 800);
+		frmPpixpress.setBounds(100, 100, 900, 850);
 		frmPpixpress.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmPpixpress.getContentPane().setLayout(null);
 		
@@ -342,7 +344,7 @@ public class PPIXpress_GUI {
 				}
 			}
 		});
-		btnBuildNetworks.setBounds(137, 370, 324, 50);
+		btnBuildNetworks.setBounds(100, 400, 324, 50);
 		frmPpixpress.getContentPane().add(btnBuildNetworks);
 		
 		chckbxSTRING = new JCheckBox("add STRING weights");
@@ -368,7 +370,7 @@ public class PPIXpress_GUI {
 					output_DDINs = false;
 			}
 		});
-		chckbxOutputDdins.setBounds(680, 379, 132, 30);
+		chckbxOutputDdins.setBounds(630, 409, 132, 30);
 		frmPpixpress.getContentPane().add(chckbxOutputDdins);
 		
 		chckbxGenelevelOnly = new JCheckBox("gene-level only");
@@ -444,7 +446,7 @@ public class PPIXpress_GUI {
 		JScrollPane scrollPane_output = new JScrollPane();
 		scrollPane_output.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane_output.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-		scrollPane_output.setBounds(19, 490, 860, 270);
+		scrollPane_output.setBounds(19, 520, 860, 300);
 		frmPpixpress.getContentPane().add(scrollPane_output);
 		
 		text_output = new JTextArea();
@@ -462,7 +464,7 @@ public class PPIXpress_GUI {
 					output_major_transcripts = false;
 			}
 		});
-		chckbxOutputMajorTranscripts.setBounds(680, 400, 205, 30);
+		chckbxOutputMajorTranscripts.setBounds(630, 430, 205, 30);
 		frmPpixpress.getContentPane().add(chckbxOutputMajorTranscripts);
 		activiy_changing_components.add(chckbxOutputMajorTranscripts);
 		
@@ -488,7 +490,7 @@ public class PPIXpress_GUI {
 					compress_output = false;
 			}
 		});
-		chckboxCompressOutput.setBounds(680, 421, 205, 30);
+		chckboxCompressOutput.setBounds(630, 451, 205, 30);
 		frmPpixpress.getContentPane().add(chckboxCompressOutput);
 		activiy_changing_components.add(chckboxCompressOutput);
 		
@@ -508,6 +510,20 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(chckbxOnlyLocalDdi);
 		activiy_changing_components.add(chckbxOnlyLocalDdi);
 		
+		chckbxReference = new JCheckBox("output reference network data");
+		chckbxReference.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (chckbxReference.isSelected()) {
+					report_reference = true;
+				} else {
+					report_reference = false;
+				}
+			}
+		});
+		chckbxReference.setBounds(630, 386, 232, 30);
+		frmPpixpress.getContentPane().add(chckbxReference);
+		activiy_changing_components.add(chckbxReference);
+		
 		btnReset = new JButton("Reset");
 		activiy_changing_components.add(btnReset);
 		btnReset.addActionListener(new ActionListener() {
@@ -525,6 +541,9 @@ public class PPIXpress_GUI {
 				
 				STRING_weights = false;
 				chckbxSTRING.setSelected(false);
+				
+				report_reference = false;
+				chckbxReference.setSelected(false);
 				
 				update_UniProt = false;
 				chckbxUpdateUniprotAccs.setSelected(false);
@@ -559,11 +578,11 @@ public class PPIXpress_GUI {
 				System.gc();
 			}
 		});
-		btnReset.setBounds(483, 370, 117, 50);
+		btnReset.setBounds(455, 400, 117, 50);
 		frmPpixpress.getContentPane().add(btnReset);
 		
 		progressBar = new JProgressBar();
-		progressBar.setBounds(100, 450, 700, 20);
+		progressBar.setBounds(100, 485, 700, 20);
 		frmPpixpress.getContentPane().add(progressBar);
 		
 		comboBox_server = new JComboBox<String>();
@@ -580,19 +599,19 @@ public class PPIXpress_GUI {
 			}
 		});
 		comboBox_server.setSelectedIndex(0);
-		comboBox_server.setBounds(720, 350, 82, 30);
+		comboBox_server.setBounds(720, 355, 82, 30);
 		frmPpixpress.getContentPane().add(comboBox_server);
 		
 		JLabel lblSever = new JLabel("Server:");
 		activiy_changing_components.add(lblSever);
 		lblSever.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblSever.setBounds(650, 349, 61, 30);
+		lblSever.setBounds(650, 354, 61, 30);
 		frmPpixpress.getContentPane().add(lblSever);
 		activiy_changing_components.add(lblSever);
 		
 		JLabel lblProgress = new JLabel("Progress:");
 		lblProgress.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblProgress.setBounds(17, 444, 75, 30);
+		lblProgress.setBounds(17, 479, 75, 30);
 		frmPpixpress.getContentPane().add(lblProgress);
 		
 		JLabel lblthreshold = new JLabel("threshold:");
@@ -699,8 +718,8 @@ public class PPIXpress_GUI {
 			return;
 		}
 		
-		if (input_files.size() == 0) {
-			stream_output.println("No expression data given.");
+		if (input_files.size() == 0 && !report_reference) {
+			stream_output.println("No networks to construct.");
 			return;
 		}
 		
@@ -826,8 +845,40 @@ public class PPIXpress_GUI {
 		stream_output.println(Math.round(builder.getMappingDomainPercentage() * 10000)/100.0 +"% of proteins could be annotated with at least one non-artificial domain," );
 		stream_output.println(Math.round(builder.getMappingPercentage() * 10000)/100.0 +"% of protein interactions could be associated with at least one non-artificial domain interaction." );
 		
-		int step_size = 50 / input_files.size();
+		int add_count = 0;
+		if (report_reference)
+			add_count = 1;
+		int step_size = 50 / (input_files.size() + add_count);
 		
+		/*
+		 * optionally output the reference network
+		 */
+		
+		if (report_reference) {
+			ConstructedNetworks constr = NetworkBuilder.constructAssociatedIsoformNetworks(original_ppin);
+			stream_output.print("Building output data for reference network ");
+			
+			String file_suffix = "_ppin.txt";
+			if (compress_output)
+				file_suffix += ".gz";
+			constr.getPPIN().writePPIN(output_folder + "reference" + file_suffix);
+			
+			stream_output.println("-> " + constr.getPPIN().getSizesStr());
+			
+			if (output_DDINs) {
+				file_suffix = "_ddin.txt";
+				if (compress_output)
+					file_suffix += ".gz";
+				constr.getDDIN().writeDDIN(output_folder + "reference" + file_suffix);
+			}
+			
+			if (output_major_transcripts) {
+				file_suffix = "_major-transcripts.txt";
+				if (compress_output)
+					file_suffix += ".gz";
+				constr.writeProteinToAssumedTranscriptMap(output_folder + "reference" + file_suffix);
+			}
+		}
 		
 		/*
 		 * process samples
@@ -912,7 +963,9 @@ public class PPIXpress_GUI {
 			progressBar.setValue(Math.min(progressBar.getValue() + step_size, 100));
 		}
 		
-		Utilities.writeEntries(matching_files_output, output_folder + "matching_files.txt");
+		// only write if there is something to write about
+		if (matching_files_output.size() > 0)
+			Utilities.writeEntries(matching_files_output, output_folder + "matching_files.txt");
 		
 		stream_output.println("Finished.");
 	}
