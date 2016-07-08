@@ -160,7 +160,7 @@ public class TranscriptAbundanceReader {
 					continue;
 				
 				String[] split = line.split("\\s+");
-				String transcript = split[0];
+				String transcript = split[0].split("\\.")[0]; // shear off version
 				float tpm = Float.parseFloat(split[4]);
 				
 				if (tpm <= threshold)
