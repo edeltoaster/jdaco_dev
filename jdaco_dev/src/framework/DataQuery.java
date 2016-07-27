@@ -736,9 +736,8 @@ public class DataQuery {
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, xref.dbprimary_acc, translation_attrib.value "
 					+ "FROM transcript, translation, object_xref, xref, translation_attrib "
 					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200' "
-					+ "AND transcript.biotype = 'protein_coding' AND translation.translation_id = translation_attrib.translation_id AND translation_attrib.attrib_type_id = '167'");
-					// better remove filtering in the future
-			// TODO: think of this in NMD patch
+					+ "AND translation.translation_id = translation_attrib.translation_id AND translation_attrib.attrib_type_id = '167'");
+			
 			while (rs.next()) {
 				String transcript = rs.getString(1);
 				String uniprot = rs.getString(2);
@@ -797,15 +796,18 @@ public class DataQuery {
 			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
-			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, protein_feature.hit_name, protein_feature.hit_start, protein_feature.hit_end "
+			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, protein_feature.hit_name, protein_feature.hit_start, protein_feature.hit_end, transcript.biotype "
 					+ "FROM transcript, translation, protein_feature, analysis "
-					+ "WHERE transcript.biotype = 'protein_coding' AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=protein_feature.translation_id AND protein_feature.analysis_id = analysis.analysis_id AND analysis.logic_name = 'Pfam'");
-					// better remove filtering in the future
-			// TODO: rework for NMD patch
+					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=protein_feature.translation_id AND protein_feature.analysis_id = analysis.analysis_id AND analysis.logic_name = 'Pfam'");
+			
 			while (rs.next()) {
 				if (!transcript_domain_mapping.containsKey(rs.getString(1)))
 					transcript_domain_mapping.put(rs.getString(1), new LinkedList<String>());
 				transcript_domain_mapping.get(rs.getString(1)).add(rs.getString(2));
+				String biotype = rs.getString(5);
+				if (biotype.equals("nonsense_mediated_decay") || biotype.equals("non_stop_decay")) { // see http://www.gencodegenes.org/gencode_biotypes.html
+					// TODO: think about data structure
+				}
 			}
 			
 		} catch (Exception e) {
@@ -2040,7 +2042,7 @@ public class DataQuery {
 			
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id "
 					+ "FROM gene, transcript "
-					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=transcript.gene_id"); // TODO: handling of NMD!
+					+ "WHERE gene.gene_id=transcript.gene_id");
 			
 			while (rs.next()) {
 				String[] row = {rs.getString(1), rs.getString(2)};

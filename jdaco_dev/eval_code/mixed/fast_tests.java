@@ -7,7 +7,7 @@ import framework.DataQuery;
 public class fast_tests {
 	
 	public static void main(String[] args) {
-		String db = DataQuery.getEnsemblOrganismDatabaseFromName("mus musculus");
+		String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
 		System.out.println(db);
 		
 		long start = System.currentTimeMillis();
