@@ -955,7 +955,7 @@ public class TranscriptAbundanceReader {
 	}
 	
 	/**
-	 * Read arbitrary but supported sample file
+	 * Read arbitrary but supported sample file, returns null if not supported
 	 * @param path
 	 * @return
 	 */
@@ -1019,8 +1019,6 @@ public class TranscriptAbundanceReader {
 			else
 				abundance = TranscriptAbundanceReader.readKallistoFile(path, threshold);
 		}
-		
-		// TODO: handling for wrong format!
 		
 		return abundance;
 	}
