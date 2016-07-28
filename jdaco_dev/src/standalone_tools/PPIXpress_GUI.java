@@ -57,6 +57,7 @@ public class PPIXpress_GUI {
 	private static String organism_database;
 	private static boolean compress_output = false;
 	private static boolean report_reference = false;
+	private static boolean remove_decay_transcripts = true;
 	
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
@@ -914,9 +915,9 @@ public class PPIXpress_GUI {
 			// build
 			ConstructedNetworks constr;
 			if (gene_level_only || !type.endsWith("T")) {
-				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance.keySet());
+				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance.keySet(), remove_decay_transcripts);
 			} else {
-				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance);
+				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance, remove_decay_transcripts);
 			}
 			
 			

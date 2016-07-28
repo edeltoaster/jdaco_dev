@@ -39,7 +39,7 @@ public class builtMCalTechNetworks {
 		for (String sample:replications.keySet()) {
 			System.out.println("Processing: " + sample);
 			Map<String, Float> abundances = TranscriptAbundanceReader.averageAbundances(replications.get(sample), expr_threshold);
-			ConstructedNetworks net = builder.constructAssociatedNetworksFromTranscriptAbundance(abundances);
+			ConstructedNetworks net = builder.constructAssociatedNetworksFromTranscriptAbundance(abundances, true);
 			
 			net.getPPIN().writePPIN(out_path + sample + "_ppin.tsv");
 			System.out.println(net.getPPIN().getSizesStr());

@@ -38,7 +38,7 @@ public class builtSalivaNetworks {
 		// process
 		for (String sample:data_prot_map.keySet()) {
 			System.out.println("Processing " + sample + " ...");
-			ConstructedNetworks constr = builder.constructAssociatedNetworksFromProteinSet(data_prot_map.get(sample));
+			ConstructedNetworks constr = builder.constructAssociatedNetworksFromProteinSet(data_prot_map.get(sample), false);
 			PPIN ppi = constr.getPPIN();
 			DDIN ddi = constr.getDDIN();
 			

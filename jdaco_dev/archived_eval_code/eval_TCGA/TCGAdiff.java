@@ -132,11 +132,11 @@ public class TCGAdiff {
 			String patient_id = path[path.length-1].split("_")[1];
 			
 			// transcript-based
-			PPIN tumor_net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(tumor_file, rsem_cutoff)).getPPIN();
+			PPIN tumor_net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(tumor_file, rsem_cutoff), true).getPPIN();
 			tumor_nodes.add((double) tumor_net.getSizes()[0]);
 			tumor_edges.add((double) tumor_net.getSizes()[1]);
 			
-			PPIN normal_net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(normal_file, rsem_cutoff)).getPPIN();
+			PPIN normal_net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(normal_file, rsem_cutoff), true).getPPIN();
 			normal_nodes.add((double) normal_net.getSizes()[0]);
 			normal_edges.add((double) normal_net.getSizes()[1]);
 			

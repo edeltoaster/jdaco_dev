@@ -30,7 +30,7 @@ public class JDACO_sink_test {
 		System.out.println("Processing " + sample);
 		
 		// build networks
-		ConstructedNetworks networks = network_builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readCufflinksTranscriptsFPKM(path, 1.0));
+		ConstructedNetworks networks = network_builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readCufflinksTranscriptsFPKM(path, 1.0), true);
 				
 		// run DACO
 		double pair_thr = networks.getPPIN().getPercentile(percentiles);

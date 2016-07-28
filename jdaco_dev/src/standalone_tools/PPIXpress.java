@@ -28,6 +28,7 @@ public class PPIXpress {
 	private static String organism_database;
 	private static boolean compress_output = false;
 	private static boolean report_reference = false;
+	private static boolean remove_decay_transcripts = true;
 	
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
@@ -44,11 +45,12 @@ public class PPIXpress {
 		
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-g : only use gene abundances (default: transcript abundance)");
+		System.out.println("	-t=[threshold] : only take transcripts/genes with an expression above [threshold] into account (default: 1.0)");
+		System.out.println("	-tp=[percentile] : only take transcripts/genes with an expression above the [percentile]-th percentile into account (default: overrides option above)");
+		System.out.println("	-x : do not remove proteins from the network if their coding transcript is subject to degradation (default: remove if tagged as 'nonsense-mediated decay' or 'non-stop decay')");
 		System.out.println("	-d : also output underlying domain-domain interaction network(s) (default: no)");
 		System.out.println("	-m : also output major transcript per protein (default: no)");
 		System.out.println("	-c : use gzip-compression on output (default: no)");
-		System.out.println("	-t=[threshold] : only take transcripts/genes with an expression above [threshold] into account (default: 1.0)");
-		System.out.println("	-tp=[percentile] : only take transcripts/genes with an expression above the [percentile]-th percentile into account (default: overrides option above)");
 		System.out.println("	-w : add weights using STRING, interactions that are not in STRING are discarded");
 		System.out.println("	-u : update outdated UniProt accessions");
 		System.out.println("	-l : do not retrieve current 3did data, only use domain-domain interaction data from DOMINE & IDDI & iPfam");
@@ -108,6 +110,10 @@ public class PPIXpress {
 			// gene level only
 			else if (arg.equals("-g"))
 				gene_level_only = true;
+			
+			// gene level only
+			else if (arg.equals("-x"))
+				remove_decay_transcripts = false;
 			
 			// output domain-domain interaction networks
 			else if (arg.equals("-d"))
@@ -348,6 +354,9 @@ public class PPIXpress {
 		 * process samples
 		 */
 		
+		if (!remove_decay_transcripts)
+			System.out.println("Proteins coded by transcripts that are subject to degradation are not removed.");
+		
 		int sample_no = 1;
 		for (String path:input_files) {
 			String match_files = path;
@@ -369,9 +378,9 @@ public class PPIXpress {
 			// build
 			ConstructedNetworks constr;
 			if (gene_level_only || !type.endsWith("T")) {
-				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance.keySet());
+				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance.keySet(), remove_decay_transcripts);
 			} else {
-				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance);
+				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance, remove_decay_transcripts);
 			}
 			
 			/*

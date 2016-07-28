@@ -149,11 +149,11 @@ public class BRCAdiff {
 			
 			
 			// transcript-based
-			PPIN tumor_net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(tumor_file, rsem_cutoff)).getPPIN();
+			PPIN tumor_net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(tumor_file, rsem_cutoff), true).getPPIN();
 			tumor_nodes.add((double) tumor_net.getSizes()[0]);
 			tumor_edges.add((double) tumor_net.getSizes()[1]);
 			
-			PPIN normal_net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(normal_file, rsem_cutoff)).getPPIN();
+			PPIN normal_net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(normal_file, rsem_cutoff), true).getPPIN();
 			normal_nodes.add((double) normal_net.getSizes()[0]);
 			normal_edges.add((double) normal_net.getSizes()[1]);
 			
@@ -246,11 +246,11 @@ public class BRCAdiff {
 			
 			
 			// gene-based
-			PPIN tumor_net = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(tumor_file, rsem_cutoff)).getPPIN();
+			PPIN tumor_net = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(tumor_file, rsem_cutoff), false).getPPIN();
 			tumor_nodes.add((double) tumor_net.getSizes()[0]);
 			tumor_edges.add((double) tumor_net.getSizes()[1]);
 			
-			PPIN normal_net = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(normal_file, rsem_cutoff)).getPPIN();
+			PPIN normal_net = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(normal_file, rsem_cutoff), false).getPPIN();
 			normal_nodes.add((double) normal_net.getSizes()[0]);
 			normal_edges.add((double) normal_net.getSizes()[1]);
 			

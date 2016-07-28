@@ -40,7 +40,7 @@ public class builtCSHLNetworks {
 			}
 			abundances.remove("no_samples");
 			
-			ConstructedNetworks net = builder.constructAssociatedNetworksFromTranscriptAbundance(abundances);
+			ConstructedNetworks net = builder.constructAssociatedNetworksFromTranscriptAbundance(abundances, true);
 			
 			net.getPPIN().writePPIN(out_path + sample + "_ppin.tsv");
 			System.out.println(net.getPPIN().getSizesStr());

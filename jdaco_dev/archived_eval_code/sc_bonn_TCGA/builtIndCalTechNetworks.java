@@ -29,7 +29,7 @@ public class builtIndCalTechNetworks {
 			String sample = f.getName().split("RnaSeq")[1].split("R2x75")[0].toUpperCase();
 			int replicate = Integer.parseInt(f.getName().split("Rep")[1].split("V3")[0]);
 			System.out.println("Processing " + sample + " (" + replicate +")");
-			ConstructedNetworks net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readGencodeGTFTranscripts(f.getAbsolutePath(), expr_threshold));
+			ConstructedNetworks net = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readGencodeGTFTranscripts(f.getAbsolutePath(), expr_threshold), true);
 			
 			net.getPPIN().writePPIN(out_path + sample + "_" + replicate +"_ppin.tsv");
 			System.out.println(net.getPPIN().getSizesStr());

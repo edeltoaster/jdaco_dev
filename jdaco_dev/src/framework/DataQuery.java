@@ -59,6 +59,7 @@ public class DataQuery {
 	private static Map<String, List<String[]>> cache_genestransprots = new HashMap<>();
 	private static Map<String, Map<String, String>> cache_isoformtranscr = new HashMap<>();
 	private static Map<String,Map<String, List<String>>> cache_transcrdom = new HashMap<>();
+	private static Map<String, Set<String>> cache_decay_transcripts = new HashMap<>();
 	private static Map<String, Map<String, List<String>>> cache_ensembl_proteins = new HashMap<>();
 	private static Map<String, Map<String, String>> cache_ensembl_names = new HashMap<>();
 	private static Map<String, String> cache_db = new HashMap<>();
@@ -68,6 +69,7 @@ public class DataQuery {
 	private static List<String[]> cache_HGNC;
 	private static Map<String, String> uniprot_sec_accs;
 	private static String uniprot_release;
+	
 	
 	/**
 	 * Queries UniProt to find organism name from a given protein
@@ -330,6 +332,15 @@ public class DataQuery {
 	 * @param organism_core_database
 	 * @returnreturn list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
 	 */
+	public static List<String[]> getGenesTranscriptsProteins(String organism_core_database) {
+		return DataQuery.getGenesTranscriptsProteinsSingleQuery(organism_core_database); // defines which implementation is used
+	}
+	
+	/**
+	 * Queries Ensembl for association of UniProt Accs. to transcripts and genes
+	 * @param organism_core_database
+	 * @returnreturn list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
+	 */
 	public static List<String[]> getGenesTranscriptsProteinsSingleQuery(String organism_core_database) {
 		
 		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
@@ -343,7 +354,7 @@ public class DataQuery {
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id, xref.dbprimary_acc "
 					+ "FROM gene, transcript, translation, object_xref, xref "
-					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
+					+ "WHERE gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
 			while (rs.next()) {
 				String[] row = {rs.getString(1), rs.getString(2), rs.getString(3)};
 				associations.add(row);
@@ -380,16 +391,17 @@ public class DataQuery {
 	 * @param organism_core_database
 	 * @returnreturn list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
 	 */
-	public static List<String[]> getGenesTranscriptsProteins(String organism_core_database) {
+	public static List<String[]> getGenesTranscriptsProteinsParallelQuery(String organism_core_database) {
 		
 		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
 			return DataQuery.cache_genestransprots.get(organism_core_database);
 		
 		List<String[]> associations = new LinkedList<>();
 		
+		ExecutorService es = Executors.newFixedThreadPool(2);
+		
 		try {
 			// compute
-			ExecutorService es = Executors.newFixedThreadPool(2);
 			Future<Map<String,List<String>>> t_p = es.submit(new getTranscriptProteinsTask(organism_core_database));
 			Future<Map<String,List<String>>> g_t = es.submit(new getGenesTranscriptsTask(organism_core_database));
 			
@@ -413,6 +425,8 @@ public class DataQuery {
 			
 			//e.printStackTrace();
 			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get gene/transcript/protein association from ENSEMBL in 10 seconds ..." );
+			es.shutdownNow();
+			
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e1) {
@@ -420,7 +434,7 @@ public class DataQuery {
 			
 			DataQuery.switchServer();
 			
-			return getGenesTranscriptsProteins(organism_core_database);
+			return getGenesTranscriptsProteinsParallelQuery(organism_core_database);
 			
 		}
 		
@@ -446,7 +460,7 @@ public class DataQuery {
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, xref.display_label "
 					+ "FROM gene, object_xref, xref "
-					+ "WHERE gene.biotype = 'protein_coding' AND gene.gene_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='1300'");
+					+ "WHERE gene.gene_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='1300'");
 			
 			while (rs.next()) {
 				gene_to_names.put(rs.getString(1), rs.getString(2));
@@ -804,9 +818,12 @@ public class DataQuery {
 				if (!transcript_domain_mapping.containsKey(rs.getString(1)))
 					transcript_domain_mapping.put(rs.getString(1), new LinkedList<String>());
 				transcript_domain_mapping.get(rs.getString(1)).add(rs.getString(2));
+				
 				String biotype = rs.getString(5);
 				if (biotype.equals("nonsense_mediated_decay") || biotype.equals("non_stop_decay")) { // see http://www.gencodegenes.org/gencode_biotypes.html
-					// TODO: think about data structure
+					if (!DataQuery.cache_decay_transcripts.containsKey(organism_core_database))
+						DataQuery.cache_decay_transcripts.put(organism_core_database, new HashSet<String>());
+					DataQuery.cache_decay_transcripts.get(organism_core_database).add(rs.getString(1));
 				}
 			}
 			
@@ -837,6 +854,18 @@ public class DataQuery {
 		
 		DataQuery.cache_transcrdom.put(organism_core_database, transcript_domain_mapping);
 		return transcript_domain_mapping;
+	}
+	
+	/**
+	 * Returns those translated Ensembl transcripts that are associated with either "nonsense_mediated_decay" or "non_stop_decay".
+	 * @param organism_core_database
+	 * @return
+	 */
+	public static Set<String> getDecayTranscripts(String organism_core_database) {
+		if (!DataQuery.cache_transcrdom.containsKey(organism_core_database))
+			getTranscriptsDomains(organism_core_database);
+		
+		return DataQuery.cache_decay_transcripts.get(organism_core_database);
 	}
 	
 	/**
@@ -1468,6 +1497,13 @@ public class DataQuery {
 		DataQuery.cache_genestransprots.clear();
 		DataQuery.cache_isoformtranscr.clear();
 		DataQuery.cache_transcrdom.clear();
+		DataQuery.cache_decay_transcripts.clear();
+		DataQuery.cache_ensembl_proteins.clear();
+		DataQuery.cache_ensembl_names.clear();
+		DataQuery.cache_db.clear();
+		DataQuery.cache_STRING.clear();
+		DataQuery.cache_ucsc.clear();
+		DataQuery.cache_ensembl_db.clear();
 	}
 	
 	/**

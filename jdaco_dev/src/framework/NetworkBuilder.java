@@ -13,7 +13,7 @@ import java.util.Set;
 public class NetworkBuilder {
 	
 	private PPIN original_ppi;
-	private String db;
+	private String organism_database;
 	private boolean isoform_based;
 	private Map<String, Set<String>> holistic_protein_domain_composition_map;
 	private Map<String, List<String>> holistic_ddis = new HashMap<>();
@@ -50,14 +50,14 @@ public class NetworkBuilder {
 		this.original_ppi = ppi;
 		
 		// retrieve annotational data, also for later usage
-		this.db = DataQuery.getEnsemblOrganismDatabaseFromProteins(proteins);
+		this.organism_database = DataQuery.getEnsemblOrganismDatabaseFromProteins(proteins);
 		this.isoform_based = isoform_based;
 		if (this.isoform_based)
-			this.holistic_protein_domain_composition_map = DataQuery.getIsoformProteinDomainMap(this.db);
+			this.holistic_protein_domain_composition_map = DataQuery.getIsoformProteinDomainMap(this.organism_database);
 		else
-			this.holistic_protein_domain_composition_map = DataQuery.getHolisticProteinDomainMap(this.db);
-		this.transcript_to_domains = DataQuery.getTranscriptsDomains(this.db);
-		for (String[] naming:DataQuery.getGenesTranscriptsProteins(this.db)) {
+			this.holistic_protein_domain_composition_map = DataQuery.getHolisticProteinDomainMap(this.organism_database);
+		this.transcript_to_domains = DataQuery.getTranscriptsDomains(this.organism_database);
+		for (String[] naming:DataQuery.getGenesTranscriptsProteins(this.organism_database)) {
 			String transcript = naming[1];
 			String protein = naming[2];
 			if (!this.transcript_to_proteins.containsKey(transcript))
@@ -201,7 +201,7 @@ public class NetworkBuilder {
 	 * @param protein_to_assumed_transcript
 	 * @return
 	 */
-	public ConstructedNetworks constructAssociatedNetworksFromTranscriptMap(Map<String, String> protein_to_assumed_transcript) {
+	public ConstructedNetworks constructAssociatedNetworksFromTranscriptMap(Map<String, String> protein_to_assumed_transcript, boolean remove_decayed) {
 		// map that stores p1<->p2
 		HashMap<String, Set<String>> ppi_partners = new HashMap<>();
 		// maps that store DDI-stuff
@@ -212,9 +212,17 @@ public class NetworkBuilder {
 		// shrink to proteins in network
 		protein_to_assumed_transcript.keySet().retainAll(this.original_ppi.getProteins());
 		
+		// prepare set of decay transcripts
+		Set<String> decay_transcripts = DataQuery.getDecayTranscripts(this.organism_database);
+		
 		// scan all expressed proteins for their abundant domains and build a state-specific domain_map
 		Map<String, List<String>> domain_map = new HashMap<>();
 		for (String protein:protein_to_assumed_transcript.keySet()) {
+			String assumed_transcript = protein_to_assumed_transcript.get(protein);
+			
+			// if transcript is thought to not lead to a viable protein, discard the whole node
+			if (remove_decayed && decay_transcripts.contains(assumed_transcript))
+				continue;
 			
 			// FB domain handling
 			String holistic_domain_id = "FB|"+protein; // holistic_domain_id equals domain_id here
@@ -230,10 +238,10 @@ public class NetworkBuilder {
 			}
 			
 			// other domains
-			if (!this.transcript_to_domains.containsKey(protein_to_assumed_transcript.get(protein))) // java 6 compatibility
-				this.transcript_to_domains.put(protein_to_assumed_transcript.get(protein), new LinkedList<String>());
+			if (!this.transcript_to_domains.containsKey(assumed_transcript)) // java 6 compatibility
+				this.transcript_to_domains.put(assumed_transcript, new LinkedList<String>());
 			
-			for (String domain_type:this.transcript_to_domains.get(protein_to_assumed_transcript.get(protein))) {
+			for (String domain_type:this.transcript_to_domains.get(assumed_transcript)) {
 				holistic_domain_id = domain_type+"|"+protein;
 				// if not needed anyhow, don't add to any data structure
 				if (!this.holistic_ddis.containsKey(holistic_domain_id))
@@ -293,16 +301,22 @@ public class NetworkBuilder {
 			}
 		}
 		
+		
 		// cleanup disconnected proteins
 		Set<String> disconnected_proteins = new HashSet<String>(protein_to_assumed_transcript.keySet());
 		disconnected_proteins.removeAll(ppi_partners.keySet());
 		
 		for (String protein:disconnected_proteins) {
-			for (String domain:protein_to_domains.get(protein))
-				domain_to_protein.remove(domain);
-			protein_to_domains.remove(protein);
+			
+			if (protein_to_domains.containsKey(protein)) {
+				for (String domain:protein_to_domains.get(protein))
+					domain_to_protein.remove(domain);
+				protein_to_domains.remove(protein);
+			}
+			
 			protein_to_assumed_transcript.remove(protein);
 		}
+		
 		
 		// cleanup domains without interactions
 		List<String> removable_domains = new LinkedList<>();
@@ -317,12 +331,13 @@ public class NetworkBuilder {
 			domain_to_protein.remove(domain);
 		}
 		
+		
 		// build matching PPIN
 		PPIN constructed_ppin = new PPIN(this.original_ppi, ppi_partners);
 		// convert data to right format
 		DDIN constructed_ddin = new DDIN(ddis, protein_to_domains, domain_to_protein);
 		
-		return new ConstructedNetworks(constructed_ppin, constructed_ddin, protein_to_assumed_transcript, this.db, this.isoform_based);
+		return new ConstructedNetworks(constructed_ppin, constructed_ddin, protein_to_assumed_transcript, this.organism_database, this.isoform_based);
 	}
 	
 	/**
@@ -330,7 +345,7 @@ public class NetworkBuilder {
 	 * @param transcript_abundance
 	 * @return
 	 */
-	public ConstructedNetworks constructAssociatedNetworksFromTranscriptAbundance(Map<String, Float> transcript_abundance) {
+	public ConstructedNetworks constructAssociatedNetworksFromTranscriptAbundance(Map<String, Float> transcript_abundance, boolean remove_decayed) {
 		
 		// map abundant transcripts to proteins and those again to highest expressed transcript
 		Map<String, String> major_transcript = new HashMap<>();
@@ -347,7 +362,7 @@ public class NetworkBuilder {
 			}
 		}
 		
-		return this.constructAssociatedNetworksFromTranscriptMap(major_transcript);
+		return this.constructAssociatedNetworksFromTranscriptMap(major_transcript, remove_decayed);
 	}
 	
 	/**
@@ -355,19 +370,19 @@ public class NetworkBuilder {
 	 * @param proteins
 	 * @return
 	 */
-	public ConstructedNetworks constructAssociatedNetworksFromProteinSet(Set<String> proteins) {
+	public ConstructedNetworks constructAssociatedNetworksFromProteinSet(Set<String> proteins, boolean remove_decayed) {
 		
 		// map proteins to isoform
-		Map<String, String> isoform = DataQuery.getIsoformTranscriptsOfProteins(this.db);
+		Map<String, String> isoform = DataQuery.getIsoformTranscriptsOfProteins(this.organism_database);
 		Map<String, String> relevant_isoforms = new HashMap<>();
 		
 		for (String protein:proteins) { // empty list is returned in actual builder function for "", but protein is said to be abundant and can still have FB domains
-			if (!isoform.containsKey(protein)) // java 6 compatibility
-				isoform.put(protein, ""); // TODO: think of this in NMD patch
+			if (!isoform.containsKey(protein)) // compatibility
+				isoform.put(protein, "");
 			relevant_isoforms.put(protein, isoform.get(protein));
 		}
 
-		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms);
+		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, remove_decayed);
 	}
 	
 	/**
@@ -375,17 +390,17 @@ public class NetworkBuilder {
 	 * @param genes
 	 * @return
 	 */
-	public ConstructedNetworks constructAssociatedNetworksFromGeneAbundance(Set<String> genes) {
+	public ConstructedNetworks constructAssociatedNetworksFromGeneAbundance(Set<String> genes, boolean remove_decayed) {
 		
 		// map proteins to isoform
-		Map<String, String> isoform = DataQuery.getIsoformTranscriptsOfProteins(this.db);
+		Map<String, String> isoform = DataQuery.getIsoformTranscriptsOfProteins(this.organism_database);
 		Map<String, String> relevant_isoforms = new HashMap<>();
 		
 		// determine proteins
 		Set<String> proteins = new HashSet<>();
 		Map<String, LinkedList<String>> genes_to_proteins = new HashMap<>();
 		
-		for (String[] data:DataQuery.getGenesTranscriptsProteins(this.db)) {
+		for (String[] data:DataQuery.getGenesTranscriptsProteins(this.organism_database)) {
 			String gene = data[0];
 			String protein = data[2];
 			if (!genes_to_proteins.containsKey(gene))
@@ -398,13 +413,13 @@ public class NetworkBuilder {
 				proteins.addAll(genes_to_proteins.get(gene));
 		
 		for (String protein:proteins) { // empty list is returned in actual builder function for "", but protein is said to be abundant and can still have FB domains
-			if (!isoform.containsKey(protein)) // java 6 compatibility
-				isoform.put(protein, ""); // TODO: think of this in NMD patch
+			if (!isoform.containsKey(protein)) //compatibility
+				isoform.put(protein, "");
 			relevant_isoforms.put(protein, isoform.get(protein));
 		}
 		
 
-		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms);
+		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, remove_decayed);
 	}
 
 	/**
@@ -582,7 +597,7 @@ public class NetworkBuilder {
 	 * @return
 	 */
 	public String getDB() {
-		return this.db;
+		return this.organism_database;
 	}
 	
 	/**

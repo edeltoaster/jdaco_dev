@@ -62,7 +62,7 @@ public class build_networks {
 			
 			Map<String, Float> transcr_expr = TranscriptAbundanceReader.readKallistoFile(path, TPM_threshold);
 			
-			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(transcr_expr);
+			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(transcr_expr, true);
 			cn.getPPIN().writePPIN(out_path + file_name + "_ppin.txt.gz");
 			cn.getDDIN().writeDDIN(out_path + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(out_path + file_name + "_major-transcripts.txt.gz");

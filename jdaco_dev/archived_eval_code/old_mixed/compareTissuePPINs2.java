@@ -44,8 +44,8 @@ public class compareTissuePPINs2 {
 			String sample_path = file.getParentFile().getAbsolutePath();
 			
 			System.out.println("Reading "+sample);
-			PPIN abundance_network = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromCufflinksFPKM(sample_path+"/isoforms.fpkm_tracking.gz", 1.0)).getPPIN();
-			PPIN splice_network = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readCufflinksTranscriptsFPKM(sample_path+"/isoforms.fpkm_tracking.gz", 1.0)).getPPIN();
+			PPIN abundance_network = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromCufflinksFPKM(sample_path+"/isoforms.fpkm_tracking.gz", 1.0), true).getPPIN();
+			PPIN splice_network = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readCufflinksTranscriptsFPKM(sample_path+"/isoforms.fpkm_tracking.gz", 1.0), true).getPPIN();
 			
 			sample_mapping.put(sample, new PPIN[]{abundance_network, splice_network});
 		}
