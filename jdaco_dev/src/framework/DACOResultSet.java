@@ -102,7 +102,7 @@ public class DACOResultSet {
 	}
 	
 	/**
-	 * Rebuilds useful data-structures on the basis of relevant seed (proteins with BS-annotated)
+	 * Rebuilds useful data-structures on the basis of relevant seed
 	 * @param seed
 	 */
 	public void rebuildData(Set<String> refined_seed) {
