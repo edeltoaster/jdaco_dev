@@ -121,10 +121,6 @@ public class DACOResultSet {
 		}
 		
 	}
-
-	public HashSet<HashSet<String>> getResult() {
-		return result;
-	}
 	
 	/**
 	 * Writes output to a csv-file
@@ -138,6 +134,81 @@ public class DACOResultSet {
 			to_write.add( String.join(",", cluster) );
 		
 		Utilities.writeEntries(to_write, out_file);
+	}
+	
+	
+	public double getComplexSimilarity(DACOResultSet result_set2) {
+		Set<HashSet<String>> result2 = result_set2.getResult();
+		
+		double sum = 0.0;
+		for (HashSet<String> set1:this.result) {
+			double max_Jsim = 0.0;
+			for (HashSet<String> set2:result2) {
+				double Jsim = Utilities.getJaccardSimilarity(set1, set2);
+				
+				if (Jsim > max_Jsim)
+					max_Jsim = Jsim;
+				
+				if (max_Jsim == 1.0)
+					break;
+			}
+			sum += max_Jsim;
+		}
+		
+		for (HashSet<String> set1:result2) {
+			double max_Jsim = 0.0;
+			for (HashSet<String> set2:this.result) {
+				double Jsim = Utilities.getJaccardSimilarity(set1, set2);
+				
+				if (Jsim > max_Jsim)
+					max_Jsim = Jsim;
+				
+				if (max_Jsim == 1.0)
+					break;
+			}
+			sum += max_Jsim;
+		}
+		
+		return sum / (this.result.size() + result2.size()); // similar to dice-similarity
+	}
+	
+	public double getSeedVariantSimilarity(DACOResultSet result_set2) {
+		Set<HashSet<String>> result2 = result_set2.getSeedToComplexMap().keySet();
+		
+		double sum = 0.0;
+		for (HashSet<String> set1:this.seed_to_complex_map.keySet()) {
+			double max_Jsim = 0.0;
+			for (HashSet<String> set2:result2) {
+				double Jsim = Utilities.getJaccardSimilarity(set1, set2);
+				
+				if (Jsim > max_Jsim)
+					max_Jsim = Jsim;
+				
+				if (max_Jsim == 1.0)
+					break;
+			}
+			sum += max_Jsim;
+		}
+		
+		for (HashSet<String> set1:result2) {
+			double max_Jsim = 0.0;
+			for (HashSet<String> set2:this.seed_to_complex_map.keySet()) {
+				double Jsim = Utilities.getJaccardSimilarity(set1, set2);
+				
+				if (Jsim > max_Jsim)
+					max_Jsim = Jsim;
+				
+				if (max_Jsim == 1.0)
+					break;
+			}
+			sum += max_Jsim;
+		}
+		
+		return sum / (this.seed_to_complex_map.size() + result2.size()); // similar to dice-similarity
+	}
+	
+	public HashSet<HashSet<String>> getResult() {
+		return result;
 	}
 	
 	public Set<String> getAbundantSeedProteins() {

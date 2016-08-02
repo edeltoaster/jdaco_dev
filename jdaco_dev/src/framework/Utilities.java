@@ -288,6 +288,21 @@ public class Utilities {
 	 * Collection helpers
 	 */
 	
+	/**
+	 * Jaccard similarity between sets of arbitrary classes
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static <S> double getJaccardSimilarity(Set<S> a, Set<S>b) {
+		HashSet<S> intersection = new HashSet<S>(a);
+		intersection.retainAll(b);
+		HashSet<S> union = new HashSet<S>(a);
+		union.addAll(b);
+		
+		return ( (double) intersection.size() ) / union.size();
+	} 
+	
 	public static <K, V> Set<V> getValueSetFromMultimap(Map<K, List<V>> map) {
 		Set<V> value_set = new HashSet<>();
 		
