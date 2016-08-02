@@ -1,6 +1,8 @@
 package framework;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public class GOAnnotationTag {
@@ -13,6 +15,9 @@ public class GOAnnotationTag {
 	private final Set<String> negative_proteins = new HashSet<>();
 	private final Set<String> mixed_proteins = new HashSet<>();
 	
+	/*
+	 * Constructor if data is given within framework
+	 */
 	public GOAnnotationTag(String taxon, String tag_name, Set<String> positive_GO_terms, Set<String> negative_GO_terms, boolean include_IEA) {
 		this.taxon = taxon;
 		this.tag_name = tag_name;
@@ -21,6 +26,37 @@ public class GOAnnotationTag {
 		this.include_IEA = include_IEA;
 		
 		this.retrieveAndProcessData();
+	}
+	
+	/*
+	 * Constructor if data is given from a string (GOAnnotator file)
+	 */
+	public GOAnnotationTag(String data_string) {
+		String[] data = data_string.trim().split("\t");
+		this.taxon = data[0];
+		this.tag_name = data[1];
+		
+		this.positive_GO_terms = new HashSet<>();
+		for (String GO_term:data[2].split(","))
+			this.positive_GO_terms.add(GO_term);
+		
+		this.negative_GO_terms = new HashSet<>();
+		for (String GO_term:data[3].split(","))
+			this.negative_GO_terms.add(GO_term);
+		
+		if (data[4].equals("IEA"))
+			this.include_IEA = true;
+		else
+			this.include_IEA = false;
+		
+		for (String protein:data[5].split(","))
+			this.positive_proteins.add(protein);
+		
+		for (String protein:data[6].split(","))
+			this.negative_proteins.add(protein);
+		
+		for (String protein:data[7].split(","))
+			this.mixed_proteins.add(protein);
 	}
 	
 	/**
@@ -39,6 +75,29 @@ public class GOAnnotationTag {
 		this.negative_proteins.removeAll(mixed_proteins);
 	}
 
+	/**
+	 * Returns tab-separated string representation of all data
+	 * @return
+	 */
+	public String getDataString() {
+		List<String> to_string = new LinkedList<>();
+		to_string.add(this.taxon);
+		to_string.add(this.tag_name);
+		to_string.add(String.join(",", this.positive_GO_terms));
+		to_string.add(String.join(",", this.negative_GO_terms));
+		
+		if (this.include_IEA)
+			to_string.add("IEA");
+		else
+			to_string.add("no IEA");
+		
+		to_string.add(String.join(",", this.positive_proteins));
+		to_string.add(String.join(",", this.negative_proteins));
+		to_string.add(String.join(",", this.mixed_proteins));
+		
+		return String.join("\t", to_string);
+	}
+	
 	/**
 	 * Return taxon of organism associated with retrieved proteins
 	 * @return
