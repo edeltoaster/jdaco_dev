@@ -1,6 +1,7 @@
 package standalone_tools;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import framework.ConstructedNetworks;
@@ -59,7 +60,7 @@ public class JDACO_classic {
 		System.out.println("using Ensembl's '"+networks.getDB()+"' data.");
 		System.out.println("");
 		System.out.flush();
-		HashSet<String> seed = Utilities.readEntryFile(seed_protein_file);
+		Set<String> seed = Utilities.readEntryFile(seed_protein_file);
 		
 		// initialize calculation and set parameters
 		DACO daco = new DACO(networks, threads, max_depth, pair_threshold, prob_threshold, System.out);

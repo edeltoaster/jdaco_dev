@@ -36,12 +36,49 @@ public class Utilities {
 	
 	
 	/**
-	 * Reads text file line by line with, for example, proteins (also works for .gz)
+	 * Reads text file line by line and stores as a set (also works for .gz)
 	 * @param in_file
 	 * @return entry per line
 	 */
-	public static HashSet<String> readEntryFile(String in_file) {
+	public static Set<String> readEntryFile(String in_file) {
 		HashSet<String> input = new HashSet<>();
+		BufferedReader in = null;
+		try {
+			if (in_file.endsWith(".gz") || in_file.endsWith(".gzip"))
+				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(in_file))));
+			else
+				in = new BufferedReader(new FileReader(in_file));
+			
+			while (in.ready()) {
+				String line = in.readLine();
+				if (line.startsWith("#"))
+					continue;
+				input.add(line.trim());
+			}
+			
+		} catch (Exception e) {
+			if (e instanceof FileNotFoundException)
+				System.err.println("Problem while opening file " + in_file + ".");
+			else
+				System.err.println("Problem while parsing file " + in_file + ".");
+		} finally {
+			try {
+				in.close();
+			} catch (Exception e) {
+				// not helpful to have any output here
+			}
+		}
+		
+		return input;
+	}
+	
+	/**
+	 * Reads text file line by line and retains order (also works for .gz)
+	 * @param in_file
+	 * @return entry per line
+	 */
+	public static List<String> readFile(String in_file) {
+		List<String> input = new LinkedList<String>();
 		BufferedReader in = null;
 		try {
 			if (in_file.endsWith(".gz") || in_file.endsWith(".gzip"))

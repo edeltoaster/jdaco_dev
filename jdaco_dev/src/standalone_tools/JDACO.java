@@ -2,6 +2,7 @@ package standalone_tools;
 
 import java.io.PrintStream;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import framework.DACO;
@@ -22,7 +23,7 @@ public class JDACO {
 	private static double percentile = 5;
 	private static PPIN ppin;
 	private static DDIN ddin;
-	private static HashSet<String> seed;
+	private static Set<String> seed;
 	private static double pair_threshold = -1.0;
 	private static double prob_threshold = -1.0;
 	private static PrintStream out = System.out;

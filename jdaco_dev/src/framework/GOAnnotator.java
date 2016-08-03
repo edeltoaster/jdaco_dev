@@ -7,10 +7,21 @@ public class GOAnnotator {
 	private final String taxon;
 	List<GOAnnotationTag> tags = new LinkedList<>();
 	
-	public GOAnnotator(String taxon) {
+	/*
+	 * Constructor to load definition data from file
+	 */
+	public GOAnnotator(String taxon, String file) {
 		this.taxon = taxon;
+		Utilities.readFile(file);
 	}
 	
+	/*
+	 * Constructor to load old GOAnnotator object from file
+	 */
+	public GOAnnotator(String file) {
+		Utilities.readFile(file);
+		this.taxon = "";
+	}
 	
 	/**
 	 * Return taxon of organism associated with retrieved data
