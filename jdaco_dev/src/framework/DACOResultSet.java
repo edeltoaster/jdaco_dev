@@ -208,17 +208,26 @@ public class DACOResultSet {
 	}
 	
 	public HashSet<HashSet<String>> getResult() {
-		return result;
+		return this.result;
 	}
 	
 	public Set<String> getAbundantSeedProteins() {
-		return abundant_seed_poteins;
+		return this.abundant_seed_poteins;
 	}
 
 	public Map<HashSet<String>, LinkedList<HashSet<String>>> getSeedToComplexMap() {
-		return seed_to_complex_map;
+		return this.seed_to_complex_map;
 	}
-
+	
+	public Map<Set<String>, List<Set<String>>> getGeneralSeedToComplexMap() {
+		Map<Set<String>, List<Set<String>>> temp = new HashMap<>();
+		for (Set<String> seed_proteins:this.seed_to_complex_map.keySet()) {
+			temp.put(seed_proteins, new LinkedList<Set<String>>());
+			temp.get(seed_proteins).addAll(this.seed_to_complex_map.get(seed_proteins));
+		}
+		return temp;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

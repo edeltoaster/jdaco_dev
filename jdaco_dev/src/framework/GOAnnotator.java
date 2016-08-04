@@ -3,6 +3,7 @@ package framework;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class GOAnnotator {
 	private String taxon = "not set";
@@ -72,7 +73,7 @@ public class GOAnnotator {
 	 * Utilities
 	 */
 	
-	public String rateProteins(Collection<String> query_proteins) {
+	public String rateProteins(Set<String> query_proteins) {
 		List<String> attributes = new LinkedList<>();
 		
 		for (GOAnnotationTag tag:this.tags) {
@@ -90,6 +91,36 @@ public class GOAnnotator {
 			}
 			else {
 				out += "!(" + occ[0] + "," + occ[1] + "," + occ[2] + ")";
+			}
+			
+			attributes.add(out);
+		}
+		
+		return String.join(",", attributes);
+	}
+	
+	public String rateListsOfProteins(List<Set<String>> query_sets) {
+		List<String> attributes = new LinkedList<>();
+		
+		for (GOAnnotationTag tag:this.tags) {
+			
+			String out = tag.getTagName();
+			
+			for (Collection<String> query_proteins:query_sets) {
+				int[] occ = tag.countProteins(query_proteins);
+				
+				if (occ[0] > 0 && occ[1] == 0) {
+					out += "+";
+				}
+				else if (occ[0] == 0 && occ[1] > 0) {
+					out += "-";
+				}
+				else if (occ[0] == 0 && occ[1] == 0) {
+					out += "/";
+				}
+				else {
+					out += "!(" + occ[0] + "," + occ[1] + "," + occ[2] + ")";
+				}
 			}
 			
 			attributes.add(out);

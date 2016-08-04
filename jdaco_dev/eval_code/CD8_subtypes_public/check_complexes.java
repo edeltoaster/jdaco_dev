@@ -37,10 +37,7 @@ public class check_complexes {
 		for (String sample1:results.keySet()) {
 			DACOResultSet daco_complexes = results.get(sample1);
 			for (HashSet<String> tfs:daco_complexes.getSeedToComplexMap().keySet()) {
-				for (HashSet<String> complex:daco_complexes.getSeedToComplexMap().get(tfs)) {
-					
-					System.out.println(sample1 + " : " + tfs + " -> " + complex + " : " + goa.rateProteins(complex));
-				}
+				System.out.println(sample1 + " : " + tfs + " -> " + goa.rateListsOfProteins( daco_complexes.getGeneralSeedToComplexMap().get(tfs)));
 			}
 		}
 	}
