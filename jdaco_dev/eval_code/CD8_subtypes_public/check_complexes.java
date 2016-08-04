@@ -3,10 +3,12 @@ package CD8_subtypes_public;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import framework.DACOResultSet;
+import framework.GOAnnotator;
 import framework.Utilities;
 
 
@@ -26,9 +28,20 @@ public class check_complexes {
 			results.put(sample, new DACOResultSet(f.getAbsolutePath(), seed));
 		}
 		
-		for (String sample1:results.keySet())
-			for (String sample2:results.keySet()) {
-				System.out.println(sample1 + " / " + sample2 + " : " + results.get(sample1).getComplexSimilarity(results.get(sample2)) + " " + results.get(sample1).getSeedVariantSimilarity(results.get(sample2)));
+//		for (String sample1:results.keySet())
+//			for (String sample2:results.keySet()) {
+//				System.out.println(sample1 + " / " + sample2 + " : " + results.get(sample1).getComplexSimilarity(results.get(sample2)) + " " + results.get(sample1).getSeedVariantSimilarity(results.get(sample2)));
+//			}
+		
+		GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
+		for (String sample1:results.keySet()) {
+			DACOResultSet daco_complexes = results.get(sample1);
+			for (HashSet<String> tfs:daco_complexes.getSeedToComplexMap().keySet()) {
+				for (HashSet<String> complex:daco_complexes.getSeedToComplexMap().get(tfs)) {
+					
+					System.out.println(sample1 + " : " + tfs + " -> " + complex + " : " + goa.rateProteins(complex));
+				}
 			}
+		}
 	}
 }

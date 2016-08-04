@@ -1,5 +1,6 @@
 package framework;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,6 +98,34 @@ public class GOAnnotationTag {
 		this.negative_proteins.removeAll(mixed_proteins);
 	}
 
+	
+	/*
+	 * Utilities
+	 */
+	
+	/**
+	 * Count and return occurrences of query proteins in [positive, negative, mixed] sets.
+	 * @param query_proteins
+	 * @return
+	 */
+	public int[] countProteins(Collection<String> query_proteins) {
+		int[] occurrences = new int[3];
+		
+		Set<String> temp = new HashSet<>(query_proteins);
+		temp.retainAll(this.positive_proteins);
+		occurrences[0] = temp.size();
+		
+		temp = new HashSet<>(query_proteins);
+		temp.retainAll(this.negative_proteins);
+		occurrences[1] = temp.size();
+		
+		temp = new HashSet<>(query_proteins);
+		temp.retainAll(this.mixed_proteins);
+		occurrences[2] = temp.size();
+		
+		return occurrences;
+	}
+	
 	/**
 	 * Returns space-separated string representation of all data
 	 * @return

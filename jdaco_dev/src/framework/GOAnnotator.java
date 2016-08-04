@@ -1,5 +1,6 @@
 package framework;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -64,6 +65,37 @@ public class GOAnnotator {
 			this.taxon = tags.get(0).getTaxon();
 			this.include_IEA = tags.get(0).IncludesIEA();
 		}
+	}
+	
+	
+	/*
+	 * Utilities
+	 */
+	
+	public String rateProteins(Collection<String> query_proteins) {
+		List<String> attributes = new LinkedList<>();
+		
+		for (GOAnnotationTag tag:this.tags) {
+			
+			int[] occ = tag.countProteins(query_proteins);
+			String out = tag.getTagName();
+			if (occ[0] > 0 && occ[1] == 0) {
+				out += "+";
+			}
+			else if (occ[0] == 0 && occ[1] > 0) {
+				out += "-";
+			}
+			else if (occ[0] == 0 && occ[1] == 0) {
+				out += "/";
+			}
+			else {
+				out += "!(" + occ[0] + "," + occ[1] + "," + occ[2] + ")";
+			}
+			
+			attributes.add(out);
+		}
+		
+		return String.join(",", attributes);
 	}
 	
 	/**
