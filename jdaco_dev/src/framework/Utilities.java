@@ -37,6 +37,7 @@ public class Utilities {
 	
 	/**
 	 * Reads text file line by line and stores as a set (also works for .gz)
+	 * lines are trimmed and comment lines marked with # are discarded
 	 * @param in_file
 	 * @return entry per line
 	 */
@@ -73,7 +74,8 @@ public class Utilities {
 	}
 	
 	/**
-	 * Reads text file line by line and retains order (also works for .gz)
+	 * Reads text file line by line and retains order (also works for .gz),
+	 * lines are trimmed and comment lines marked with # are discarded
 	 * @param in_file
 	 * @return entry per line
 	 */

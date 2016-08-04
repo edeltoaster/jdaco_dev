@@ -29,10 +29,32 @@ public class GOAnnotationTag {
 	}
 	
 	/*
+	 * Constructor if data is given from a string (definition file)
+	 */
+	public GOAnnotationTag(String taxon, boolean include_IEA, String data_string) {
+		this.taxon = taxon;
+		this.include_IEA = include_IEA;
+		
+		String[] data = data_string.trim().split("\\s+");
+		this.tag_name = data[0];
+		
+		this.positive_GO_terms = new HashSet<>();
+		for (String GO_term:data[1].split(","))
+			this.positive_GO_terms.add(GO_term);
+		
+		this.negative_GO_terms = new HashSet<>();
+		for (String GO_term:data[2].split(","))
+			this.negative_GO_terms.add(GO_term);
+		
+		this.retrieveAndProcessData();
+	}
+	
+	/*
 	 * Constructor if data is given from a string (GOAnnotator file)
 	 */
 	public GOAnnotationTag(String data_string) {
-		String[] data = data_string.trim().split("\t");
+		String[] data = data_string.trim().split("\\s+");
+		
 		this.taxon = data[0];
 		this.tag_name = data[1];
 		
@@ -76,7 +98,7 @@ public class GOAnnotationTag {
 	}
 
 	/**
-	 * Returns tab-separated string representation of all data
+	 * Returns space-separated string representation of all data
 	 * @return
 	 */
 	public String getDataString() {
@@ -95,7 +117,7 @@ public class GOAnnotationTag {
 		to_string.add(String.join(",", this.negative_proteins));
 		to_string.add(String.join(",", this.mixed_proteins));
 		
-		return String.join("\t", to_string);
+		return String.join(" ", to_string);
 	}
 	
 	/**

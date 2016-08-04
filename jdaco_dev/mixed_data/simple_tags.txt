@@ -1,0 +1,4 @@
+regulation GO:0045944 GO:0000122
+coregulation GO:0003713 GO:0003714
+chromatin GO:0016573,GO:0071557 GO:0016575,GO:0070734
+# according to "Mapping and analysis of chromatin state dynamics in nine human cell types" and the DACO paper
