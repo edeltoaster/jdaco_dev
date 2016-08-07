@@ -603,6 +603,26 @@ public class DataQuery {
 	}
 	
 	/**
+	 * Translates collection of human UniProt accessions to a list of HGNC gene symbols
+	 * @param input
+	 * @return
+	 */
+	public static List<String> batchHGNCProteinsGenes(Collection<String> input) {
+		List<String[]> HGNC_map = DataQuery.getHGNCProteinsGenes();
+		Map<String, String> up_hgnc = new HashMap<String, String>();
+		for (String[] s:HGNC_map) {
+			up_hgnc.put(s[1], s[0]);
+		}
+		
+		List<String> output = new LinkedList<String>();
+		for (String in:input)
+			if (up_hgnc.containsKey(in))
+				output.add(up_hgnc.get(in));
+		
+		return output;
+	}
+	
+	/**
 	 * Queries Uniprot biomart to determine organism, then get mapping to ensembl
 	 * @return
 	 */

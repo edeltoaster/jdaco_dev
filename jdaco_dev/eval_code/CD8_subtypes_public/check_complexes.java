@@ -4,10 +4,14 @@ package CD8_subtypes_public;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import framework.BindingDataHandler;
 import framework.DACOResultSet;
+import framework.DataQuery;
 import framework.GOAnnotator;
 import framework.Utilities;
 
@@ -33,12 +37,52 @@ public class check_complexes {
 //				System.out.println(sample1 + " / " + sample2 + " : " + results.get(sample1).getComplexSimilarity(results.get(sample2)) + " " + results.get(sample1).getSeedVariantSimilarity(results.get(sample2)));
 //			}
 		
-		GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
-		for (String sample1:results.keySet()) {
-			DACOResultSet daco_complexes = results.get(sample1);
-			for (HashSet<String> tfs:daco_complexes.getSeedToComplexMap().keySet()) {
-				System.out.println(sample1 + " : " + tfs + " -> " + goa.rateListsOfProteins( daco_complexes.getGeneralSeedToComplexMap().get(tfs)));
+		// gather what is found in all samples of a cell type
+		Map<String, Set<Set<String>>> exclusive_TFComb = new HashMap<>();
+		for (String sample:results.keySet()) {
+			String cell_type = sample.split("_")[1];
+			if (exclusive_TFComb.containsKey(cell_type))
+				exclusive_TFComb.get(cell_type).retainAll(results.get(sample).getGeneralSeedToComplexMap().keySet());
+			else
+				exclusive_TFComb.put(cell_type, new HashSet<Set<String>>(results.get(sample).getGeneralSeedToComplexMap().keySet()));
+		}
+		
+		// remove what is found in any other cell type
+		for (String sample:results.keySet()) {
+			String cell_type = sample.split("_")[1];
+			for (String cell_type2:exclusive_TFComb.keySet()) {
+				if (cell_type.equals(cell_type2))
+					continue;
+				exclusive_TFComb.get(cell_type2).removeAll(results.get(sample).getGeneralSeedToComplexMap().keySet());
 			}
 		}
+		
+		// check exclusive complexes
+		GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz");
+		for (String cell_type:exclusive_TFComb.keySet()) {
+			System.out.println(cell_type + " " + exclusive_TFComb.get(cell_type).size());
+			
+			for (Set<String> excl_TFC:exclusive_TFComb.get(cell_type)) {
+				
+				// gather relevant TF combinations from all samples
+				List<Set<String>> complexes = new LinkedList<>();
+				for (String sample:results.keySet()) {
+					String cell_type2 = sample.split("_")[1];
+					if (cell_type2.equals(cell_type)) 
+						complexes.addAll(results.get(sample).getSeedToComplexMap().get(excl_TFC));
+				}
+				
+				// annotate with function
+				List<List<String>> hgnc_complexes = new LinkedList<>();
+				for (Set<String> compl:complexes)
+					hgnc_complexes.add(DataQuery.batchHGNCProteinsGenes(compl));
+				System.out.println(DataQuery.batchHGNCProteinsGenes(excl_TFC) + " -> " + hgnc_complexes + " : " + goa.rateListsOfProteins(complexes));
+				
+				// annotate targets
+				System.out.println("shared targets: " + bdh.getCommonTargets(excl_TFC).size() + ":" + DataQuery.batchHGNCProteinsGenes(bdh.getCommonTargets(excl_TFC)));
+			}
+		}
+
 	}
 }
