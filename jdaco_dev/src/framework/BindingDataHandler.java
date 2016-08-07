@@ -27,8 +27,8 @@ public class BindingDataHandler {
 	
 	/**
 	 * Unrestricted constructor:
-	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there)
-	 * all proteins (and associated genes) are assumed to be in UniProt accs.
+	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there).
+	 * All proteins (and associated genes) are assumed to be in UniProt accs.
 	 * @param fimo_outputfile
 	 */
 	public BindingDataHandler(String fimo_outputfile) {
@@ -37,12 +37,23 @@ public class BindingDataHandler {
 	
 	/**
 	 * Constructor with p-value threshold:
-	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there)
-	 * all proteins (and associated genes) are assumed to be in UniProt accs.
+	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there).
+	 * All proteins (and associated genes) are assumed to be in UniProt accs.
 	 * @param fimo_outputfile
 	 */
 	public BindingDataHandler(String fimo_outputfile, double p_threshold) {
 		this.readFIMO(fimo_outputfile, null, p_threshold, null);
+	}
+	
+	/**
+	 * Constructor with p-value threshold:
+	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there)
+	 * but only care for the TFs in a given set.
+	 * All proteins (and associated genes) are assumed to be in UniProt accs.
+	 * @param fimo_outputfile
+	 */
+	public BindingDataHandler(String fimo_outputfile, double p_threshold, Collection<String> expressed_TFs) {
+		this.readFIMO(fimo_outputfile, expressed_TFs, p_threshold, null);
 	}
 	
 	/**

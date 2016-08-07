@@ -57,9 +57,16 @@ public class check_complexes {
 			}
 		}
 		
+		// prune down to keep binding data smaller
+		Set<String> TFC_left = new HashSet<>();
+		for (Set<Set<String>> excl_TFCs:exclusive_TFComb.values()) {
+			for (Set<String> TFC: excl_TFCs)
+				TFC_left.addAll(TFC);
+		}
+		
 		// check exclusive complexes
 		GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz");
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", 1.0, TFC_left);
 		for (String cell_type:exclusive_TFComb.keySet()) {
 			System.out.println(cell_type + " " + exclusive_TFComb.get(cell_type).size());
 			
