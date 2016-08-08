@@ -14,7 +14,7 @@ import framework.StrPair;
 public class build_diff_networks {
 	
 	static double FDR = 0.05;
-	static String network_folder = "/Users/tho/Dropbox/Work/projects/CD8_subsets_public/CD8_networks/";
+	static String network_folder = "/Users/tho/Dropbox/Work/projects/CD8_subsets_public/CD8_networks_0.0/";
 	static String results_root = "/Users/tho/Desktop/N_MNP_diffnets/";
 	
 	public static void process(String network_folder, String results_folder) {
