@@ -308,13 +308,14 @@ public class NetworkBuilder {
 		
 		for (String protein:disconnected_proteins) {
 			
+			// decay transcripts are NOT removed from the protein->transcript map
 			if (protein_to_domains.containsKey(protein)) {
 				for (String domain:protein_to_domains.get(protein))
 					domain_to_protein.remove(domain);
 				protein_to_domains.remove(protein);
+				protein_to_assumed_transcript.remove(protein);
 			}
 			
-			protein_to_assumed_transcript.remove(protein);
 		}
 		
 		

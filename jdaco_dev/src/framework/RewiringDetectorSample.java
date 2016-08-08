@@ -18,6 +18,7 @@ public class RewiringDetectorSample {
 	// sophisticated part of domain interaction data
 	private final Map<String, Set<String>> protein_to_domains; // set of non-FB domains per protein in this network, not in there if no non-FB domain
 	private final Map<String, Map<String, Set<String>>> protein_to_protein_by_domains; // one-sided reachable protein2s over given domains in protein1, not in there if no non-FB domain
+	private final Set<String> decay_proteins;
 	
 	/**
 	 * Constructor, builds objects from files
@@ -77,6 +78,10 @@ public class RewiringDetectorSample {
 			else
 				this.protein_to_assumed_transcript.put(spl[0], "unknown_transcript"); // NMD transcripts could bring up such artefacts with older versions of PPIXpress
 		}
+		
+		// store decay transcripts: those that are in protein->transcript but have not even annotated FB domains
+		this.decay_proteins = new HashSet<String>(this.protein_to_assumed_transcript.keySet());
+		this.decay_proteins.removeAll(ddin.getProtein_to_domains().keySet());
 	}
 	
 	/**
@@ -111,6 +116,13 @@ public class RewiringDetectorSample {
 		return protein_to_protein_by_domains;
 	}
 	
+	/**
+	 * Returns all proteins that are not abundant due to known post-translational regulation on their most abundant transcript
+	 * @return
+	 */
+	public Set<String> getDecayProteins() {
+		return decay_proteins;
+	}
 	
 	/*
 	 * General purpose helpers

@@ -78,10 +78,11 @@ public class build_networks {
 		
 		new File(network_folder_pre).mkdir();
 		
-		for (double thr = 0.0; thr <= 1.0; thr += 0.01) {
-			thr = Math.round(thr * 100.0) / 100.0;
-			process(thr);
-		}
+//		for (double thr = 0.0; thr <= 1.0; thr += 0.01) {
+//			thr = Math.round(thr * 100.0) / 100.0;
+//			process(thr);
+//		}
+		process(0.0);
 		
 	}
 }

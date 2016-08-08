@@ -325,6 +325,8 @@ public class RewiringDetector {
 		Map<String, Set<String>> pd2 = group2.get(sample2).getProteinToUsedDomains();
 		Map<String, Map<String, Set<String>>> ppd1 = group1.get(sample1).getProteinToProteinByDomains();
 		Map<String, Map<String, Set<String>>> ppd2 = group2.get(sample2).getProteinToProteinByDomains();
+		Set<String> decayed1 = group1.get(sample1).getDecayProteins();
+		Set<String> decayed2 = group2.get(sample2).getDecayProteins();
 		
 		List<String> reasons = new LinkedList<>();
 		
@@ -366,6 +368,8 @@ public class RewiringDetector {
 			// check details: filter for change
 			boolean has_domains1 = pd1.containsKey(p1);
 			boolean has_domains2 = pd2.containsKey(p1);
+			boolean is_decay1 = decayed1.contains(p1);
+			boolean is_decay2 = decayed2.contains(p1);
 			
 			// if no non-FB domains in neither sample: switch cannot be relevant
 			if (has_domains1 || has_domains2) {
@@ -411,6 +415,12 @@ public class RewiringDetector {
 					
 				} // end of relevant domain check loop
 			} // end of domain annotation check loop
+			
+			// switch could be due to decay in one sample
+			if (is_decay1 || is_decay2) {
+				reasons.add( p1 + "(" + m1.get(p1) + "->" + m2.get(p1) + ")");
+			}
+			
 		} // end check for splicing of p1
 		
 		// analogous check for relevant splicing of p2: only check if p2 in both samples and Ensembl id changed
@@ -419,6 +429,8 @@ public class RewiringDetector {
 			// check details: filter for change
 			boolean has_domains1 = pd1.containsKey(p2);
 			boolean has_domains2 = pd2.containsKey(p2);
+			boolean is_decay1 = decayed1.contains(p2);
+			boolean is_decay2 = decayed2.contains(p2);
 			
 			// if no non-FB domains in neither sample: switch cannot be relevant
 			if (has_domains1 || has_domains2) {
@@ -464,6 +476,12 @@ public class RewiringDetector {
 					
 				} // end of relevant domain check loop
 			} // end of domain annotation check loop
+			
+			// switch could be due to decay in one sample
+			if (is_decay1 || is_decay2) {
+				reasons.add( p2 + "(" + m1.get(p2) + "->" + m2.get(p2) + ")");
+			}
+			
 		} // end check for splicing of p2
 
 		return String.join("/", reasons);
