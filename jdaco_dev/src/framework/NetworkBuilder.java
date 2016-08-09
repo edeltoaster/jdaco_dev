@@ -201,7 +201,7 @@ public class NetworkBuilder {
 	 * @param protein_to_assumed_transcript
 	 * @return
 	 */
-	public ConstructedNetworks constructAssociatedNetworksFromTranscriptMap(Map<String, String> protein_to_assumed_transcript, boolean remove_decayed) {
+	public ConstructedNetworks constructAssociatedNetworksFromTranscriptMap(Map<String, String> protein_to_assumed_transcript, Map<String, Float> original_transcript_abundance, boolean remove_decayed) {
 		// map that stores p1<->p2
 		HashMap<String, Set<String>> ppi_partners = new HashMap<>();
 		// maps that store DDI-stuff
@@ -338,7 +338,14 @@ public class NetworkBuilder {
 		// convert data to right format
 		DDIN constructed_ddin = new DDIN(ddis, protein_to_domains, domain_to_protein);
 		
-		return new ConstructedNetworks(constructed_ppin, constructed_ddin, protein_to_assumed_transcript, this.organism_database, this.isoform_based);
+		// return including abundance data (if given) or without
+		if (original_transcript_abundance != null) {
+			Map<String, Float> transcript_abundance = new HashMap<>(original_transcript_abundance);
+			transcript_abundance.keySet().retainAll(protein_to_assumed_transcript.values());
+			return new ConstructedNetworks(constructed_ppin, constructed_ddin, protein_to_assumed_transcript, transcript_abundance, this.organism_database, this.isoform_based);
+		}
+		else
+			return new ConstructedNetworks(constructed_ppin, constructed_ddin, protein_to_assumed_transcript, this.organism_database, this.isoform_based);
 	}
 	
 	/**
@@ -363,7 +370,7 @@ public class NetworkBuilder {
 			}
 		}
 		
-		return this.constructAssociatedNetworksFromTranscriptMap(major_transcript, remove_decayed);
+		return this.constructAssociatedNetworksFromTranscriptMap(major_transcript, transcript_abundance, remove_decayed);
 	}
 	
 	/**
@@ -383,7 +390,7 @@ public class NetworkBuilder {
 			relevant_isoforms.put(protein, isoform.get(protein));
 		}
 
-		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, remove_decayed);
+		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, null, remove_decayed);
 	}
 	
 	/**
@@ -420,7 +427,7 @@ public class NetworkBuilder {
 		}
 		
 
-		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, remove_decayed);
+		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, null, remove_decayed);
 	}
 
 	/**

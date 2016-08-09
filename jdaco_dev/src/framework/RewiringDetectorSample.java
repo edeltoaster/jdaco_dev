@@ -73,7 +73,7 @@ public class RewiringDetectorSample {
 		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
 			String[] spl = s.trim().split("\\s+");
 			
-			if (spl.length == 2)
+			if (spl.length >= 2)// to account for newer protein->assumed transcript files including expression data
 				this.protein_to_assumed_transcript.put(spl[0], spl[1]); 
 			else
 				this.protein_to_assumed_transcript.put(spl[0], "unknown_transcript"); // NMD transcripts could bring up such artefacts with older versions of PPIXpress

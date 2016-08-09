@@ -14,11 +14,12 @@ public class ConstructedNetworks {
 	private final PPIN ppi;
 	private final DDIN ddi;
 	private final Map<String, String> protein_to_assumed_transcript;
+	private Map<String, Float> transcript_abundance = null;
 	private final String db;
 	private final boolean isoform_based;
 	
 	/**
-	 * Constructor used by NetworkBuilder
+	 * Constructor used by NetworkBuilder (no abundance information)
 	 * @param ppi
 	 * @param ddi
 	 * @param protein_to_assumed_isoform
@@ -29,6 +30,24 @@ public class ConstructedNetworks {
 		this.ppi = ppi;
 		this.ddi = ddi;
 		this.protein_to_assumed_transcript = protein_to_assumed_transcript;
+		this.db = db;
+		this.isoform_based = isoform_based;
+	}
+	
+	/**
+	 * Constructor used by NetworkBuilder (with abundance information)
+	 * @param ppi
+	 * @param ddi
+	 * @param protein_to_assumed_isoform
+	 * @param transcript_abundance
+	 * @param db
+	 * @param isoform_based
+	 */
+	public ConstructedNetworks(PPIN ppi, DDIN ddi, Map<String, String> protein_to_assumed_transcript, Map<String, Float> transcript_abundance, String db, boolean isoform_based) {
+		this.ppi = ppi;
+		this.ddi = ddi;
+		this.protein_to_assumed_transcript = protein_to_assumed_transcript;
+		this.transcript_abundance = transcript_abundance;
 		this.db = db;
 		this.isoform_based = isoform_based;
 	}
@@ -46,9 +65,20 @@ public class ConstructedNetworks {
 		this.ddi = new DDIN(ddi_file);
 		
 		this.protein_to_assumed_transcript = new HashMap<String, String>(1024);
+		boolean check = true;
 		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
 			String[] spl = s.trim().split("\\s+");
 			this.protein_to_assumed_transcript.put(spl[0], spl[1]);
+			
+			// depending on information content of file
+			if (check) {
+				check = false;
+				if (spl.length == 3)
+					this.transcript_abundance = new HashMap<String, Float>(1024);
+			}
+			
+			if (spl.length == 3)
+				this.transcript_abundance.put(spl[1], Float.parseFloat(spl[2]));
 		}
 		
 		this.db = db;
@@ -78,7 +108,15 @@ public class ConstructedNetworks {
 	public Map<String, String> getProteinToAssumedTranscriptMap() {
 		return this.protein_to_assumed_transcript;
 	}
-
+	
+	/**
+	 * Returns a map of most abundant transcripts per protein and their abundance, null if not stored
+	 * @return
+	 */
+	public Map<String, Float> getTranscriptAbundanceMap() {
+		return this.transcript_abundance;
+	}
+	
 	/**
 	 * Writes the protein->transcript mapping to a file for later usage
 	 * @param out_file
@@ -86,8 +124,14 @@ public class ConstructedNetworks {
 	public void writeProteinToAssumedTranscriptMap(String out_file) {
 		List<String> to_write = new LinkedList<>();
 		
-		for (String protein:this.protein_to_assumed_transcript.keySet())
-			to_write.add( protein + " " + this.protein_to_assumed_transcript.get(protein));
+		for (String protein:this.protein_to_assumed_transcript.keySet()) {
+			String transcript = this.protein_to_assumed_transcript.get(protein);
+			
+			if (this.transcript_abundance != null)
+				to_write.add( protein + " " + transcript + " " + this.transcript_abundance.get(transcript) );
+			else
+				to_write.add( protein + " " + transcript );
+		}
 		
 		Utilities.writeEntries(to_write, out_file);
 	}
@@ -136,6 +180,7 @@ public class ConstructedNetworks {
 		result = prime * result + ((ppi == null) ? 0 : ppi.hashCode());
 		result = prime * result
 				+ ((protein_to_assumed_transcript == null) ? 0 : protein_to_assumed_transcript.hashCode());
+		result = prime * result + ((transcript_abundance == null) ? 0 : transcript_abundance.hashCode());
 		return result;
 	}
 
@@ -170,6 +215,12 @@ public class ConstructedNetworks {
 				return false;
 		} else if (!protein_to_assumed_transcript.equals(other.protein_to_assumed_transcript))
 			return false;
+		if (transcript_abundance == null) {
+			if (other.transcript_abundance != null)
+				return false;
+		} else if (!transcript_abundance.equals(other.transcript_abundance))
+			return false;
 		return true;
 	}
+	
 }

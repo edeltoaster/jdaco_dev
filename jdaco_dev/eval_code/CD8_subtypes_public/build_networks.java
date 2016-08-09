@@ -62,6 +62,7 @@ public class build_networks {
 			
 			Map<String, Float> transcr_expr = TranscriptAbundanceReader.readKallistoFile(path, TPM_threshold);
 			
+			System.out.println("Processing" + path);
 			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(transcr_expr, true);
 			cn.getPPIN().writePPIN(out_path + file_name + "_ppin.txt.gz");
 			cn.getDDIN().writeDDIN(out_path + file_name + "_ddin.txt.gz");
@@ -73,7 +74,7 @@ public class build_networks {
 	public static void main(String[] args) {
 		//loadAndStoreReferenceNetwork("mixed_data/human_mentha_8_jul.txt.gz");
 		//System.exit(0);
-		
+		DataQuery.enforceSpecificEnsemblRelease("84");
 		preprocess();
 		
 		new File(network_folder_pre).mkdir();

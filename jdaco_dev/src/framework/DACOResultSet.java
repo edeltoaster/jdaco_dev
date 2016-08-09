@@ -137,7 +137,7 @@ public class DACOResultSet {
 	}
 	
 	
-	public double getComplexSimilarity(DACOResultSet result_set2) {
+	public double getComplexSetsSimilarity(DACOResultSet result_set2) {
 		Set<HashSet<String>> result2 = result_set2.getResult();
 		
 		double sum = 0.0;
@@ -172,7 +172,7 @@ public class DACOResultSet {
 		return sum / (this.result.size() + result2.size()); // similar to dice-similarity
 	}
 	
-	public double getSeedVariantSimilarity(DACOResultSet result_set2) {
+	public double getSeedVariantSetsSimilarity(DACOResultSet result_set2) {
 		Set<HashSet<String>> result2 = result_set2.getSeedToComplexMap().keySet();
 		
 		double sum = 0.0;
