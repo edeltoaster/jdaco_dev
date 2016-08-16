@@ -87,7 +87,9 @@ public class check_complexes {
 				System.out.println(DataQuery.batchHGNCProteinsGenes(excl_TFC) + " -> " +  hgnc_complexes.size() + " : " + goa.rateListsOfProteins(complexes));
 				
 				// annotate targets
-				System.out.println("shared targets: " + bdh.getCommonTargets(excl_TFC).size() + " restr. targets: " + bdh.getAdjacencyPossibilities(excl_TFC, -50, 50, false).size());
+				Set<String> targets = bdh.getAdjacencyPossibilities(excl_TFC, -50, 50, false);
+				System.out.println("shared targets: " + bdh.getCommonTargets(excl_TFC).size() + " restr. targets: " +targets.size());
+				//Utilities.writeEntries(targets, "/Users/tho/Desktop/allcomb_" + cell_type + "_" + String.join("-", DataQuery.batchHGNCProteinsGenes(excl_TFC)) + "_targets.txt");
 			}
 		}
 	}
@@ -157,7 +159,9 @@ public class check_complexes {
 				System.out.println(DataQuery.batchHGNCProteinsGenes(excl_TFC) + " -> " +  hgnc_complexes.size() + " : " + goa.rateListsOfProteins(complexes));
 				
 				// annotate targets
-				System.out.println("shared targets: " + bdh.getCommonTargets(excl_TFC).size() + " restr. targets: " + bdh.getAdjacencyPossibilities(excl_TFC, -50, 50, false).size());
+				Set<String> targets = bdh.getAdjacencyPossibilities(excl_TFC, -50, 50, false);
+				System.out.println("shared targets: " + bdh.getCommonTargets(excl_TFC).size() + " restr. targets: " +targets.size());
+				//Utilities.writeEntries(targets, "/Users/tho/Desktop/NMNP_" + cell_type + "_" + String.join("-", DataQuery.batchHGNCProteinsGenes(excl_TFC)) + "_targets.txt");
 			}
 		}
 	}
