@@ -73,7 +73,7 @@ public class GOAnnotator {
 	 * Utilities
 	 */
 	
-	public String rateProteins(Set<String> query_proteins) {
+	public String rateProteins(Collection<String> query_proteins) {
 		List<String> attributes = new LinkedList<>();
 		
 		for (GOAnnotationTag tag:this.tags) {
