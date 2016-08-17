@@ -141,6 +141,11 @@ public class DACOResultSet {
 	}
 	
 	
+	/**
+	 * Get Jaccard/Dice-similarity-like similary for complex sets
+	 * @param result_set2
+	 * @return
+	 */
 	public double getComplexSetsSimilarity(DACOResultSet result_set2) {
 		Set<HashSet<String>> result2 = result_set2.getResult();
 		
@@ -176,6 +181,11 @@ public class DACOResultSet {
 		return sum / (this.result.size() + result2.size()); // similar to dice-similarity
 	}
 	
+	/**
+	 * Get Jaccard/Dice-similarity-like similary for seed variants
+	 * @param result_set2
+	 * @return
+	 */
 	public double getSeedVariantSetsSimilarity(DACOResultSet result_set2) {
 		Set<HashSet<String>> result2 = result_set2.getSeedToComplexMap().keySet();
 		
@@ -210,6 +220,66 @@ public class DACOResultSet {
 		
 		return sum / (this.seed_to_complex_map.size() + result2.size()); // similar to dice-similarity
 	}
+	
+	
+	/*
+	 * Simple quantification
+	 */
+	
+	/**
+	 * Quantify each complex with the abundance of its least abundant member
+	 * @param protein_to_assumed_transcript
+	 * @param transcript_abundance
+	 * @return
+	 */
+	public Map<HashSet<String>, Float> getSimpleAbundanceOfComplexes(Map<String, String> protein_to_assumed_transcript, Map<String, Float> transcript_abundance) {
+		Map<HashSet<String>, Float> quantification_result = new HashMap<>();
+		
+		for (LinkedList<HashSet<String>> complexes:this.getSeedToComplexMap().values())
+			for (HashSet<String> complex:complexes) {
+				float min_abundance = Float.MAX_VALUE;
+				for (String protein:complex) {
+					float abundance = transcript_abundance.get(protein_to_assumed_transcript.get(protein));
+					if (abundance < min_abundance)
+						min_abundance = abundance;
+				}
+				quantification_result.put(complex, min_abundance);
+			}
+		
+		return quantification_result;
+	}
+	
+	/**
+	 * Quantify each complex with the abundance of its least abundant member
+	 * @param constructed_network
+	 * @return
+	 */
+	public Map<HashSet<String>, Float> getSimpleAbundanceOfComplexes(ConstructedNetworks constructed_network) {
+		return getSimpleAbundanceOfComplexes(constructed_network.getProteinToAssumedTranscriptMap(), constructed_network.getTranscriptAbundanceMap());
+	}
+	
+	/**
+	 * Quantify each complex with the abundance of its least abundant member
+	 * @param protein_to_assumed_transcript_file
+	 * @return
+	 */
+	public Map<HashSet<String>, Float> getSimpleAbundanceOfComplexes(String protein_to_assumed_transcript_file) {
+		Map<String, String> protein_to_assumed_transcript = new HashMap<String, String>(1024);
+		Map<String, Float> transcript_abundance = new HashMap<String, Float>(1024);
+		
+		for (String s:Utilities.readEntryFile(protein_to_assumed_transcript_file)) {
+			String[] spl = s.trim().split("\\s+");
+			protein_to_assumed_transcript.put(spl[0], spl[1]);
+			transcript_abundance.put(spl[1], Float.parseFloat(spl[2])); // assumes file that includes abundance values, error otherwise
+		}
+		
+		return getSimpleAbundanceOfComplexes(protein_to_assumed_transcript, transcript_abundance);
+	}
+	
+	
+	/*
+	 * getters
+	 */
 	
 	public HashSet<HashSet<String>> getResult() {
 		return this.result;
