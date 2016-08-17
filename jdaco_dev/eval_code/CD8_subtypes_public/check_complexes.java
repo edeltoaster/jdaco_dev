@@ -93,6 +93,8 @@ public class check_complexes {
 			}
 		}
 	}
+	
+	
 	public static void N_MNP_TFcombinations() {
 		System.out.println("N_MNP only, TF combinations only");
 		Map<String, DACOResultSet> results = new HashMap<>();
@@ -103,11 +105,6 @@ public class check_complexes {
 			if (cell_type.equals("N") || cell_type.equals("TMNP"))
 				results.put(sample, new DACOResultSet(f.getAbsolutePath(), seed));
 		}
-		
-//		for (String sample1:results.keySet())
-//			for (String sample2:results.keySet()) {
-//				System.out.println(sample1 + " / " + sample2 + " : " + results.get(sample1).getComplexSimilarity(results.get(sample2)) + " " + results.get(sample1).getSeedVariantSimilarity(results.get(sample2)));
-//			}
 		
 		// gather what is found in all samples of a cell type
 		Map<String, Set<Set<String>>> exclusive_TFComb = new HashMap<>();
