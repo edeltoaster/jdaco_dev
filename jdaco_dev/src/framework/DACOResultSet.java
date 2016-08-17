@@ -13,6 +13,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * Stores DACO results
+ * @author Thorsten Will
+ */
 public class DACOResultSet {
 	
 	private final HashSet<HashSet<String>> result;

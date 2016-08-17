@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 /**
  * Implementation of the network construction method PPIXpress
  * @author Thorsten Will

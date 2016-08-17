@@ -5,6 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Stores and prepares GO annotation data for a list of GOAnnotationTag-defined terms
+ * @author Thorsten Will
+ */
 public class GOAnnotator {
 	private String taxon = "not set";
 	private boolean include_IEA;

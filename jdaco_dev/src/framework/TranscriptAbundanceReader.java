@@ -14,6 +14,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * Helper class with parsers for plenty of file types describing expression data
+ * @author Thorsten Will
+ */
 public class TranscriptAbundanceReader {
 	
 	/**

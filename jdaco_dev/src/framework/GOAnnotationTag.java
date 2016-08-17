@@ -6,6 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Stores and processes GO annotation data for an individual term
+ * @author Thorsten Will
+ */
 public class GOAnnotationTag {
 	private final String taxon;
 	private final String tag_name;

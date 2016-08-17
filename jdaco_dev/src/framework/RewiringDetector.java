@@ -18,6 +18,10 @@ import java.util.concurrent.Future;
 import org.apache.commons.math3.stat.inference.AlternativeHypothesis;
 import org.apache.commons.math3.stat.inference.BinomialTest;
 
+/**
+ * Implementation of the differential network analysis method PPICompare
+ * @author Thorsten Will
+ */
 public class RewiringDetector {
 
 	private final int max_in_thread_iterations = 500;
