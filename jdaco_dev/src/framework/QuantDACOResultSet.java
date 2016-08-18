@@ -39,6 +39,14 @@ public class QuantDACOResultSet extends DACOResultSet {
 			this.transcript_abundance.put(transcript, (double) constructed_network.getTranscriptAbundanceMap().get(transcript));
 	}
 	
+	public QuantDACOResultSet(HashSet<HashSet<String>> results, Set<String> seed, Map<String, String> protein_to_assumed_transcript, Map<String, Float> transcript_abundance) {
+		super(results, seed);
+		this.protein_to_assumed_transcript = protein_to_assumed_transcript;
+		this.transcript_abundance = new HashMap<String, Double>(1024);
+		for (String transcript:transcript_abundance.keySet())
+			this.transcript_abundance.put(transcript, (double) transcript_abundance.get(transcript));
+	}
+	
 	private void readProteinTranscriptFile(String protein_to_assumed_transcript_file) {
 		this.protein_to_assumed_transcript = new HashMap<String, String>(1024);
 		this.transcript_abundance = new HashMap<String, Double>(1024);
@@ -52,7 +60,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 
 	
 	/*
-	 * functions
+	 * quantification functions
 	 */
 	
 	/**
@@ -62,16 +70,128 @@ public class QuantDACOResultSet extends DACOResultSet {
 	public Map<HashSet<String>, Double> getSimpleAbundanceOfComplexes() {
 		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
 		
-		for (LinkedList<HashSet<String>> complexes:this.getSeedToComplexMap().values())
-			for (HashSet<String> complex:complexes) {
-				double min_abundance = Double.MAX_VALUE;
-				for (String protein:complex) {
-					double abundance = this.transcript_abundance.get(this.protein_to_assumed_transcript.get(protein));
-					if (abundance < min_abundance)
-						min_abundance = abundance;
-				}
-				quantification_result.put(complex, min_abundance);
+		for (HashSet<String> complex:this.getResult()) {
+			double min_abundance = Double.MAX_VALUE;
+			for (String protein:complex) {
+				double abundance = this.getProteinAbundance(protein);
+				if (abundance < min_abundance)
+					min_abundance = abundance;
 			}
+			quantification_result.put(complex, min_abundance);
+		}
+		
+		return quantification_result;
+	}
+	
+	/**
+	 * Quantify each complex with the abundance of its least abundant member, but take overall amount of into account
+	 * @return
+	 */
+	public Map<HashSet<String>, Double> getAbundanceOfComplexes() {
+		
+		// count occurrence of each protein in complexes
+		Map<String, Integer> protein_in_complexes_count = new HashMap<>();
+		Map<String, List<HashSet<String>>> protein_in_complexes = new HashMap<>();
+		
+		for (HashSet<String> complex:this.getResult())
+			for (String protein:complex) {
+				if (!protein_in_complexes.containsKey(protein))
+					protein_in_complexes.put(protein, new LinkedList<HashSet<String>>());
+				protein_in_complexes.get(protein).add(complex);
+				protein_in_complexes_count.put(protein, protein_in_complexes_count.getOrDefault(protein, 0) + 1);
+			}
+		
+		// filter proteins that are only in one complex
+		protein_in_complexes_count.keySet().removeIf(d -> protein_in_complexes_count.get(d) == 1);
+		
+		// set initial "effective" abundance per protein in each complex by equal distribution
+		Map<HashSet<String>, Map<String, Double>> protein_abundance_per_complex = new HashMap<>();
+		for (HashSet<String> complex:this.getResult()) {
+			Map<String, Double> effective_protein_in_complex = new HashMap<>();
+			for (String protein:complex)
+				effective_protein_in_complex.put(protein, this.getProteinAbundance(protein) / protein_in_complexes_count.getOrDefault(protein, 1));
+			protein_abundance_per_complex.put(complex, effective_protein_in_complex);
+		}
+		
+		// iterative
+		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
+		boolean iterate = false;
+		double last_to_distr = Double.MAX_VALUE;
+		
+		do {
+			iterate = false;
+			Map<String, Double> remaining_amount = new HashMap<>();
+			Map<String, List<HashSet<String>>> distribute_to = new HashMap<>();
+			for (HashSet<String> complex:this.getResult()) {
+				double min_abundance = protein_abundance_per_complex.get(complex).values().stream().min(Double::compare).get();
+				quantification_result.put(complex, min_abundance);
+				
+				// calculate remaining amount of proteins and add it up to overall remaining
+				for (String protein:complex) {
+					// only relevant for those in several complexes
+					if (!protein_in_complexes_count.containsKey(protein))
+						continue;
+					double distance_to_min = protein_abundance_per_complex.get(complex).get(protein) - min_abundance;
+					remaining_amount.put(protein, remaining_amount.getOrDefault(protein, 0.0) + distance_to_min);
+					
+					// if protein is the limiting protein, note that it should be increased in the complex here
+					if (distance_to_min == 0.0) {
+						if (!distribute_to.containsKey(protein))
+							distribute_to.put(protein, new LinkedList<HashSet<String>>());
+						distribute_to.get(protein).add(complex);
+					}
+					
+					protein_abundance_per_complex.get(complex).put(protein, min_abundance);
+				}
+			}
+			remaining_amount.keySet().removeIf(d -> remaining_amount.get(d) == 0.0);
+			distribute_to.keySet().removeIf(d -> !remaining_amount.containsKey(d));
+			
+			// do another iteration if there is barely increase in the distribution of remaining values
+			double current_to_distr = remaining_amount.values().stream().reduce(0.0, Double::sum);
+			
+			if ( (last_to_distr - current_to_distr) > 0.0001)
+				iterate = true;
+			
+			last_to_distr = current_to_distr;
+			
+			// distribute remaining account equally on limiting proteins
+			for (String protein:distribute_to.keySet()) {
+				double distr_amount = remaining_amount.get(protein) / distribute_to.get(protein).size();
+				for (HashSet<String> complex:distribute_to.get(protein))
+					protein_abundance_per_complex.get(complex).put(protein, protein_abundance_per_complex.get(complex).get(protein) + distr_amount);
+				
+				remaining_amount.remove(protein);
+			}
+			distribute_to.clear();
+			
+			// distribute for other proteins
+			for (String protein:remaining_amount.keySet()) {
+				double distr_amount = remaining_amount.get(protein) / protein_in_complexes_count.get(protein);
+				for (HashSet<String> complex:protein_in_complexes.get(protein))
+					protein_abundance_per_complex.get(complex).put(protein, protein_abundance_per_complex.get(complex).get(protein) + distr_amount);
+			}
+			remaining_amount.clear();
+			
+		} while (iterate);
+		
+		return quantification_result;
+	}
+	
+	/**
+	 * Quantify each seed variant with the max (simple) abundance of complexes containing it
+	 * @return
+	 */
+	public Map<HashSet<String>, Double> getSimpleMaxAbundanceOfSeedVariantsComplexes() {
+		Map<HashSet<String>, Double> individual_quantification_result = this.getSimpleAbundanceOfComplexes();
+		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
+		
+		for (HashSet<String> seed_variant:this.getSeedToComplexMap().keySet()) {
+			List<Double> abundance_values = new LinkedList<>();
+			for (HashSet<String> complex:this.getSeedToComplexMap().get(seed_variant))
+				abundance_values.add(individual_quantification_result.get(complex));
+			quantification_result.put(seed_variant, abundance_values.stream().max(Double::compare).get());
+		}
 		
 		return quantification_result;
 	}
@@ -80,7 +200,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 	 * Quantify each seed variant with the median (simple) abundance of complexes containing it
 	 * @return
 	 */
-	public Map<HashSet<String>, Double> getSimpleAbundanceOfSeedVariantsComplexes() {
+	public Map<HashSet<String>, Double> getSimpleMedianAbundanceOfSeedVariantsComplexes() {
 		Map<HashSet<String>, Double> individual_quantification_result = this.getSimpleAbundanceOfComplexes();
 		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
 		
@@ -94,6 +214,23 @@ public class QuantDACOResultSet extends DACOResultSet {
 		return quantification_result;
 	}
 	
+	/**
+	 * Quantify each seed variant with the max abundance of complexes containing it
+	 * @return
+	 */
+	public Map<HashSet<String>, Double> getMaxAbundanceOfSeedVariantsComplexes() {
+		Map<HashSet<String>, Double> individual_quantification_result = this.getAbundanceOfComplexes();
+		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
+		
+		for (HashSet<String> seed_variant:this.getSeedToComplexMap().keySet()) {
+			List<Double> abundance_values = new LinkedList<>();
+			for (HashSet<String> complex:this.getSeedToComplexMap().get(seed_variant))
+				abundance_values.add(individual_quantification_result.get(complex));
+			quantification_result.put(seed_variant, abundance_values.stream().max(Double::compare).get());
+		}
+		
+		return quantification_result;
+	}
 	
 	/*
 	 * getters
@@ -115,4 +252,41 @@ public class QuantDACOResultSet extends DACOResultSet {
 		return transcript_abundance;
 	}
 	
+	/**
+	 * Returns the expression value of the most abundant transcript associated with this protein and 0.0 if it cannot be found
+	 * @param protein
+	 * @return
+	 */
+	public double getProteinAbundance(String protein) {
+		return this.transcript_abundance.getOrDefault(this.protein_to_assumed_transcript.get(protein), 0.0);
+	}
+	
+	// for testing purposes
+//	public static void main(String[] args) {
+//		HashSet<HashSet<String>> results = new HashSet<>();
+//		results.add(new HashSet<>(Arrays.asList("PA", "PB")));
+//		results.add(new HashSet<>(Arrays.asList("PB", "PC")));
+//		results.add(new HashSet<>(Arrays.asList("PC", "PD")));
+//		results.add(new HashSet<>(Arrays.asList("PC", "PE")));
+//		
+//		Set<String> seed = new HashSet<>();
+//		seed.add("PB");
+//		
+//		Map<String, String> protein_to_assumed_transcript = new HashMap<>();
+//		protein_to_assumed_transcript.put("PA", "TA");
+//		protein_to_assumed_transcript.put("PB", "TB");
+//		protein_to_assumed_transcript.put("PC", "TC");
+//		protein_to_assumed_transcript.put("PD", "TD");
+//		protein_to_assumed_transcript.put("PE", "TE");
+//		
+//		Map<String, Float> transcript_abundance = new HashMap<>();
+//		transcript_abundance.put("TA", 0.2f);
+//		transcript_abundance.put("TB", 1f);
+//		transcript_abundance.put("TC", 1f);
+//		transcript_abundance.put("TD", 0.5f);
+//		transcript_abundance.put("TE", 1f);
+//		
+//		QuantDACOResultSet qdr = new QuantDACOResultSet(results, seed, protein_to_assumed_transcript, transcript_abundance);
+//		System.out.println("out: " + qdr.getAbundanceOfComplexes());
+//	}
 }

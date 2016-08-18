@@ -29,6 +29,7 @@ public class check_complexes_quant {
 	}
 	
 	public static void N_MNP_TFcombinationsMedian() {
+		System.out.println("N_MNP_TFcomb_median");
 		Map<String, QuantDACOResultSet> results = new HashMap<>();
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv")) {
 			String sample = f.getName().split("\\.")[0];
@@ -47,7 +48,7 @@ public class check_complexes_quant {
 		
 		for (String sample:results.keySet()) {
 			String cell_type = sample.split("_")[1];
-			Map<HashSet<String>, Double> sample_abundances = results.get(sample).getSimpleAbundanceOfSeedVariantsComplexes();
+			Map<HashSet<String>, Double> sample_abundances = results.get(sample).getSimpleMedianAbundanceOfSeedVariantsComplexes();
 			for (HashSet<String> TFvariant:TFvariants) {
 				double abundance = sample_abundances.getOrDefault(TFvariant, 0.0);
 				if (cell_type.equals("N")) {
@@ -64,17 +65,103 @@ public class check_complexes_quant {
 		}
 		
 		MannWhitneyUTest mwu = new MannWhitneyUTest();
-		System.out.println(TFvariants.size());
 		for (HashSet<String> TFvariant:TFvariants) {
 			double pm = mwu.mannWhitneyUTest(getDoubleArray(N_TFV_abundance.get(TFvariant)), getDoubleArray(TMNP_TFV_abundance.get(TFvariant)));
 			
 			System.out.println(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "          -> " + N_TFV_abundance.get(TFvariant) + " vs " + TMNP_TFV_abundance.get(TFvariant));
 		}
-		
 	}
 	
+	public static void N_MNP_TFcombinationsMax() {
+		System.out.println("N_MNP_TFcomb_max");
+		Map<String, QuantDACOResultSet> results = new HashMap<>();
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv")) {
+			String sample = f.getName().split("\\.")[0];
+			String cell_type = sample.split("_")[1];
+			
+			if (cell_type.equals("N") || cell_type.equals("TMNP"))
+				results.put(sample, new QuantDACOResultSet(f.getAbsolutePath(), seed, networks_folder_pre + cell_type + "/" + sample + "_major-transcripts.txt.gz"));
+		}
+		
+		Set<HashSet<String>> TFvariants = new HashSet<>();
+		for (QuantDACOResultSet qdr:results.values())
+			TFvariants.addAll(qdr.getSeedToComplexMap().keySet());
+		
+		Map<HashSet<String>, LinkedList<Double>> N_TFV_abundance = new HashMap<>();
+		Map<HashSet<String>, LinkedList<Double>> TMNP_TFV_abundance = new HashMap<>();
+		
+		for (String sample:results.keySet()) {
+			String cell_type = sample.split("_")[1];
+			Map<HashSet<String>, Double> sample_abundances = results.get(sample).getSimpleMaxAbundanceOfSeedVariantsComplexes();
+			for (HashSet<String> TFvariant:TFvariants) {
+				double abundance = sample_abundances.getOrDefault(TFvariant, 0.0);
+				if (cell_type.equals("N")) {
+					if (!N_TFV_abundance.containsKey(TFvariant))
+						N_TFV_abundance.put(TFvariant, new LinkedList<Double>());
+					N_TFV_abundance.get(TFvariant).add(abundance);
+				} 
+				else { // TMNP
+					if (!TMNP_TFV_abundance.containsKey(TFvariant))
+						TMNP_TFV_abundance.put(TFvariant, new LinkedList<Double>());
+					TMNP_TFV_abundance.get(TFvariant).add(abundance);
+				}
+			}
+		}
+		
+		MannWhitneyUTest mwu = new MannWhitneyUTest();
+		for (HashSet<String> TFvariant:TFvariants) {
+			double pm = mwu.mannWhitneyUTest(getDoubleArray(N_TFV_abundance.get(TFvariant)), getDoubleArray(TMNP_TFV_abundance.get(TFvariant)));
+			System.out.println(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "          -> " + N_TFV_abundance.get(TFvariant) + " vs " + TMNP_TFV_abundance.get(TFvariant));
+		}
+	}
+	
+	public static void N_MNP_TFcombinationsAmount() {
+		System.out.println("N_MNP_TFcomb_Amount");
+		Map<String, QuantDACOResultSet> results = new HashMap<>();
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv")) {
+			String sample = f.getName().split("\\.")[0];
+			String cell_type = sample.split("_")[1];
+			
+			if (cell_type.equals("N") || cell_type.equals("TMNP"))
+				results.put(sample, new QuantDACOResultSet(f.getAbsolutePath(), seed, networks_folder_pre + cell_type + "/" + sample + "_major-transcripts.txt.gz"));
+		}
+		
+		Set<HashSet<String>> TFvariants = new HashSet<>();
+		for (QuantDACOResultSet qdr:results.values())
+			TFvariants.addAll(qdr.getSeedToComplexMap().keySet());
+		
+		Map<HashSet<String>, LinkedList<Double>> N_TFV_abundance = new HashMap<>();
+		Map<HashSet<String>, LinkedList<Double>> TMNP_TFV_abundance = new HashMap<>();
+		
+		for (String sample:results.keySet()) {
+			String cell_type = sample.split("_")[1];
+			Map<HashSet<String>, Double> sample_abundances = results.get(sample).getMaxAbundanceOfSeedVariantsComplexes();
+			for (HashSet<String> TFvariant:TFvariants) {
+				double abundance = sample_abundances.getOrDefault(TFvariant, 0.0);
+				if (cell_type.equals("N")) {
+					if (!N_TFV_abundance.containsKey(TFvariant))
+						N_TFV_abundance.put(TFvariant, new LinkedList<Double>());
+					N_TFV_abundance.get(TFvariant).add(abundance);
+				} 
+				else { // TMNP
+					if (!TMNP_TFV_abundance.containsKey(TFvariant))
+						TMNP_TFV_abundance.put(TFvariant, new LinkedList<Double>());
+					TMNP_TFV_abundance.get(TFvariant).add(abundance);
+				}
+			}
+		}
+		
+		MannWhitneyUTest mwu = new MannWhitneyUTest();
+		for (HashSet<String> TFvariant:TFvariants) {
+			double pm = mwu.mannWhitneyUTest(getDoubleArray(N_TFV_abundance.get(TFvariant)), getDoubleArray(TMNP_TFV_abundance.get(TFvariant)));
+			
+			System.out.println(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "          -> " + N_TFV_abundance.get(TFvariant) + " vs " + TMNP_TFV_abundance.get(TFvariant));
+		}
+	}
 	
 	public static void main(String[] args) {
+		N_MNP_TFcombinationsAmount();
+		N_MNP_TFcombinationsMax();
 		N_MNP_TFcombinationsMedian();
 	}
 }
