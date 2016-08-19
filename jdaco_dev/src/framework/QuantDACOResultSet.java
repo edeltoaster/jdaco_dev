@@ -128,7 +128,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 				
 				// calculate remaining amount of proteins and add it up to overall remaining
 				for (String protein:complex) {
-					// only relevant for those in several complexes
+					// only relevant for those in several complexes -> do not touch proteins that are only in one complex
 					if (!protein_in_complexes_count.containsKey(protein))
 						continue;
 					double distance_to_min = protein_abundance_per_complex.get(complex).get(protein) - min_abundance;
@@ -141,21 +141,20 @@ public class QuantDACOResultSet extends DACOResultSet {
 						distribute_to.get(protein).add(complex);
 					}
 					
+					// limit to maximal value, remaining amount of protein (actually transcript) as was added to remaining_amount
 					protein_abundance_per_complex.get(complex).put(protein, min_abundance);
 				}
 			}
-			remaining_amount.keySet().removeIf(d -> remaining_amount.get(d) == 0.0);
-			distribute_to.keySet().removeIf(d -> !remaining_amount.containsKey(d));
+			remaining_amount.keySet().removeIf(d -> remaining_amount.get(d) == 0.0); // can happen if protein is always the limiting member
+			distribute_to.keySet().removeIf(d -> !remaining_amount.containsKey(d)); // don't distribute when there's nothing to distribute
 			
-			// do another iteration if there is barely increase in the distribution of remaining values
+			// do another iteration if there is still a decrease in the overall amount of re-distributable abundance values
 			double current_to_distr = remaining_amount.values().stream().reduce(0.0, Double::sum);
-			
 			if ( (last_to_distr - current_to_distr) > 0.0001)
 				iterate = true;
-			
 			last_to_distr = current_to_distr;
 			
-			// distribute remaining account equally on limiting proteins
+			// distribute remaining account equally on the limiting proteins
 			for (String protein:distribute_to.keySet()) {
 				double distr_amount = remaining_amount.get(protein) / distribute_to.get(protein).size();
 				for (HashSet<String> complex:distribute_to.get(protein))
@@ -165,7 +164,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 			}
 			distribute_to.clear();
 			
-			// distribute for other proteins
+			// distribute for all other proteins
 			for (String protein:remaining_amount.keySet()) {
 				double distr_amount = remaining_amount.get(protein) / protein_in_complexes_count.get(protein);
 				for (HashSet<String> complex:protein_in_complexes.get(protein))
@@ -179,10 +178,10 @@ public class QuantDACOResultSet extends DACOResultSet {
 	}
 	
 	/**
-	 * Quantify each seed variant with the max (simple) abundance of complexes containing it
+	 * Quantify each seed variant with the overall (simple) abundance of complexes containing it
 	 * @return
 	 */
-	public Map<HashSet<String>, Double> getSimpleMaxAbundanceOfSeedVariantsComplexes() {
+	public Map<HashSet<String>, Double> getSimpleAbundanceOfSeedVariantsComplexes() {
 		Map<HashSet<String>, Double> individual_quantification_result = this.getSimpleAbundanceOfComplexes();
 		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
 		
@@ -190,35 +189,17 @@ public class QuantDACOResultSet extends DACOResultSet {
 			List<Double> abundance_values = new LinkedList<>();
 			for (HashSet<String> complex:this.getSeedToComplexMap().get(seed_variant))
 				abundance_values.add(individual_quantification_result.get(complex));
-			quantification_result.put(seed_variant, abundance_values.stream().max(Double::compare).get());
+			quantification_result.put(seed_variant, abundance_values.stream().reduce(0.0, Double::sum));
 		}
 		
 		return quantification_result;
 	}
 	
 	/**
-	 * Quantify each seed variant with the median (simple) abundance of complexes containing it
+	 * Quantify each seed variant with the overall abundance of complexes containing it
 	 * @return
 	 */
-	public Map<HashSet<String>, Double> getSimpleMedianAbundanceOfSeedVariantsComplexes() {
-		Map<HashSet<String>, Double> individual_quantification_result = this.getSimpleAbundanceOfComplexes();
-		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
-		
-		for (HashSet<String> seed_variant:this.getSeedToComplexMap().keySet()) {
-			List<Double> abundance_values = new LinkedList<>();
-			for (HashSet<String> complex:this.getSeedToComplexMap().get(seed_variant))
-				abundance_values.add(individual_quantification_result.get(complex));
-			quantification_result.put(seed_variant, Utilities.getMedian(abundance_values));
-		}
-		
-		return quantification_result;
-	}
-	
-	/**
-	 * Quantify each seed variant with the max abundance of complexes containing it
-	 * @return
-	 */
-	public Map<HashSet<String>, Double> getMaxAbundanceOfSeedVariantsComplexes() {
+	public Map<HashSet<String>, Double> getAbundanceOfSeedVariantsComplexes() {
 		Map<HashSet<String>, Double> individual_quantification_result = this.getAbundanceOfComplexes();
 		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
 		
@@ -226,11 +207,12 @@ public class QuantDACOResultSet extends DACOResultSet {
 			List<Double> abundance_values = new LinkedList<>();
 			for (HashSet<String> complex:this.getSeedToComplexMap().get(seed_variant))
 				abundance_values.add(individual_quantification_result.get(complex));
-			quantification_result.put(seed_variant, abundance_values.stream().max(Double::compare).get());
+			quantification_result.put(seed_variant, abundance_values.stream().reduce(0.0, Double::sum));
 		}
 		
 		return quantification_result;
 	}
+	
 	
 	/*
 	 * getters
