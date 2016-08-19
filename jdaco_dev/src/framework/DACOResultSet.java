@@ -140,6 +140,18 @@ public class DACOResultSet {
 		Utilities.writeEntries(to_write, out_file);
 	}
 	
+	/**
+	 * Filters DACOResultSet from all complexes that include proteins with opposing statements according to a given GOAnnotator definition
+	 * @param goa
+	 */
+	public void removeOpposinglyAnnotatedComplexes(GOAnnotator goa) {
+		this.result.removeIf(d -> goa.rateProteins(d).contains("!"));
+		this.rebuildData(new HashSet<>(this.abundant_seed_poteins));
+	}
+	
+	/*
+	 * Some similarity functions
+	 */
 	
 	/**
 	 * Get Jaccard/Dice-similarity-like similary for complex sets

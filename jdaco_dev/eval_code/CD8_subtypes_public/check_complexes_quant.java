@@ -131,8 +131,66 @@ public class check_complexes_quant {
 	}
 	
 	
+	public static void MNP_ALL_TFcombinationsCleaned() {
+		System.out.println("MNP_vs_ALL_TFcomb");
+		Map<String, QuantDACOResultSet> results = new HashMap<>();
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv")) {
+			String sample = f.getName().split("\\.")[0];
+			String cell_type = sample.split("_")[1];
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), seed, networks_folder_pre + cell_type + "/" + sample + "_major-transcripts.txt.gz");
+			System.out.println(sample + " " + qdr.getResult().size());
+			qdr.removeOpposinglyAnnotatedComplexes(goa);
+			System.out.println(sample + " " + qdr.getResult().size());
+			results.put(sample, qdr);
+		}
+		
+		Set<HashSet<String>> TFvariants = new HashSet<>();
+		for (QuantDACOResultSet qdr:results.values())
+			TFvariants.addAll(qdr.getSeedToComplexMap().keySet());
+		
+		Map<HashSet<String>, LinkedList<Double>> other_TFV_abundance = new HashMap<>();
+		Map<HashSet<String>, LinkedList<Double>> TMNP_TFV_abundance = new HashMap<>();
+		
+		for (String sample:results.keySet()) {
+			String cell_type = sample.split("_")[1];
+			Map<HashSet<String>, Double> sample_abundances = results.get(sample).getAbundanceOfSeedVariantsComplexes();
+			for (HashSet<String> TFvariant:TFvariants) {
+				double abundance = sample_abundances.getOrDefault(TFvariant, 0.0);
+				if (cell_type.equals("TMNP")) {
+					if (!TMNP_TFV_abundance.containsKey(TFvariant))
+						TMNP_TFV_abundance.put(TFvariant, new LinkedList<Double>());
+					TMNP_TFV_abundance.get(TFvariant).add(abundance);
+
+				} 
+				else { // all others
+					if (!other_TFV_abundance.containsKey(TFvariant))
+						other_TFV_abundance.put(TFvariant, new LinkedList<Double>());
+					other_TFV_abundance.get(TFvariant).add(abundance);
+				}
+			}
+		}
+		
+		MannWhitneyUTest mwu = new MannWhitneyUTest();
+		for (HashSet<String> TFvariant:TFvariants) {
+			double pm = mwu.mannWhitneyUTest(getDoubleArray(TMNP_TFV_abundance.get(TFvariant)), getDoubleArray(other_TFV_abundance.get(TFvariant)));
+			
+			if (pm < 0.05) {
+				List<Set<String>> complexes = new LinkedList<>();
+				for (String sample:results.keySet()) {
+					String cell_type2 = sample.split("_")[1];
+					if (cell_type2.equals("TMNP")) 
+						if (results.get(sample).getSeedToComplexMap().containsKey(TFvariant)) // could also be not found in MNP cells
+							complexes.addAll(results.get(sample).getSeedToComplexMap().get(TFvariant));
+				}
+				System.out.println(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + goa.rateListsOfProteins(complexes) + " " + TMNP_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+			}
+		}
+	}
+	
+	
 	public static void main(String[] args) {
-		MNP_ALL_TFcombinations();
+		MNP_ALL_TFcombinationsCleaned();
+		//MNP_ALL_TFcombinations();
 		//System.out.println();
 		//System.out.println();
 		//N_MNP_TFcombinations();
