@@ -34,7 +34,6 @@ public class Utilities {
 	 * IO helpers
 	 */
 	
-	
 	/**
 	 * Reads text file line by line and stores as a set (also works for .gz)
 	 * lines are trimmed and comment lines marked with # are discarded
@@ -215,7 +214,7 @@ public class Utilities {
 	}
 	
 	/**
-	 * Writes entries to a file
+	 * Writes entries to a file using the entries' toString() function, uses GZIP if file to write to ends with .gz/.gzip
 	 * @param <T>
 	 * @param file
 	 */
@@ -248,7 +247,11 @@ public class Utilities {
 	 * Statistic helpers
 	 */
 	
-	
+	/**
+	 * Computes the mean
+	 * @param data
+	 * @return
+	 */
 	public static double getMean(Collection<Double> data) {
 		double sum = 0;
 		for (Double d:data)
@@ -257,6 +260,11 @@ public class Utilities {
 		return sum / data.size();
 	}
 	
+	/**
+	 * Computes the median
+	 * @param data
+	 * @return
+	 */
 	public static double getMedian(Collection<Double> data) {
 		List<Double> listed_data = new ArrayList<>(data);
 		
@@ -273,6 +281,11 @@ public class Utilities {
 		}
 	}
 	
+	/**
+	 * Computes the variance
+	 * @param data
+	 * @return
+	 */
 	public static double getVariance(Collection<Double> data) {
 		double ssum = 0;
 		double mean = getMean(data);
@@ -283,6 +296,11 @@ public class Utilities {
 		return ssum / data.size();
 	}
 	
+	/**
+	 * Computes the standard deviation
+	 * @param data
+	 * @return
+	 */
 	public static double getStd(Collection<Double> data) {
 		return Math.sqrt(getVariance(data));
 	}
@@ -309,7 +327,7 @@ public class Utilities {
 		return output;
 	}
 	
-	public static List<List<Integer>> putInEveryPosition(int x, List<List<Integer>> list_of_lists) {
+	private static List<List<Integer>> putInEveryPosition(int x, List<List<Integer>> list_of_lists) {
 		List<List<Integer>> new_list_of_lists = new LinkedList<>();
 		int n = list_of_lists.get(0).size();
 		// for every permutation so far
@@ -342,6 +360,11 @@ public class Utilities {
 		return ( (double) intersection.size() ) / union.size();
 	} 
 	
+	/**
+	 * Builds a set of all values in a multimap
+	 * @param map
+	 * @return
+	 */
 	public static <K, V> Set<V> getValueSetFromMultimap(Map<K, List<V>> map) {
 		Set<V> value_set = new HashSet<>();
 		
