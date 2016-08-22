@@ -18,7 +18,7 @@ import framework.Utilities;
 
 public class check_complexes {
 	
-	static String results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subsets_public/CD8_DACO_0.0/res7/";
+	static String results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_DACO_0.0/res7/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	
 	public static void all_TFcombinations() {

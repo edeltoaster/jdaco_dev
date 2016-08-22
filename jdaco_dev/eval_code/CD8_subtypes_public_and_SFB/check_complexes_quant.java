@@ -19,8 +19,8 @@ import framework.Utilities;
 
 public class check_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subsets_public/CD8_DACO_0.0/res7/";
-	static String networks_folder_pre = "/Users/tho/Dropbox/Work/projects/CD8_subsets_public/CD8_networks_0.0/";
+	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_DACO_0.0/res7/";
+	static String networks_folder_pre = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.0/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	static GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
 	

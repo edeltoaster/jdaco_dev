@@ -11,7 +11,7 @@ import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
 public class build_CD8_networks {
-	static String expr_folder = "/Users/tho/Dropbox/Work/projects/CD8_subsets_public/expr_data/";
+	static String expr_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/expr_data/";
 	static String network_folder_pre = "/Users/tho/Desktop/CD8_networks/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
