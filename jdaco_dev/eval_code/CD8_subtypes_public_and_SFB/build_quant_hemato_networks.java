@@ -1,4 +1,4 @@
-package CD8_subtypes_public;
+package CD8_subtypes_public_and_SFB;
 
 import java.io.File;
 import java.util.Map;
@@ -10,9 +10,9 @@ import framework.PPIN;
 import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
-public class build_networks {
-	static String expr_folder = "/Users/tho/Dropbox/Work/projects/CD8_subsets_public/expr_data/";
-	static String network_folder_pre = "/Users/tho/Desktop/CD8_networks/";
+public class build_quant_hemato_networks {
+	static String expr_folder = "/Users/tho/Desktop/BLUEPRINT_expr/";
+	static String network_folder_pre = "/Users/tho/Desktop/quant_hemo_networks_0.0/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
 	
@@ -44,8 +44,8 @@ public class build_networks {
 	
 	public static void process(double TPM_threshold) {
 		
-		System.out.println("CD8 net-builder, TPM threshold: " + TPM_threshold);
-		String network_folder = network_folder_pre + TPM_threshold + "/";
+		System.out.println("hemato net-builder, TPM threshold: " + TPM_threshold);
+		String network_folder = network_folder_pre;
 		
 		new File(network_folder).mkdir();
 		
@@ -53,14 +53,21 @@ public class build_networks {
 			String path = f.getAbsolutePath();
 			String[] path_split = path.split("/");
 			String file_name = path_split[path_split.length-1].split("\\.")[0];
-			String cell_type = file_name.split("_")[1];
+			String cell_type = path_split[5];
+			String sample = file_name.split("-")[2];
+			String out_path = network_folder;
 			
-			String out_path = network_folder + cell_type + "/";
+			if (cell_type.contains("CD4"))
+				cell_type = "CD4";
+			else
+				cell_type = "CLP";
+			
+			file_name = cell_type + "_" + sample;
 			
 			if (!new File(out_path).exists())
 				new File(out_path).mkdir();
 			
-			Map<String, Float> transcr_expr = TranscriptAbundanceReader.readKallistoFile(path, TPM_threshold);
+			Map<String, Float> transcr_expr = TranscriptAbundanceReader.readRSEMTranscriptsTPM(path, TPM_threshold);
 			
 			System.out.println("Processing" + path);
 			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(transcr_expr, true);
@@ -74,15 +81,10 @@ public class build_networks {
 	public static void main(String[] args) {
 		//loadAndStoreReferenceNetwork("mixed_data/human_mentha_8_jul.txt.gz");
 		//System.exit(0);
-		DataQuery.enforceSpecificEnsemblRelease("84");
 		preprocess();
 		
 		new File(network_folder_pre).mkdir();
 		
-//		for (double thr = 0.0; thr <= 1.0; thr += 0.01) {
-//			thr = Math.round(thr * 100.0) / 100.0;
-//			process(thr);
-//		}
 		process(0.0);
 		
 	}
