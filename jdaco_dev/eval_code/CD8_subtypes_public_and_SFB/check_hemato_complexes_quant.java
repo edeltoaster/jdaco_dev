@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
+import org.apache.commons.math3.stat.inference.TTest;
 
 import framework.DataQuery;
 import framework.GOAnnotator;
@@ -67,14 +68,28 @@ public class check_hemato_complexes_quant {
 		}
 		
 		MannWhitneyUTest mwu = new MannWhitneyUTest();
+		TTest tt = new TTest();
+		List<String> mwu_out = new LinkedList<>();
+		List<String> tt_out = new LinkedList<>();
 		System.out.println(TFvariants.size() + " tests.");
 		for (HashSet<String> TFvariant:TFvariants) {
 			double pm = mwu.mannWhitneyUTest(getDoubleArray(CLP_TFV_abundance.get(TFvariant)), getDoubleArray(CD4_TFV_abundance.get(TFvariant)));
+			double pt = tt.tTest(getDoubleArray(CLP_TFV_abundance.get(TFvariant)), getDoubleArray(CD4_TFV_abundance.get(TFvariant)));
 			
-			if (pm < 0.05) {
-				System.out.println(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + CLP_TFV_abundance.get(TFvariant) + " vs " + CD4_TFV_abundance.get(TFvariant));
-			}
+			String sig_m = "-";
+			if (pm <0.05)
+				sig_m = "+";
+			
+			String sig_t = "-";
+			if (pt <0.05)
+				sig_t = "+";
+			
+			mwu_out.add(sig_m + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + CLP_TFV_abundance.get(TFvariant) + " vs " + CD4_TFV_abundance.get(TFvariant));
+			tt_out.add(sig_t + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pt + "  -> " + CLP_TFV_abundance.get(TFvariant) + " vs " + CD4_TFV_abundance.get(TFvariant));
 		}
+		
+		Utilities.writeEntries(mwu_out, "/Users/tho/Desktop/mwu_out.txt");
+		Utilities.writeEntries(tt_out, "/Users/tho/Desktop/tt_out.txt");
 	}
 	
 	public static void main(String[] args) {
