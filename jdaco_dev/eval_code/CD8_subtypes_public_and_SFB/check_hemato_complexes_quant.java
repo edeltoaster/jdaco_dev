@@ -21,7 +21,7 @@ import framework.Utilities;
 public class check_hemato_complexes_quant {
 	
 	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/hemato_DACO_0.0/res5/";
-	static String networks_folder_pre = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/quant_hemato_networks_0.0/";
+	static String networks_folder_pre = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/quant_hemo_networks_0.0/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	static GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
 	
@@ -134,17 +134,26 @@ public class check_hemato_complexes_quant {
 			}
 			
 			// check significance
-			
 			MannWhitneyUTest mwu = new MannWhitneyUTest();
 			List<String> out = new LinkedList<>();
+			Map<HashSet<String>, Double> test_results = new HashMap<>();
 			for (HashSet<String> TFvariant:TFvariants) {
 				double pm = mwu.mannWhitneyUTest(getDoubleArray(test_TFV_abundance.get(TFvariant)), getDoubleArray(other_TFV_abundance.get(TFvariant)));
-
-				if (pm < 0.05)
-					out.add(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+				test_results.put(TFvariant, pm);
 			}
 			
-			Utilities.writeEntries(out, "/Users/tho/Desktop/" + test_cell_type + "_out.txt");
+			Map<HashSet<String>, Double> adj_test_results = Utilities.convertRawPValuesToBHFDR(test_results, 0.05);
+			for (HashSet<String> TFvariant:adj_test_results.keySet()) {
+				String direction = "+";
+				double test_median = Utilities.getMedian(test_TFV_abundance.get(TFvariant));
+				double other_median = Utilities.getMedian(other_TFV_abundance.get(TFvariant));
+				if (test_median < other_median)
+					direction = "-";
+				out.add(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + adj_test_results.get(TFvariant) + "  -> " + test_median + " vs " + other_median + " -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+			}
+			
+			if (out.size() > 0)
+				Utilities.writeEntries(out, "/Users/tho/Desktop/" + test_cell_type + "_out.txt");
 		}
 		
 	}
