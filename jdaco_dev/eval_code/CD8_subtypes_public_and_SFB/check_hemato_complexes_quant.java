@@ -20,7 +20,7 @@ import framework.Utilities;
 
 public class check_hemato_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/hemato_DACO_0.0/res7/";
+	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/hemato_DACO_0.0/res5/";
 	static String networks_folder_pre = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/quant_hemato_networks_0.0/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	static GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
@@ -59,7 +59,7 @@ public class check_hemato_complexes_quant {
 						CLP_TFV_abundance.put(TFvariant, new LinkedList<Double>());
 					CLP_TFV_abundance.get(TFvariant).add(abundance);
 				} 
-				else {
+				else if (cell_type.equals("CD4")){
 					if (!CD4_TFV_abundance.containsKey(TFvariant))
 						CD4_TFV_abundance.put(TFvariant, new LinkedList<Double>());
 					CD4_TFV_abundance.get(TFvariant).add(abundance);
@@ -92,7 +92,65 @@ public class check_hemato_complexes_quant {
 		Utilities.writeEntries(tt_out, "/Users/tho/Desktop/tt_out.txt");
 	}
 	
+	public static void hemato_all_vs_all() {
+		System.out.println("all_TFcomb");
+		Map<String, QuantDACOResultSet> results = new HashMap<>();
+		Set<String> cell_types = new HashSet<>();
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv")) {
+			String sample = f.getName().split("\\.")[0];
+			String cell_type = sample.split("_")[0];
+			cell_types.add(cell_type);
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), seed, networks_folder_pre + sample + "_major-transcripts.txt.gz");
+			qdr.removeOpposinglyAnnotatedComplexes(goa);
+			results.put(sample, qdr);
+		}
+		
+		Set<HashSet<String>> TFvariants = new HashSet<>();
+		for (QuantDACOResultSet qdr:results.values())
+			TFvariants.addAll(qdr.getSeedToComplexMap().keySet());
+		
+		for (String test_cell_type:cell_types) {
+			System.out.println("Checking " + test_cell_type);
+			
+			Map<HashSet<String>, LinkedList<Double>> test_TFV_abundance = new HashMap<>();
+			Map<HashSet<String>, LinkedList<Double>> other_TFV_abundance = new HashMap<>();
+			
+			for (String sample:results.keySet()) {
+				String cell_type = sample.split("_")[0];
+				Map<HashSet<String>, Double> sample_abundances = results.get(sample).getAbundanceOfSeedVariantsComplexes();
+				for (HashSet<String> TFvariant:TFvariants) {
+					double abundance = sample_abundances.getOrDefault(TFvariant, 0.0);
+					if (cell_type.equals(test_cell_type)) {
+						if (!test_TFV_abundance.containsKey(TFvariant))
+							test_TFV_abundance.put(TFvariant, new LinkedList<Double>());
+						test_TFV_abundance.get(TFvariant).add(abundance);
+					} 
+					else {
+						if (!other_TFV_abundance.containsKey(TFvariant))
+							other_TFV_abundance.put(TFvariant, new LinkedList<Double>());
+						other_TFV_abundance.get(TFvariant).add(abundance);
+					}
+				}
+			}
+			
+			// check significance
+			
+			MannWhitneyUTest mwu = new MannWhitneyUTest();
+			List<String> out = new LinkedList<>();
+			for (HashSet<String> TFvariant:TFvariants) {
+				double pm = mwu.mannWhitneyUTest(getDoubleArray(test_TFV_abundance.get(TFvariant)), getDoubleArray(other_TFV_abundance.get(TFvariant)));
+
+				if (pm < 0.05)
+					out.add(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+			}
+			
+			Utilities.writeEntries(out, "/Users/tho/Desktop/" + test_cell_type + "_out.txt");
+		}
+		
+	}
+	
 	public static void main(String[] args) {
-		CLP_CD4_TFcombinations();
+		//CLP_CD4_TFcombinations();
+		hemato_all_vs_all();
 	}
 }
