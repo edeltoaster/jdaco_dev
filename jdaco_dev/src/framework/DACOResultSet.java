@@ -19,7 +19,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class DACOResultSet {
 	
-	private final HashSet<HashSet<String>> result;
+	private final Set<HashSet<String>> result;
 	private final Set<String> abundant_seed_poteins = new HashSet<>();
 	private final Map<HashSet<String>, LinkedList<HashSet<String>>> seed_to_complex_map = new HashMap<>();
 	
@@ -39,7 +39,7 @@ public class DACOResultSet {
 		this.buildData(seed);
 	}
 
-	public DACOResultSet(HashSet<HashSet<String>> results, Set<String> seed) {
+	public DACOResultSet(Set<HashSet<String>> results, Set<String> seed) {
 		this.result = results;
 		this.buildData(seed);
 	}
@@ -238,7 +238,7 @@ public class DACOResultSet {
 	 * getters
 	 */
 	
-	public HashSet<HashSet<String>> getResult() {
+	public Set<HashSet<String>> getResult() {
 		return this.result;
 	}
 	

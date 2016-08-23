@@ -12,9 +12,11 @@ import java.util.Set;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TTest;
 
+import framework.BindingDataHandler;
 import framework.DataQuery;
 import framework.GOAnnotator;
 import framework.QuantDACOResultSet;
+import framework.RegulatoryNetwork;
 import framework.Utilities;
 
 
@@ -109,6 +111,16 @@ public class check_hemato_complexes_quant {
 		for (QuantDACOResultSet qdr:results.values())
 			TFvariants.addAll(qdr.getSeedToComplexMap().keySet());
 		
+		// prune down to keep binding data smaller
+		Set<String> TFC_left = new HashSet<>();
+		for (HashSet<String> TFC:TFvariants)
+				TFC_left.addAll(TFC);
+		
+		// only among TFs
+		System.out.println("reading binding data ...");
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", TFC_left, TFC_left);
+		System.out.println("done.");
+		
 		for (String test_cell_type:cell_types) {
 			System.out.println("Checking " + test_cell_type);
 			
@@ -152,8 +164,12 @@ public class check_hemato_complexes_quant {
 				out.add(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + adj_test_results.get(TFvariant) + "  -> " + test_median + " vs " + other_median + " -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
 			}
 			
-			if (out.size() > 0)
-				Utilities.writeEntries(out, "/Users/tho/Desktop/" + test_cell_type + "_out.txt");
+			if (out.size() > 0) {
+				Utilities.writeEntries(out, "/Users/tho/Desktop/" + test_cell_type + "_textout.txt");
+				RegulatoryNetwork regnet = new RegulatoryNetwork(adj_test_results.keySet(), bdh);
+				regnet.writeRegulatoryNetwork("/Users/tho/Desktop/" + test_cell_type + "_netout.txt");
+				regnet.writeHumanNodeTable("/Users/tho/Desktop/" + test_cell_type + "_nodeout.txt");
+			}
 		}
 		
 	}
