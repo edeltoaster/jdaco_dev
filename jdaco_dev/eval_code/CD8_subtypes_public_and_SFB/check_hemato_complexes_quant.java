@@ -22,7 +22,7 @@ import framework.Utilities;
 
 public class check_hemato_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/hemato_DACO_0.0/res5/";
+	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/hemato_DACO_0.0/res7/";
 	static String networks_folder_pre = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/quant_hemo_networks_0.0/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	static GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
@@ -161,7 +161,15 @@ public class check_hemato_complexes_quant {
 				double other_median = Utilities.getMedian(other_TFV_abundance.get(TFvariant));
 				if (test_median < other_median)
 					direction = "-";
-				out.add(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + adj_test_results.get(TFvariant) + "  -> " + test_median + " vs " + other_median + " -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+				List<Set<String>> complexes = new LinkedList<>();
+				for (String sample:results.keySet()) {
+					String cell_type2 = sample.split("_")[0];
+					if (cell_type2.equals(test_cell_type)) 
+						if (results.get(sample).getSeedToComplexMap().containsKey(TFvariant))
+							complexes.addAll(results.get(sample).getSeedToComplexMap().get(TFvariant));
+				}
+				
+				out.add(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + goa.rateListsOfProteins(complexes) + ", "+ adj_test_results.get(TFvariant) + "  -> " + test_median + " vs " + other_median + " -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
 			}
 			
 			if (out.size() > 0) {
