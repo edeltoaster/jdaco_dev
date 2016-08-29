@@ -337,22 +337,19 @@ public class Utilities {
 		}
 		
 		
-		k = 1;
+		k = 0;
 		p_values = new ArrayList<>(new HashSet<>(p_values));
 		Collections.sort(p_values);
 		
 		Map<T, Double> sign_obj_to_adjusted_p = new HashMap<>();
 		for (double p:p_values) {
-			if (k > largest_k) { // remaining ones not deemed significant
-				// reset counter for output
-				k--;
+			k += p_to_obj.get(p).size();
+			
+			if (k > largest_k) // remaining ones not deemed significant
 				break;
-			}
 
-			for (T obj:p_to_obj.get(p)) {
+			for (T obj:p_to_obj.get(p))
 				sign_obj_to_adjusted_p.put(obj, raw_to_adj_p.get(p));
-				k++;
-			}
 		}
 		
 		return sign_obj_to_adjusted_p;

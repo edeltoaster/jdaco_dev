@@ -244,17 +244,16 @@ public class RewiringDetector {
 			this.verbose.flush();
 		}
 		
-		k = 1;
+		k = 0;
 		p_values = new ArrayList<>(new HashSet<>(p_values));
 		Collections.sort(p_values);
 		
 		List<ReasonEvalTask> reason_calculations = new LinkedList<>();
 		for (double p:p_values) {
-			if (k > largest_k) { // remaining ones not deemed significant
-				// reset counter for output
-				k--;
+			k += p2pair.get(p).size();
+			
+			if (k > largest_k) // remaining ones not deemed significant
 				break;
-			}
 
 			for (StrPair pair:p2pair.get(p)) {
 
@@ -271,8 +270,6 @@ public class RewiringDetector {
 				// reasoning part can be bypassed
 				if (!this.only_diffnet)
 					reason_calculations.add(new ReasonEvalTask(pair, addition));
-				
-				k++;
 			}
 		}
 		
