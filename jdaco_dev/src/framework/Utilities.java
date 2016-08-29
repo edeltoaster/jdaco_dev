@@ -306,7 +306,7 @@ public class Utilities {
 	}
 	
 	/**
-	 * Converts raw pvalues to Benjamini-Hochberg adjusted pvalues according to given FDR, only returns significant subset
+	 * Converts raw pvalues to Benjamini-Hochberg adjusted pvalues according to given FDR
 	 * @param raw_pvalues
 	 * @param FDR
 	 * @return
@@ -326,31 +326,31 @@ public class Utilities {
 		int m = p_values.size();
 		Collections.sort(p_values);
 		int k = 1;
-		int largest_k = -1;
 		Map<Double, Double> raw_to_adj_p = new HashMap<>();
-		
 		for (double p:p_values) {
-		    if (p <= k * FDR / m)
-		        largest_k = k;
-		    raw_to_adj_p.put(p, (p* m) / k); // if multiple have the same rank, take the biggest
+		    raw_to_adj_p.put(p, (p* m) / k); // if multiple have the same rank, take largest k
 		    k++;
 		}
 		
-		
-		k = 0;
 		p_values = new ArrayList<>(new HashSet<>(p_values));
 		Collections.sort(p_values);
+		Collections.reverse(p_values);
 		
 		Map<T, Double> sign_obj_to_adjusted_p = new HashMap<>();
+		double adj_p_before = 1.0;
 		for (double p:p_values) {
-			k += p_to_obj.get(p).size();
+			double adj_p = Math.min(raw_to_adj_p.get(p), adj_p_before);
 			
-			if (k > largest_k) // remaining ones not deemed significant
-				break;
-
+			raw_to_adj_p.put(p, adj_p);
+			
 			for (T obj:p_to_obj.get(p))
-				sign_obj_to_adjusted_p.put(obj, raw_to_adj_p.get(p));
+				sign_obj_to_adjusted_p.put(obj, adj_p);
+			
+			adj_p_before = adj_p;
 		}
+		
+		// filter
+		sign_obj_to_adjusted_p.keySet().removeIf( s-> (sign_obj_to_adjusted_p.get(s) >= 0.5) );
 		
 		return sign_obj_to_adjusted_p;
 	}
