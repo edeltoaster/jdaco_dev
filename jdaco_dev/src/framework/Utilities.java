@@ -350,7 +350,7 @@ public class Utilities {
 		}
 		
 		// filter
-		sign_obj_to_adjusted_p.keySet().removeIf( s-> (sign_obj_to_adjusted_p.get(s) >= 0.5) );
+		sign_obj_to_adjusted_p.keySet().removeIf( s-> (sign_obj_to_adjusted_p.get(s) >= FDR) );
 		
 		return sign_obj_to_adjusted_p;
 	}
