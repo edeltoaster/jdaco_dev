@@ -228,13 +228,9 @@ public class RewiringDetector {
 		List<Double> p_values = new ArrayList<>(test_map.values());
 		int m = p_values.size();
 		Collections.sort(p_values);
+		
 		int k = 1;
-		int largest_k = -1;
-
-		// find largest k
 		for (double p:p_values) {
-			if (p <= k * FDR / m)
-				largest_k = k;
 			this.rawp2adjp.put(p, (p* m) / k); // if multiple have the same rank, take the biggest
 			k++;
 		}
@@ -244,17 +240,23 @@ public class RewiringDetector {
 			this.verbose.flush();
 		}
 		
-		k = 0;
 		p_values = new ArrayList<>(new HashSet<>(p_values));
 		Collections.sort(p_values);
+		Collections.reverse(p_values);
 		
 		List<ReasonEvalTask> reason_calculations = new LinkedList<>();
+		double adj_p_before = 1.0;
 		for (double p:p_values) {
-			k += p2pair.get(p).size();
 			
-			if (k > largest_k) // remaining ones not deemed significant
-				break;
-
+			double adj_p = Math.min(this.rawp2adjp.get(p), adj_p_before);
+			
+			this.rawp2adjp.put(p, adj_p);
+			
+			adj_p_before = adj_p;
+			
+			if (adj_p >= this.FDR) //skip exact calculations for non-significant
+				continue;
+			
 			for (StrPair pair:p2pair.get(p)) {
 
 				this.interaction_p_map.put(pair, p);

@@ -342,15 +342,14 @@ public class Utilities {
 			double adj_p = Math.min(raw_to_adj_p.get(p), adj_p_before);
 			
 			raw_to_adj_p.put(p, adj_p);
+			adj_p_before = adj_p;
+			
+			if (adj_p >= FDR) //skip calculations for non-significant
+				continue;
 			
 			for (T obj:p_to_obj.get(p))
 				sign_obj_to_adjusted_p.put(obj, adj_p);
-			
-			adj_p_before = adj_p;
 		}
-		
-		// filter
-		sign_obj_to_adjusted_p.keySet().removeIf( s-> (sign_obj_to_adjusted_p.get(s) >= FDR) );
 		
 		return sign_obj_to_adjusted_p;
 	}
