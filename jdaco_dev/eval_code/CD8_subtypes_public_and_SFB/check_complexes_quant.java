@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
@@ -208,7 +209,17 @@ public class check_complexes_quant {
 							allow_in_binding_data.addAll(TFvariant);
 						}
 				}
-				System.out.println(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + goa.rateListsOfProteins(complexes) + " " + TMNP_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+				
+				String direction = "+";
+				double test_median = Utilities.getMedian(TMNP_TFV_abundance.get(TFvariant));
+				double other_median = Utilities.getMedian(other_TFV_abundance.get(TFvariant));
+				if (test_median < other_median)
+					direction = "-";
+				
+				System.out.println(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + goa.rateListsOfProteins(complexes) + 
+						" -> " + test_median + " vs " + other_median + " , " + 
+						complexes.stream().map(s->DataQuery.batchHGNCProteinsGenes(s)).collect(Collectors.toList()) + " , " + 
+						TMNP_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
 			}
 		}
 		
