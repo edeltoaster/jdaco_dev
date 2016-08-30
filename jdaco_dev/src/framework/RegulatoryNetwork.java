@@ -186,7 +186,6 @@ public class RegulatoryNetwork {
 		List<String> to_write = new LinkedList<>();
 		
 		to_write.add("Node Nodetype");
-		
 		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet()) {
 			String complex = String.join("/", tfs_in_complex);
 			to_write.add(complex + " complex");
@@ -200,15 +199,25 @@ public class RegulatoryNetwork {
 					to_write.add(target + " protein");
 			}
 		}
+		// ensure that all TFs were described, even if they are in no target set
+		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet())
+			for (String tf:tfs_in_complex) {
+				if (seen_targets.contains(tf))
+					continue;
+				seen_targets.add(tf);
+				
+				String data = tf + " TF";
+				to_write.add(data);
+			}
 		
 		Utilities.writeEntries(to_write, out_file);
 	}
 	
 	/**
-	 * Writes further information to all nodes in a textfile, for human adds even more info
+	 * Writes further information to all nodes in a textfile, adds HGNC identifiers and user-given labels
 	 * @param out_file
 	 */
-	public void writeHumanNodeTable(String out_file) {
+	public void writeHumanNodeTable(String out_file, Map<String, Set<String>> additional_data) {
 		Set<String> seen_targets = new HashSet<>();
 		List<String> to_write = new LinkedList<>();
 		
@@ -218,7 +227,12 @@ public class RegulatoryNetwork {
 			up_hgnc.put(s[1], s[0]);
 		}
 		
-		to_write.add("Node Nodetype HGNC");
+		String header = "Node Nodetype HGNC";
+		if (additional_data != null)
+			for (String label:additional_data.keySet())
+				header += " " + label;
+		
+		to_write.add(header);
 		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet()) {
 			String complex = String.join("/", tfs_in_complex);
 			String temp = "";
@@ -232,19 +246,69 @@ public class RegulatoryNetwork {
 					temp += "/" + up_hgnc.get(s);
 			}
 			
-			to_write.add(complex + " complex " + temp);
+			String data = complex + " complex " + temp;
+			if (additional_data != null)
+				for (String label:additional_data.keySet()) {
+					Set<String> of_interest = new HashSet<String>(additional_data.get(label));
+					of_interest.retainAll(tfs_in_complex);
+					if (of_interest.size() > 0)
+						data += " yes";
+					else
+						data += " no";
+				}
+			to_write.add(data);
+			
 			for (String target:this.complex_to_targets.get(tfs_in_complex)) {
+				
+				// don't do twice
 				if (seen_targets.contains(target))
 					continue;
 				seen_targets.add(target);
+				
 				if (this.tf_to_complex.keySet().contains(target))
-					to_write.add(target + " TF " + up_hgnc.get(target));
+					data = target + " TF " + up_hgnc.get(target);
 				else
-					to_write.add(target + " protein " + up_hgnc.get(target));
+					data = target + " protein " + up_hgnc.get(target);
+				
+				if (additional_data != null)
+					for (String label:additional_data.keySet()) {
+						if (additional_data.get(label).contains(target))
+							data += " yes";
+						else
+							data += " no";
+					}
+				to_write.add(data);
 			}
 		}
 		
+		// ensure that all TFs were described, even if they are in no target set
+		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet())
+			for (String tf:tfs_in_complex) {
+				if (seen_targets.contains(tf))
+					continue;
+				seen_targets.add(tf);
+				
+				String data = tf + " TF " + up_hgnc.get(tf);
+				
+				if (additional_data != null)
+					for (String label:additional_data.keySet()) {
+						if (additional_data.get(label).contains(tf))
+							data += " yes";
+						else
+							data += " no";
+					}
+				to_write.add(data);
+			}
+		
 		Utilities.writeEntries(to_write, out_file);
+	}
+	
+	/**
+	 * Writes further information to all nodes in a textfile, adds HGNC identifiers
+	 * @param out_file
+	 */
+	public void writeHumanNodeTable(String out_file) {
+		this.writeHumanNodeTable(out_file, null);
 	}
 	
 	/**

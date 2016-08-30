@@ -175,7 +175,7 @@ public class check_hemato_complexes_quant {
 			if (out.size() > 0) {
 				Utilities.writeEntries(out, "/Users/tho/Desktop/" + test_cell_type + "_textout.txt");
 				RegulatoryNetwork regnet = new RegulatoryNetwork(adj_test_results.keySet(), bdh);
-				regnet.writeRegulatoryNetwork("/Users/tho/Desktop/" + test_cell_type + "_netout.txt");
+				regnet.writeRegulatoryNetwork("/Users/tho/Desktop/" + test_cell_type + "_netout.txt", 2);
 				regnet.writeHumanNodeTable("/Users/tho/Desktop/" + test_cell_type + "_nodeout.txt");
 			}
 		}
