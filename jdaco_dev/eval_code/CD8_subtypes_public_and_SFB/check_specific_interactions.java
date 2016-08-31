@@ -15,8 +15,8 @@ import framework.Utilities;
 
 public class check_specific_interactions {
 	
-	static String CD8_networks_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.0/";
-	static String hemato_networks_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/quant_hemo_networks_0.0/";
+	static String CD8_networks_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.13/";//"/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.0/"; // 0.13
+	static String hemato_networks_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/0.31/";//"/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/quant_hemo_networks_0.0/";
 	
 	public static boolean containsIA(String ppin_path, StrPair IA) {
 		PPIN ppin = new PPIN(ppin_path);
@@ -40,7 +40,7 @@ public class check_specific_interactions {
 			System.out.println("Checking " + DataQuery.batchHGNCProteinsGenes(list));
 			
 			// check reference
-			if (!containsIA("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_mentha_8_jul.txt.gz", pair)) {
+			if (!containsIA("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_mentha_8_jul.txt.gz", pair)) { // strictly speaking more than the old hematopoiesis data
 				System.out.println("not in reference");
 				continue;
 			}
@@ -50,6 +50,7 @@ public class check_specific_interactions {
 			
 			for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(hemato_networks_folder, "_ppin.txt.gz")) {
 				String cell_type = f.getName().split("_")[0];
+				cell_type = f.getParentFile().getName(); // for old data
 				
 				if (!cell_type_count.containsKey(cell_type)) {
 					cell_type_count.put(cell_type, 0);
