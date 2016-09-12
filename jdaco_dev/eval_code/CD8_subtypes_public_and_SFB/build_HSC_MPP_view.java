@@ -33,7 +33,7 @@ public class build_HSC_MPP_view {
 //		}
 		
 		List<String> to_write = new LinkedList<>();
-		to_write.add("Protein1 Protein2 HSC_percentage MPP_percentage");
+		to_write.add("Protein1 Protein2 HSC_percentage MPP_percentage Membership");
 		for (StrPair pair:original_ppin.getInteractionsFast()) {
 			String p1 = pair.getL();
 			String p2 = pair.getR();
@@ -51,9 +51,16 @@ public class build_HSC_MPP_view {
 			
 			MPPc /= MPPs.size();
 			
-			to_write.add(p1 + " " + p2 + " " + HSCc + " " + MPPc);
+			String color = "none";
+			if (HSCc > 0.5 && MPPc > 0.5) 
+				color = "HSCs/MPPs";
+			else if (HSCc > 0.5)
+				color = "HSCs";
+			else if (MPPc > 0.5)
+				color = "MPPs";
+			
+			to_write.add(p1 + " " + p2 + " " + HSCc + " " + MPPc + " " + color);
 		}
-		
 		Utilities.writeEntries(to_write, "/Users/tho/Desktop/ref_HSC_MPP.txt");
 		
 	}
