@@ -154,6 +154,7 @@ public class check_hemato_complexes_quant {
 				test_results.put(TFvariant, pm);
 			}
 			
+			Map<String, String> effect = new HashMap<>();
 			Map<HashSet<String>, Double> adj_test_results = Utilities.convertRawPValuesToBHFDR(test_results, 0.05);
 			for (HashSet<String> TFvariant:adj_test_results.keySet()) {
 				String direction = "+";
@@ -170,13 +171,18 @@ public class check_hemato_complexes_quant {
 				}
 				
 				out.add(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + goa.rateListsOfProteins(complexes) + ", "+ adj_test_results.get(TFvariant) + "  -> " + test_median + " vs " + other_median + " -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
-			}
+				effect.put(TFvariant.toString(), goa.rateListsOfProteins(complexes));
+			}		
+			
+			// adding annotational data
+			Map<String, Map<String,String>> annotational_data = new HashMap<>();
+			annotational_data.put("Regulatory_effect", effect);
 			
 			if (out.size() > 0) {
 				Utilities.writeEntries(out, "/Users/tho/Desktop/" + test_cell_type + "_textout.txt");
 				RegulatoryNetwork regnet = new RegulatoryNetwork(adj_test_results.keySet(), bdh);
 				regnet.writeRegulatoryNetwork("/Users/tho/Desktop/" + test_cell_type + "_netout.txt", 2);
-				regnet.writeHumanNodeTable("/Users/tho/Desktop/" + test_cell_type + "_nodeout.txt");
+				regnet.writeNodeTable("/Users/tho/Desktop/" + test_cell_type + "_nodeout.txt", annotational_data);
 			}
 		}
 		

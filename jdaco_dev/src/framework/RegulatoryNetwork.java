@@ -382,7 +382,7 @@ public class RegulatoryNetwork {
 				if (annotational_data != null)
 					for (String label:annotational_data.keySet()) {
 						Map<String, String> annotation_map = annotational_data.get(label);
-						data += " " + annotation_map.getOrDefault(tfs_in_complex, "/");
+						data += " " + annotation_map.getOrDefault(target, "/");
 					}
 				to_write.add(data);
 			}
@@ -446,6 +446,17 @@ public class RegulatoryNetwork {
 		return TF_complexes;
 	}
 
+	/**
+	 * Returns all proteins somehow included in the network
+	 * @return
+	 */
+	public Set<String> getIncludedProteins() {
+		Set<String> proteins = new HashSet<String>(this.tf_to_complex.keySet());
+		for (Set<String> temp:this.complex_to_targets.values())
+			proteins.addAll(temp);
+		return proteins;
+	}
+	
 	public BindingDataHandler getBindingDataHandler() {
 		return bdh;
 	}

@@ -195,6 +195,7 @@ public class check_complexes_quant {
 		allow_in_binding_data.addAll(not_expressed);
 		MannWhitneyUTest mwu = new MannWhitneyUTest();
 		Set<HashSet<String>> signTFvariants = new HashSet<>();
+		
 		Map<String, String> effect = new HashMap<>();
 		for (HashSet<String> TFvariant:TFvariants) {
 			double pm = mwu.mannWhitneyUTest(getDoubleArray(TMNP_TFV_abundance.get(TFvariant)), getDoubleArray(other_TFV_abundance.get(TFvariant)));
@@ -224,8 +225,8 @@ public class check_complexes_quant {
 				effect.put(TFvariant.toString(), goa.rateListsOfProteins(complexes));
 			}
 		}
-		Map<String, Map<String,String>> annotational_data = new HashMap<>();
-		annotational_data.put("Regulatory_effect", effect);
+		
+		// binding data and regnet
 		
 		System.out.println("reading binding data ...");
 		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", allow_in_binding_data, allow_in_binding_data);
@@ -233,6 +234,32 @@ public class check_complexes_quant {
 		
 		RegulatoryNetwork regnet = new RegulatoryNetwork(signTFvariants, bdh);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/" + "TMNP_netout.txt", 2);
+		
+		// adding annotational data
+		Map<String, Map<String,String>> annotational_data = new HashMap<>();
+		annotational_data.put("Regulatory_effect", effect);
+		
+		Map<String, String> setting_specific = new HashMap<>();
+		
+		// add increased, expressed_effectors, not_expressed
+		for (String protein:regnet.getIncludedProteins()) {
+			List<String> annotate = new LinkedList<>();
+			
+			if (increased.contains(protein))
+				annotate.add("increased");
+			
+			if (expressed_effectors.contains(protein)) {
+				annotate.add("expr_effectors");
+			}
+			
+			if (not_expressed.contains(protein))
+				annotate.add("not_expressed");
+			
+			if (annotate.size() > 0)
+				setting_specific.put(protein, String.join(",", annotate));
+		}
+		
+		annotational_data.put("CD8_specific", setting_specific);
 		regnet.writeNodeTable("/Users/tho/Desktop/" + "TMNP_newnodeout.txt", annotational_data);
 		
 	}
