@@ -195,6 +195,7 @@ public class check_complexes_quant {
 		allow_in_binding_data.addAll(not_expressed);
 		MannWhitneyUTest mwu = new MannWhitneyUTest();
 		Set<HashSet<String>> signTFvariants = new HashSet<>();
+		Map<String, String> effect = new HashMap<>();
 		for (HashSet<String> TFvariant:TFvariants) {
 			double pm = mwu.mannWhitneyUTest(getDoubleArray(TMNP_TFV_abundance.get(TFvariant)), getDoubleArray(other_TFV_abundance.get(TFvariant)));
 			
@@ -220,8 +221,11 @@ public class check_complexes_quant {
 						" -> " + test_median + " vs " + other_median + " , " + 
 						complexes.stream().map(s->DataQuery.batchHGNCProteinsGenes(s)).collect(Collectors.toList()) + " , " + 
 						TMNP_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+				effect.put(TFvariant.toString(), goa.rateListsOfProteins(complexes));
 			}
 		}
+		Map<String, Map<String,String>> annotational_data = new HashMap<>();
+		annotational_data.put("Regulatory_effect", effect);
 		
 		System.out.println("reading binding data ...");
 		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", allow_in_binding_data, allow_in_binding_data);
@@ -229,7 +233,8 @@ public class check_complexes_quant {
 		
 		RegulatoryNetwork regnet = new RegulatoryNetwork(signTFvariants, bdh);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/" + "TMNP_netout.txt", 2);
-		regnet.writeHumanNodeTable("/Users/tho/Desktop/" + "TMNP_nodeout.txt", annotated_targets);
+		regnet.writeNodeTable("/Users/tho/Desktop/" + "TMNP_newnodeout.txt", annotational_data);
+		
 	}
 	
 	

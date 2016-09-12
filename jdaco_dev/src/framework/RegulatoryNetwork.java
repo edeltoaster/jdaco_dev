@@ -11,6 +11,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * Class to handle regulatory networks
@@ -181,43 +182,53 @@ public class RegulatoryNetwork {
 	 * Writes further information to all nodes in a textfile
 	 * @param out_file
 	 */
-	public void writeNodeTable(String out_file) {
-		Set<String> seen_targets = new HashSet<>();
-		List<String> to_write = new LinkedList<>();
-		
-		to_write.add("Node Nodetype");
-		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet()) {
-			String complex = String.join("/", tfs_in_complex);
-			to_write.add(complex + " complex");
-			for (String target:this.complex_to_targets.get(tfs_in_complex)) {
-				if (seen_targets.contains(target))
-					continue;
-				seen_targets.add(target);
-				if (this.tf_to_complex.keySet().contains(target))
-					to_write.add(target + " TF");
-				else
-					to_write.add(target + " protein");
-			}
-		}
-		// ensure that all TFs were described, even if they are in no target set
-		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet())
-			for (String tf:tfs_in_complex) {
-				if (seen_targets.contains(tf))
-					continue;
-				seen_targets.add(tf);
-				
-				String data = tf + " TF";
-				to_write.add(data);
-			}
-		
-		Utilities.writeEntries(to_write, out_file);
+	public void writeSimpleNodeTable(String out_file) {
+		writeNodeTable(out_file, null, null);
 	}
 	
 	/**
-	 * Writes further information to all nodes in a textfile, adds HGNC identifiers and user-given labels
+	 * Writes further information to all nodes in a textfile, automatically retrieves gene names
 	 * @param out_file
 	 */
-	public void writeHumanNodeTable(String out_file, Map<String, Set<String>> additional_data) {
+	public void writeNodeTable(String out_file) {
+		
+		// naming data
+		String organism_db = DataQuery.getEnsemblOrganismDatabaseFromProteins(tf_to_complex.keySet());
+		Map<String, String> gene_to_name = DataQuery.getGenesCommonNames(organism_db);
+		Map<String, String> up_to_name = new HashMap<>();
+		for (String[] data:DataQuery.getGenesTranscriptsProteins(organism_db)) {
+			String gene = data[0];
+			String protein = data[2];
+			up_to_name.put(protein, gene_to_name.get(gene));
+		}
+		
+		writeNodeTable(out_file, up_to_name, null);
+	}
+	
+	/**
+	 * Writes further information to all nodes in a textfile, automatically retrieves gene names
+	 * @param out_file
+	 */
+	public void writeNodeTable(String out_file, Map<String, Map<String, String>> annotational_data) {
+		
+		// naming data
+		String organism_db = DataQuery.getEnsemblOrganismDatabaseFromProteins(tf_to_complex.keySet());
+		Map<String, String> gene_to_name = DataQuery.getGenesCommonNames(organism_db);
+		Map<String, String> up_to_name = new HashMap<>();
+		for (String[] data:DataQuery.getGenesTranscriptsProteins(organism_db)) {
+			String gene = data[0];
+			String protein = data[2];
+			up_to_name.put(protein, gene_to_name.get(gene));
+		}
+		
+		writeNodeTable(out_file, up_to_name, annotational_data);
+	}
+	
+	/**
+	 * Writes further information to all nodes in a textfile, adds HGNC identifiers and user-given boolean labels
+	 * @param out_file
+	 */
+	public void writeHumanNodeTableOld(String out_file, Map<String, Set<String>> additional_data) {
 		Set<String> seen_targets = new HashSet<>();
 		List<String> to_write = new LinkedList<>();
 		
@@ -308,7 +319,100 @@ public class RegulatoryNetwork {
 	 * @param out_file
 	 */
 	public void writeHumanNodeTable(String out_file) {
-		this.writeHumanNodeTable(out_file, null);
+		this.writeHumanNodeTableOld(out_file, null);
+	}
+	
+	/**
+	 * Writes further information to all nodes in a textfile
+	 * @param out_file
+	 */
+	public void writeNodeTable(String out_file, Map<String, String> name_conversion, Map<String, Map<String, String>> annotational_data) {
+		List<String> to_write = new LinkedList<>();
+		
+		// write header
+		String header = "Node Nodetype";
+		
+		if (name_conversion != null)
+			header += " Gene";
+		
+		if (annotational_data != null)
+			for (String label:annotational_data.keySet())
+				header += " " + label;
+		
+		to_write.add(header);
+		
+		Set<String> seen_targets = new HashSet<>();
+		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet()) {
+			String complex = String.join("/", tfs_in_complex);
+			String data = complex + " complex";
+			
+			// converts names, names protein by UniProt Acc if not in map
+			if (name_conversion != null) {
+				String genes = String.join("/", tfs_in_complex.stream().map(p->name_conversion.getOrDefault(p, p)).collect(Collectors.toList()));
+				data += " " + genes;
+			}
+			
+			// adds annotational data, annotates with / if there is no data for this TF combination
+			if (annotational_data != null)
+				for (String label:annotational_data.keySet()) {
+					Map<String, String> annotation_map = annotational_data.get(label);
+					data += " " + annotation_map.getOrDefault(tfs_in_complex.toString(), "/");
+				}
+			to_write.add(data);
+			
+			for (String target:this.complex_to_targets.get(tfs_in_complex)) {
+				
+				// don't do twice
+				if (seen_targets.contains(target))
+					continue;
+				seen_targets.add(target);
+				
+				if (this.tf_to_complex.keySet().contains(target))
+					data = target + " TF";
+				else
+					data = target + " protein";
+				
+				// converts name, names protein by UniProt Acc if not in map
+				if (name_conversion != null) {
+					String gene = name_conversion.getOrDefault(target, target);
+					data += " " + gene;
+				}
+				
+				// adds annotational data, annotates with / if there is no data for this target
+				if (annotational_data != null)
+					for (String label:annotational_data.keySet()) {
+						Map<String, String> annotation_map = annotational_data.get(label);
+						data += " " + annotation_map.getOrDefault(tfs_in_complex, "/");
+					}
+				to_write.add(data);
+			}
+		}
+		
+		// ensure that all TFs were described, even if they are in no target set
+		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet())
+			for (String tf:tfs_in_complex) {
+				if (seen_targets.contains(tf))
+					continue;
+				seen_targets.add(tf);
+				
+				String data = tf + " TF";
+				
+				// converts name, names protein by UniProt Acc if not in map
+				if (name_conversion != null) {
+					String gene = name_conversion.getOrDefault(tf, tf);
+					data += " " + gene;
+				}
+				
+				// adds annotational data, annotates with / if there is no data for this TF
+				if (annotational_data != null)
+					for (String label:annotational_data.keySet()) {
+						Map<String, String> annotation_map = annotational_data.get(label);
+						data += " " + annotation_map.getOrDefault(tf, "/");
+					}
+				to_write.add(data);
+			}
+		
+		Utilities.writeEntries(to_write, out_file);
 	}
 	
 	/**
