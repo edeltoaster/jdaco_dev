@@ -588,7 +588,7 @@ public class PPIXpress_GUI {
 		
 		comboBox_server = new JComboBox<String>();
 		activiy_changing_components.add(comboBox_server);
-		comboBox_server.setModel(new DefaultComboBoxModel<String>(new String[] {"US", "UK", "ASIA"}));
+		comboBox_server.setModel(new DefaultComboBoxModel<String>(new String[] {"UK", "US", "ASIA"}));
 		comboBox_server.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (comboBox_server.getSelectedItem().toString().equals("UK"))
