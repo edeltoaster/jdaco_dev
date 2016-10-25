@@ -9,7 +9,7 @@ import framework.PPIN;
 import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
-public class build_networks {
+public class build_networks_preppi {
 	static String expr_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/expr_data/";
 	static String network_folder = "/Users/tho/Desktop/networks/";
 	static PPIN original_ppin;
@@ -24,12 +24,15 @@ public class build_networks {
 	}
 	
 	public static void preprocess() {
-		System.out.println("Original PPIN: " + "mixed_data/human_mentha_25_oct.txt.gz");
+		System.out.println("Original PPIN: " + "mixed_data/human_preppi.tsv.gz"); // PrePPI 1.2.0
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		System.out.println("3did: " + DataQuery.get3didVersion());
 		System.out.println("iPfam: " + DataQuery.getIPfamVersion());
 		
-		original_ppin = new PPIN("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_mentha_25_oct.txt.gz");
+		original_ppin = new PPIN("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_preppi.tsv.gz");
+		System.out.println(original_ppin.getSizesStr());
+		original_ppin = original_ppin.updateUniprotAccessions();
+		System.out.println(original_ppin.getSizesStr());
 		builder = new NetworkBuilder(original_ppin);
 		
 		System.out.println("Proteins mapped: " + builder.getMappingDomainPercentage());

@@ -147,6 +147,18 @@ public class TranscriptAbundanceReader {
 	 * @return map of genes/transcript -> TPM (if a transcript/gene above > threshold)
 	 */
 	public static Map<String, Float> readKallistoFile(String file, double threshold) {
+		return readKallistoFile(file, threshold, false);
+	}
+	
+	/**
+	 * Reads Kallisto output files of genes/transcripts (gzipped also fine, ending .gz assumed there)
+	 * and allow all only genes/transcripts with genes/transcripts above TPM or count threshold.
+	 * @param file
+	 * @param threshold
+	 * @param get_counts
+	 * @return map of genes/transcript -> TPM or estimated count (if a transcript/gene above > threshold)
+	 */
+	public static Map<String, Float> readKallistoFile(String file, double threshold, boolean get_counts) {
 		Map<String, Float> transcript_abundance = new HashMap<>(1024);
 		
 		BufferedReader in = null;
@@ -166,6 +178,10 @@ public class TranscriptAbundanceReader {
 				String[] split = line.split("\\s+");
 				String transcript = split[0].split("\\.")[0]; // shear off version
 				float tpm = Float.parseFloat(split[4]);
+				
+				// tpm stores estinated counts instead
+				if (get_counts)
+					tpm = Float.parseFloat(split[3]);
 				
 				if (tpm <= threshold)
 					continue;
