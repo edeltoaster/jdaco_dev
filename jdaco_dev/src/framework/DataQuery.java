@@ -42,7 +42,7 @@ public class DataQuery {
 	// Servers
 	// ensembldb.ensembl.org:3306 from Ensembl 48 onwards, 3337: GRCh37 current/previous
 	// useastdb.ensembl.org:3306 current und previous version only
-	private static String ensembl_mysql = "useastdb.ensembl.org:3306";
+	private static String ensembl_mysql = "ensembldb.ensembl.org:3306";
 	private static Map<String, List<String>> known_DDIs;
 	private static boolean up2date_DDIs = true;
 	private static String STRING_version = "10";
@@ -352,9 +352,7 @@ public class DataQuery {
 			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
-			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id, xref.dbprimary_acc "
-					+ "FROM gene, transcript, translation, object_xref, xref "
-					+ "WHERE gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
+			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id, trans_table.dbprimary_acc FROM gene, transcript, (SELECT translation.translation_id, xref.dbprimary_acc FROM translation, object_xref, xref WHERE translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200') AS trans_table WHERE gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = trans_table.translation_id");
 			while (rs.next()) {
 				String[] row = {rs.getString(1), rs.getString(2), rs.getString(3)};
 				associations.add(row);
@@ -363,7 +361,6 @@ public class DataQuery {
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
-			
 			//e.printStackTrace();
 			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get gene/transcript/protein data from ENSEMBL in 10 seconds ..." );
 			try {
@@ -767,10 +764,7 @@ public class DataQuery {
 			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
-			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, xref.dbprimary_acc, translation_attrib.value "
-					+ "FROM transcript, translation, object_xref, xref, translation_attrib "
-					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200' "
-					+ "AND translation.translation_id = translation_attrib.translation_id AND translation_attrib.attrib_type_id = '167'");
+			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, trans_table.dbprimary_acc, translation_attrib.value FROM transcript, (SELECT translation.translation_id, xref.dbprimary_acc FROM translation, object_xref, xref WHERE translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200') AS trans_table, translation_attrib WHERE transcript.canonical_translation_id = trans_table.translation_id AND trans_table.translation_id = translation_attrib.translation_id AND translation_attrib.attrib_type_id = '167'");
 			
 			while (rs.next()) {
 				String transcript = rs.getString(1);
@@ -1544,11 +1538,11 @@ public class DataQuery {
 		String server3 = "asiadb.ensembl.org:3306";
 		
 		if (DataQuery.ensembl_mysql.equals(server1))
-			DataQuery.ensembl_mysql = server3;
-		else if (DataQuery.ensembl_mysql.equals(server2))
-			DataQuery.ensembl_mysql = server1;
-		else // server 3
 			DataQuery.ensembl_mysql = server2;
+		else if (DataQuery.ensembl_mysql.equals(server2))
+			DataQuery.ensembl_mysql = server3;
+		else // server 3
+			DataQuery.ensembl_mysql = server1;
 		
 		err_out.println("ENSEMBL server changed to " + DataQuery.ensembl_mysql + ".");
 	}
@@ -2130,10 +2124,7 @@ public class DataQuery {
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			
-			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, xref.dbprimary_acc "
-					+ "FROM transcript, translation, object_xref, xref "
-					+ "WHERE transcript.canonical_translation_id = translation.translation_id AND translation.translation_id=object_xref.ensembl_id "
-					+ "AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200'");
+			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, trans_table.dbprimary_acc FROM transcript, (SELECT translation.translation_id, xref.dbprimary_acc FROM translation, object_xref, xref WHERE translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200') AS trans_table WHERE transcript.canonical_translation_id = trans_table.translation_id");
 			
 			while (rs.next()) {
 				String[] row = {rs.getString(1), rs.getString(2)};
