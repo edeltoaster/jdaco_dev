@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import framework.DataQuery;
+import framework.GOAnnotator;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
@@ -23,7 +24,8 @@ public class check_complexes_quant {
 //	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/mentha_TPM/res5/";
 //	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/mentha_TPM_networks/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
-
+	static GOAnnotator goa = new GOAnnotator("9606", false, "/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/stem_tags.txt");
+	
 	public static double[] getDoubleArray(List<Double> list) {
 		if (list.size() == 0)
 			return new double[]{0.0};
@@ -35,6 +37,9 @@ public class check_complexes_quant {
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv")) {
 			String sample = f.getName().split("\\.")[0];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), seed, networks_folder + sample + "_major-transcripts.txt.gz");
+			System.out.println(sample + " " + qdr.getResult().size());
+			qdr.removeOpposinglyAnnotatedComplexes(goa);
+			System.out.println(qdr.getResult().size());
 			results.put(sample, qdr);
 		}
 		
