@@ -520,20 +520,15 @@ public class DACO {
 	}
 	
 	/**
-	 * Merges and writes output to a csv-file
+	 * Merges proper subset and removes complexes that don't involve seed proteins and writes output to a csv-file
 	 * @param out_file
 	 * @param results
 	 */
-	public static void writeAndFilterOutput(String out_file, HashSet<HashSet<String>> results) {
+	public static void writeAndFilterOutput(String out_file, HashSet<HashSet<String>> results, Set<String> seed) {
 		// clean from subsets
 		DACO.filterOutput(results);
 		
-		List<String> to_write = new LinkedList<>();
-
-		for (HashSet<String> cluster : results) 
-			to_write.add( String.join(",", cluster) );
-		
-		Utilities.writeEntries(to_write, out_file);
+		new DACOResultSet(results, seed).writeCSV(out_file);
 	}
 	
 	/**

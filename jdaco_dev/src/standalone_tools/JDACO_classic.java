@@ -84,7 +84,7 @@ public class JDACO_classic {
 		System.out.println("Comp. time: " + TimeUnit.MILLISECONDS.toMinutes(duration) + " min");
 		
 		// filter and write output
-		DACO.writeAndFilterOutput(output_file, results);
+		DACO.writeAndFilterOutput(output_file, results, seed);
 		System.out.println(results.size() + " candidates written to output.");
 	}
 }

@@ -33,6 +33,7 @@ public class build_networks_preppi {
 		System.out.println(original_ppin.getSizesStr());
 		original_ppin = original_ppin.updateUniprotAccessions();
 		System.out.println(original_ppin.getSizesStr());
+		System.out.println("upper 5% cutoff: " + original_ppin.getPercentile(5));
 		builder = new NetworkBuilder(original_ppin);
 		
 		System.out.println("Proteins mapped: " + builder.getMappingDomainPercentage());

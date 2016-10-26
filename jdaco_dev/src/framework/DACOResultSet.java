@@ -106,7 +106,7 @@ public class DACOResultSet {
 	}
 	
 	/**
-	 * Rebuilds useful data-structures on the basis of relevant seed
+	 * Rebuilds useful data-structures on the basis of relevant seed, removes other results
 	 * @param seed
 	 */
 	public void rebuildData(Set<String> refined_seed) {
@@ -114,6 +114,7 @@ public class DACOResultSet {
 		this.seed_to_complex_map.clear();
 		
 		// build seed-set to complex map and note seed proteins that are abundant in the result
+		Set<HashSet<String>> to_remove = new HashSet<HashSet<String>>();
 		for (HashSet<String> set:this.result) {
 			HashSet<String> from_seed = filterSeedProteins(set, refined_seed);
 			if (from_seed.size() > 0) {
@@ -121,8 +122,12 @@ public class DACOResultSet {
 				if (!this.seed_to_complex_map.containsKey(from_seed))
 					this.seed_to_complex_map.put(from_seed, new LinkedList<HashSet<String>>());
 				this.seed_to_complex_map.get(from_seed).add(set);
+			} else { // no seed protein included -> remove from result set
+				to_remove.add(set);
 			}
 		}
+		
+		this.result.removeAll(to_remove);
 		
 	}
 	

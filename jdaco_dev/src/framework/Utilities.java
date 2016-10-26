@@ -306,7 +306,8 @@ public class Utilities {
 	}
 	
 	/**
-	 * Converts raw pvalues to Benjamini-Hochberg adjusted pvalues according to given FDR
+	 * Converts raw pvalues to Benjamini-Hochberg adjusted pvalues according to given FDR,
+	 * only returns significant objects
 	 * @param raw_pvalues
 	 * @param FDR
 	 * @return
@@ -476,5 +477,4 @@ public class Utilities {
 
     	return powerSet;
     }
-    
 }
