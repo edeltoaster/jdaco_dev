@@ -1,6 +1,5 @@
 # from DACO paper?
 regulation GO:0045944 GO:0000122
-coregulation GO:0003713 GO:0003714
 # according to "Mapping and analysis of chromatin state dynamics in nine human cell types" important
 # p300/CBP are, for example, activating HATs -> H3K9ac,H3K27ac?
 histone_acetylation GO:0016573 GO:0016575

@@ -84,7 +84,7 @@ public class check_complexes {
 				List<List<String>> hgnc_complexes = new LinkedList<>();
 				for (Set<String> compl:complexes)
 					hgnc_complexes.add(DataQuery.batchHGNCProteinsGenes(compl));
-				System.out.println(DataQuery.batchHGNCProteinsGenes(excl_TFC) + " -> " +  hgnc_complexes.size() + " : " + goa.rateListsOfProteins(complexes));
+				System.out.println(DataQuery.batchHGNCProteinsGenes(excl_TFC) + " -> " +  hgnc_complexes.size() + " : " + goa.rateCollectionOfProteins(complexes));
 				
 				// annotate targets
 				Set<String> targets = bdh.getAdjacencyPossibilities(excl_TFC, -50, 50, false);
@@ -153,7 +153,7 @@ public class check_complexes {
 				List<List<String>> hgnc_complexes = new LinkedList<>();
 				for (Set<String> compl:complexes)
 					hgnc_complexes.add(DataQuery.batchHGNCProteinsGenes(compl));
-				System.out.println(DataQuery.batchHGNCProteinsGenes(excl_TFC) + " -> " +  hgnc_complexes.size() + " : " + goa.rateListsOfProteins(complexes));
+				System.out.println(DataQuery.batchHGNCProteinsGenes(excl_TFC) + " -> " +  hgnc_complexes.size() + " : " + goa.rateCollectionOfProteins(complexes));
 				
 				// annotate targets
 				Set<String> targets = bdh.getAdjacencyPossibilities(excl_TFC, -50, 50, false);

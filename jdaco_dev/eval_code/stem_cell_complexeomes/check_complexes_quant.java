@@ -19,7 +19,7 @@ import framework.Utilities;
 
 public class check_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/preppi95_TPM/res5/";
+	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/preppi95_TPM/res7/";
 	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/preppi_TPM_networks/";
 //	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/mentha_TPM/res5/";
 //	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/mentha_TPM_networks/";
@@ -75,7 +75,8 @@ public class check_complexes_quant {
 		
 		// test
 		MannWhitneyUTest mwu = new MannWhitneyUTest();
-		List<String> mwu_out = new LinkedList<>();
+		List<String> pos_out = new LinkedList<>();
+		List<String> neg_out = new LinkedList<>();
 		System.out.println(TFvariants.size() + " tests.");
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
 		for (HashSet<String> TFvariant:TFvariants) {
@@ -89,10 +90,28 @@ public class check_complexes_quant {
 		for (HashSet<String> TFvariant:adj_test_results.keySet()) {
 			double hESC_median = Utilities.getMedian(hESC_TFV_abundance.get(TFvariant));
 			double BM_median = Utilities.getMedian(BM_TFV_abundance.get(TFvariant));
-			mwu_out.add(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + adj_test_results.get(TFvariant) + " (" + test_results.get(TFvariant) + ")  -> " + hESC_median + " vs " + BM_median + " , " + TFvariant + ", "+ hESC_TFV_abundance.get(TFvariant) + " vs " + BM_TFV_abundance.get(TFvariant));
+			
+			String sign = "+";
+			if (hESC_median < BM_median)
+				sign = "-";
+			
+			Set<Set<String>> complexes = new HashSet<>();
+			for (String sample:results.keySet()) {
+				if (sample.contains("hESC")) 
+					if (results.get(sample).getSeedToComplexMap().containsKey(TFvariant))
+						complexes.addAll(results.get(sample).getSeedToComplexMap().get(TFvariant));
+			}
+			
+			String out = sign + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + adj_test_results.get(TFvariant) + " (" + test_results.get(TFvariant) + ")  -> " + hESC_median + " vs " + BM_median + " , " + goa.rateCollectionOfProteins(complexes) + ", " + TFvariant + ", "+ hESC_TFV_abundance.get(TFvariant) + " vs " + BM_TFV_abundance.get(TFvariant);
+			
+			if (sign.equals("+"))
+				pos_out.add(out);
+			else
+				neg_out.add(out);
+		
 		}
 		
-		Utilities.writeEntries(mwu_out, "/Users/tho/Desktop/mwu_out.txt");
-		
+		Utilities.writeEntries(pos_out, "/Users/tho/Desktop/stem_excl.txt");
+		Utilities.writeEntries(neg_out, "/Users/tho/Desktop/non_stem.txt");
 	}
 }

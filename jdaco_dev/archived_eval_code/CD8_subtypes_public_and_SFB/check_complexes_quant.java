@@ -129,7 +129,7 @@ public class check_complexes_quant {
 						if (results.get(sample).getSeedToComplexMap().containsKey(TFvariant)) // could also be not found in MNP cells
 							complexes.addAll(results.get(sample).getSeedToComplexMap().get(TFvariant));
 				}
-				System.out.println(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + goa.rateListsOfProteins(complexes) + " " + TMNP_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+				System.out.println(DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + goa.rateCollectionOfProteins(complexes) + " " + TMNP_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
 			}
 		}
 	}
@@ -218,11 +218,11 @@ public class check_complexes_quant {
 				if (test_median < other_median)
 					direction = "-";
 				
-				System.out.println(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + goa.rateListsOfProteins(complexes) + 
+				System.out.println(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + goa.rateCollectionOfProteins(complexes) + 
 						" -> " + test_median + " vs " + other_median + " , " + 
 						complexes.stream().map(s->DataQuery.batchHGNCProteinsGenes(s)).collect(Collectors.toList()) + " , " + 
 						TMNP_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
-				effect.put(TFvariant.toString(), goa.rateListsOfProteins(complexes));
+				effect.put(TFvariant.toString(), goa.rateCollectionOfProteins(complexes));
 			}
 		}
 		

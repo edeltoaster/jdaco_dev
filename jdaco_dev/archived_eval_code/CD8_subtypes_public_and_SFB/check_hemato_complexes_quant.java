@@ -170,8 +170,8 @@ public class check_hemato_complexes_quant {
 							complexes.addAll(results.get(sample).getSeedToComplexMap().get(TFvariant));
 				}
 				
-				out.add(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + goa.rateListsOfProteins(complexes) + ", "+ adj_test_results.get(TFvariant) + "  -> " + test_median + " vs " + other_median + " -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
-				effect.put(TFvariant.toString(), goa.rateListsOfProteins(complexes));
+				out.add(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + goa.rateCollectionOfProteins(complexes) + ", "+ adj_test_results.get(TFvariant) + "  -> " + test_median + " vs " + other_median + " -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+				effect.put(TFvariant.toString(), goa.rateCollectionOfProteins(complexes));
 			}		
 			
 			// adding annotational data
