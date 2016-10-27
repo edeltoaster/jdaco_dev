@@ -19,7 +19,7 @@ import framework.Utilities;
 
 public class check_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/preppi95_TPM/res7/";
+	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/preppi95_TPM/res5/";
 	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/preppi_TPM_networks/";
 //	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/mentha_TPM/res5/";
 //	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/mentha_TPM_networks/";
