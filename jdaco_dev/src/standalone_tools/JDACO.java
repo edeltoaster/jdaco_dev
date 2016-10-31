@@ -163,10 +163,10 @@ public class JDACO {
 		
 		// output parameters
 		System.out.println("Running JDACO using:");
-		System.out.println("PPIN: " + ppin_file);
-		//stats?
-		System.out.println("DDIN: " + ddin_file);
-		// stats
+		
+		System.out.println("PPIN: " + ppin_file + " ("+ ppin.getSizesStr() + ")");
+		System.out.println("DDIN: " + ddin_file + " ("+ ddin.getSizesStr() + ")");
+		
 		System.out.println("Seed protein list: " + seed_file + " (" + seed.size() + " proteins)");
 		
 		// determine thresholds

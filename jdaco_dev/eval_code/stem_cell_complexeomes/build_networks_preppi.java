@@ -14,14 +14,6 @@ public class build_networks_preppi {
 	static String network_folder = "/Users/tho/Desktop/networks/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
-
-	public static void loadAndStoreReferenceNetwork(String network_out) {
-		PPIN ppin = DataQuery.getMenthaNetwork("9606");
-		System.out.println(ppin.getSizesStr());
-		ppin = ppin.updateUniprotAccessions();
-		ppin.writePPIN(network_out);
-		System.out.println(ppin.getSizesStr());
-	}
 	
 	public static void preprocess() {
 		System.out.println("Original PPIN: " + "mixed_data/human_preppi.tsv.gz"); // PrePPI 1.2.0
@@ -32,6 +24,7 @@ public class build_networks_preppi {
 		original_ppin = new PPIN("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_preppi.tsv.gz");
 		System.out.println(original_ppin.getSizesStr());
 		original_ppin = original_ppin.updateUniprotAccessions();
+		System.out.println("Updating Uniprot Accs with " + DataQuery.getUniprotRelease());
 		System.out.println(original_ppin.getSizesStr());
 		System.out.println("upper 5% cutoff: " + original_ppin.getPercentile(5));
 		builder = new NetworkBuilder(original_ppin);
@@ -59,9 +52,7 @@ public class build_networks_preppi {
 	}
 	
 	public static void main(String[] args) {
-		//loadAndStoreReferenceNetwork("mixed_data/human_mentha_25_oct.txt.gz");
-		//System.exit(0);
-		
+
 		preprocess();
 		
 		new File(network_folder).mkdir();
