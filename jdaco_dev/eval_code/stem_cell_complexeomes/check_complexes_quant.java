@@ -19,18 +19,10 @@ import framework.Utilities;
 
 public class check_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/preppi95_TPM/res5/";
-	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/preppi_TPM_networks/";
-//	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/mentha_TPM/res5/";
-//	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/mentha_TPM_networks/";
+	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_results/preppi95_95_TPM/res5/";
+	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/PrePPI_TPM_networks/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	static GOAnnotator goa = new GOAnnotator("9606", false, "/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/stem_tags.txt");
-	
-	public static double[] getDoubleArray(List<Double> list) {
-		if (list.size() == 0)
-			return new double[]{0.0};
-		return list.stream().mapToDouble(d->d).toArray();
-	}
 	
 	public static void main(String[] args) {
 		Map<String, QuantDACOResultSet> results = new HashMap<>();
@@ -80,7 +72,7 @@ public class check_complexes_quant {
 		System.out.println(TFvariants.size() + " tests.");
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
 		for (HashSet<String> TFvariant:TFvariants) {
-			double pm = mwu.mannWhitneyUTest(getDoubleArray(hESC_TFV_abundance.get(TFvariant)), getDoubleArray(BM_TFV_abundance.get(TFvariant)));
+			double pm = mwu.mannWhitneyUTest(Utilities.getDoubleArray(hESC_TFV_abundance.get(TFvariant)), Utilities.getDoubleArray(BM_TFV_abundance.get(TFvariant)));
 			test_results.put(TFvariant, pm);
 		}
 		

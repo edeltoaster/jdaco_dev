@@ -306,6 +306,17 @@ public class Utilities {
 	}
 	
 	/**
+	 * Converts a list of Doubles to a double[]
+	 * @param list
+	 * @return
+	 */
+	public static double[] getDoubleArray(List<Double> list) {
+		if (list.size() == 0)
+			return new double[]{0.0};
+		return list.stream().mapToDouble(d->d).toArray();
+	}
+	
+	/**
 	 * Converts raw pvalues to Benjamini-Hochberg adjusted pvalues according to given FDR,
 	 * only returns significant objects
 	 * @param raw_pvalues

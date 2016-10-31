@@ -26,14 +26,14 @@ public class DACO {
 	private final DDIN ddi;
 	
 	// collections for calculations need to be thread-safe
-	private Set<HashSet<String>> temp_results = Collections.newSetFromMap(new ConcurrentHashMap<>());
 	private int number_of_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1);
-	private ThreadPoolExecutor pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-	private int max_depth_of_search = 10;
-	private double pair_building_threshold = 0.75;
-	private double prob_cutoff = 0.5;
+	private Set<HashSet<String>> temp_results; // set in growPairs
+	private ThreadPoolExecutor pool; // set in growPairs
+	private int max_depth_of_search = 5;
+	private double pair_building_threshold = 0.95;
+	private double prob_cutoff = this.pair_building_threshold;
 	private PrintStream verbose;
-	private int compute_timeout = 0; // minutes
+	private int compute_timeout = 60; // in minutes
 	
 	/**
 	 * Some convenient constructors
@@ -345,10 +345,6 @@ public class DACO {
 	 */
 	public HashSet<HashSet<String>> growPairs(String protein, Set<String> other_seed_proteins) {
 		
-		// re-init necessary stuff
-		temp_results = Collections.newSetFromMap(new ConcurrentHashMap<>(Math.min(number_of_threads / 2, 2)));
-		pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-		
 		// check if in PPI
 		if (!ppi.contains(protein)) {
 			if (verbose != null)
@@ -386,13 +382,21 @@ public class DACO {
 		
 		// old Python implementation tried to have at least 2 pairs at this point, JDACO doesn't do that
 		
+		// stop early if there is nothing to do
+		if (jobs.size() == 0) {
+			verbose.println("No interaction partners above pair-building threshold.");
+			return new HashSet<HashSet<String>>();
+		}
+		
+		if (verbose != null)
+			verbose.println("Seeding from " + no_pair_proteins + " pairs with " + jobs.size() + " unique domain interactions.");
+		
+		// re-init necessary stuff
+		temp_results = Collections.newSetFromMap(new ConcurrentHashMap<>(jobs.size(), 0.9f, Math.max(number_of_threads / 8, 1)));
+		pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 		
 		// start computing and output
 		Timer timer = new Timer();
-		
-		if (verbose != null)
-			verbose.println("Seeding from "+no_pair_proteins+" pairs with "+jobs.size()+ " unique domain interactions.");
-		
 		if (this.compute_timeout > 0)
 			timer.schedule(new EarlyStopper(), this.compute_timeout * 60 * 1000);
 		
@@ -400,17 +404,20 @@ public class DACO {
 			pool.execute(job);
 		do {
 			try {
-				Thread.sleep(500);
+				Thread.sleep(20 * this.max_depth_of_search);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		while (pool.getQueue().size() > 0 || pool.getActiveCount() > 0);
+		while (pool.getActiveCount() > 0 || pool.getQueue().size() > 0);
 		
 		timer.cancel();
 		pool.shutdown();
 		
 		System.gc();
+		
+		if (verbose != null)
+			verbose.println("DACO determined " + temp_results.size() + " complexes around this seed protein.");
 		
 		return new HashSet<>(temp_results);
 	}
