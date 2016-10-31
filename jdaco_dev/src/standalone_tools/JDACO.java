@@ -178,7 +178,7 @@ public class JDACO {
 		if (prob_threshold == -1.0)
 			prob_threshold = Math.pow(pair_threshold, max_depth-1);
 		
-		System.out.println("Pair threshold: " + pair_threshold);
+		System.out.println("Pair-building threshold: " + pair_threshold);
 		System.out.println("Probability threshold: " + prob_threshold);
 		System.out.println("Max. depth of search: " + max_depth);
 		
@@ -194,8 +194,6 @@ public class JDACO {
 		// initialize calculation and set parameters
 		DACO daco = new DACO(ddin, ppin, no_threads, max_depth, pair_threshold, prob_threshold, out, compute_timeout);
 		
-		// some enforced cleaning, just in case :-)
-		System.gc();
 		
 		// carry out computation
 		long start = System.currentTimeMillis();
@@ -209,12 +207,20 @@ public class JDACO {
 			results.addAll(daco.growPairs(tf, seed));
 			++i;
 		}
-		
 		long duration = System.currentTimeMillis() - start;
-		System.out.println("Overall time: " + TimeUnit.MILLISECONDS.toMinutes(duration) + " min");
+		
+		
+		// aftermath
+		daco.ensurePoolShutdown();
 		
 		// filter and write output
 		DACO.writeAndFilterOutput(output_file, results, seed);
 		System.out.println(results.size() + " candidates written to output.");
+		
+		// below 2 min show results in seconds
+		if (duration < 120000)
+			System.out.println("Overall time: " + TimeUnit.MILLISECONDS.toSeconds(duration) + " sec");
+		else
+			System.out.println("Overall time: " + TimeUnit.MILLISECONDS.toMinutes(duration) + " min");
 	}
 }

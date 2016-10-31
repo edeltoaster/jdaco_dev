@@ -325,7 +325,7 @@ public class DACO {
 		public void run() {
 			
 			if (verbose != null)
-				verbose.println("Timeout of " + compute_timeout + " min exceeded: forced shutdown while collecting intermediate results.");
+				verbose.println("Timeout of " + compute_timeout + " min exceeded: forced shutdown and reporting intermediate results.");
 			
 			// stops algorithm and retrieves remaining incomplete iterations
 			List<Runnable> intermediates = pool.shutdownNow();
@@ -333,6 +333,8 @@ public class DACO {
 				StepFunction step = (StepFunction) r;
 				temp_results.add(step.internal_proteins);
 			}
+			
+			System.gc();
 		}
 		
 	}
@@ -349,7 +351,7 @@ public class DACO {
 		if (!ppi.contains(protein)) {
 			if (verbose != null)
 				verbose.println(protein+" not in PPIN.");
-			return new HashSet<>();
+			return new HashSet<HashSet<String>>();
 		}
 		
 		// determine start-pairs and DDIs
@@ -391,9 +393,14 @@ public class DACO {
 		if (verbose != null)
 			verbose.println("Seeding from " + no_pair_proteins + " pairs with " + jobs.size() + " unique domain interactions.");
 		
-		// re-init necessary stuff
-		temp_results = Collections.newSetFromMap(new ConcurrentHashMap<>(jobs.size(), 0.9f, Math.max(number_of_threads / 8, 1)));
-		pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+		// re-init data structures if necessary
+		if (this.temp_results == null) 
+			this.temp_results = Collections.newSetFromMap(new ConcurrentHashMap<>(Math.min(jobs.size(), 20), 0.75f, Math.max(number_of_threads / 4, 1)));
+		 else 
+			this.temp_results.clear();
+		
+		if (this.pool == null || this.pool.isShutdown())
+			this.pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 		
 		// start computing and output
 		Timer timer = new Timer();
@@ -401,44 +408,24 @@ public class DACO {
 			timer.schedule(new EarlyStopper(), this.compute_timeout * 60 * 1000);
 		
 		for (StepFunction job : jobs)
-			pool.execute(job);
+			this.pool.execute(job);
 		do {
 			try {
-				Thread.sleep(20 * this.max_depth_of_search);
+				Thread.sleep( (long) Math.pow(max_depth_of_search, 2) );
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		while (pool.getActiveCount() > 0 || pool.getQueue().size() > 0);
+		while (this.pool.getActiveCount() > 0 || this.pool.getQueue().size() > 0);
 		
 		timer.cancel();
-		pool.shutdown();
 		
-		System.gc();
-		
-		if (verbose != null)
+		if (verbose != null) {
 			verbose.println("DACO determined " + temp_results.size() + " complexes around this seed protein.");
-		
-		return new HashSet<>(temp_results);
-	}
-	
-	/**
-	 * Starts the pair growing and DACO algorithm for all nodes automatically,
-	 * merges all results and returns the final set of sets in a special results class.
-	 * @param seed_proteins
-	 * @return
-	 */
-	public DACOResultSet batchGrowPairs(Set<String> seed_proteins) {
-		
-		HashSet<HashSet<String>> results = new HashSet<>();
-		
-		for (String tf : seed_proteins) {
-			results.addAll(this.growPairs(tf, seed_proteins));
+			verbose.flush();
 		}
 		
-		DACO.filterOutput(results);
-		
-		return new DACOResultSet(results, seed_proteins);
+		return new HashSet<>(temp_results);
 	}
 	
 	/**
@@ -553,5 +540,13 @@ public class DACO {
 					sub.add(i);
 			}
 		results.removeAll(sub);
+	}
+	
+	/**
+	 * Application can only be closed when pool is shut down
+	 */
+	public void ensurePoolShutdown() {
+		if (this.pool != null)
+			this.pool.shutdownNow();
 	}
 }
