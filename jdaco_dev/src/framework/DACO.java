@@ -407,11 +407,13 @@ public class DACO {
 		if (this.compute_timeout > 0)
 			timer.schedule(new EarlyStopper(), this.compute_timeout * 60 * 1000);
 		
+		long check_interval = (long) Math.pow(max_depth_of_search, 2);
+		
 		for (StepFunction job : jobs)
 			this.pool.execute(job);
 		do {
 			try {
-				Thread.sleep( (long) Math.pow(max_depth_of_search, 2) );
+				Thread.sleep(check_interval);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

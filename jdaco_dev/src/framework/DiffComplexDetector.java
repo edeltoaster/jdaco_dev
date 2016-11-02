@@ -15,7 +15,7 @@ import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
  * @author Thorsten Will
  */
 public class DiffComplexDetector {
-// TODO: getter
+	
 	// given data
 	private final Map<String, QuantDACOResultSet> group1;
 	private final Map<String, QuantDACOResultSet> group2;
@@ -89,6 +89,39 @@ public class DiffComplexDetector {
 			System.out.println(variant + " " + this.significance_variants_pvalues.get(variant));
 		}
 	}
-	
+
 	// TODO: think about what is helpful, probably inherit classes that are more specific, like TF complexes
+	
+	public Map<String, QuantDACOResultSet> getGroup1() {
+		return group1;
+	}
+
+	public Map<String, QuantDACOResultSet> getGroup2() {
+		return group2;
+	}
+
+	public double getFDR() {
+		return FDR;
+	}
+
+	public Set<HashSet<String>> getSeedCombinationVariant() {
+		return seed_combination_variant;
+	}
+
+	public Map<HashSet<String>, LinkedList<Double>> getGroup1Abundances() {
+		return group1_abundances;
+	}
+
+	public Map<HashSet<String>, LinkedList<Double>> getGroup2Abundances() {
+		return group2_abundances;
+	}
+
+	public Map<HashSet<String>, Double> getSignificanceVariantsPValues() {
+		return significance_variants_pvalues;
+	}
+
+	public List<HashSet<String>> getSignificanceSortedVariants() {
+		return significance_sorted_variants;
+	}
+	
 }
