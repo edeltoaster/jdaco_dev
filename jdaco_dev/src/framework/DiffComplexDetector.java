@@ -53,20 +53,27 @@ public class DiffComplexDetector {
 	}
 	
 	/**
-	 * Determines the abundance values of each seed variant found with the overall abundance of complexes containing it in the samples of the groups
+	 * Determines the abundance values of each seed variant found with the overall abundance of complexes containing the exact variant in the samples of the groups.
 	 * @param group
 	 * @return map of seed variant and abundance in each sample
 	 */
 	private Map<HashSet<String>, LinkedList<Double>> determineAbundanceOfSeedVariantsComplexes(Map<String, QuantDACOResultSet> group) {
+		// init empty data structure for abundance data
 		Map<HashSet<String>, LinkedList<Double>> group_abundances = new HashMap<>();
+		for (HashSet<String> variant:this.seed_combination_variant) {
+			group_abundances.put(variant, new LinkedList<Double>());
+		}
 		
+		// abundance of a seed_comb_variant is the sum of all complexes it is contained in
 		for (String sample:group.keySet()) {
 			Map<HashSet<String>, Double> sample_abundances = group.get(sample).getAbundanceOfSeedVariantsComplexes();
 			for (HashSet<String> variant:this.seed_combination_variant) {
-				double abundance = sample_abundances.getOrDefault(variant, 0.0);
-				if (!group_abundances.containsKey(variant))
-					group_abundances.put(variant, new LinkedList<Double>());
-				group_abundances.get(variant).add(abundance);
+				double abundance_values = 0.0;
+				for (HashSet<String> current_variant:sample_abundances.keySet()) { // sufficient to sum over sample as it is zero anyhow
+					if (current_variant.containsAll(variant))
+						abundance_values += sample_abundances.get(current_variant);
+				}
+				group_abundances.get(variant).add(abundance_values);
 			}
 		}
 		

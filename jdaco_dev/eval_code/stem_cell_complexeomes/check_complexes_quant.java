@@ -3,8 +3,11 @@ package stem_cell_complexeomes;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import framework.DiffComplexDetector;
 import framework.QuantDACOResultSet;
@@ -33,5 +36,15 @@ public class check_complexes_quant {
 		
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.05);
 		dcd.printResults();
+		String sox2 = "P48431";
+		String oct4 = "Q01860";
+		MannWhitneyUTest mwu = new MannWhitneyUTest();
+		System.out.println(dcd.getGroup2().keySet());
+		for (HashSet<String> combs:dcd.getGroup2Abundances().keySet()) {
+			if (combs.contains(sox2) && combs.contains(oct4)) {
+				double pm = mwu.mannWhitneyUTest(Utilities.getDoubleArray(dcd.getGroup2Abundances().get(combs)), Utilities.getDoubleArray(dcd.getGroup1Abundances().get(combs)));
+				System.out.println(combs + " " + pm + "/" + dcd.getSignificanceVariantsPValues().get(combs) + ":"+ dcd.getGroup2Abundances().get(combs) + " vs " + dcd.getGroup1Abundances().get(combs));
+			}
+		}
 	}
 }

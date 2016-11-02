@@ -204,10 +204,10 @@ public class QuantDACOResultSet extends DACOResultSet {
 		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
 		
 		for (HashSet<String> seed_variant:this.getSeedToComplexMap().keySet()) {
-			List<Double> abundance_values = new LinkedList<>();
+			double abundance_values = 0.0;
 			for (HashSet<String> complex:this.getSeedToComplexMap().get(seed_variant))
-				abundance_values.add(individual_quantification_result.get(complex));
-			quantification_result.put(seed_variant, abundance_values.stream().reduce(0.0, Double::sum));
+				abundance_values += individual_quantification_result.get(complex);
+			quantification_result.put(seed_variant, abundance_values);
 		}
 		
 		return quantification_result;
