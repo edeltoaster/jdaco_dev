@@ -23,6 +23,7 @@ public class DiffComplexDetector {
 	
 	// processed / determined data
 	private final Set<HashSet<String>> seed_combination_variant = new HashSet<>();
+	private final Map<HashSet<String>, LinkedList<HashSet<String>>> seed_combination_variant_superset = new HashMap<>();
 	private final Map<HashSet<String>, LinkedList<Double>> group1_abundances;
 	private final Map<HashSet<String>, LinkedList<Double>> group2_abundances;
 	
@@ -35,11 +36,19 @@ public class DiffComplexDetector {
 		this.group2 = group2;
 		this.FDR = FDR;
 		
-		// determine potentially relevent seed variant combinations
+		// determine potentially relevent seed variant combinations ...
 		for (QuantDACOResultSet qdr:group1.values())
 			this.seed_combination_variant.addAll(qdr.getSeedToComplexMap().keySet());
 		for (QuantDACOResultSet qdr:group2.values())
 			this.seed_combination_variant.addAll(qdr.getSeedToComplexMap().keySet());
+		// ... and subsets
+		for (HashSet<String> variant:this.seed_combination_variant)
+			for (HashSet<String> current_variant:this.seed_combination_variant) 
+				if (current_variant.containsAll(variant) && !current_variant.equals(variant)) {
+					if (!this.seed_combination_variant_superset.containsKey(variant))
+						this.seed_combination_variant_superset.put(variant, new LinkedList<HashSet<String>>());
+					this.seed_combination_variant_superset.get(variant).add(current_variant);
+				}
 		
 		// determine abundance values
 		this.group1_abundances = this.determineAbundanceOfSeedVariantsComplexes(group1);
@@ -68,10 +77,11 @@ public class DiffComplexDetector {
 		for (String sample:group.keySet()) {
 			Map<HashSet<String>, Double> sample_abundances = group.get(sample).getAbundanceOfSeedVariantsComplexes();
 			for (HashSet<String> variant:this.seed_combination_variant) {
-				double abundance_values = 0.0;
-				for (HashSet<String> current_variant:sample_abundances.keySet()) { // sufficient to sum over sample as it is zero anyhow
-					if (current_variant.containsAll(variant))
-						abundance_values += sample_abundances.get(current_variant);
+				double abundance_values = sample_abundances.getOrDefault(variant, 0.0);
+				if (this.seed_combination_variant_superset.containsKey(variant)) {
+					for (HashSet<String> current_variant:this.seed_combination_variant_superset.get(variant)) { // sufficient to sum over sample as it is zero anyhow
+						abundance_values += sample_abundances.getOrDefault(current_variant, 0.0);
+					}
 				}
 				group_abundances.get(variant).add(abundance_values);
 			}

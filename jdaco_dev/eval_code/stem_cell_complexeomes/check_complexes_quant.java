@@ -7,8 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
-
+import framework.DataQuery;
 import framework.DiffComplexDetector;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
@@ -16,7 +15,7 @@ import framework.Utilities;
 
 public class check_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_PrePPI_95_95_TPM/res5/";
+	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_PrePPI_95_95_TPM/res7/";
 	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/PrePPI_TPM_networks/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	
@@ -35,16 +34,21 @@ public class check_complexes_quant {
 		}
 		
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.05);
-		dcd.printResults();
-		String sox2 = "P48431";
-		String oct4 = "Q01860";
-		MannWhitneyUTest mwu = new MannWhitneyUTest();
-		System.out.println(dcd.getGroup2().keySet());
-		for (HashSet<String> combs:dcd.getGroup2Abundances().keySet()) {
-			if (combs.contains(sox2) && combs.contains(oct4)) {
-				double pm = mwu.mannWhitneyUTest(Utilities.getDoubleArray(dcd.getGroup2Abundances().get(combs)), Utilities.getDoubleArray(dcd.getGroup1Abundances().get(combs)));
-				System.out.println(combs + " " + pm + "/" + dcd.getSignificanceVariantsPValues().get(combs) + ":"+ dcd.getGroup2Abundances().get(combs) + " vs " + dcd.getGroup1Abundances().get(combs));
-			}
+		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
+			double median_tissues = Utilities.getMedian(dcd.getGroup1Abundances().get(variant));
+			double median_ESCs = Utilities.getMedian(dcd.getGroup2Abundances().get(variant));
+			
+			String sign = "-";
+			if (median_ESCs > median_tissues)
+				sign = "+";
+			
+			String hgncs = DataQuery.batchHGNCProteinsGenes(variant).toString();
+			double pval = dcd.getSignificanceVariantsPValues().get(variant);
+			
+			if (sign.equals("-"))
+				continue;
+			
+			System.out.println(sign + " " + hgncs + ", " + pval);
 		}
 	}
 }
