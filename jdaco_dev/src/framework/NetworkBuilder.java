@@ -480,6 +480,40 @@ public class NetworkBuilder {
 	}
 	
 	/**
+	 * Construct specific PPIN and DDIN from a map of abundant proteins and their expressed transcripts
+	 * @param transcript_abundance
+	 * @param remove_decayed
+	 * @return
+	 */
+	public ConstructedNetworks constructAssociatedWeightedNetworksFromTranscriptAbundance(Map<String, Float> transcript_abundance, boolean remove_decayed) {
+		// map abundant transcripts to proteins and those again to highest expressed transcript
+		Map<String, String> major_transcript = new HashMap<>();
+		for (String transcript:transcript_abundance.keySet()) {
+			if (!this.transcript_to_proteins.containsKey(transcript)) // if no protein coding transcript
+				continue;
+			for (String protein:this.transcript_to_proteins.get(transcript)) {
+				if (!major_transcript.containsKey(protein))
+					major_transcript.put(protein, transcript);
+				else { // compare case
+					if (transcript_abundance.get(transcript) > transcript_abundance.get(major_transcript.get(protein)))
+						major_transcript.put(protein, transcript);
+				}
+			}
+		}
+		
+		// maps that store interactions and weights
+		HashMap<String, Set<String>> ppi_partners = new HashMap<>(1024);
+		HashMap<StrPair, Double> weights = new HashMap<>(8192);
+		// maps that store DDI-stuff
+		Map<String, List<String>> ddis = new HashMap<>(8192);// will later be converted to fixed data structure
+		Map<String, List<String>> protein_to_domains = new HashMap<>(1024);// will later be converted to fixed data structure
+		HashMap<String, String> domain_to_protein = new HashMap<>(8192);// HashMap since already final
+		
+		
+		return null;
+	}
+	
+	/**
 	 * Constructs DDIN of principal isoforms from given PPIN and returns the resulting pair of networks
 	 */
 	private static ConstructedNetworks constructSingleDDIN(PPIN ppi) {
