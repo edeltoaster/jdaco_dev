@@ -257,6 +257,43 @@ public class PPIN {
 	}
 	
 	/**
+	 * Alternative constructor that builds subnetworks of isoforms and weight factors
+	 * @param unpruned_ppi
+	 * @param abundant_proteins
+	 */
+	public PPIN(PPIN unpruned_ppi, Map<String, Set<String>> supported_interactions, Map<StrPair, Double> weight_factors) {
+		
+		this.is_weighted = true;
+		
+		for (String p1:supported_interactions.keySet()) 
+			for (String p2:supported_interactions.get(p1)) {
+				// every pair only one time
+				if (p1.compareTo(p2) <= 0)
+					continue;
+				StrPair pair = new StrPair(p1, p2);
+				double w = unpruned_ppi.getWeights().get(pair) * weight_factors.get(pair);
+				
+				// every interaction only once -> add both directions
+				if (!this.partners.containsKey(p1)) {
+					this.w_whole.put(p1, 0.0);
+					this.partners.put(p1, new HashSet<String>());
+				}
+				this.partners.get(p1).add(p2);
+				this.w_whole.put(p1, this.w_whole.get(p1) + w);
+				
+				if (!this.partners.containsKey(p2)) {
+					this.w_whole.put(p2, 0.0);
+					this.partners.put(p2, new HashSet<String>());
+				}
+				this.partners.get(p2).add(p1);
+				this.w_whole.put(p2, this.w_whole.get(p2) + w);
+				
+				this.weights.put(pair, w);
+			}
+	}
+	
+	
+	/**
 	 * Alternative constructor
 	 * @param abundant_proteins
 	 */

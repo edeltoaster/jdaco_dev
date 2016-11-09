@@ -41,7 +41,8 @@ public class build_networks_preppi {
 			String file_name = path_split[path_split.length-1].split("\\.")[0];
 			System.out.println("Processing " + file_name);
 			
-			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readKallistoFile(path, 0.0), true, true);
+			//ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readKallistoFile(path, 0.0), true, true);
+			ConstructedNetworks cn = builder.constructAssociatedWeightedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readKallistoFile(path, 0.0), true);
 			cn.getPPIN().writePPIN(network_folder + file_name + "_ppin.txt.gz");
 			cn.getDDIN().writeDDIN(network_folder + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(network_folder + file_name + "_major-transcripts.txt.gz");

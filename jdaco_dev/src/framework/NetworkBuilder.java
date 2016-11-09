@@ -479,39 +479,217 @@ public class NetworkBuilder {
 		return constructSingleDDIN(ppi);
 	}
 	
+	
 	/**
-	 * Construct specific PPIN and DDIN from a map of abundant proteins and their expressed transcripts
+	 * Construct specific PPIN and DDIN from a map of expressed transcripts (>0) where only domains of the major isoform are assumed
 	 * @param transcript_abundance
 	 * @param remove_decayed
 	 * @return
 	 */
 	public ConstructedNetworks constructAssociatedWeightedNetworksFromTranscriptAbundance(Map<String, Float> transcript_abundance, boolean remove_decayed) {
-		// map abundant transcripts to proteins and those again to highest expressed transcript
-		Map<String, String> major_transcript = new HashMap<>();
+		
+		// map abundant transcripts to proteins and those again to highest expressed transcript and all transcripts
+		Map<String, String> major_transcripts = new HashMap<>();
+		Map<String, LinkedList<String>> protein_to_transcripts = new HashMap<>();
 		for (String transcript:transcript_abundance.keySet()) {
 			if (!this.transcript_to_proteins.containsKey(transcript)) // if no protein coding transcript
 				continue;
 			for (String protein:this.transcript_to_proteins.get(transcript)) {
-				if (!major_transcript.containsKey(protein))
-					major_transcript.put(protein, transcript);
-				else { // compare case
-					if (transcript_abundance.get(transcript) > transcript_abundance.get(major_transcript.get(protein)))
-						major_transcript.put(protein, transcript);
+				if (!major_transcripts.containsKey(protein)) {
+					major_transcripts.put(protein, transcript);
+					protein_to_transcripts.put(protein, new LinkedList<>());
+				} else { // compare case
+					if (transcript_abundance.get(transcript) > transcript_abundance.get(major_transcripts.get(protein)))
+						major_transcripts.put(protein, transcript);
 				}
+				protein_to_transcripts.get(protein).add(transcript);
 			}
 		}
 		
 		// maps that store interactions and weights
 		HashMap<String, Set<String>> ppi_partners = new HashMap<>(1024);
-		HashMap<StrPair, Double> weights = new HashMap<>(8192);
+		HashMap<StrPair, Double> ppi_weight_factor = new HashMap<>(8192);
+		Map<String, Float> sum_abundance = new HashMap<>();
+		
 		// maps that store DDI-stuff
 		Map<String, List<String>> ddis = new HashMap<>(8192);// will later be converted to fixed data structure
 		Map<String, List<String>> protein_to_domains = new HashMap<>(1024);// will later be converted to fixed data structure
 		HashMap<String, String> domain_to_protein = new HashMap<>(8192);// HashMap since already final
 		
+		// shrink to proteins in network
+		major_transcripts.keySet().retainAll(this.original_ppi.getProteins());
 		
-		return null;
+		// prepare set of decay transcripts
+		Set<String> decay_transcripts = DataQuery.getDecayTranscripts(this.organism_database);
+		
+		// scan all expressed proteins for their abundant domains and build a state-specific domain_map
+		Map<String, List<String>> domain_map = new HashMap<>();
+		Map<String, Double> domain_probability_map = new HashMap<>();
+		
+		for (String protein:protein_to_transcripts.keySet()) {
+			Map<String, Double> local_domain_probability_map = new HashMap<>();
+			double overall_abundance = 0.0;
+			
+			// initialize domain_type counting
+			if (this.holistic_protein_domain_composition_map.containsKey(protein))
+				for (String domain_type:this.holistic_protein_domain_composition_map.get(protein))
+					local_domain_probability_map.put(domain_type, 0.0);
+			
+			// summarize counts per protein for normalization and count abundance of domain types
+			for (String current_transcript:protein_to_transcripts.get(protein)) {
+				double transcript_count = transcript_abundance.get(current_transcript);
+				overall_abundance += transcript_count;
+				// if transcript is thought to not lead to a viable protein, discard it
+				if (remove_decayed && decay_transcripts.contains(current_transcript))
+					continue;
+				
+				if (this.transcript_to_domains.containsKey(current_transcript))
+					for (String domain_type:new HashSet<>(this.transcript_to_domains.get(current_transcript))) {
+						if (local_domain_probability_map.containsKey(domain_type))
+							local_domain_probability_map.put(domain_type, local_domain_probability_map.get(domain_type) + transcript_count);
+					}
+			}
+			
+			// normalize and remove non-occurring domain types
+			if (this.holistic_protein_domain_composition_map.containsKey(protein))
+				for (String domain_type:this.holistic_protein_domain_composition_map.get(protein))
+					local_domain_probability_map.put(domain_type, local_domain_probability_map.get(domain_type) / overall_abundance);
+			local_domain_probability_map.keySet().removeIf(s->local_domain_probability_map.get(s) == 0.0);
+			
+			// FB domain handling
+			String holistic_domain_id = "FB|"+protein; // holistic_domain_id equals domain_id here
+			String domain_id = "0|"+holistic_domain_id;
+			if (this.holistic_ddis.containsKey(holistic_domain_id)) {
+				domain_map.put(holistic_domain_id, new LinkedList<String>());
+				domain_map.get(holistic_domain_id).add(domain_id);
+				domain_probability_map.put(holistic_domain_id, 1.0); // artificial domins always have probability 1.0
+				protein_to_domains.put(protein, new LinkedList<String>());
+				protein_to_domains.get(protein).add(domain_id);
+				domain_to_protein.put(domain_id, protein);
+			} else {
+				protein_to_domains.put(protein, new LinkedList<String>());
+			}
+			
+			String assumed_transcript = major_transcripts.get(protein);
+			
+			if (remove_decayed && decay_transcripts.contains(assumed_transcript))
+				continue;
+			
+			// other domains
+			if (!this.transcript_to_domains.containsKey(assumed_transcript))
+				this.transcript_to_domains.put(assumed_transcript, new LinkedList<String>());
+			
+			for (String domain_type:this.transcript_to_domains.get(assumed_transcript)) {
+				holistic_domain_id = domain_type+"|"+protein;
+				// if not needed anyhow, don't add to any data structure
+				if (!this.holistic_ddis.containsKey(holistic_domain_id))
+					continue;
+				domain_probability_map.put(holistic_domain_id, local_domain_probability_map.get(domain_type));
+				// 2 cases: either first of this kind or n-th, FB domains not accounted for
+				if (!domain_map.containsKey(holistic_domain_id)) {
+					domain_id = "1|"+holistic_domain_id;
+					domain_map.put(holistic_domain_id, new LinkedList<String>());
+					domain_map.get(holistic_domain_id).add(domain_id);
+				} else {
+					List<String> already_known = domain_map.get(holistic_domain_id);
+					domain_id = (already_known.size()+1) +"|"+holistic_domain_id;
+					already_known.add(domain_id);
+				}
+				
+				protein_to_domains.get(protein).add(domain_id);
+				domain_to_protein.put(domain_id, protein);
+			}
+			
+			sum_abundance.put(assumed_transcript, (float) overall_abundance);
+		}
+		
+		// scan all known DDIs
+		for (String holistic_domain_id1:this.holistic_ddis.keySet()) {
+			// don't try if nothing there
+			if (!domain_map.containsKey(holistic_domain_id1))
+				continue;
+			for (String holistic_domain_id2:this.holistic_ddis.get(holistic_domain_id1)) {
+				// check if there is such a domain and don't iterate double
+				if (! domain_map.containsKey(holistic_domain_id2) || holistic_domain_id1.compareTo(holistic_domain_id2) <= 0)
+					continue;
+				boolean first = true;
+				for (String domain_id1:domain_map.get(holistic_domain_id1))
+					for (String domain_id2:domain_map.get(holistic_domain_id2)) {
+						// if actual connection exists in the sample
+						if (first) {
+							first = false;
+							// add ppi
+							String protein1 = this.holistic_domain_to_protein.get(holistic_domain_id1);
+							String protein2 = this.holistic_domain_to_protein.get(holistic_domain_id2);
+							if (!ppi_partners.containsKey(protein1))
+								ppi_partners.put(protein1, new HashSet<String>());
+							ppi_partners.get(protein1).add(protein2);
+							if (!ppi_partners.containsKey(protein2))
+								ppi_partners.put(protein2, new HashSet<String>());
+							ppi_partners.get(protein2).add(protein1);
+							
+							// add weights
+							StrPair pair = new StrPair(protein1, protein2);
+							double current_ppi_weight = Math.min(domain_probability_map.get(holistic_domain_id1), domain_probability_map.get(holistic_domain_id2));
+							if (!ppi_weight_factor.containsKey(pair) || current_ppi_weight > ppi_weight_factor.get(pair))
+								ppi_weight_factor.put(pair, current_ppi_weight);
+						}
+						
+						// add actual DDI
+						if (!ddis.containsKey(domain_id1))
+							ddis.put(domain_id1, new LinkedList<String>());
+						ddis.get(domain_id1).add(domain_id2);
+						if (!ddis.containsKey(domain_id2))
+							ddis.put(domain_id2, new LinkedList<String>());
+						ddis.get(domain_id2).add(domain_id1);
+					}
+				
+				
+			}
+		}
+		
+		
+		// cleanup disconnected proteins
+		Set<String> disconnected_proteins = new HashSet<String>(major_transcripts.keySet());
+		disconnected_proteins.removeAll(ppi_partners.keySet());
+		
+		for (String protein:disconnected_proteins) {
+			
+			// decay transcripts are NOT removed from the protein->transcript map
+			if (protein_to_domains.containsKey(protein)) {
+				for (String domain:protein_to_domains.get(protein))
+					domain_to_protein.remove(domain);
+				protein_to_domains.remove(protein);
+				major_transcripts.remove(protein);
+			}
+			
+		}
+		
+		
+		// cleanup domains without interactions
+		List<String> removable_domains = new LinkedList<>();
+		for (String domain:domain_to_protein.keySet())
+			if (!ddis.containsKey(domain))
+				removable_domains.add(domain);
+			
+		for (String domain:removable_domains) {
+			// remove from protein -> domains
+			protein_to_domains.get(domain_to_protein.get(domain)).remove(domain);
+			// remove from domain -> protein
+			domain_to_protein.remove(domain);
+		}
+		
+		// cleanup abundance data
+		sum_abundance.keySet().retainAll(major_transcripts.keySet());
+		
+		// build matching PPIN
+		PPIN constructed_ppin = new PPIN(this.original_ppi, ppi_partners, ppi_weight_factor);
+		// convert data to right format
+		DDIN constructed_ddin = new DDIN(ddis, protein_to_domains, domain_to_protein);
+		
+		return new ConstructedNetworks(constructed_ppin, constructed_ddin, major_transcripts, sum_abundance, this.organism_database, this.isoform_based);
 	}
+	
 	
 	/**
 	 * Constructs DDIN of principal isoforms from given PPIN and returns the resulting pair of networks
