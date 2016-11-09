@@ -202,7 +202,7 @@ public class NetworkBuilder {
 	 * @param protein_to_assumed_transcript
 	 * @return
 	 */
-	public ConstructedNetworks constructAssociatedNetworksFromTranscriptMap(Map<String, String> protein_to_assumed_transcript, Map<String, Float> original_transcript_abundance, boolean remove_decayed) {
+	public ConstructedNetworks constructAssociatedNetworksFromTranscriptMap(Map<String, String> protein_to_assumed_transcript, Map<String, Float> original_transcript_abundance, boolean remove_decayed, boolean report_gene_abundance) {
 		// map that stores p1<->p2
 		HashMap<String, Set<String>> ppi_partners = new HashMap<>();
 		// maps that store DDI-stuff
@@ -341,8 +341,27 @@ public class NetworkBuilder {
 		
 		// return including abundance data (if given) or without
 		if (original_transcript_abundance != null) {
-			Map<String, Float> transcript_abundance = new HashMap<>(original_transcript_abundance);
-			transcript_abundance.keySet().retainAll(protein_to_assumed_transcript.values());
+			Map<String, Float> transcript_abundance = null;
+			if (report_gene_abundance) { // quantify protein as all its transcripts
+				transcript_abundance = new HashMap<>();
+				for (String current_transcript:original_transcript_abundance.keySet()) {
+					if (!this.transcript_to_proteins.containsKey(current_transcript)) // if no protein coding transcript
+						continue;
+					float abundance = original_transcript_abundance.get(current_transcript);
+					for (String protein:this.transcript_to_proteins.get(current_transcript)) {
+						String assumed_transcript = protein_to_assumed_transcript.get(protein);
+						if (!transcript_abundance.containsKey(assumed_transcript))
+							transcript_abundance.put(assumed_transcript, abundance);
+						else {
+							transcript_abundance.put(assumed_transcript, transcript_abundance.get(assumed_transcript) + abundance);
+						}
+					}
+				}
+			} else { // only count abundance of one particular transcript per protein, remove unnecessary data
+				transcript_abundance = new HashMap<>(original_transcript_abundance);
+				transcript_abundance.keySet().retainAll(protein_to_assumed_transcript.values());
+			}
+
 			return new ConstructedNetworks(constructed_ppin, constructed_ddin, protein_to_assumed_transcript, transcript_abundance, this.organism_database, this.isoform_based);
 		}
 		else
@@ -350,11 +369,12 @@ public class NetworkBuilder {
 	}
 	
 	/**
-	 * Construct specific PPIN and DDIN from a map of transcript abundances
+	 * Construct specific PPIN and DDIN from a map of transcript abundances,
+	 * reports abundance per protein as the abundance its major coding transcript or the sum of all expressed coding transcripts
 	 * @param transcript_abundance
 	 * @return
 	 */
-	public ConstructedNetworks constructAssociatedNetworksFromTranscriptAbundance(Map<String, Float> transcript_abundance, boolean remove_decayed) {
+	public ConstructedNetworks constructAssociatedNetworksFromTranscriptAbundance(Map<String, Float> transcript_abundance, boolean remove_decayed, boolean report_gene_abundance) {
 		
 		// map abundant transcripts to proteins and those again to highest expressed transcript
 		Map<String, String> major_transcript = new HashMap<>();
@@ -371,7 +391,17 @@ public class NetworkBuilder {
 			}
 		}
 		
-		return this.constructAssociatedNetworksFromTranscriptMap(major_transcript, transcript_abundance, remove_decayed);
+		return this.constructAssociatedNetworksFromTranscriptMap(major_transcript, transcript_abundance, remove_decayed, report_gene_abundance);
+	}
+	
+	/**
+	 * Construct specific PPIN and DDIN from a map of transcript abundances, 
+	 * reports abundance per protein as the abundance its major coding transcript
+	 * @param transcript_abundance
+	 * @return
+	 */
+	public ConstructedNetworks constructAssociatedNetworksFromTranscriptAbundance(Map<String, Float> transcript_abundance, boolean remove_decayed) {
+		return this.constructAssociatedNetworksFromTranscriptAbundance(transcript_abundance, remove_decayed, false); // old behaviour
 	}
 	
 	/**
@@ -391,7 +421,7 @@ public class NetworkBuilder {
 			relevant_isoforms.put(protein, isoform.get(protein));
 		}
 
-		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, null, remove_decayed);
+		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, null, remove_decayed, true);
 	}
 	
 	/**
@@ -428,7 +458,7 @@ public class NetworkBuilder {
 		}
 		
 
-		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, null, remove_decayed);
+		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, null, remove_decayed, true);
 	}
 
 	/**

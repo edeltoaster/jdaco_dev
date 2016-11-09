@@ -26,7 +26,7 @@ public class check_complexes_quant {
 			String sample = f.getName().split("\\.")[0];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), seed, networks_folder + sample + "_major-transcripts.txt.gz");
 			
-			if (sample.startsWith("BM"))
+			if (!sample.contains("hESC"))
 				group1.put(sample, qdr);
 			else if (sample.contains("hESC")) {
 				group2.put(sample, qdr);
