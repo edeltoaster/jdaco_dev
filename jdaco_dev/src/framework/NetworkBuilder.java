@@ -204,11 +204,11 @@ public class NetworkBuilder {
 	 */
 	public ConstructedNetworks constructAssociatedNetworksFromTranscriptMap(Map<String, String> protein_to_assumed_transcript, Map<String, Float> original_transcript_abundance, boolean remove_decayed, boolean report_gene_abundance) {
 		// map that stores p1<->p2
-		HashMap<String, Set<String>> ppi_partners = new HashMap<>();
+		HashMap<String, Set<String>> ppi_partners = new HashMap<>(1024);
 		// maps that store DDI-stuff
-		Map<String, List<String>> ddis = new HashMap<>();// will later be converted to fixed data structure
-		Map<String, List<String>> protein_to_domains = new HashMap<>();// will later be converted to fixed data structure
-		HashMap<String, String> domain_to_protein = new HashMap<>();// HashMap since already final
+		Map<String, List<String>> ddis = new HashMap<>(8192);// will later be converted to fixed data structure
+		Map<String, List<String>> protein_to_domains = new HashMap<>(1024);// will later be converted to fixed data structure
+		HashMap<String, String> domain_to_protein = new HashMap<>(8192);// HashMap since already final
 		
 		// shrink to proteins in network
 		protein_to_assumed_transcript.keySet().retainAll(this.original_ppi.getProteins());
