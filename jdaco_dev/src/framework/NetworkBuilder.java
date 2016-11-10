@@ -509,7 +509,7 @@ public class NetworkBuilder {
 		// maps that store interactions and weights
 		HashMap<String, Set<String>> ppi_partners = new HashMap<>(1024);
 		HashMap<StrPair, Double> ppi_weight_factor = new HashMap<>(8192);
-		Map<String, Float> sum_abundance = new HashMap<>();
+		Map<String, Float> sum_abundance = new HashMap<>(1024);
 		
 		// maps that store DDI-stuff
 		Map<String, List<String>> ddis = new HashMap<>(8192);// will later be converted to fixed data structure
@@ -523,11 +523,18 @@ public class NetworkBuilder {
 		Set<String> decay_transcripts = DataQuery.getDecayTranscripts(this.organism_database);
 		
 		// scan all expressed proteins for their abundant domains and build a state-specific domain_map
-		Map<String, List<String>> domain_map = new HashMap<>();
-		Map<String, Double> domain_probability_map = new HashMap<>();
+		Map<String, List<String>> domain_map = new HashMap<>(1024);
+		Map<String, Double> domain_probability_map = new HashMap<>(8192);
 		
-		for (String protein:protein_to_transcripts.keySet()) {
-			Map<String, Double> local_domain_probability_map = new HashMap<>();
+		for (String protein:major_transcripts.keySet()) {
+			
+			String assumed_transcript = major_transcripts.get(protein);
+			
+			// do not process transcripts that are not there in the end
+			if (remove_decayed && decay_transcripts.contains(assumed_transcript))
+				continue;
+			
+			Map<String, Double> local_domain_probability_map = new HashMap<>(4);
 			double overall_abundance = 0.0;
 			
 			// initialize domain_type counting
@@ -562,7 +569,7 @@ public class NetworkBuilder {
 			if (this.holistic_ddis.containsKey(holistic_domain_id)) {
 				domain_map.put(holistic_domain_id, new LinkedList<String>());
 				domain_map.get(holistic_domain_id).add(domain_id);
-				domain_probability_map.put(holistic_domain_id, 1.0); // artificial domins always have probability 1.0
+				domain_probability_map.put(holistic_domain_id, 1.0); // artificial domains always have probability 1.0
 				protein_to_domains.put(protein, new LinkedList<String>());
 				protein_to_domains.get(protein).add(domain_id);
 				domain_to_protein.put(domain_id, protein);
@@ -570,15 +577,9 @@ public class NetworkBuilder {
 				protein_to_domains.put(protein, new LinkedList<String>());
 			}
 			
-			String assumed_transcript = major_transcripts.get(protein);
-			
-			if (remove_decayed && decay_transcripts.contains(assumed_transcript))
-				continue;
-			
 			// other domains
 			if (!this.transcript_to_domains.containsKey(assumed_transcript))
 				this.transcript_to_domains.put(assumed_transcript, new LinkedList<String>());
-			
 			for (String domain_type:this.transcript_to_domains.get(assumed_transcript)) {
 				holistic_domain_id = domain_type+"|"+protein;
 				// if not needed anyhow, don't add to any data structure
@@ -610,7 +611,7 @@ public class NetworkBuilder {
 				continue;
 			for (String holistic_domain_id2:this.holistic_ddis.get(holistic_domain_id1)) {
 				// check if there is such a domain and don't iterate double
-				if (! domain_map.containsKey(holistic_domain_id2) || holistic_domain_id1.compareTo(holistic_domain_id2) <= 0)
+				if (!domain_map.containsKey(holistic_domain_id2) || holistic_domain_id1.compareTo(holistic_domain_id2) <= 0)
 					continue;
 				boolean first = true;
 				for (String domain_id1:domain_map.get(holistic_domain_id1))
@@ -643,8 +644,6 @@ public class NetworkBuilder {
 							ddis.put(domain_id2, new LinkedList<String>());
 						ddis.get(domain_id2).add(domain_id1);
 					}
-				
-				
 			}
 		}
 		
@@ -680,7 +679,7 @@ public class NetworkBuilder {
 		}
 		
 		// cleanup abundance data
-		sum_abundance.keySet().retainAll(major_transcripts.keySet());
+		sum_abundance.keySet().retainAll(major_transcripts.values());
 		
 		// build matching PPIN
 		PPIN constructed_ppin = new PPIN(this.original_ppi, ppi_partners, ppi_weight_factor);

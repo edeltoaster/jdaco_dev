@@ -110,7 +110,7 @@ public class ConstructedNetworks {
 	}
 	
 	/**
-	 * Returns a map of most abundant transcripts per protein and their abundance, null if not stored
+	 * Returns a map of most abundant transcripts per protein and their abundance/summarized abundance of all transcripts associated with the protein (depending on building process), null if not stored
 	 * @return
 	 */
 	public Map<String, Float> getTranscriptAbundanceMap() {
