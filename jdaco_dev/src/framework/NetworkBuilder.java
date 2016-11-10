@@ -531,8 +531,10 @@ public class NetworkBuilder {
 			String assumed_transcript = major_transcripts.get(protein);
 			
 			// do not process transcripts that are not there in the end
-			if (remove_decayed && decay_transcripts.contains(assumed_transcript))
+			if (remove_decayed && decay_transcripts.contains(assumed_transcript)) {
+				sum_abundance.put(assumed_transcript, 0f); // is in major transcript file, but only for PPICompare compatibility
 				continue;
+			}
 			
 			Map<String, Double> local_domain_probability_map = new HashMap<>(4);
 			double overall_abundance = 0.0;
