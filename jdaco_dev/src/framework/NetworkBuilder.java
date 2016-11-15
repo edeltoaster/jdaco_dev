@@ -633,7 +633,7 @@ public class NetworkBuilder {
 							
 							// add weights
 							StrPair pair = new StrPair(protein1, protein2);
-							double current_ppi_weight = Math.min(domain_probability_map.get(holistic_domain_id1), domain_probability_map.get(holistic_domain_id2));
+							double current_ppi_weight = domain_probability_map.get(holistic_domain_id1) * domain_probability_map.get(holistic_domain_id2);
 							if (!ppi_weight_factor.containsKey(pair) || current_ppi_weight > ppi_weight_factor.get(pair))
 								ppi_weight_factor.put(pair, current_ppi_weight);
 						}
