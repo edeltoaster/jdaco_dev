@@ -169,7 +169,14 @@ public class ConstructedNetworks {
 		String[] split = this.db.split("_");
 		return split[split.length-1];
 	}
-
+	
+	/**
+	 * ConstructedNetworks data contains abundance data
+	 */
+	public boolean containsAbundanceData() {
+		return this.transcript_abundance != null;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
