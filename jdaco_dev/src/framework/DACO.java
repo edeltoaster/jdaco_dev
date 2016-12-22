@@ -212,6 +212,17 @@ public class DACO {
 					return;
 				} else {
 					// add case
+					
+					final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
+					new_internal_proteins.add(add_max_protein);
+					
+					boolean size_cutoff = false;
+					
+					// cutoff if there's nothing to check further and P_n >= prob_cutoff (needs to be positive for at least one case)
+					if (new_internal_proteins.size() == max_depth_of_search) {
+						size_cutoff = true;
+					}
+					
 					// filter alternatives
 					final LinkedList<StrPair> domain_edge_alternatives = filterDomainInteractionAlternatives(incident.get(add_max_protein));
 					
@@ -221,16 +232,14 @@ public class DACO {
 						final double P_n = P * ppi.getWeights().get(new StrPair(ddi.getDomain_to_protein().get(distinct_domain_edge.getL()), ddi.getDomain_to_protein().get(distinct_domain_edge.getR())));
 						
 						if (P_n >= prob_cutoff) {
-							// add
-							final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
-							final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
-							new_internal_proteins.add(add_max_protein);
 							
-							// cutoff, don't recurse
-							if (new_internal_proteins.size() == max_depth_of_search) {
+							// cutoff if there's nothing to check further
+							if (size_cutoff) {
 								temp_results.add(new_internal_proteins);
 								return;
 							}
+							
+							final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
 							new_domain_interactions.add(distinct_domain_edge);
 							
 							// recurse,  necessary to make new objects
@@ -251,9 +260,6 @@ public class DACO {
 						final double d_out = c_w_out + n_w_out - n_w_in;
 						boolean any_addition = false;
 						
-						final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
-						new_internal_proteins.add(add_max_protein);
-						
 						if (pool.isShutdown()) {
 							temp_results.add(new_internal_proteins);
 							return;
@@ -263,13 +269,15 @@ public class DACO {
 							for (StrPair domain_edge : domain_edge_alternatives) {
 								final double P_n = P * ppi.getWeights().get(new StrPair(ddi.getDomain_to_protein().get(domain_edge.getL()), ddi.getDomain_to_protein().get(domain_edge.getR())));
 								if (P_n >= prob_cutoff) {
+									
+									// cutoff if there's nothing to check further
+									if (size_cutoff) {
+										temp_results.add(new_internal_proteins);
+										return;
+									}
+									
 									// add
 									any_addition = true;
-									// cutoff, don't recurse
-									if (new_internal_proteins.size() == max_depth_of_search) {
-										temp_results.add(new_internal_proteins);
-										return;// ok if only 1 choice is above threshold...
-									}
 									final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
 									new_domain_interactions.add(domain_edge);
 									
