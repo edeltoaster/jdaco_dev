@@ -91,17 +91,19 @@ public class wDACO {
 	/**
 	 * StepFunction implements the parallel-part of the algorithm
 	 */
-	private final class StepFunction implements Runnable { // TODO: new parameter HashMap<String, Double> protein_probabilities
+	private final class StepFunction implements Runnable {
 		
 		final HashSet<String> internal_proteins;
-		final HashSet<StrPair> domain_interactions; 
+		final HashSet<StrPair> domain_interactions;
+		final HashMap<String, Double> prev_protein_abundance;
 		final double c_w_in;
 		final double c_w_out;
 		final double P;
 		
-		public StepFunction(HashSet<String> internal_proteins, HashSet<StrPair> domain_interactions, double c_w_in, double c_w_out, double p) {
+		public StepFunction(HashSet<String> internal_proteins, HashSet<StrPair> domain_interactions, HashMap<String, Double> prev_protein_abundance, double c_w_in, double c_w_out, double p) {
 			this.internal_proteins = internal_proteins;
 			this.domain_interactions = domain_interactions;
+			this.prev_protein_abundance = prev_protein_abundance;
 			this.c_w_in = c_w_in;
 			this.c_w_out = c_w_out;
 			P = p;
@@ -166,6 +168,7 @@ public class wDACO {
 			
 			// search for additional protein that may max. cohesiveness
 			HashMap<String, LinkedList<StrPair>> incident = getIncidentNodes(internal_proteins, occupied_domains);
+			// TODO: get weighting
 			String add_max_protein = null;
 			for (String protein : incident.keySet()) {
 				final double[] coh = ppi.computeDeltaCohesiveness(protein, internal_proteins);
@@ -180,6 +183,7 @@ public class wDACO {
 			
 			// search for removable protein that could max. cohesiveness
 			HashMap<String, StrPair> boundary = getBoundaryNodes(internal_proteins, domain_interactions);
+			// TODO: use prev_
 			String del_max_protein = null;
 			for (String protein : boundary.keySet()) {
 				final double[] coh = ppi.computeDeltaCohesiveness(protein, internal_proteins);
@@ -200,6 +204,19 @@ public class wDACO {
 					return;
 				} else {
 					// add case
+					
+					final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
+					new_internal_proteins.add(add_max_protein);
+					final HashMap<String, Double> new_prev_protein_abundance = new HashMap<>(prev_protein_abundance);
+					// TODO: add new protein
+					
+					boolean size_cutoff = false;
+					
+					// cutoff if there's nothing to check further and P_n >= prob_cutoff (needs to be positive for at least one case)
+					if (new_internal_proteins.size() == max_depth_of_search) {
+						size_cutoff = true;
+					}
+					
 					// filter alternatives
 					final LinkedList<StrPair> domain_edge_alternatives = filterDomainInteractionAlternatives(incident.get(add_max_protein));
 					
@@ -209,21 +226,19 @@ public class wDACO {
 						final double P_n = P * ppi.getWeights().get(new StrPair(ddi.getDomain_to_protein().get(distinct_domain_edge.getL()), ddi.getDomain_to_protein().get(distinct_domain_edge.getR())));
 						
 						if (P_n >= prob_cutoff) {
-							// add
-							final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
-							final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
-							new_internal_proteins.add(add_max_protein);
 							
-							// cutoff, don't recurse
-							if (new_internal_proteins.size() == max_depth_of_search) {
+							// cutoff if there's nothing to check further
+							if (size_cutoff) {
 								temp_results.add(new_internal_proteins);
 								return;
 							}
+							
+							final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
 							new_domain_interactions.add(distinct_domain_edge);
 							
 							// recurse,  necessary to make new objects
 							try {
-								pool.execute(new StepFunction(new_internal_proteins, new_domain_interactions, c_w_in + n_w_in, c_w_out + n_w_out - n_w_in, P_n));
+								pool.execute(new StepFunction(new_internal_proteins, new_domain_interactions, new_prev_protein_abundance, c_w_in + n_w_in, c_w_out + n_w_out - n_w_in, P_n));
 							} catch (RejectedExecutionException e) {
 								temp_results.add(new_internal_proteins);
 							}
@@ -239,9 +254,6 @@ public class wDACO {
 						final double d_out = c_w_out + n_w_out - n_w_in;
 						boolean any_addition = false;
 						
-						final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
-						new_internal_proteins.add(add_max_protein);
-						
 						if (pool.isShutdown()) {
 							temp_results.add(new_internal_proteins);
 							return;
@@ -249,27 +261,29 @@ public class wDACO {
 						
 						try {
 							for (StrPair domain_edge : domain_edge_alternatives) {
+								
 								final double P_n = P * ppi.getWeights().get(new StrPair(ddi.getDomain_to_protein().get(domain_edge.getL()), ddi.getDomain_to_protein().get(domain_edge.getR())));
 								if (P_n >= prob_cutoff) {
+									
+									// cutoff if there's nothing to check further
+									if (size_cutoff) {
+										temp_results.add(new_internal_proteins);
+										return;
+									}
+									
 									// add
 									any_addition = true;
-									// cutoff, don't recurse
-									if (new_internal_proteins.size() == max_depth_of_search) {
-										temp_results.add(new_internal_proteins);
-										return;// ok if only 1 choice is above threshold...
-									}
 									final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
 									new_domain_interactions.add(domain_edge);
 									
 									// recurse, only necessary to make new domain-IA objects
-									pool.execute(new StepFunction(new_internal_proteins, new_domain_interactions, d_in, d_out, P_n));	
+									pool.execute(new StepFunction(new_internal_proteins, new_domain_interactions, new_prev_protein_abundance, d_in, d_out, P_n));	
 								} 
 							}
 						} catch (RejectedExecutionException e) {
 							temp_results.add(new_internal_proteins);
 							return;
-						} 
-						
+						}
 						
 						
 						// if no extension possible, return current
@@ -284,12 +298,16 @@ public class wDACO {
 				final double P_n = P / ppi.getWeights().get(new StrPair(ddi.getDomain_to_protein().get(distinct_domain_edge.getL()), ddi.getDomain_to_protein().get(distinct_domain_edge.getR())));
 				final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
 				final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
+				final HashMap<String, Double> new_prev_protein_abundance = new HashMap<>(prev_protein_abundance);
 				new_internal_proteins.remove(del_max_protein);
 				new_domain_interactions.remove(distinct_domain_edge);
+				new_prev_protein_abundance.remove(del_max_protein);
+				
+				// TODO: adjust weights!
 				
 				// recurse, make new objects
 				try {
-					pool.execute(new StepFunction(new_internal_proteins, new_domain_interactions, c_w_in - n_w_in, c_w_out - n_w_out + n_w_in, P_n));
+					pool.execute(new StepFunction(new_internal_proteins, new_domain_interactions, new_prev_protein_abundance, c_w_in - n_w_in, c_w_out - n_w_out + n_w_in, P_n));
 				} catch (RejectedExecutionException e) {
 					temp_results.add(new_internal_proteins);
 				}
@@ -347,6 +365,8 @@ public class wDACO {
 		seed.add(protein);
 		HashMap<String, LinkedList<StrPair>> incident = getIncidentNodes(seed, new HashSet<>());
 		LinkedList<StepFunction> jobs = new LinkedList<>();
+		final HashMap<String, Double> prot_weights = new HashMap<>();
+		prot_weights.put(protein, 1.0);
 		
 		// get all DDIs and proteins
 		int no_pair_proteins = 0;
@@ -361,16 +381,16 @@ public class wDACO {
 			LinkedList<StrPair> relevant_ddis = filterDomainInteractionAlternatives(incident.get(other_protein));
 			final HashSet<String> temp_set = new HashSet<>(seed);
 			temp_set.add(other_protein);
+			final HashMap<String, Double> temp_prot_weights = new HashMap<>(prot_weights);
+			temp_prot_weights.put(other_protein, 1.0);
 			double[] coh = ppi.computeClusterCohesiveness(temp_set);
 			for (StrPair ddi_choice : relevant_ddis) {
 				final HashSet<StrPair> new_domain_interactions = new HashSet<>();
 				new_domain_interactions.add(ddi_choice);
-				jobs.add(new StepFunction(temp_set, new_domain_interactions, coh[0], coh[1], P));
+				jobs.add(new StepFunction(temp_set, new_domain_interactions, temp_prot_weights, coh[0], coh[1], P));
 			}
 		}
 		// end job building
-		
-		// old Python implementation tried to have at least 2 pairs at this point, JDACO doesn't do that
 		
 		// stop early if there is nothing to do
 		if (jobs.size() == 0) {
@@ -503,6 +523,11 @@ public class wDACO {
 		return incident_nodes;
 	}
 	
+	private HashMap<String, Double> getIncidentProteinRelativeWeight(Set<String> proteins) {
+		HashMap<String, Double> inc_prot_weights = new HashMap<>();
+		
+		return inc_prot_weights;
+	}
 	/**
 	 * Merges proper subset and removes complexes that don't involve seed proteins and writes output to a csv-file
 	 * @param out_file
@@ -510,26 +535,9 @@ public class wDACO {
 	 */
 	public static void writeAndFilterOutput(String out_file, HashSet<HashSet<String>> results, Set<String> seed) {
 		// clean from subsets
-		wDACO.filterOutput(results);
+		DACO.filterOutput(results);
 		
 		new DACOResultSet(results, seed).writeCSV(out_file);
-	}
-	
-	/**
-	 * Merges proper subsets in results (in-memory!)
-	 * @param results
-	 */
-	public static void filterOutput(HashSet<HashSet<String>> results) {
-		// clean from subsets
-		HashSet<HashSet<String>> sub = new HashSet<>();
-		for (HashSet<String> i : results)
-			for (HashSet<String> j : results) {
-				if (i.equals(j))
-					continue;
-				if (j.containsAll(i))
-					sub.add(i);
-			}
-		results.removeAll(sub);
 	}
 	
 	/**
