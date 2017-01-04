@@ -168,31 +168,32 @@ public class wDACO {
 			
 			// search for additional protein that may max. cohesiveness
 			HashMap<String, LinkedList<StrPair>> incident = getIncidentNodes(internal_proteins, occupied_domains);
-			// TODO: get weighting
 			String add_max_protein = null;
+			HashMap<String, Double> prot_weights = getIncidentProteinRelativeWeight(incident.keySet());
 			for (String protein : incident.keySet()) {
 				final double[] coh = ppi.computeDeltaCohesiveness(protein, internal_proteins);
-				final double temp_coh = (c_w_in + coh[0]) / (c_sum + coh[1]);
+				final double w = prot_weights.get(protein);
+				final double temp_coh = (c_w_in + w*coh[0]) / (c_sum + w*coh[1]);
 				if (temp_coh > max_coh) {
 					max_coh = temp_coh;
 					add_max_protein = protein;
-					n_w_in = coh[0];
-					n_w_out = coh[1];
+					n_w_in = w*coh[0];
+					n_w_out = w*coh[1];
 				}
 			}
 			
 			// search for removable protein that could max. cohesiveness
 			HashMap<String, StrPair> boundary = getBoundaryNodes(internal_proteins, domain_interactions);
-			// TODO: use prev_
 			String del_max_protein = null;
 			for (String protein : boundary.keySet()) {
 				final double[] coh = ppi.computeDeltaCohesiveness(protein, internal_proteins);
-				final double temp_coh = (c_w_in - coh[0]) / (c_sum - coh[1]);
+				final double w = prev_protein_abundance.get(protein);
+				final double temp_coh = (c_w_in - w*coh[0]) / (c_sum - w*coh[1]);
 				if (temp_coh > max_coh) {
 					max_coh = temp_coh;
 					del_max_protein = protein;
-					n_w_in = coh[0];
-					n_w_out = coh[1];
+					n_w_in = w*coh[0];
+					n_w_out = w*coh[1];
 				}
 			}
 			
@@ -208,7 +209,8 @@ public class wDACO {
 					final HashSet<String> new_internal_proteins = new HashSet<>(internal_proteins);
 					new_internal_proteins.add(add_max_protein);
 					final HashMap<String, Double> new_prev_protein_abundance = new HashMap<>(prev_protein_abundance);
-					// TODO: add new protein
+					double w = prot_weights.get(add_max_protein);
+					new_prev_protein_abundance.put(add_max_protein, w);
 					
 					boolean size_cutoff = false;
 					
@@ -235,6 +237,7 @@ public class wDACO {
 							
 							final HashSet<StrPair> new_domain_interactions = new HashSet<>(domain_interactions);
 							new_domain_interactions.add(distinct_domain_edge);
+							
 							
 							// recurse,  necessary to make new objects
 							try {
@@ -302,8 +305,6 @@ public class wDACO {
 				new_internal_proteins.remove(del_max_protein);
 				new_domain_interactions.remove(distinct_domain_edge);
 				new_prev_protein_abundance.remove(del_max_protein);
-				
-				// TODO: adjust weights!
 				
 				// recurse, make new objects
 				try {
@@ -523,8 +524,20 @@ public class wDACO {
 		return incident_nodes;
 	}
 	
+	/**
+	 * Returns weights for each incident protein, weighted by proportion of most abundant one.
+	 * Returns null if set is empty .
+	 * @param proteins
+	 * @return
+	 */
 	private HashMap<String, Double> getIncidentProteinRelativeWeight(Set<String> proteins) {
+		if (proteins.size() == 0)
+			return null;
+		
 		HashMap<String, Double> inc_prot_weights = new HashMap<>();
+		double max = proteins.stream().mapToDouble(p->protein_abundance.get(p)).max().getAsDouble();
+		for (String protein:proteins)
+			inc_prot_weights.put(protein, protein_abundance.get(protein) / max);
 		
 		return inc_prot_weights;
 	}
