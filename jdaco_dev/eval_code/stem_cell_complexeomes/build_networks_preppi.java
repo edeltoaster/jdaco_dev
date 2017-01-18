@@ -16,12 +16,12 @@ public class build_networks_preppi {
 	static NetworkBuilder builder;
 	
 	public static void preprocess() {
-		System.out.println("Original PPIN: " + "mixed_data/human_preppi.tsv.gz"); // PrePPI 1.2.0
+		System.out.println("Original PPIN: " + "mixed_data/human_PrePPI_17_01_17.txt.gz"); // PrePPI, jan 2017
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		System.out.println("3did: " + DataQuery.get3didVersion());
 		System.out.println("iPfam: " + DataQuery.getIPfamVersion());
 		
-		original_ppin = new PPIN("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_preppi.tsv.gz");
+		original_ppin = new PPIN("mixed_data/human_PrePPI_17_01_17.txt.gz");
 		System.out.println(original_ppin.getSizesStr());
 		original_ppin = original_ppin.updateUniprotAccessions();
 		System.out.println("Updating Uniprot Accs with " + DataQuery.getUniprotRelease());
@@ -41,8 +41,8 @@ public class build_networks_preppi {
 			String file_name = path_split[path_split.length-1].split("\\.")[0];
 			System.out.println("Processing " + file_name);
 			
-			//ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readKallistoFile(path, 0.0), true, true);
-			ConstructedNetworks cn = builder.constructAssociatedWeightedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readKallistoFile(path, 0.0), true);
+			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readKallistoFile(path, 0.0), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
+			//ConstructedNetworks cn = builder.constructAssociatedWeightedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readKallistoFile(path, 0.0), true); // returns abundance as transcript abundance
 			cn.getPPIN().writePPIN(network_folder + file_name + "_ppin.txt.gz");
 			cn.getDDIN().writeDDIN(network_folder + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(network_folder + file_name + "_major-transcripts.txt.gz");
