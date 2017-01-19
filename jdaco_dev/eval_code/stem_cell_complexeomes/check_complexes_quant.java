@@ -17,8 +17,8 @@ import framework.Utilities;
 
 public class check_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_PrePPI_95_wTPM/res5/";
-	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/PrePPI_TPMgene_networks/";
+	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_PrePPIhc_TPMgene/res5/";
+	static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/PrePPIhc_TPMgene_networks/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	
 	public static void main(String[] args) {
@@ -28,9 +28,15 @@ public class check_complexes_quant {
 			String sample = f.getName().split("\\.")[0];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), seed, networks_folder + sample + "_major-transcripts.txt.gz");
 			
-			if (sample.startsWith("BM_"))
+//			if (sample.startsWith("BM_"))
+//				group1.put(sample, qdr);
+//			else if (sample.contains("hESC")) {
+//				group2.put(sample, qdr);
+//			}
+			
+			if (!sample.contains("hESC"))
 				group1.put(sample, qdr);
-			else if (sample.contains("hESC")) {
+			else {
 				group2.put(sample, qdr);
 			}
 		}
