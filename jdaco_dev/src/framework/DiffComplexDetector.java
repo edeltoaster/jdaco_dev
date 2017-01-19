@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
@@ -35,7 +36,7 @@ public class DiffComplexDetector {
 		this.group2 = group2;
 		this.FDR = FDR;
 		
-		// determine potentially relevent seed variant combinations ...
+		// determine potentially relevant seed variant combinations ...
 		for (QuantDACOResultSet qdr:group1.values())
 			this.seed_combination_variant.addAll(qdr.getSeedToComplexMap().keySet());
 		for (QuantDACOResultSet qdr:group2.values())
@@ -47,6 +48,7 @@ public class DiffComplexDetector {
 		
 		// determine differential abundance, apply multiple hypothesis correction and filter to significant seed variants
 		this.significance_variants_pvalues = this.determinePValues();
+		
 		// sort from most to least significant
 		this.significance_sorted_variants = new ArrayList<>(this.significance_variants_pvalues.keySet());
 		this.significance_sorted_variants.sort( (v1, v2) -> this.significance_variants_pvalues.get(v1).compareTo(this.significance_variants_pvalues.get(v2)));
@@ -65,8 +67,9 @@ public class DiffComplexDetector {
 		}
 		
 		// abundance of a seed_comb_variant is the sum of all complexes it is contained in
+		Map<String, Map<HashSet<String>, Double>> precomputed_sample_abundances = group.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getAbundanceOfSeedVariantsComplexes()));
 		for (String sample:group.keySet()) {
-			Map<HashSet<String>, Double> sample_abundances = group.get(sample).getAbundanceOfSeedVariantsComplexes();
+			Map<HashSet<String>, Double> sample_abundances = precomputed_sample_abundances.get(sample);
 			for (HashSet<String> variant:this.seed_combination_variant) {
 				double abundance_values = sample_abundances.getOrDefault(variant, 0.0);
 				group_abundances.get(variant).add(abundance_values);
