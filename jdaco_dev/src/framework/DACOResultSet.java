@@ -159,7 +159,7 @@ public class DACOResultSet {
 	 */
 	
 	/**
-	 * Get Jaccard/Dice-similarity-like similary for complex sets
+	 * Get Jaccard/Dice-similarity-like similary for complex sets (parallel implementation)
 	 * @param result_set2
 	 * @return
 	 */
@@ -169,28 +169,22 @@ public class DACOResultSet {
 		double sum = 0.0;
 		for (HashSet<String> set1:this.result) {
 			double max_Jsim = 0.0;
-			for (HashSet<String> set2:result2) {
-				double Jsim = Utilities.getJaccardSimilarity(set1, set2);
-				
-				if (Jsim > max_Jsim)
-					max_Jsim = Jsim;
-				
-				if (max_Jsim == 1.0)
-					break;
+			
+			if (result2.contains(set1)) {
+				max_Jsim = 1.0;
+			} else {
+				max_Jsim = result2.parallelStream().map(e -> Utilities.getJaccardSimilarity(set1, e)).reduce(Double::max).orElse(0.0);
 			}
+			
 			sum += max_Jsim;
 		}
 		
 		for (HashSet<String> set1:result2) {
 			double max_Jsim = 0.0;
-			for (HashSet<String> set2:this.result) {
-				double Jsim = Utilities.getJaccardSimilarity(set1, set2);
-				
-				if (Jsim > max_Jsim)
-					max_Jsim = Jsim;
-				
-				if (max_Jsim == 1.0)
-					break;
+			if (this.result.contains(set1)) {
+				max_Jsim = 1.0;
+			} else {
+				max_Jsim = this.result.parallelStream().map(e -> Utilities.getJaccardSimilarity(set1, e)).reduce(Double::max).orElse(0.0);
 			}
 			sum += max_Jsim;
 		}

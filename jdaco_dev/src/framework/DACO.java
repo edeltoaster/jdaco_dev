@@ -453,13 +453,16 @@ public class DACO {
 			String d2 = domain_interaction.getR();
 			String p1 = ddi.getDomain_to_protein().get(d1);
 			String p2 = ddi.getDomain_to_protein().get(d2);
+			
 			if (!associated_dom_interactions.containsKey(p1))
 				associated_dom_interactions.put(p1, new LinkedList<>());
 			associated_dom_interactions.get(p1).add(domain_interaction);
+			
 			if (!associated_dom_interactions.containsKey(p2))
 				associated_dom_interactions.put(p2, new LinkedList<>());
 			associated_dom_interactions.get(p2).add(domain_interaction);
 		}
+		
 		for (String protein : associated_dom_interactions.keySet()) {
 			List<StrPair> ddi_options = associated_dom_interactions.get(protein);
 			if (ddi_options.size() == 1)
@@ -478,6 +481,7 @@ public class DACO {
 	private LinkedList<StrPair> filterDomainInteractionAlternatives(LinkedList<StrPair> usable_interactions) {
 		HashSet<String> already_seen = new HashSet<>();
 		LinkedList<StrPair> filtered_list = new LinkedList<>();
+		
 		for (StrPair pair : usable_interactions) {
 			// reverse ordering
 			String[] sp1 = pair.getL().split("\\|");
@@ -485,15 +489,19 @@ public class DACO {
 			String s1 = sp1[2]+sp1[1];
 			String s2 = sp2[2]+sp2[1];
 			String hash;
+			
 			if (s1.compareTo(s2) < 0)
-				hash = s1+s2;
+				hash = s1 + s2;
 			else
-				hash = s2+s1;
+				hash = s2 + s1;
+			
 			if (already_seen.contains(hash)) 
 				continue;
+			
 			already_seen.add(hash);
 			filtered_list.add(pair);
 		}
+		
 		return filtered_list;
 	}
 	
@@ -507,11 +515,18 @@ public class DACO {
 		HashMap<String, LinkedList<StrPair>> incident_nodes = new HashMap<>();
 		for (String protein : internal_proteins)
 			for (String domain1: ddi.getProtein_to_domains().get(protein)) {
-				if (occupied_domains.contains(domain1)) continue;
+				
+				if (occupied_domains.contains(domain1))
+					continue;
+				
 				for (String domain2: ddi.getDDIs().get(domain1)) {
-					if (occupied_domains.contains(domain2)) continue;
+					
+					if (occupied_domains.contains(domain2)) 
+						continue;
+					
 					String protein2 = ddi.getDomain_to_protein().get(domain2);
-					if (internal_proteins.contains(protein2)) continue;
+					if (internal_proteins.contains(protein2)) 
+						continue;
 					
 					// add option
 					if (!incident_nodes.containsKey(protein2))
