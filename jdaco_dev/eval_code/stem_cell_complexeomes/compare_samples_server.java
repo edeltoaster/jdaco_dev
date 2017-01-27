@@ -16,6 +16,7 @@ public class compare_samples_server {
 	static Set<String> seed = Utilities.readEntryFile("hocomoco_human_TFs_v10.txt.gz");
 	
 	public static void main(String[] args) {
+		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "32");
 		Map<String, DACOResultSet> data = new HashMap<>();
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv")) {
 			String sample = f.getName().split("\\.")[0];
