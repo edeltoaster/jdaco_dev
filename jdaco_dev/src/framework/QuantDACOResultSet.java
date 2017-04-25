@@ -234,18 +234,16 @@ public class QuantDACOResultSet extends DACOResultSet {
 	 */
 	
 	/**
-	 * Euclidean distance
+	 * Euclidean distance on abundance values for all reference seed variants
 	 */
-	public double getComplexSetsDistance(Set<HashSet<String>> reference_universe, QuantDACOResultSet result_set2) {
-		Map<HashSet<String>, Double> result_abundances1 = this.getAbundanceOfComplexes();
-		Map<HashSet<String>, Double> result_abundances2 = result_set2.getAbundanceOfComplexes();
+	public double getSeedVariantSetsAbundanceDistance(Set<HashSet<String>> reference_universe, QuantDACOResultSet result_set2) {
+		Map<HashSet<String>, Double> result_abundances1 = this.getAbundanceOfSeedVariantsComplexes();
+		Map<HashSet<String>, Double> result_abundances2 = result_set2.getAbundanceOfSeedVariantsComplexes();
 		
 		double sum = 0.0;
-		for (HashSet<String> complex:reference_universe) {
-			sum += Math.pow(result_abundances1.getOrDefault(complex, 0.0) - result_abundances2.getOrDefault(complex, 0.0), 2);
+		for (HashSet<String> seed_variant:reference_universe) {
+			sum += Math.pow(result_abundances1.getOrDefault(seed_variant, 0.0) - result_abundances2.getOrDefault(seed_variant, 0.0), 2);
 		}
-		
-		// alternative: sum = reference_universe.parallelStream().map(c -> Math.pow(result_abundances1.getOrDefault(c, 0.0) - result_abundances2.getOrDefault(c, 0.0), 2)).reduce(Double::sum);
 		
 		return Math.sqrt(sum);
 	}

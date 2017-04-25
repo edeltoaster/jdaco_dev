@@ -204,6 +204,22 @@ public class DACOResultSet {
 	}
 	
 	/**
+	 * Hamming distance: fraction of non-equally abundant seed variants normalized by reference universe of all seed variants seen
+	 */
+	public double getSeedVariantSetsDistance(Set<HashSet<String>> reference_universe, DACOResultSet result_set2) {
+		Set<HashSet<String>> result2 = result_set2.getSeedToComplexMap().keySet();
+		Set<HashSet<String>> result1 = this.getSeedToComplexMap().keySet();
+		
+		double sum = 0.0;
+		for (HashSet<String> seed_variant:reference_universe) {
+			if ( (result1.contains(seed_variant) && !result2.contains(seed_variant)) || (!result1.contains(seed_variant) && result2.contains(seed_variant)))
+				sum += 1;
+		}
+		
+		return sum / reference_universe.size();
+	}
+	
+	/**
 	 * Get Jaccard/Dice-similarity-like similary for seed variants
 	 * @param result_set2
 	 * @return
