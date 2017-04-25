@@ -154,15 +154,11 @@ public class DACOResultSet {
 		this.rebuildData(new HashSet<>(this.abundant_seed_poteins));
 	}
 	
+	
 	/*
 	 * Some similarity functions
 	 */
 	
-	/**
-	 * Get Jaccard/Dice-similarity-like similary for complex sets (parallel implementation)
-	 * @param result_set2
-	 * @return
-	 */
 	public double getComplexSetsSimilarity(DACOResultSet result_set2) {
 		Set<HashSet<String>> result2 = result_set2.getResult();
 		
@@ -190,6 +186,21 @@ public class DACOResultSet {
 		}
 		
 		return sum / (this.result.size() + result2.size()); // similar to dice-similarity
+	}
+	
+	/**
+	 * Get fraction of shared abundant complexes normalized a reference universe of all complexes seen
+	 */
+	public double getComplexSetsSimilarity(Set<HashSet<String>> reference_universe, DACOResultSet result_set2) {
+		Set<HashSet<String>> result2 = result_set2.getResult();
+		
+		double sum = 0.0;
+		for (HashSet<String> complex:reference_universe) {
+			if ( (this.result.contains(complex) && result2.contains(complex)))
+				sum += 1;
+		}
+		
+		return sum / reference_universe.size();
 	}
 	
 	/**

@@ -10,9 +10,10 @@ import java.util.Set;
 public class QuantDACOResultSet extends DACOResultSet {
 	private  Map<String, String> protein_to_assumed_transcript;
 	private  Map<String, Double> transcript_abundance; // transcript data actually only given in float precision, but double simplifies the usage in statistical functions
+	private Map<HashSet<String>, Double> cached_abundance_of_complexes; // convenient storage for complex quantification results of the non-simple method
 	
 	/*
-	 * diverse constructors
+	 * diverse constructorsand necessities
 	 */
 	
 	public QuantDACOResultSet(String daco_out_file, String seed_file, String protein_to_assumed_transcript_file) {
@@ -57,8 +58,15 @@ public class QuantDACOResultSet extends DACOResultSet {
 			transcript_abundance.put(spl[1], Double.parseDouble(spl[2])); // assumes file that includes abundance values, error otherwise
 		}
 	}
-
 	
+	/**
+	 * Rebuilds useful data-structures on the basis of relevant seed, removes other results and resets cached results
+	 * @param refined_seed
+	 */
+	public void rebuildData(Set<String> refined_seed) {
+		super.rebuildData(refined_seed);
+		this.cached_abundance_of_complexes = null; // additionally reset the cache as results will differ if changed occurred
+	}
 	/*
 	 * quantification functions
 	 */
@@ -88,6 +96,10 @@ public class QuantDACOResultSet extends DACOResultSet {
 	 * @return
 	 */
 	public Map<HashSet<String>, Double> getAbundanceOfComplexes() {
+		
+		// get cached results if already computed
+		if (this.cached_abundance_of_complexes != null)
+			return this.cached_abundance_of_complexes;
 		
 		// count occurrence of each protein in complexes
 		Map<String, Integer> protein_in_complexes_count = new HashMap<>();
@@ -174,6 +186,9 @@ public class QuantDACOResultSet extends DACOResultSet {
 			
 		} while (iterate);
 		
+		// cache results
+		this.cached_abundance_of_complexes = quantification_result;
+		
 		return quantification_result;
 	}
 	
@@ -211,6 +226,23 @@ public class QuantDACOResultSet extends DACOResultSet {
 		}
 		
 		return quantification_result;
+	}
+	
+	
+	/*
+	 * similarity function
+	 */
+	
+	/**
+	 * xxxx
+	 */
+	public double getComplexSetsSimilarity(Set<HashSet<String>> reference_universe, QuantDACOResultSet result_set2) {
+		
+		for (HashSet<String> complex:reference_universe) {
+			// TODO: implement distance measure
+		}
+		
+		return 0.0;
 	}
 	
 	
