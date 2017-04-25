@@ -199,7 +199,7 @@ public class DACOResultSet {
 			if ( (this.result.contains(complex) && result2.contains(complex)))
 				sum += 1;
 		}
-		
+		// TODO: good metric?
 		return sum / reference_universe.size();
 	}
 	
