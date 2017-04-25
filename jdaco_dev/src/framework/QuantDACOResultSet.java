@@ -230,19 +230,24 @@ public class QuantDACOResultSet extends DACOResultSet {
 	
 	
 	/*
-	 * similarity function
+	 * distance function
 	 */
 	
 	/**
-	 * xxxx
+	 * Euclidean distance
 	 */
-	public double getComplexSetsSimilarity(Set<HashSet<String>> reference_universe, QuantDACOResultSet result_set2) {
+	public double getComplexSetsDistance(Set<HashSet<String>> reference_universe, QuantDACOResultSet result_set2) {
+		Map<HashSet<String>, Double> result_abundances1 = this.getAbundanceOfComplexes();
+		Map<HashSet<String>, Double> result_abundances2 = result_set2.getAbundanceOfComplexes();
 		
+		double sum = 0.0;
 		for (HashSet<String> complex:reference_universe) {
-			// TODO: implement distance measure
+			sum += Math.pow(result_abundances1.getOrDefault(complex, 0.0) - result_abundances2.getOrDefault(complex, 0.0), 2);
 		}
 		
-		return 0.0;
+		// alternative: sum = reference_universe.parallelStream().map(c -> Math.pow(result_abundances1.getOrDefault(c, 0.0) - result_abundances2.getOrDefault(c, 0.0), 2)).reduce(Double::sum);
+		
+		return Math.sqrt(sum);
 	}
 	
 	

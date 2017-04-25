@@ -10,7 +10,7 @@ import framework.DACOResultSet;
 import framework.Utilities;
 
 
-public class compare_PrePPI_results_server {
+public class compare_PrePPI_results {
 	
 	static String hc_results_folder = "DACO_PrePPIhc_TPMgene/res5/";
 	static String all_results_folder = "DACO_PrePPI_TPMgene/res5/";

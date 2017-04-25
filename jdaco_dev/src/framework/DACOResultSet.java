@@ -156,7 +156,7 @@ public class DACOResultSet {
 	
 	
 	/*
-	 * Some similarity functions
+	 * Some similarity/distance functions
 	 */
 	
 	public double getComplexSetsSimilarity(DACOResultSet result_set2) {
@@ -189,17 +189,17 @@ public class DACOResultSet {
 	}
 	
 	/**
-	 * Get fraction of shared abundant complexes normalized a reference universe of all complexes seen
+	 * Hamming distance: fraction of non-equally abundant complexes normalized by reference universe of all complexes seen
 	 */
-	public double getComplexSetsSimilarity(Set<HashSet<String>> reference_universe, DACOResultSet result_set2) {
+	public double getComplexSetsDistance(Set<HashSet<String>> reference_universe, DACOResultSet result_set2) {
 		Set<HashSet<String>> result2 = result_set2.getResult();
 		
 		double sum = 0.0;
 		for (HashSet<String> complex:reference_universe) {
-			if ( (this.result.contains(complex) && result2.contains(complex)))
+			if ( (this.result.contains(complex) && !result2.contains(complex)) || (!this.result.contains(complex) && result2.contains(complex)))
 				sum += 1;
 		}
-		// TODO: good metric?
+		
 		return sum / reference_universe.size();
 	}
 	

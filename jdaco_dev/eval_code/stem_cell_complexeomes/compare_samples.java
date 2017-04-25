@@ -10,7 +10,7 @@ import framework.DACOResultSet;
 import framework.Utilities;
 
 
-public class compare_samples_server {
+public class compare_samples {
 	
 	static String daco_results_folder = "DACO_PrePPI_TPMgene/res5/";
 	static Set<String> seed = Utilities.readEntryFile("hocomoco_human_TFs_v10.txt.gz");
