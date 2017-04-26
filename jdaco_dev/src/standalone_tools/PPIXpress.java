@@ -1,6 +1,7 @@
 package standalone_tools;
 
 import java.io.File;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,8 @@ import framework.NetworkBuilder;
 import framework.PPIN;
 import framework.TranscriptAbundanceReader;
 import framework.Utilities;
+
+// TODO: update regarding reporting transcript/gene abundance
 
 /**
  * PPIXpress cmd-tool
@@ -380,6 +383,7 @@ public class PPIXpress {
 			if (gene_level_only || !type.endsWith("T")) {
 				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance.keySet(), remove_decay_transcripts);
 			} else {
+				// TODO: add new case distinction
 				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance, remove_decay_transcripts);
 			}
 			

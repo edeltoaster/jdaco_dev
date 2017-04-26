@@ -44,6 +44,8 @@ import javax.swing.DefaultComboBoxModel;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
+//TODO: update regarding reporting transcript/gene abundance
+
 public class PPIXpress_GUI {
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
@@ -917,6 +919,7 @@ public class PPIXpress_GUI {
 			if (gene_level_only || !type.endsWith("T")) {
 				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance.keySet(), remove_decay_transcripts);
 			} else {
+				// TODO: add new case distinction
 				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance, remove_decay_transcripts);
 			}
 			
