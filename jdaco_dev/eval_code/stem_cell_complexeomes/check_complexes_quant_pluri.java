@@ -2,7 +2,6 @@ package stem_cell_complexeomes;
 
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -20,17 +19,12 @@ import framework.Utilities;
 
 public class check_complexes_quant_pluri {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_PrePPIhc_TPMgene/res5/";
-	static String networks_folder = "/Users/tho/Desktop/PrePPIhc_TPMgene_networks/";
-	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
-	static Set<String> pluri_factors = new HashSet<>(Arrays.asList("Q01860", "P48431", "Q9H9S0"));
-	
 	public static void main(String[] args) {
 		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
 		Map<String, QuantDACOResultSet> group2 = new HashMap<>();
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(definitions.daco_results_folder, ".csv")) {
 			String sample = f.getName().split("\\.")[0];
-			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), seed, networks_folder + sample + "_major-transcripts.txt.gz");
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, definitions.networks_folder + sample + "_major-transcripts.txt.gz");
 			
 //			if (sample.startsWith("BM_"))
 //				group1.put(sample, qdr);
@@ -48,6 +42,7 @@ public class check_complexes_quant_pluri {
 		Set<String> involved_tfs = new HashSet<>();
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.05);
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
+		Map<String, String> effect = new HashMap<>();
 		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
 			double median_tissues = Utilities.getMedian(dcd.getGroup1Abundances().get(variant));
 			double median_ESCs = Utilities.getMedian(dcd.getGroup2Abundances().get(variant));
@@ -58,23 +53,39 @@ public class check_complexes_quant_pluri {
 			
 			String hgncs = DataQuery.batchHGNCProteinsGenes(variant).toString();
 			double pval = dcd.getSignificanceVariantsPValues().get(variant);
-			Set<String> overlap = new HashSet<>(pluri_factors);
+			
+			Set<String> overlap = new HashSet<>(definitions.pluri_factors);
 			overlap.retainAll(variant);
 			
+			// filter for increases abundance and those including pluri factors
 			if (sign.equals("-") || overlap.size() == 0)
 				continue;
 			
 			involved_tfs.addAll(variant);
 			pluri_tf_variants.add(variant);
+			
+			// determine actual complexes
+			List<Set<String>> complexes = new LinkedList<>();
+			for (QuantDACOResultSet qdr:group2.values())
+				if (qdr.getSeedToComplexMap().containsKey(variant))
+					complexes.addAll(qdr.getSeedToComplexMap().get(variant));
+			effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
+			
 			System.out.println(sign + " " + hgncs + ", " + pval);
 		}
 		
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", involved_tfs, 0.0001, involved_tfs);
+		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, involved_tfs, 0.0001, involved_tfs);
+		
 		System.out.println("Building regnet ...");
 		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -50, 50, 4, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only_min2.txt", 2);
-		regnet.writeHumanNodeTable("/Users/tho/Desktop/node_table_only.txt");
+		
+		// adding annotational data
+		Map<String, Map<String,String>> annotational_data = new HashMap<>();
+		annotational_data.put("Regulatory_effect", effect);
+		
+		regnet.writeNodeTable("/Users/tho/Desktop/node_table_only.txt", annotational_data);
 	}
 }
