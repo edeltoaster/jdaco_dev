@@ -44,8 +44,6 @@ import javax.swing.DefaultComboBoxModel;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
-//TODO: update regarding reporting transcript/gene abundance
-
 public class PPIXpress_GUI {
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
@@ -60,6 +58,7 @@ public class PPIXpress_GUI {
 	private static boolean compress_output = false;
 	private static boolean report_reference = false;
 	private static boolean remove_decay_transcripts = true;
+	private static boolean report_gene_abundance = false;
 	
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
@@ -95,6 +94,7 @@ public class PPIXpress_GUI {
 	private JButton btnRetrieve;
 	private JCheckBox chckbxReference;
 	private JCheckBox chckbxOutputMajorTranscripts;
+	private JCheckBox chckbxSumAbundances;
 	private JCheckBox chckbxUpdateUniprotAccs;
 	private JCheckBox chckboxCompressOutput;
 	
@@ -128,7 +128,7 @@ public class PPIXpress_GUI {
 		frmPpixpress = new JFrame();
 		frmPpixpress.setTitle("PPIXpress");
 		frmPpixpress.setResizable(false);
-		frmPpixpress.setBounds(100, 100, 900, 850);
+		frmPpixpress.setBounds(100, 100, 900, 870);
 		frmPpixpress.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmPpixpress.getContentPane().setLayout(null);
 		
@@ -449,7 +449,7 @@ public class PPIXpress_GUI {
 		JScrollPane scrollPane_output = new JScrollPane();
 		scrollPane_output.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane_output.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-		scrollPane_output.setBounds(19, 520, 860, 300);
+		scrollPane_output.setBounds(21, 534, 860, 300);
 		frmPpixpress.getContentPane().add(scrollPane_output);
 		
 		text_output = new JTextArea();
@@ -461,10 +461,16 @@ public class PPIXpress_GUI {
 		chckbxOutputMajorTranscripts = new JCheckBox("output major transcripts");
 		chckbxOutputMajorTranscripts.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (chckbxOutputMajorTranscripts.isSelected())
+				if (chckbxOutputMajorTranscripts.isSelected()) {
 					output_major_transcripts = true;
-				else
+					chckbxSumAbundances.setEnabled(true);
+				}
+				else {
 					output_major_transcripts = false;
+					chckbxSumAbundances.setSelected(false);
+					report_gene_abundance = false;
+					chckbxSumAbundances.setEnabled(false);
+				}
 			}
 		});
 		chckbxOutputMajorTranscripts.setBounds(630, 430, 205, 30);
@@ -493,7 +499,7 @@ public class PPIXpress_GUI {
 					compress_output = false;
 			}
 		});
-		chckboxCompressOutput.setBounds(630, 451, 205, 30);
+		chckboxCompressOutput.setBounds(630, 472, 205, 30);
 		frmPpixpress.getContentPane().add(chckboxCompressOutput);
 		activiy_changing_components.add(chckboxCompressOutput);
 		
@@ -542,6 +548,10 @@ public class PPIXpress_GUI {
 				output_major_transcripts = false;
 				chckbxOutputMajorTranscripts.setSelected(false);
 				
+				report_gene_abundance = false;
+				chckbxSumAbundances.setSelected(false);
+				chckbxSumAbundances.setEnabled(false);
+				
 				STRING_weights = false;
 				chckbxSTRING.setSelected(false);
 				
@@ -585,7 +595,7 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(btnReset);
 		
 		progressBar = new JProgressBar();
-		progressBar.setBounds(100, 485, 700, 20);
+		progressBar.setBounds(102, 499, 700, 20);
 		frmPpixpress.getContentPane().add(progressBar);
 		
 		comboBox_server = new JComboBox<String>();
@@ -614,7 +624,7 @@ public class PPIXpress_GUI {
 		
 		JLabel lblProgress = new JLabel("Progress:");
 		lblProgress.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblProgress.setBounds(17, 479, 75, 30);
+		lblProgress.setBounds(19, 493, 75, 30);
 		frmPpixpress.getContentPane().add(lblProgress);
 		
 		JLabel lblthreshold = new JLabel("threshold:");
@@ -707,6 +717,20 @@ public class PPIXpress_GUI {
 		lblLoadProteinInteraction.setBounds(55, 5, 220, 40);
 		frmPpixpress.getContentPane().add(lblLoadProteinInteraction);
 		activiy_changing_components.add(lblLoadProteinInteraction);
+		
+		chckbxSumAbundances = new JCheckBox("summarize abundances");
+		chckbxSumAbundances.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (chckbxSumAbundances.isSelected())
+					report_gene_abundance = true;
+				else
+					report_gene_abundance = false;
+			}
+		});
+		chckbxSumAbundances.setEnabled(false);
+		chckbxSumAbundances.setBounds(670, 451, 205, 30);
+		frmPpixpress.getContentPane().add(chckbxSumAbundances);
+		activiy_changing_components.add(chckbxSumAbundances);
 		
 		// most general
 		System.setErr(stream_output);
@@ -919,8 +943,7 @@ public class PPIXpress_GUI {
 			if (gene_level_only || !type.endsWith("T")) {
 				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance.keySet(), remove_decay_transcripts);
 			} else {
-				// TODO: add new case distinction
-				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance, remove_decay_transcripts);
+				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance, remove_decay_transcripts, report_gene_abundance);
 			}
 			
 			
@@ -977,6 +1000,8 @@ public class PPIXpress_GUI {
 	private void setActivity(boolean active) {
 		for (JComponent c:activiy_changing_components)
 			c.setEnabled(active);
+		if (active && !chckbxOutputMajorTranscripts.isSelected())
+			chckbxSumAbundances.setEnabled(false);
 	}
 	
 	public void retrieve_network(String taxon_id) {
