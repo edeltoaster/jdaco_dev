@@ -26,6 +26,8 @@ public class check_complexes_quant_pluri {
 			String sample = f.getName().split("\\.")[0];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, definitions.networks_folder + sample + "_major-transcripts.txt.gz");
 			
+			//qdr.removeOpposinglyAnnotatedComplexes(definitions.goa);
+			
 //			if (sample.startsWith("BM_"))
 //				group1.put(sample, qdr);
 //			else if (sample.contains("hESC")) {

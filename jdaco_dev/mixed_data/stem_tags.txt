@@ -2,9 +2,12 @@
 # regulation GO:0045944 GO:0000122 -> p300 for example HAT but also annotated as negative regulator
 # according to "Mapping and analysis of chromatin state dynamics in nine human cell types" important
 # p300/CBP are, for example, activating HATs -> H3K9ac,H3K27ac?
-h_ac GO:0016573 GO:0016575
-# importantant repressive mark
+#h_ac GO:0016573 GO:0016575
+H3K9ac GO:0043970 GO:1990619
+# there is actually no H3K27deac, negative here is general histone H3 deacetylation
+H3K27ac GO:0043974 GO:0070932
+# important repressive mark
 H3K27meX GO:0070734 GO:0071557
 # important other activating mark in stem cells (from "Single-molecule decoding of combinatorially modified nucleosomes")
 H3K4meX GO:0051568 GO:0034720
-DNA_meth GO:0006306 GO:0080111
+DNA_me GO:0006306 GO:0080111

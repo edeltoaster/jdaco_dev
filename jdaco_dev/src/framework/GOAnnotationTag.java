@@ -76,14 +76,18 @@ public class GOAnnotationTag {
 		else
 			this.include_IEA = false;
 		
-		for (String protein:data[5].split(","))
-			this.positive_proteins.add(protein);
+		// distinction of empty sets
+		if (!data[5].equals("/"))
+			for (String protein:data[5].split(","))
+				this.positive_proteins.add(protein);
 		
-		for (String protein:data[6].split(","))
-			this.negative_proteins.add(protein);
+		if (!data[6].equals("/"))
+			for (String protein:data[6].split(","))
+				this.negative_proteins.add(protein);
 		
-		for (String protein:data[7].split(","))
-			this.mixed_proteins.add(protein);
+		if (!data[7].equals("/"))
+			for (String protein:data[7].split(","))
+				this.mixed_proteins.add(protein);
 	}
 	
 	/**
@@ -144,11 +148,23 @@ public class GOAnnotationTag {
 		if (this.include_IEA)
 			to_string.add("IEA");
 		else
-			to_string.add("no IEA");
+			to_string.add("no_IEA");
 		
-		to_string.add(String.join(",", this.positive_proteins));
-		to_string.add(String.join(",", this.negative_proteins));
-		to_string.add(String.join(",", this.mixed_proteins));
+		// distinction of empty sets
+		if (this.positive_proteins.isEmpty())
+			to_string.add("/");
+		else
+			to_string.add(String.join(",", this.positive_proteins));
+		
+		if (this.negative_proteins.isEmpty())
+			to_string.add("/");
+		else
+			to_string.add(String.join(",", this.negative_proteins));
+		
+		if (this.mixed_proteins.isEmpty())
+			to_string.add("/");
+		else
+			to_string.add(String.join(",", this.mixed_proteins));
 		
 		return String.join(" ", to_string);
 	}
