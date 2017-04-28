@@ -13,8 +13,6 @@ import framework.PPIN;
 import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
-// TODO: update regarding reporting transcript/gene abundance
-
 /**
  * PPIXpress cmd-tool
  * @author Thorsten Will
@@ -32,6 +30,7 @@ public class PPIXpress {
 	private static boolean compress_output = false;
 	private static boolean report_reference = false;
 	private static boolean remove_decay_transcripts = true;
+	private static boolean report_gene_abundance = false;
 	
 	// stuff that needs to be retrieved
 	private static boolean load_UCSC = false;
@@ -53,6 +52,7 @@ public class PPIXpress {
 		System.out.println("	-x : do not remove proteins from the network if their coding transcript is subject to degradation (default: remove if tagged as 'nonsense-mediated decay' or 'non-stop decay')");
 		System.out.println("	-d : also output underlying domain-domain interaction network(s) (default: no)");
 		System.out.println("	-m : also output major transcript per protein (default: no)");
+		System.out.println("	-mg : -m option and abundance per protein as the sum of all expressed coding transcripts");
 		System.out.println("	-c : use gzip-compression on output (default: no)");
 		System.out.println("	-w : add weights using STRING, interactions that are not in STRING are discarded");
 		System.out.println("	-u : update outdated UniProt accessions");
@@ -129,6 +129,12 @@ public class PPIXpress {
 			// output major transcript per protein
 			else if (arg.equals("-m"))
 				output_major_transcripts = true;
+			
+			// output major transcript per protein with each ones abundance as the sum of all its expressed coding transcripts
+			else if (arg.equals("-mg")) {
+				output_major_transcripts = true;
+				report_gene_abundance = true;
+			}
 			
 			// compress output
 			else if (arg.equals("-c"))
@@ -383,8 +389,7 @@ public class PPIXpress {
 			if (gene_level_only || !type.endsWith("T")) {
 				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance.keySet(), remove_decay_transcripts);
 			} else {
-				// TODO: add new case distinction
-				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance, remove_decay_transcripts);
+				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance, remove_decay_transcripts, report_gene_abundance);
 			}
 			
 			/*
