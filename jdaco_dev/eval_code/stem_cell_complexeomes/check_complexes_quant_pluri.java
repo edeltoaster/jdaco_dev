@@ -22,6 +22,7 @@ public class check_complexes_quant_pluri {
 	public static void main(String[] args) {
 		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
 		Map<String, QuantDACOResultSet> group2 = new HashMap<>();
+		boolean check_supersets = false;
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(definitions.daco_results_folder, ".csv")) {
 			String sample = f.getName().split("\\.")[0];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, definitions.networks_folder + sample + "_major-transcripts.txt.gz");
@@ -42,7 +43,7 @@ public class check_complexes_quant_pluri {
 		}
 		
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.05);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.05, check_supersets);
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
 		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {

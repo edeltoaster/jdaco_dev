@@ -566,7 +566,7 @@ public class RewiringDetector {
 		return interaction_reasons_count_map;
 	}
 
-	public Map<StrPair, Boolean> getInteractionDiectionMap() {
+	public Map<StrPair, Boolean> getInteractionDirectionMap() {
 		return this.interaction_direction_map;
 	}
 
