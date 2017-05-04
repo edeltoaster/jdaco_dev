@@ -46,6 +46,8 @@ public class check_complexes_quant_pluri {
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.05, check_supersets);
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
+		List<String> res_pos = new LinkedList<>();
+		List<String> res_pluri = new LinkedList<>();
 		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
 			double median_tissues = Utilities.getMedian(dcd.getGroup1Abundances().get(variant));
 			double median_ESCs = Utilities.getMedian(dcd.getGroup2Abundances().get(variant));
@@ -57,15 +59,24 @@ public class check_complexes_quant_pluri {
 			String hgncs = DataQuery.batchHGNCProteinsGenes(variant).toString();
 			double pval = dcd.getSignificanceVariantsPValues().get(variant);
 			
+			// filter for increases abundance
+			if (sign.equals("-"))
+				continue;
+			
+			res_pos.add(sign + " " + hgncs + ", " + pval);
+			
 			Set<String> overlap = new HashSet<>(definitions.pluri_factors);
 			overlap.retainAll(variant);
 			
-			// filter for increases abundance and those including pluri factors
-			if (sign.equals("-") || overlap.size() == 0)
+			// filter for those including pluri factors
+			if (overlap.size() == 0)
 				continue;
+			
+			res_pluri.add(sign + " " + hgncs + ", " + pval);
 			
 			involved_tfs.addAll(variant);
 			pluri_tf_variants.add(variant);
+			
 			
 			// determine actual complexes
 			List<Set<String>> complexes = new LinkedList<>();
@@ -73,15 +84,18 @@ public class check_complexes_quant_pluri {
 				if (qdr.getSeedToComplexMap().containsKey(variant))
 					complexes.addAll(qdr.getSeedToComplexMap().get(variant));
 			effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
-			
-			System.out.println(sign + " " + hgncs + ", " + pval);
 		}
+		
+		// write results
+		Utilities.writeEntries(res_pos, "/Users/tho/Desktop/res_all.txt");
+		Utilities.writeEntries(res_pluri, "/Users/tho/Desktop/res_pluri.txt");
+		
 		
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
 		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, involved_tfs, 0.0001, involved_tfs);
 		
 		System.out.println("Building regnet ...");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -50, 50, 4, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -20, 20, 4, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only_min2.txt", 2);
 		
