@@ -43,7 +43,7 @@ public class check_complexes_quant_pluri {
 		}
 		
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.05, check_supersets);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.01, check_supersets);
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
 		List<String> res_pos = new LinkedList<>();
@@ -95,7 +95,7 @@ public class check_complexes_quant_pluri {
 		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, involved_tfs, 0.0001, involved_tfs);
 		
 		System.out.println("Building regnet ...");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -20, 20, 4, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -50, 50, 4, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only_min2.txt", 2);
 		

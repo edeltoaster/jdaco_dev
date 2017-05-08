@@ -122,7 +122,7 @@ public class RegulatoryNetwork {
 		}
 		int n = i;
 		try {
-			for (i = 0; i< n; i++) {
+			for (i = 0; i < n; i++) {
 				HashMap<HashSet<String>, Set<String>> target_map;
 				target_map = pool.take().get(); // always gets a finished job
 				for (HashSet<String> tfs_in_complex:target_map.keySet()) {
