@@ -29,20 +29,18 @@ public class BindingDataHandler {
 	 * Unrestricted constructor:
 	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there).
 	 * All proteins (and associated genes) are assumed to be in UniProt accs.
-	 * @param fimo_outputfile
 	 */
 	public BindingDataHandler(String fimo_outputfile) {
-		this.readFIMO(fimo_outputfile, null, 1.0, null);
+		this.readFIMO(fimo_outputfile, null, 1.0, null, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 	
 	/**
 	 * Constructor with p-value threshold:
 	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there).
 	 * All proteins (and associated genes) are assumed to be in UniProt accs.
-	 * @param fimo_outputfile
 	 */
 	public BindingDataHandler(String fimo_outputfile, double p_threshold) {
-		this.readFIMO(fimo_outputfile, null, p_threshold, null);
+		this.readFIMO(fimo_outputfile, null, p_threshold, null, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 	
 	/**
@@ -50,10 +48,9 @@ public class BindingDataHandler {
 	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there)
 	 * but only care for the TFs in a given set.
 	 * All proteins (and associated genes) are assumed to be in UniProt accs.
-	 * @param fimo_outputfile
 	 */
 	public BindingDataHandler(String fimo_outputfile, double p_threshold, Collection<String> expressed_TFs) {
-		this.readFIMO(fimo_outputfile, expressed_TFs, p_threshold, null);
+		this.readFIMO(fimo_outputfile, expressed_TFs, p_threshold, null, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 	
 	/**
@@ -61,10 +58,9 @@ public class BindingDataHandler {
 	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there),
 	 * but only care for the TFs in a given set and the acc. targets given in another.
 	 * All proteins (and associated genes) are assumed to be in UniProt accs.
-	 * @param fimo_outputfile
 	 */
 	public BindingDataHandler(String fimo_outputfile, Collection<String> expressed_TFs, Collection<String> acc_targets) {
-		this.readFIMO(fimo_outputfile, expressed_TFs, 1.0, acc_targets);
+		this.readFIMO(fimo_outputfile, expressed_TFs, 1.0, acc_targets, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 	
 	/**
@@ -72,18 +68,28 @@ public class BindingDataHandler {
 	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there),
 	 * but only care for the TFs in a given set, BS below p_threshold and the acc. targets given in another.
 	 * All proteins (and associated genes) are assumed to be in UniProt accs.
-	 * @param fimo_outputfile
 	 */
 	public BindingDataHandler(String fimo_outputfile, Collection<String> expressed_TFs, double p_threshold, Collection<String> acc_targets) {
-		this.readFIMO(fimo_outputfile, expressed_TFs, p_threshold, acc_targets);
+		this.readFIMO(fimo_outputfile, expressed_TFs, p_threshold, acc_targets, Integer.MIN_VALUE, Integer.MAX_VALUE);
+	}
+	
+	/**
+	 * Restricted constructor:
+	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there),
+	 * but only care for the TFs in a given set, BS below p_threshold and the acc. targets given in another.
+	 * Additionally, only allow binding sites in the range between min_start and max_end around the TSS, for example. 
+	 * This strongly depends on the processing and annotation of the binding data.
+	 * All proteins (and associated genes) are assumed to be in UniProt accs.
+	 */
+	public BindingDataHandler(String fimo_outputfile, Collection<String> expressed_TFs, double p_threshold, Collection<String> acc_targets, int min_start, int max_end) {
+		this.readFIMO(fimo_outputfile, expressed_TFs, p_threshold, acc_targets, min_start, max_end);
 	}
 	
 	/**
 	 * Read binding data from MEME-suite's FIMO txt-file (gzipped also fine, ending .gz assumed there)
 	 * all proteins (and associated genes) are assumed to be in UniProt accs.
-	 * @param fimo_outputfile
 	 */
-	private void readFIMO(String fimo_outputfile, Collection<String> expressed_TFs, double p_threshold, Collection<String> acc_targets) {
+	private void readFIMO(String fimo_outputfile, Collection<String> expressed_TFs, double p_threshold, Collection<String> acc_targets, int min_start, int max_end) {
 		
 		BufferedReader in = null;
 		try {
@@ -117,6 +123,10 @@ public class BindingDataHandler {
 				
 				int left = Integer.parseInt(data[2]);
 				int right = Integer.parseInt(data[3]);
+				
+				if (left < min_start || right > max_end)
+					continue;
+				
 				boolean plus_strand = true;
 				if (data[4].equals("-"))
 					plus_strand = false;
