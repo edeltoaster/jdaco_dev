@@ -232,5 +232,29 @@ public class GOAnnotationTag {
 	public Set<String> getMixedProteins() {
 		return mixed_proteins;
 	}
+	
+	/**
+	 * Prints some info regarding the tag
+	 */
+	public void printTagInformation() {
+		// tag_name positive_GO_term(s) negative_GO_term(s) taxon include_IEA #positive_proteins #negative_proteins #mixed_proteins
+		List<String> to_string = new LinkedList<>();
+		to_string.add(this.tag_name);
+		to_string.add(String.join(",", this.positive_GO_terms));
+		to_string.add(String.join(",", this.negative_GO_terms));
+		
+		to_string.add(this.taxon);
+		
+		if (this.include_IEA)
+			to_string.add("IEA");
+		else
+			to_string.add("no_IEA");
+		
+		to_string.add(Integer.toString(this.positive_proteins.size()));
+		to_string.add(Integer.toString(this.negative_proteins.size()));
+		to_string.add(Integer.toString(this.mixed_proteins.size()));
+		
+		System.out.println(String.join(" ", to_string));
+	}
 
 }

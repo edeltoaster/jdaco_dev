@@ -168,4 +168,12 @@ public class GOAnnotator {
 		return this.tags;
 	}
 	
+	/**
+	 * Prints some info regarding the tags
+	 */
+	public void printTagInformation() {
+		System.out.println("tag_name positive_GO_term(s) negative_GO_term(s) taxon include_IEA #positive_proteins #negative_proteins #mixed_proteins");
+		for (GOAnnotationTag tag:this.tags)
+			tag.printTagInformation();
+	}
 }
