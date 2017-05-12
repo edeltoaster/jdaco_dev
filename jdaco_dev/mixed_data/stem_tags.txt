@@ -1,7 +1,7 @@
 regulation GO:0045944 GO:0000122
 coregulation GO:0003713 GO:0003714
 # acetylase and deacetylase activity
-h_ac_ac GO:0004402 GO:0004407
+h_ac GO:0004402 GO:0004407
 # important repressive mark H3K27me
 H3K27meX GO:0070734 GO:0071557
 # important other activating mark in stem cells (from "Single-molecule decoding of combinatorially modified nucleosomes")
