@@ -1,4 +1,4 @@
-package stem_cell_complexeomes;
+package stem_cell_complexeomes_older;
 
 import java.io.File;
 
@@ -10,18 +10,18 @@ import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
 public class build_networks_preppi {
-	static String expr_folder = "quantified_samples/"; // intended to be run on server
-	static String network_folder = "ENCODE_networks/";
+	static String expr_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/expr_data/";
+	static String network_folder = "/Users/tho/Desktop/networks/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
 	
 	public static void preprocess() {
-		System.out.println("Original PPIN: " + "mixed_data/human_PrePPI_17_01_17_hc.txt.gz"); // PrePPI, jan 2017
+		System.out.println("Original PPIN: " + "mixed_data/human_PrePPI_17_01_17.txt.gz"); // PrePPI, jan 2017
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		System.out.println("3did: " + DataQuery.get3didVersion());
 		System.out.println("iPfam: " + DataQuery.getIPfamVersion());
 		
-		original_ppin = new PPIN("mixed_data/human_PrePPI_17_01_17_hc.txt.gz");
+		original_ppin = new PPIN("mixed_data/human_PrePPI_17_01_17.txt.gz");
 		System.out.println(original_ppin.getSizesStr());
 		original_ppin = original_ppin.updateUniprotAccessions();
 		System.out.println("Updating Uniprot Accs with " + DataQuery.getUniprotRelease());

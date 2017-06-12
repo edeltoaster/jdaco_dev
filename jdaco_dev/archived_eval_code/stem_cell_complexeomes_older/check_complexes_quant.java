@@ -1,4 +1,4 @@
-package stem_cell_complexeomes;
+package stem_cell_complexeomes_older;
 
 
 import java.io.File;
@@ -15,9 +15,10 @@ import framework.DiffComplexDetector;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
+import stem_cell_complexeomes_older.definitions;
 
 
-public class check_complexes_quant_pluri {
+public class check_complexes_quant {
 	
 	public static void main(String[] args) {
 		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
@@ -26,14 +27,6 @@ public class check_complexes_quant_pluri {
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(definitions.daco_results_folder, ".csv")) {
 			String sample = f.getName().split("\\.")[0];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, definitions.networks_folder + sample + "_major-transcripts.txt.gz");
-			
-			//qdr.removeOpposinglyAnnotatedComplexes(definitions.goa);
-			
-//			if (sample.startsWith("BM_"))
-//				group1.put(sample, qdr);
-//			else if (sample.contains("hESC")) {
-//				group2.put(sample, qdr);
-//			}
 			
 			if (!sample.contains("hESC"))
 				group1.put(sample, qdr);
@@ -44,10 +37,9 @@ public class check_complexes_quant_pluri {
 		
 		Set<String> involved_tfs = new HashSet<>();
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.01, check_supersets);
-		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
 		List<String> res_pos = new LinkedList<>();
-		List<String> res_pluri = new LinkedList<>();
+		List<HashSet<String>> tf_variants = new LinkedList<>();
 		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
 			double median_tissues = Utilities.getMedian(dcd.getGroup1Abundances().get(variant));
 			double median_ESCs = Utilities.getMedian(dcd.getGroup2Abundances().get(variant));
@@ -64,19 +56,9 @@ public class check_complexes_quant_pluri {
 				continue;
 			
 			res_pos.add(sign + " " + hgncs + ", " + pval);
-			
-			Set<String> overlap = new HashSet<>(definitions.pluri_factors);
-			overlap.retainAll(variant);
-			
-			// filter for those including pluri factors
-			if (overlap.size() == 0)
-				continue;
-			
-			res_pluri.add(sign + " " + hgncs + ", " + pval);
-			
+
 			involved_tfs.addAll(variant);
-			pluri_tf_variants.add(variant);
-			
+			tf_variants.add(variant);
 			
 			// determine actual complexes
 			List<Set<String>> complexes = new LinkedList<>();
@@ -88,14 +70,13 @@ public class check_complexes_quant_pluri {
 		
 		// write results
 		Utilities.writeEntries(res_pos, "/Users/tho/Desktop/res_all.txt");
-		Utilities.writeEntries(res_pluri, "/Users/tho/Desktop/res_pluri.txt");
 		
 		
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
 		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, involved_tfs, 0.0001, involved_tfs);
 		
 		System.out.println("Building regnet ...");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -30, 30, 4, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(tf_variants, bdh, -30, 30, 4, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only_min2.txt", 2);
 		
