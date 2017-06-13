@@ -52,7 +52,7 @@ public class DACOResultSet {
 		
 		BufferedReader in = null;
 		try {
-			if (daco_out_file.endsWith(".gz"))
+			if (daco_out_file.endsWith(".gz") || daco_out_file.endsWith(".gzip"))
 				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(daco_out_file))));
 			else
 				in = new BufferedReader(new FileReader(daco_out_file));

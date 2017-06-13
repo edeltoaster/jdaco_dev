@@ -67,6 +67,7 @@ public class DiffComplexDetector {
 		this.group2_abundances = this.determineAbundanceOfSeedVariantsComplexes(group2);
 		
 		// determine medians
+		// TODO: see above, no_threads
 		this.group1_medians = this.group1_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMedian(e.getValue())));
 		this.group2_medians = this.group2_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMedian(e.getValue())));
 		
@@ -108,6 +109,7 @@ public class DiffComplexDetector {
 		}
 		
 		// abundance of a seed_comb_variant is the sum of all complexes it is contained in
+		// TODO: probably rewrite to insert no_threads as a parameter
 		Map<String, Map<HashSet<String>, Double>> precomputed_sample_abundances = group.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getAbundanceOfSeedVariantsComplexes()));
 		for (String sample:group.keySet()) {
 			Map<HashSet<String>, Double> sample_abundances = precomputed_sample_abundances.get(sample);

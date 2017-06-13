@@ -266,6 +266,12 @@ public class Utilities {
 	 * @return
 	 */
 	public static double getMedian(Collection<Double> data) {
+		
+		// if the list only includes one element
+		if (data.size() == 1)
+			for (Double d:data)
+				return d;
+		
 		List<Double> listed_data = new ArrayList<>(data);
 		
 		// sorts in ascending order
