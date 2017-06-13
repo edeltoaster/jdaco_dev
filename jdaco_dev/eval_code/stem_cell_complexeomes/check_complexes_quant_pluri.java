@@ -32,13 +32,14 @@ public class check_complexes_quant_pluri {
 			
 			//qdr.removeOpposinglyAnnotatedComplexes(definitions.goa);
 			
-			if (!sample.contains("H1-hESC") || !sample.contains("H7-hESC") || !sample.contains("induced-pluripotent-stem-cell"))
+			if (!sample.contains("H1-hESC") && !sample.contains("H7-hESC") && !sample.contains("induced-pluripotent-stem-cell"))
 				group1.put(sample, qdr);
 			else {
 				group2.put(sample, qdr);
 			}
 		}
-		
+		System.out.println("non-stem : " + group1.size());
+		System.out.println("stem samples : " + group2.size());
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
