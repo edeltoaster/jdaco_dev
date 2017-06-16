@@ -47,6 +47,8 @@ public class check_complexes_quant_pluri {
 		
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> pluri_effect = new HashMap<>();
+		List<HashSet<String>> nonpluri_tf_variants = new LinkedList<>();
+		Map<String, String> nonpluri_effect = new HashMap<>();
 		List<String> res_pos_all = new LinkedList<>();
 		List<String> res_pos_pluri = new LinkedList<>();
 		List<String> res_neg_all = new LinkedList<>();
@@ -60,11 +62,20 @@ public class check_complexes_quant_pluri {
 			
 			String hgncs = DataQuery.batchHGNCProteinsGenes(variant).toString();
 			double pval = dcd.getSignificanceVariantsPValues().get(variant);
+			involved_tfs.addAll(variant);
 			
 			// distinguish between increased/positive abundance and diminishing/negative abundance
 			if (sign.equals("-")) {
 				res_neg_all.add(sign + " " + hgncs + ", " + pval);
-				// TODO: add stuff to build non-pluri network?
+				
+				nonpluri_tf_variants.add(variant);
+				
+				// determine actual complexes
+				List<Set<String>> complexes = new LinkedList<>();
+				for (QuantDACOResultSet qdr:group2.values())
+					if (qdr.getSeedToComplexMap().containsKey(variant))
+						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
+				nonpluri_effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
 			} else {
 				res_pos_all.add(sign + " " + hgncs + ", " + pval);
 				
@@ -76,9 +87,7 @@ public class check_complexes_quant_pluri {
 				
 				res_pos_pluri.add(sign + " " + hgncs + ", " + pval);
 				
-				involved_tfs.addAll(variant);
 				pluri_tf_variants.add(variant);
-				
 				
 				// determine actual complexes
 				List<Set<String>> complexes = new LinkedList<>();
@@ -98,15 +107,34 @@ public class check_complexes_quant_pluri {
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
 		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, involved_tfs, 0.0001, involved_tfs);
 		
-		System.out.println("Building regnet ...");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -30, 30, definitions.no_threads, 1);
-		regnet.writeRegulatoryNetwork("regnet_only.txt");
-		regnet.writeRegulatoryNetwork("regnet_only_min2.txt", 2);
+		/**
+		 *  writing pluri network data
+		 */
+		
+		System.out.println("Building pluri regnet ...");
+		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -30, 30, definitions.no_threads, 1);
+		pluri_regnet.writeRegulatoryNetwork("pluri_regnet_only.txt");
+		pluri_regnet.writeRegulatoryNetwork("pluri_regnet_only_min2.txt", 2);
 		
 		// adding annotational data
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
 		annotational_data.put("Regulatory_effect", pluri_effect);
+		pluri_regnet.writeNodeTable("pluri_node_table_only.txt", annotational_data);
 		
-		regnet.writeNodeTable("node_table_only.txt", annotational_data);
+		// TODO: add pos_not only pluri-factors?
+		
+		/**
+		 *  writing non-pluri network data
+		 */
+		
+		System.out.println("Building non-pluri regnet ...");
+		RegulatoryNetwork nonpluri_regnet = new RegulatoryNetwork(nonpluri_tf_variants, bdh, -30, 30, definitions.no_threads, 1);
+		nonpluri_regnet.writeRegulatoryNetwork("nonpluri_regnet_only.txt");
+		nonpluri_regnet.writeRegulatoryNetwork("nonpluri_regnet_only_min2.txt", 2);
+		
+		// also adding annotational data here
+		annotational_data = new HashMap<>();
+		annotational_data.put("Regulatory_effect", nonpluri_effect);
+		nonpluri_regnet.writeNodeTable("nonpluri_node_table_only.txt", annotational_data);
 	}
 }
