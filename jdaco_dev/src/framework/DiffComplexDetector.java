@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
@@ -22,24 +24,31 @@ public class DiffComplexDetector {
 	private final Map<String, QuantDACOResultSet> group2;
 	private final double FDR;
 	private final boolean incorporate_supersets;
+	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	
 	// processed / determined data
 	private final Set<HashSet<String>> seed_combination_variants;
 	private final Map<HashSet<String>, LinkedList<HashSet<String>>> seed_combination_variant_superset;
 	private final Map<HashSet<String>, LinkedList<Double>> group1_abundances;
 	private final Map<HashSet<String>, LinkedList<Double>> group2_abundances;
-	private final Map<HashSet<String>, Double> group1_medians;
-	private final Map<HashSet<String>, Double> group2_medians;
+	private Map<HashSet<String>, Double> group1_medians;
+	private Map<HashSet<String>, Double> group2_medians;
 	
 	// differential analysis results
 	private final Map<HashSet<String>, Double> significance_variants_pvalues;
 	private final List<HashSet<String>> significance_sorted_variants;
 	
-	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean incorporate_supersets) {
+	// helper objects
+	private final ForkJoinPool pool;
+	
+	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, int no_threads, boolean incorporate_supersets) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
+		this.no_threads = no_threads;
 		this.incorporate_supersets = incorporate_supersets;
+		
+		pool = new ForkJoinPool(this.no_threads);
 		
 		// determine potentially relevant seed variant combinations ...
 		this.seed_combination_variants = new HashSet<>();
@@ -67,9 +76,15 @@ public class DiffComplexDetector {
 		this.group2_abundances = this.determineAbundanceOfSeedVariantsComplexes(group2);
 		
 		// determine medians
-		// TODO: see above, no_threads
-		this.group1_medians = this.group1_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMedian(e.getValue())));
-		this.group2_medians = this.group2_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMedian(e.getValue())));
+		ForkJoinTask<Map<HashSet<String>, Double>> group1_task = pool.submit(() -> this.group1_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMedian(e.getValue()))));
+		ForkJoinTask<Map<HashSet<String>, Double>> group2_task = pool.submit(() -> this.group2_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMedian(e.getValue()))));
+		try {
+			this.group1_medians = group1_task.get();
+			this.group2_medians = group2_task.get();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
 		
 		// determine differential abundance, apply multiple hypothesis correction and filter to significant seed variants
 		this.significance_variants_pvalues = this.determinePValues();
@@ -77,6 +92,8 @@ public class DiffComplexDetector {
 		// sort from most to least significant
 		this.significance_sorted_variants = new ArrayList<>(this.significance_variants_pvalues.keySet());
 		this.significance_sorted_variants.sort( (v1, v2) -> diffCompareTo(v1, v2));
+		
+		pool.shutdownNow();
 	}
 	
 	/**
@@ -109,8 +126,15 @@ public class DiffComplexDetector {
 		}
 		
 		// abundance of a seed_comb_variant is the sum of all complexes it is contained in
-		// TODO: probably rewrite to insert no_threads as a parameter
-		Map<String, Map<HashSet<String>, Double>> precomputed_sample_abundances = group.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getAbundanceOfSeedVariantsComplexes()));
+		ForkJoinTask<Map<String, Map<HashSet<String>, Double>>> task = this.pool.submit(() -> group.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getAbundanceOfSeedVariantsComplexes())));
+		Map<String, Map<HashSet<String>, Double>> precomputed_sample_abundances = null;
+		try {
+			precomputed_sample_abundances = task.get();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
 		for (String sample:group.keySet()) {
 			Map<HashSet<String>, Double> sample_abundances = precomputed_sample_abundances.get(sample);
 			for (HashSet<String> variant:this.seed_combination_variants) {

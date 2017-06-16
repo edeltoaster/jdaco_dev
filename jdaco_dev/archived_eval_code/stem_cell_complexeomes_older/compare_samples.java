@@ -35,6 +35,6 @@ public class compare_samples {
 			}
 		
 		// quantitative abundance
-		// TODO: implement analysis
+		// TODO: implement analysis?
 	}
 }

@@ -8,8 +8,10 @@ import framework.GOAnnotator;
 import framework.Utilities;
 
 public class definitions {
-	static String daco_results_folder = "res_99_5/";
+	static String daco_results_folder = "res_95_5/";
+	static double pvalue = 0.01;
 	static String networks_folder = "ENCODE_networks/";
+	static boolean check_supersets = false;
 	
 	static Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	
@@ -18,7 +20,7 @@ public class definitions {
 	static String binding_data = "mixed_data/hocomoco_v10_EPD_v4_5k.txt.gz";
 	static GOAnnotator goa = new GOAnnotator("mixed_data/stem_tags_retrieved.txt.gz");
 	
-	static int no_threads = 32;
+	static int no_threads = 40;
 	
 	public static void main(String[] args) {
 		// running updates the GO annotations
