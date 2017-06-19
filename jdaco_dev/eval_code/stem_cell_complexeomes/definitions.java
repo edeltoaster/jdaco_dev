@@ -11,12 +11,13 @@ public class definitions {
 	static String daco_results_folder = "res_95_5/";
 	static String networks_folder = "ENCODE_networks/";
 	
-	static double pvalue = 0.01;
+	static double pvalue = 0.001;
 	static boolean check_supersets = false;
 	
 	static int no_threads = 48;
 	
-	static Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_human_TFs_v10.txt.gz");
+	static String seed_file = "mixed_data/hocomoco_human_TFs_v10.txt.gz";
+	static Set<String> seed = Utilities.readEntryFile(seed_file);
 	
 	static Set<String> pluri_factors = new HashSet<>(Arrays.asList("Q01860", "P48431", "Q9H9S0"));
 	
@@ -36,7 +37,7 @@ public class definitions {
 		
 		System.out.println("no_threads : " + no_threads);
 		
-		System.out.println("seed file : " + seed);
+		System.out.println("seed file : " + seed_file);
 		
 		System.out.println("considered as pluri factors : " + pluri_factors);
 		
