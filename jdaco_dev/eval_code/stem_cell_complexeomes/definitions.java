@@ -12,7 +12,7 @@ public class definitions {
 	static String networks_folder = "ENCODE_networks/";
 	
 	static double pvalue = 0.001;
-	static boolean parametric = false;
+	static boolean parametric = false; // for 0s, Welch test not really helpful
 	static boolean check_supersets = false;
 	
 	static int no_threads = 48;

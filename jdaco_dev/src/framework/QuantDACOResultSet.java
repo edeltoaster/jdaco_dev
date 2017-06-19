@@ -188,7 +188,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 		
 		// cache results
 		this.cached_abundance_of_complexes = quantification_result;
-		
+		// TODO: cache remaining_amount somehow
 		return quantification_result;
 	}
 	
