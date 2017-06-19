@@ -21,6 +21,7 @@ import stem_cell_complexeomes.definitions;
 public class check_complexes_quant_pluri {
 	
 	public static void main(String[] args) {
+		definitions.printParameters();
 		
 		System.out.println("Reading data ...");
 		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
@@ -47,6 +48,8 @@ public class check_complexes_quant_pluri {
 		
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> pluri_effect = new HashMap<>();
+		List<HashSet<String>> plurisub_tf_variants = new LinkedList<>();
+		Map<String, String> plurisub_effect = new HashMap<>();
 		List<HashSet<String>> nonpluri_tf_variants = new LinkedList<>();
 		Map<String, String> nonpluri_effect = new HashMap<>();
 		List<String> res_pos_all = new LinkedList<>();
@@ -72,20 +75,13 @@ public class check_complexes_quant_pluri {
 				
 				// determine actual complexes
 				List<Set<String>> complexes = new LinkedList<>();
-				for (QuantDACOResultSet qdr:group2.values())
+				for (QuantDACOResultSet qdr:group1.values()) // get examples from group1 since they are underrepresented in group2
 					if (qdr.getSeedToComplexMap().containsKey(variant))
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
 				nonpluri_effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
 			} else {
+				// everything in pluri-network
 				res_pos_all.add(sign + " " + hgncs + ", " + pval);
-				
-				// filter for those including pluri factors
-				Set<String> overlap = new HashSet<>(definitions.pluri_factors);
-				overlap.retainAll(variant);
-				if (overlap.size() == 0)
-					continue;
-				
-				res_pos_pluri.add(sign + " " + hgncs + ", " + pval);
 				
 				pluri_tf_variants.add(variant);
 				
@@ -95,6 +91,24 @@ public class check_complexes_quant_pluri {
 					if (qdr.getSeedToComplexMap().containsKey(variant))
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
 				pluri_effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
+				
+				
+				// filter for those including pluri factors
+				Set<String> overlap = new HashSet<>(definitions.pluri_factors);
+				overlap.retainAll(variant);
+				if (overlap.size() == 0)
+					continue;
+				
+				res_pos_pluri.add(sign + " " + hgncs + ", " + pval);
+				
+				plurisub_tf_variants.add(variant);
+				
+				// determine actual complexes
+				complexes = new LinkedList<>();
+				for (QuantDACOResultSet qdr:group2.values())
+					if (qdr.getSeedToComplexMap().containsKey(variant))
+						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
+				plurisub_effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
 			}
 		}
 		
@@ -111,24 +125,33 @@ public class check_complexes_quant_pluri {
 		 *  writing pluri network data
 		 */
 		
+		System.out.println("Building pluri sub-regnet ...");
+		RegulatoryNetwork plurisub_regnet = new RegulatoryNetwork(plurisub_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
+		plurisub_regnet.writeRegulatoryNetwork("plurisub_regnet_only.txt");
+		plurisub_regnet.writeRegulatoryNetwork("plurisub_regnet_only_min2.txt", 2);
+		
+		// adding annotational data
+		Map<String, Map<String,String>> annotational_data = new HashMap<>();
+		annotational_data.put("Regulatory_effect", plurisub_effect);
+		plurisub_regnet.writeNodeTable("plurisub_node_table_only.txt", annotational_data);
+		
+		
 		System.out.println("Building pluri regnet ...");
-		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -30, 30, definitions.no_threads, 1);
+		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
 		pluri_regnet.writeRegulatoryNetwork("pluri_regnet_only.txt");
 		pluri_regnet.writeRegulatoryNetwork("pluri_regnet_only_min2.txt", 2);
 		
 		// adding annotational data
-		Map<String, Map<String,String>> annotational_data = new HashMap<>();
-		annotational_data.put("Regulatory_effect", pluri_effect);
+		annotational_data = new HashMap<>();
+		annotational_data.put("Regulatory_effect", plurisub_effect);
 		pluri_regnet.writeNodeTable("pluri_node_table_only.txt", annotational_data);
-		
-		// TODO: add pos_not only pluri-factors?
 		
 		/**
 		 *  writing non-pluri network data
 		 */
 		
 		System.out.println("Building non-pluri regnet ...");
-		RegulatoryNetwork nonpluri_regnet = new RegulatoryNetwork(nonpluri_tf_variants, bdh, -30, 30, definitions.no_threads, 1);
+		RegulatoryNetwork nonpluri_regnet = new RegulatoryNetwork(nonpluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
 		nonpluri_regnet.writeRegulatoryNetwork("nonpluri_regnet_only.txt");
 		nonpluri_regnet.writeRegulatoryNetwork("nonpluri_regnet_only_min2.txt", 2);
 		
