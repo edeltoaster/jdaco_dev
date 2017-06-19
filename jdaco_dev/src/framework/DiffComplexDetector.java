@@ -12,6 +12,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
+import org.apache.commons.math3.stat.inference.TTest;
 
 /**
  * Class for differential DACO complexes
@@ -23,6 +24,7 @@ public class DiffComplexDetector {
 	private final Map<String, QuantDACOResultSet> group1;
 	private final Map<String, QuantDACOResultSet> group2;
 	private final double FDR;
+	private final boolean parametric;
 	private final boolean incorporate_supersets;
 	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	
@@ -41,12 +43,13 @@ public class DiffComplexDetector {
 	// helper objects
 	private final ForkJoinPool pool;
 	
-	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, int no_threads, boolean incorporate_supersets) {
+	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean incorporate_supersets, int no_threads) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
-		this.no_threads = no_threads;
+		this.parametric = parametric;
 		this.incorporate_supersets = incorporate_supersets;
+		this.no_threads = no_threads;
 		
 		pool = new ForkJoinPool(this.no_threads);
 		
@@ -87,7 +90,10 @@ public class DiffComplexDetector {
 		}
 		
 		// determine differential abundance, apply multiple hypothesis correction and filter to significant seed variants
-		this.significance_variants_pvalues = this.determinePValues();
+		if (this.parametric) // parametric Welch test
+			this.significance_variants_pvalues = this.determinePValuesParametric();
+		else // non-parametric MWU test
+			this.significance_variants_pvalues = this.determinePValuesNonParametric();
 		
 		// sort from most to least significant
 		this.significance_sorted_variants = new ArrayList<>(this.significance_variants_pvalues.keySet());
@@ -154,17 +160,38 @@ public class DiffComplexDetector {
 		return group_abundances;
 	}
 	
-	private Map<HashSet<String>, Double> determinePValues() {
+	/**
+	 * Applies parametric heteroscedastic two-sample t-test/Welch test and FDR-correction
+	 * @return
+	 */
+	private Map<HashSet<String>, Double> determinePValuesParametric() {
+		TTest tt = new TTest();
+		Map<HashSet<String>, Double> test_results = new HashMap<>();
+		for (HashSet<String> variant:this.seed_combination_variants) {
+			// two-sample two-tailed Welch test, t-test with differing variances (heteroscedastic)
+			double pm = tt.tTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
+			test_results.put(variant, pm);
+		}
+		
+		return Utilities.convertRawPValuesToBHFDR(test_results, this.FDR);
+	}
+	
+	/**
+	 * Applies non-parametric MWU test and FDR-correction
+	 * @return
+	 */
+	private Map<HashSet<String>, Double> determinePValuesNonParametric() {
 		MannWhitneyUTest mwu = new MannWhitneyUTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
 		for (HashSet<String> variant:this.seed_combination_variants) {
+			// MWU test
 			double pm = mwu.mannWhitneyUTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
 			test_results.put(variant, pm);
 		}
 		
 		return Utilities.convertRawPValuesToBHFDR(test_results, this.FDR);
 	}
-
+	
 	public void printResults() {
 		for (HashSet<String> variant: this.significance_sorted_variants) {
 			System.out.println(variant + " " + this.significance_variants_pvalues.get(variant));
@@ -197,6 +224,14 @@ public class DiffComplexDetector {
 		return FDR;
 	}
 
+	/**
+	 * Returns the if a parametric test or a non-parametric test was used
+	 * @return
+	 */
+	public boolean getParametricTestUsed() {
+		return this.parametric;
+	}
+	
 	/**
 	 * Returns if supersets have been incorporated in the significance calculations
 	 * @return

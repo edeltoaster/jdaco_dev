@@ -44,7 +44,7 @@ public class check_complexes_quant_pluri {
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.pvalue, definitions.no_threads, definitions.check_supersets);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.pvalue, definitions.parametric, definitions.check_supersets, definitions.no_threads);
 		
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> pluri_effect = new HashMap<>();
