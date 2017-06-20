@@ -1,5 +1,6 @@
 package framework;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -11,9 +12,10 @@ public class QuantDACOResultSet extends DACOResultSet {
 	private  Map<String, String> protein_to_assumed_transcript;
 	private  Map<String, Double> transcript_abundance; // transcript data actually only given in float precision, but double simplifies the usage in statistical functions
 	private Map<HashSet<String>, Double> cached_abundance_of_complexes; // convenient storage for complex quantification results of the non-simple method
+	private Map<String, Double> cached_remaining_abundance_of_proteins; // convenient storage for remaining_amount results of the non-simple method
 	
 	/*
-	 * diverse constructorsand necessities
+	 * diverse constructors and necessities
 	 */
 	
 	public QuantDACOResultSet(String daco_out_file, String seed_file, String protein_to_assumed_transcript_file) {
@@ -125,17 +127,23 @@ public class QuantDACOResultSet extends DACOResultSet {
 			protein_abundance_per_complex.put(complex, effective_protein_in_complex);
 		}
 		
-		// iterative
+		
+		// some pre-allocated objects and variables, to limit the amount of object generation
 		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
 		boolean iterate = false;
 		double last_to_distr = Double.MAX_VALUE;
-		
+		Map<String, Double> remaining_amount = new HashMap<>();
+		Map<String, List<HashSet<String>>> distribute_to = new HashMap<>();
+		double min_abundance;
+		double distance_to_min;
+		double current_to_distr;
+		double distr_amount;
+		// iterative refinement
 		do {
 			iterate = false;
-			Map<String, Double> remaining_amount = new HashMap<>();
-			Map<String, List<HashSet<String>>> distribute_to = new HashMap<>();
 			for (HashSet<String> complex:this.getResult()) {
-				double min_abundance = protein_abundance_per_complex.get(complex).values().stream().min(Double::compare).get();
+				// complex abundance is limited by least abundant protein
+				min_abundance = protein_abundance_per_complex.get(complex).values().stream().min(Double::compare).get();
 				quantification_result.put(complex, min_abundance);
 				
 				// calculate remaining amount of proteins and add it up to overall remaining
@@ -143,8 +151,10 @@ public class QuantDACOResultSet extends DACOResultSet {
 					// only relevant for those in several complexes -> do not touch proteins that are only in one complex
 					if (!protein_in_complexes_count.containsKey(protein))
 						continue;
-					double distance_to_min = protein_abundance_per_complex.get(complex).get(protein) - min_abundance;
+					// update used amount of protein and limit to maximal value, remaining amount of protein (actually transcript) as was added to remaining_amount
+					distance_to_min = protein_abundance_per_complex.get(complex).get(protein) - min_abundance;
 					remaining_amount.put(protein, remaining_amount.getOrDefault(protein, 0.0) + distance_to_min);
+					protein_abundance_per_complex.get(complex).put(protein, min_abundance);
 					
 					// if protein is the limiting protein, note that it should be increased in the complex here
 					if (distance_to_min == 0.0) {
@@ -152,23 +162,25 @@ public class QuantDACOResultSet extends DACOResultSet {
 							distribute_to.put(protein, new LinkedList<HashSet<String>>());
 						distribute_to.get(protein).add(complex);
 					}
-					
-					// limit to maximal value, remaining amount of protein (actually transcript) as was added to remaining_amount
-					protein_abundance_per_complex.get(complex).put(protein, min_abundance);
 				}
 			}
-			remaining_amount.keySet().removeIf(d -> remaining_amount.get(d) == 0.0); // can happen if protein is always the limiting member
+			System.out.println("quant: " + quantification_result);
+			System.out.println("prot_per_compl: " + protein_abundance_per_complex);
+			System.out.println("remaining: " + remaining_amount);
+			System.out.println("distr_to: " + distribute_to);
+			
+			remaining_amount.keySet().removeIf(d -> remaining_amount.get(d) == 0.0); // limiting proteins
 			distribute_to.keySet().removeIf(d -> !remaining_amount.containsKey(d)); // don't distribute when there's nothing to distribute
 			
 			// do another iteration if there is still a decrease in the overall amount of re-distributable abundance values
-			double current_to_distr = remaining_amount.values().stream().reduce(0.0, Double::sum);
-			if ( (last_to_distr - current_to_distr) > 0.0001)
+			current_to_distr = remaining_amount.values().stream().reduce(0.0, Double::sum);
+			if ( (last_to_distr - current_to_distr) > 0.00001)
 				iterate = true;
 			last_to_distr = current_to_distr;
 			
 			// distribute remaining account equally on the limiting proteins
 			for (String protein:distribute_to.keySet()) {
-				double distr_amount = remaining_amount.get(protein) / distribute_to.get(protein).size();
+				distr_amount = remaining_amount.get(protein) / distribute_to.get(protein).size();
 				for (HashSet<String> complex:distribute_to.get(protein))
 					protein_abundance_per_complex.get(complex).put(protein, protein_abundance_per_complex.get(complex).get(protein) + distr_amount);
 				
@@ -178,7 +190,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 			
 			// distribute for all other proteins
 			for (String protein:remaining_amount.keySet()) {
-				double distr_amount = remaining_amount.get(protein) / protein_in_complexes_count.get(protein);
+				distr_amount = remaining_amount.get(protein) / protein_in_complexes_count.get(protein);
 				for (HashSet<String> complex:protein_in_complexes.get(protein))
 					protein_abundance_per_complex.get(complex).put(protein, protein_abundance_per_complex.get(complex).get(protein) + distr_amount);
 			}
@@ -188,7 +200,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 		
 		// cache results
 		this.cached_abundance_of_complexes = quantification_result;
-		// TODO: cache remaining_amount somehow
+		
 		return quantification_result;
 	}
 	
@@ -278,32 +290,68 @@ public class QuantDACOResultSet extends DACOResultSet {
 		return this.transcript_abundance.getOrDefault(this.protein_to_assumed_transcript.get(protein), 0.0);
 	}
 	
+	// example why complexes that consist only of one protein do not work well here; gladly this cannot happen with DACO results!
+	public static void single_prot_complex_test() {
+		HashSet<HashSet<String>> results = new HashSet<>();
+		results.add(new HashSet<>(Arrays.asList("PA", "PB")));
+		results.add(new HashSet<>(Arrays.asList("PC", "PD")));
+		results.add(new HashSet<>(Arrays.asList("PD", "PE")));
+		results.add(new HashSet<>(Arrays.asList("PD", "PE", "PF")));
+		results.add(new HashSet<>(Arrays.asList("PF")));
+		
+		Set<String> seed = new HashSet<>();
+		seed.add("PB");
+		
+		Map<String, String> protein_to_assumed_transcript = new HashMap<>();
+		protein_to_assumed_transcript.put("PA", "TA");
+		protein_to_assumed_transcript.put("PB", "TB");
+		protein_to_assumed_transcript.put("PC", "TC");
+		protein_to_assumed_transcript.put("PD", "TD");
+		protein_to_assumed_transcript.put("PE", "TE");
+		protein_to_assumed_transcript.put("PF", "TF");
+		
+		Map<String, Float> transcript_abundance = new HashMap<>();
+		transcript_abundance.put("TA", 0.2f);
+		transcript_abundance.put("TB", 1f);
+		transcript_abundance.put("TC", 0.2f);
+		transcript_abundance.put("TD", 0.5f);
+		transcript_abundance.put("TE", 1f);
+		transcript_abundance.put("TF", 1f);
+		
+		QuantDACOResultSet qdr = new QuantDACOResultSet(results, seed, protein_to_assumed_transcript, transcript_abundance);
+		System.out.println("out: " + qdr.getAbundanceOfComplexes());
+	}
+	
 	// for testing purposes
-//	public static void main(String[] args) {
-//		HashSet<HashSet<String>> results = new HashSet<>();
-//		results.add(new HashSet<>(Arrays.asList("PA", "PB")));
-//		results.add(new HashSet<>(Arrays.asList("PB", "PC")));
-//		results.add(new HashSet<>(Arrays.asList("PC", "PD")));
-//		results.add(new HashSet<>(Arrays.asList("PC", "PE")));
-//		
-//		Set<String> seed = new HashSet<>();
-//		seed.add("PB");
-//		
-//		Map<String, String> protein_to_assumed_transcript = new HashMap<>();
-//		protein_to_assumed_transcript.put("PA", "TA");
-//		protein_to_assumed_transcript.put("PB", "TB");
-//		protein_to_assumed_transcript.put("PC", "TC");
-//		protein_to_assumed_transcript.put("PD", "TD");
-//		protein_to_assumed_transcript.put("PE", "TE");
-//		
-//		Map<String, Float> transcript_abundance = new HashMap<>();
-//		transcript_abundance.put("TA", 0.2f);
-//		transcript_abundance.put("TB", 1f);
-//		transcript_abundance.put("TC", 1f);
-//		transcript_abundance.put("TD", 0.5f);
-//		transcript_abundance.put("TE", 1f);
-//		
-//		QuantDACOResultSet qdr = new QuantDACOResultSet(results, seed, protein_to_assumed_transcript, transcript_abundance);
-//		System.out.println("out: " + qdr.getAbundanceOfComplexes());
-//	}
+	public static void main(String[] args) {
+		HashSet<HashSet<String>> results = new HashSet<>();
+		results.add(new HashSet<>(Arrays.asList("PA", "PB")));
+		results.add(new HashSet<>(Arrays.asList("PC", "PD")));
+		results.add(new HashSet<>(Arrays.asList("PD", "PE")));
+		results.add(new HashSet<>(Arrays.asList("PE", "PF", "PG")));
+		
+		Set<String> seed = new HashSet<>();
+		seed.add("PB");
+		
+		Map<String, String> protein_to_assumed_transcript = new HashMap<>();
+		protein_to_assumed_transcript.put("PA", "TA");
+		protein_to_assumed_transcript.put("PB", "TB");
+		protein_to_assumed_transcript.put("PC", "TC");
+		protein_to_assumed_transcript.put("PD", "TD");
+		protein_to_assumed_transcript.put("PE", "TE");
+		protein_to_assumed_transcript.put("PF", "TF");
+		protein_to_assumed_transcript.put("PG", "TG");
+		
+		Map<String, Float> transcript_abundance = new HashMap<>();
+		transcript_abundance.put("TA", 0.2f);
+		transcript_abundance.put("TB", 1f);
+		transcript_abundance.put("TC", 0.2f);
+		transcript_abundance.put("TD", 0.5f);
+		transcript_abundance.put("TE", 1f);
+		transcript_abundance.put("TF", 1f);
+		transcript_abundance.put("TG", 1f);
+		
+		QuantDACOResultSet qdr = new QuantDACOResultSet(results, seed, protein_to_assumed_transcript, transcript_abundance);
+		System.out.println("out: " + qdr.getAbundanceOfComplexes());
+	}
 }
