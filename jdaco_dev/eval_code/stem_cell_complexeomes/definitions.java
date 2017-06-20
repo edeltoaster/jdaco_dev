@@ -11,7 +11,7 @@ public class definitions {
 	static String daco_results_folder = "res_95_5/";
 	static String networks_folder = "ENCODE_networks/";
 	
-	static double pvalue = 0.001;
+	static double pvalue = 0.05;
 	static boolean parametric = false; // for 0s, Welch test not really helpful
 	static boolean check_supersets = false;
 	

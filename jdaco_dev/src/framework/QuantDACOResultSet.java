@@ -90,24 +90,30 @@ public class QuantDACOResultSet extends DACOResultSet {
 		
 		return quantification_result;
 	}
+	
 	/**
 	 * Quantify each complex with the abundance of its least abundant member, but take overall amount of into account
 	 * @return
 	 */
 	public Map<HashSet<String>, Double> getAbundanceOfComplexes() {
+		// get cached results if already computed
+		if (this.cached_abundance_of_complexes != null)
+			return this.cached_abundance_of_complexes;
+		
 		double convergence_limit = 1.0E-7 * this.protein_to_assumed_transcript.size();
-		return getAbundanceOfComplexes(convergence_limit, 0.5, 10000);
+		
+		// cache results
+		this.cached_abundance_of_complexes = getAbundanceOfComplexes(convergence_limit, 0.5, 10000);
+		
+		return this.cached_abundance_of_complexes;
 	}
+	
 	/**
 	 * Quantify each complex with the abundance of its least abundant member, but take overall amount of into account (detailed)
 	 * @return
 	 */
 	public Map<HashSet<String>, Double> getAbundanceOfComplexes(final double convergence_limit, final double distr_factor, final int max_iterations) {
-		
-		// get cached results if already computed
-		if (this.cached_abundance_of_complexes != null)
-			return this.cached_abundance_of_complexes;
-		
+
 		// count occurrence of each protein in complexes
 		Map<String, Integer> protein_in_complexes_count = new HashMap<>();
 		Map<String, List<HashSet<String>>> protein_in_complexes = new HashMap<>();
@@ -205,9 +211,6 @@ public class QuantDACOResultSet extends DACOResultSet {
 			
 			++iteration_no;
 		} while (true); // while(true) actually nicest form to implement that! :-P
-		
-		// cache results
-		this.cached_abundance_of_complexes = quantification_result;
 		
 		return quantification_result;
 	}
