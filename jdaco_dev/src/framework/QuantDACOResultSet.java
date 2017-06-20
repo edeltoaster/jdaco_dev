@@ -103,7 +103,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 		double convergence_limit = 1.0E-7 * this.protein_to_assumed_transcript.size();
 		
 		// cache results
-		this.cached_abundance_of_complexes = getAbundanceOfComplexes(convergence_limit, 0.5, 10000);
+		this.cached_abundance_of_complexes = getAbundanceOfComplexes(convergence_limit, 10000);
 		
 		return this.cached_abundance_of_complexes;
 	}
@@ -112,7 +112,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 	 * Quantify each complex with the abundance of its least abundant member, but take overall amount of into account (detailed)
 	 * @return
 	 */
-	public Map<HashSet<String>, Double> getAbundanceOfComplexes(final double convergence_limit, final double distr_factor, final int max_iterations) {
+	public Map<HashSet<String>, Double> getAbundanceOfComplexes(final double convergence_limit, final int max_iterations) {
 
 		// count occurrence of each protein in complexes
 		Map<String, Integer> protein_in_complexes_count = new HashMap<>();
@@ -147,6 +147,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 		double min_abundance;
 		double distance_to_min;
 		double current_to_distr;
+		double distr_factor;
 		double distr_amount;
 		int iteration_no = 1;
 		
@@ -192,6 +193,9 @@ public class QuantDACOResultSet extends DACOResultSet {
 				break;
 			}
 			
+			// saturation function that goes from 0.99 to 0.09
+			distr_factor = 1.89 - (1.8 / (1+Math.exp(-0.05* (iteration_no-1))));
+			
 			// distribute remaining account equally on the limiting proteins if worthwhile, algorithm stopped otherwise
 			for (String protein:distribute_to.keySet()) {
 				distr_amount = (distr_factor * remaining_amount.get(protein)) / distribute_to.get(protein).size();
@@ -212,6 +216,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 			++iteration_no;
 		} while (true); // while(true) actually nicest form to implement that! :-P
 		
+		System.out.println(iteration_no + " " + current_to_distr);
 		return quantification_result;
 	}
 	
