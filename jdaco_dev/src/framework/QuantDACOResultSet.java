@@ -143,6 +143,9 @@ public class QuantDACOResultSet extends DACOResultSet {
 		Map<HashSet<String>, Double> quantification_result = new HashMap<>();
 		Map<String, Double> remaining_amount = new HashMap<>();
 		Map<String, List<HashSet<String>>> distribute_to = new HashMap<>();
+		Set<HashSet<String>> unsaturated_complexes = new HashSet<>(this.getResult());
+		Set<HashSet<String>> saturated_complexes = new HashSet<>();
+		boolean limiting_protein_changeable = false;
 		double last_to_distr = Double.MAX_VALUE;
 		double min_abundance;
 		double distance_to_min;
@@ -154,12 +157,14 @@ public class QuantDACOResultSet extends DACOResultSet {
 		// iterative refinement
 		do {
 			// determine limiting proteins and remaining abundances
-			for (HashSet<String> complex:this.getResult()) {
+			for (HashSet<String> complex:unsaturated_complexes) {
+				
 				// complex abundance is limited by least abundant protein
 				min_abundance = protein_abundance_per_complex.get(complex).values().stream().min(Double::compare).get();
 				quantification_result.put(complex, min_abundance);
 				
 				// calculate remaining amount of proteins and add it up to overall remaining
+				limiting_protein_changeable = false;
 				for (String protein:complex) {
 					// only relevant for those in several complexes -> do not touch proteins that are only in one complex
 					if (!protein_in_complexes_count.containsKey(protein))
@@ -171,12 +176,27 @@ public class QuantDACOResultSet extends DACOResultSet {
 					
 					// if protein is the limiting protein, note that it should be increased in the complex here
 					if (distance_to_min == 0.0) {
+						limiting_protein_changeable = true;
 						if (!distribute_to.containsKey(protein))
 							distribute_to.put(protein, new LinkedList<HashSet<String>>());
 						distribute_to.get(protein).add(complex);
 					}
 				}
+				
+				// if the limiting protein cannot be changed anyhow, take this complex as saturated and don't touch it anymore, adjust proteins
+				if (!limiting_protein_changeable) {
+					saturated_complexes.add(complex);
+					for (String protein:complex) {
+						if (protein_in_complexes_count.containsKey(protein))
+							protein_in_complexes_count.put(protein, protein_in_complexes_count.get(protein) - 1);
+						protein_in_complexes.get(protein).remove(complex);
+					}
+				}
 			}
+			
+			// remove saturated complexes that cannot be changed anyhow
+			unsaturated_complexes.removeAll(saturated_complexes);
+			saturated_complexes.clear();
 			
 			remaining_amount.keySet().removeIf(d -> remaining_amount.get(d) == 0.0); // limiting proteins
 			distribute_to.keySet().removeIf(d -> !remaining_amount.containsKey(d)); // don't distribute when there's nothing to distribute
@@ -216,7 +236,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 			++iteration_no;
 		} while (true); // while(true) actually nicest form to implement that! :-P
 		
-		System.out.println(iteration_no + " " + current_to_distr);
+		//System.out.println(iteration_no + " " + current_to_distr);
 		return quantification_result;
 	}
 	

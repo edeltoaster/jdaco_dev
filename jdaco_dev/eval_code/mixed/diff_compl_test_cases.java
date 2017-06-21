@@ -75,13 +75,17 @@ public class diff_compl_test_cases {
 		System.out.println("out: " + qdr.getAbundanceOfComplexes());
 	}
 	
-	public static void bio_example() {
+	public static Map<HashSet<String>, Double> bio_example() {
 		QuantDACOResultSet qdr = new QuantDACOResultSet("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", "mixed_data/hocomoco_human_TFs_v10.txt.gz", "mixed_data/A172_1_1_ENCSR580GSX_major-transcripts.txt.gz");
-		qdr.getAbundanceOfComplexes();
+		return qdr.getAbundanceOfComplexes();
 	}
 	
 	// for testing purposes
 	public static void main(String[] args) {
+		long start = System.currentTimeMillis();
 		bio_example();
+		long end = System.currentTimeMillis();
+		double time_needed = (end - start) / 1000;
+		System.out.println(time_needed+"s");
 	}
 }
