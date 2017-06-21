@@ -11,6 +11,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 	private  Map<String, String> protein_to_assumed_transcript;
 	private  Map<String, Float> transcript_abundance; // transcript data only given in float precision, but double later simplifies the usage in statistical functions in calculations
 	private Map<HashSet<String>, Double> cached_abundance_of_complexes; // convenient storage for complex quantification results of the non-simple method
+	private Map<String, Double> cached_remaining_abundance_of_proteins; // convenient storage for advanced complex quantification results of the non-simple method
 	
 	/*
 	 * diverse constructors and necessities
@@ -92,7 +93,8 @@ public class QuantDACOResultSet extends DACOResultSet {
 	}
 	
 	/**
-	 * Quantify each complex with the abundance of its least abundant member, but take overall amount of into account
+	 * Quantify each complex with the abundance of its least abundant member, but take overall amount of into account.
+	 * Returns cached results if default parameters have already been used before.
 	 * @return
 	 */
 	public Map<HashSet<String>, Double> getAbundanceOfComplexes() {
@@ -236,8 +238,17 @@ public class QuantDACOResultSet extends DACOResultSet {
 			++iteration_no;
 		} while (true); // while(true) actually nicest form to implement that! :-P
 		
+		this.cached_remaining_abundance_of_proteins = remaining_amount;
 		//System.out.println(iteration_no + " " + current_to_distr);
 		return quantification_result;
+	}
+	
+	/**
+	 * Returns the remaining abundance value of the last abundance computation for each protein with > 0 remaining abundance value.
+	 * @return
+	 */
+	public Map<String, Double> getRemainingAbundanceOfProteins() {
+		return this.cached_remaining_abundance_of_proteins;
 	}
 	
 	/**
