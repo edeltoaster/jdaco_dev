@@ -1,6 +1,8 @@
 package mixed;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,6 +12,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
 import framework.DACOResultSet;
@@ -150,99 +153,116 @@ public class diff_compl_test_cases {
 		return output;
 	}
 	
-	/**
-	 * Given a DACO result and some parameters, returns [QuantDACOResultSet qdr, Map<HashSet<String>, Double> artificial_complex_abundance, Map<String, Double> remaining_abundances] as an Object[]. 
-	 * Here, the approximation algorithm is run in between to adjust for the model.
-	 * @param daco_outfile
-	 * @param min_abundance
-	 * @param max_abundance
-	 * @return
-	 */
-	public static Object[] simulate_sample_model(String daco_outfile, double min_abundance, double max_abundance) {// TODO: think about model, likely too optimistic
+	public static Object[] simulate_sample_model(String daco_outfile, double min_abundance, double max_abundance, double std_factor, double remaining_prefactor) {
+		double scaled_max_abundance = max_abundance - min_abundance;
+		
 		// load real complex result
 		DACOResultSet dr = new DACOResultSet(daco_outfile, "mixed_data/hocomoco_human_TFs_v10.txt.gz");
+		List<HashSet<String>> complexes = new ArrayList<>(dr.getResult());
 		
 		// construct appropriate protein->transcript data structure
 		Map<String, String> protein_to_assumed_transcript = new HashMap<>();
-		for (HashSet<String> complex:dr.getResult())
+		for (HashSet<String> complex:complexes)
 			for (String protein:complex)
 				if (!protein_to_assumed_transcript.containsKey(protein))
 					protein_to_assumed_transcript.put(protein, "T" + protein);
 		
-		// assign random abundance values to complexes
+		// select limiting proteins
 		Random rnd = new Random(System.currentTimeMillis());
-		final double scaled_max_abundance = max_abundance - min_abundance;
-		Map<HashSet<String>, Double> artificial_complex_abundance = dr.getResult().stream().collect(Collectors.toMap(e -> e, e -> (rnd.nextDouble() * scaled_max_abundance) + min_abundance));
+		HashMap<String, LinkedList<HashSet<String>>> limiting_protein_to_complex = new HashMap<>();
+		Collections.shuffle(complexes, rnd); // order is shuffled to ensure very different choices of limiting proteins
+		for (HashSet<String> complex:complexes) {
+			Set<String> temp_set = new HashSet<>(limiting_protein_to_complex.keySet());
+			temp_set.retainAll(complex);
+			if (temp_set.size() == 0) { // if there is no limiting protein yet, choose one
+				int chosen_index = rnd.nextInt(complex.size());
+				String chosen = (String) complex.toArray()[chosen_index];
+				limiting_protein_to_complex.put(chosen, new LinkedList<HashSet<String>>());;
+			}
+		}
 		
-		// summarize transcript abundances
+		// note in which complexes limiting proteins are found
+		for (HashSet<String> complex:complexes) {
+			List<String> temp_list = new ArrayList<>(complex);
+			temp_list.retainAll(limiting_protein_to_complex.keySet());
+			if (temp_list.size() > 0)// there may be one or more proteins limiting, chose one randomly and link that
+				Collections.shuffle(temp_list, rnd);
+			for (String limiting_protein:temp_list) { 
+				limiting_protein_to_complex.get(limiting_protein).add(complex);
+				break;
+			}
+		}
+		limiting_protein_to_complex.keySet().removeIf(e->limiting_protein_to_complex.get(e).size() == 0);
+		
+		// distribute limiting proteins roughly equally using normal distribution
+		Map<HashSet<String>, Double> artificial_complex_abundance = new HashMap<>();
+		for (String limiting_protein:limiting_protein_to_complex.keySet()) {
+			double prot_abundance = (rnd.nextDouble() * scaled_max_abundance) + min_abundance;
+			double complex_abundance_mean = prot_abundance / limiting_protein_to_complex.get(limiting_protein).size();
+			double complex_abundance_std = complex_abundance_mean * std_factor;
+			NormalDistribution distr = new NormalDistribution(complex_abundance_mean, complex_abundance_std);
+			for (HashSet<String> complex:limiting_protein_to_complex.get(limiting_protein)) {
+				double abundance = -1;
+				while (abundance <= 0.0) // TODO: other distribution?
+					abundance = distr.sample();
+				artificial_complex_abundance.put(complex, abundance);
+			}
+		}
+		
+		// sum up transcript abundances
 		Map<String, Float> transcript_abundance = new HashMap<>();
 		for (HashSet<String> complex:artificial_complex_abundance.keySet()) {
-			float compl_abundance = (float) ((double) artificial_complex_abundance.get(complex));
+			double abundance = artificial_complex_abundance.get(complex);
 			for (String protein:complex) {
 				String transcript_string = "T" + protein;
-				transcript_abundance.put(transcript_string, transcript_abundance.getOrDefault(transcript_string, 0f) + compl_abundance);
+				transcript_abundance.put(transcript_string, transcript_abundance.getOrDefault(transcript_string, 0f) + (float) abundance);
 			}
 		}
 		
-		// build qdr object from the artificial data and compute abundances using model
+		// add to non-limiting proteins
+		for (String transcript:transcript_abundance.keySet()) {
+			String prot = transcript.substring(1);
+			if (limiting_protein_to_complex.containsKey(prot))
+				continue;
+			float compl_abundance = rnd.nextFloat() * ((float) remaining_prefactor) * transcript_abundance.get(transcript);
+			transcript_abundance.put(transcript, transcript_abundance.getOrDefault(transcript, 0f) + compl_abundance);
+		}
+		
 		QuantDACOResultSet qdr = new QuantDACOResultSet(new HashSet<HashSet<String>>(dr.getResult()), Utilities.readEntryFile("mixed_data/hocomoco_human_TFs_v10.txt.gz"), protein_to_assumed_transcript, transcript_abundance);
-		artificial_complex_abundance = qdr.getAbundanceOfComplexes();
-		Map<String, Double> remaining_abundances = qdr.getRemainingAbundanceOfProteins();
-		
-		// integrate into new artificial data that better matches the model
-		transcript_abundance.clear();
-		for (HashSet<String> complex:artificial_complex_abundance.keySet()) {
-			float compl_abundance = (float) ((double) artificial_complex_abundance.get(complex));
-			for (String protein:complex) {
-				String transcript_string = "T" + protein;
-				transcript_abundance.put(transcript_string, transcript_abundance.getOrDefault(transcript_string, 0f) + compl_abundance);
-			}
-		}
-		
-		for (String protein:remaining_abundances.keySet()) {
-			String transcript_string = "T" + protein;
-			transcript_abundance.put(transcript_string, transcript_abundance.getOrDefault(transcript_string, 0f) + (float) (double)remaining_abundances.get(protein));
-		}
-			
-		qdr = new QuantDACOResultSet(new HashSet<HashSet<String>>(dr.getResult()), Utilities.readEntryFile("mixed_data/hocomoco_human_TFs_v10.txt.gz"), protein_to_assumed_transcript, transcript_abundance);
 		
 		Object[] output = new Object[3];
 		output[0] = qdr;
 		output[1] = artificial_complex_abundance;
-		output[2] = remaining_abundances;
+		
 		return output;
 	}
 	
 	// for testing purposes
 	public static void main(String[] args) {
-		
-		for (int i=0; i< 5; i++) {
-			// get reference data
-			System.out.println("construct ...");
-			Object[] simulation = simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", 0.00001, 10);
-			QuantDACOResultSet qdr = (QuantDACOResultSet) simulation[0];
-			@SuppressWarnings("unchecked")
-			Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) simulation[1];
-			@SuppressWarnings("unchecked")
-			Map<String, Double> remaining_abundances = (Map<String, Double>) simulation[2];
-			
-			System.out.println("evaluate ...");
-			Map<HashSet<String>, Double> eval_complex_abundance = qdr.getAbundanceOfComplexes();
-			
-
-			System.out.println(qdr.getRemainingAbundanceOfProteins().values().stream().reduce(0.0, Double::sum));
-			System.out.println(remaining_abundances.values().stream().reduce(0.0, Double::sum));
-			
-			List<Double> artificial = new LinkedList<>();
-			List<Double> evaluated = new LinkedList<>();
-			for (HashSet<String> complex: artificial_complex_abundance.keySet()) {
-				artificial.add(artificial_complex_abundance.get(complex));
-				evaluated.add(eval_complex_abundance.get(complex));
+		double[] stds = new double[]{0.01, 0.05, 0.1, 0.2};
+		for (double std:stds) {
+			for (int i = 0; i < 3; i++) {
+				// get reference data
+				System.out.println("std: " + std + ", construct ...");
+				Object[] simulation = simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", 0.0001, 10, std, 2);
+				QuantDACOResultSet qdr = (QuantDACOResultSet) simulation[0];
+				@SuppressWarnings("unchecked")
+				Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) simulation[1];
+				
+				System.out.println("evaluate ...");
+				Map<HashSet<String>, Double> eval_complex_abundance = qdr.getAbundanceOfComplexes();
+				
+				List<Double> artificial = new LinkedList<>();
+				List<Double> evaluated = new LinkedList<>();
+				for (HashSet<String> complex: artificial_complex_abundance.keySet()) {
+					artificial.add(artificial_complex_abundance.get(complex));
+					evaluated.add(eval_complex_abundance.get(complex));
+				}
+				
+				PearsonsCorrelation pcorr = new PearsonsCorrelation();
+				double corr = pcorr.correlation(Utilities.getDoubleArray(artificial), Utilities.getDoubleArray(evaluated)); // TODO: correlation a good measure here?
+				System.out.println("std: " + std + ", corr: " + corr);
 			}
-			
-			PearsonsCorrelation pcorr = new PearsonsCorrelation();
-			double corr = pcorr.correlation(Utilities.getDoubleArray(artificial), Utilities.getDoubleArray(evaluated));
-			System.out.println("corr: " + corr);
 		}
 	}
 }
