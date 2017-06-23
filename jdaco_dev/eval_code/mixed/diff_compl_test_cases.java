@@ -153,12 +153,11 @@ public class diff_compl_test_cases {
 		return output;
 	}
 	
-	public static Object[] simulate_sample_model(String daco_outfile, double min_abundance, double max_abundance, double std_factor, double remaining_prefactor) {
-		double scaled_max_abundance = max_abundance - min_abundance;
-		
+	public static Object[] simulate_sample_model(String daco_outfile, String major_transcript_file, double std_factor, double remaining_prefactor) {
 		// load real complex result
-		DACOResultSet dr = new DACOResultSet(daco_outfile, "mixed_data/hocomoco_human_TFs_v10.txt.gz");
+		QuantDACOResultSet dr = new QuantDACOResultSet(daco_outfile, "mixed_data/hocomoco_human_TFs_v10.txt.gz", major_transcript_file);
 		List<HashSet<String>> complexes = new ArrayList<>(dr.getResult());
+		List<Float> abundance_values = new ArrayList<>(dr.getTranscriptAbundance().values());
 		
 		// construct appropriate protein->transcript data structure
 		Map<String, String> protein_to_assumed_transcript = new HashMap<>();
@@ -193,11 +192,12 @@ public class diff_compl_test_cases {
 			}
 		}
 		limiting_protein_to_complex.keySet().removeIf(e->limiting_protein_to_complex.get(e).size() == 0);
-		
+		// TODO: should be done differently: 1. detect ALL complexes it takes part in, 2. distribute values unevenly
 		// distribute limiting proteins roughly equally using normal distribution
 		Map<HashSet<String>, Double> artificial_complex_abundance = new HashMap<>();
 		for (String limiting_protein:limiting_protein_to_complex.keySet()) {
-			double prot_abundance = (rnd.nextDouble() * scaled_max_abundance) + min_abundance;
+			int chosen_index = rnd.nextInt(abundance_values.size());
+			double prot_abundance = abundance_values.get(chosen_index); // will be fast as it is an array list
 			double complex_abundance_mean = prot_abundance / limiting_protein_to_complex.get(limiting_protein).size();
 			double complex_abundance_std = complex_abundance_mean * std_factor;
 			NormalDistribution distr = new NormalDistribution(complex_abundance_mean, complex_abundance_std);
@@ -239,17 +239,18 @@ public class diff_compl_test_cases {
 	
 	// for testing purposes
 	public static void main(String[] args) {
-		double[] stds = new double[]{0.01, 0.05, 0.1, 0.2};
+		double[] stds = new double[]{0.001, 0.01, 0.1, 0.3, 0.5, 1.0};
 		for (double std:stds) {
-			for (int i = 0; i < 3; i++) {
-				// get reference data
-				System.out.println("std: " + std + ", construct ...");
-				Object[] simulation = simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", 0.0001, 10, std, 2);
+			System.out.println("Std: " + std);
+			List<Double> results = new LinkedList<>();
+			for (int i = 0; i < 5; i++) {
+				// get simulated reference data
+				Object[] simulation = simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", "mixed_data/A172_1_1_ENCSR580GSX_major-transcripts.txt.gz", std, 1);
 				QuantDACOResultSet qdr = (QuantDACOResultSet) simulation[0];
 				@SuppressWarnings("unchecked")
 				Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) simulation[1];
 				
-				System.out.println("evaluate ...");
+				// evaluate
 				Map<HashSet<String>, Double> eval_complex_abundance = qdr.getAbundanceOfComplexes();
 				
 				List<Double> artificial = new LinkedList<>();
@@ -260,9 +261,10 @@ public class diff_compl_test_cases {
 				}
 				
 				PearsonsCorrelation pcorr = new PearsonsCorrelation();
-				double corr = pcorr.correlation(Utilities.getDoubleArray(artificial), Utilities.getDoubleArray(evaluated)); // TODO: correlation a good measure here?
-				System.out.println("std: " + std + ", corr: " + corr);
+				double corr = pcorr.correlation(Utilities.getDoubleArray(artificial), Utilities.getDoubleArray(evaluated));
+				results.add(corr);
 			}
+			System.out.println("avg corr: " + Utilities.getMean(results) + "+-" + Utilities.getStd(results));
 		}
 	}
 }
