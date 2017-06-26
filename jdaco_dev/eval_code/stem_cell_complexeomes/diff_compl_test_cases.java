@@ -1,4 +1,4 @@
-package mixed;
+package stem_cell_complexeomes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -288,9 +288,9 @@ public class diff_compl_test_cases {
 		
 		System.out.println("std prefactor corr_mean corr_std rmsd_mean rmsd_std");
 		
-		int no_iterations = 32;
-		double[] stds = new double[]{0.01, 0.1, 0.5, 0.8};
-		double[] prefactors = new double[]{0.01, 0.1, 0.5, 0.8};
+		int no_iterations = 100;
+		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25};
+		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25};
 		
 		for (double std:stds) 
 			for (double prefactor:prefactors) {
