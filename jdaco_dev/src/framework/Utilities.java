@@ -312,6 +312,22 @@ public class Utilities {
 	}
 	
 	/**
+	 * Computes the RMSD between two List<Doubles> of equal length
+	 * @param data1
+	 * @param data2
+	 * @return
+	 */
+	public static double getRMSD(List<Double> data1, List<Double> data2) {
+		double rmsd = 0;
+		List<Double> data1_array = new ArrayList<>(data1);
+		List<Double> data2_array = new ArrayList<>(data2);
+		for (int i = 0; i < data1_array.size(); i++) {
+			rmsd += Math.pow((data1_array.get(i) - data2_array.get(i)), 2);
+		}
+		rmsd /= data1_array.size();
+		return Math.sqrt(rmsd);
+	}
+	/**
 	 * Converts a list of Doubles to a double[]
 	 * @param list
 	 * @return

@@ -260,7 +260,7 @@ public class diff_compl_test_cases {
 		return output;
 	}
 	
-	public static double simulate_sample_model_run(double std_factor, double remaining_prefactor) {
+	public static double[] simulate_sample_model_run(double std_factor, double remaining_prefactor) {
 		Object[] simulation = simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", "mixed_data/A172_1_1_ENCSR580GSX_major-transcripts.txt.gz", std_factor, remaining_prefactor);
 		QuantDACOResultSet qdr = (QuantDACOResultSet) simulation[0];
 		@SuppressWarnings("unchecked")
@@ -277,17 +277,31 @@ public class diff_compl_test_cases {
 		}
 		
 		PearsonsCorrelation pcorr = new PearsonsCorrelation();
-		return pcorr.correlation(Utilities.getDoubleArray(artificial), Utilities.getDoubleArray(evaluated));
+		double[] results = new double[2];
+		results[0] = pcorr.correlation(Utilities.getDoubleArray(artificial), Utilities.getDoubleArray(evaluated));
+		results[1] = Utilities.getRMSD(artificial, evaluated);
+		return results;
 	}
 	
 	// for testing purposes
 	public static void main(String[] args) {
+		
+		System.out.println("std prefactor corr_mean corr_std rmsd_mean rmsd_std");
+		
+		int no_iterations = 32;
 		double[] stds = new double[]{0.01, 0.1, 0.5, 0.8};
-		double[] prefactors = new double[]{0.1, 0.5};
+		double[] prefactors = new double[]{0.01, 0.1, 0.5, 0.8};
+		
 		for (double std:stds) 
-		for (double prefactor:prefactors) {
-			List<Double> results = IntStream.range(0, 4).parallel().mapToDouble(d->simulate_sample_model_run(std, prefactor)).boxed().collect(Collectors.toList());
-			System.out.println(std + " " + prefactor + " " + Utilities.getMean(results) + "+-" + Utilities.getStd(results));
-		}
+			for (double prefactor:prefactors) {
+				List<double[]> results = IntStream.range(0, no_iterations).boxed().parallel().map(d->simulate_sample_model_run(std, prefactor)).collect(Collectors.toList());
+				List<Double> corrs = new LinkedList<>();
+				List<Double> rmsds = new LinkedList<>();
+				for (double[] result:results) {
+					corrs.add(result[0]);
+					rmsds.add(result[1]);
+				}
+				System.out.println(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds));
+			}
 	}
 }
