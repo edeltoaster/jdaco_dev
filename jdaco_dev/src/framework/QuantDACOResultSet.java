@@ -239,7 +239,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 		} while (true); // while(true) actually nicest form to implement that! :-P
 		
 		this.cached_remaining_abundance_of_proteins = remaining_amount;
-		//System.out.println(iteration_no + " " + current_to_distr);
+		
 		return quantification_result;
 	}
 	

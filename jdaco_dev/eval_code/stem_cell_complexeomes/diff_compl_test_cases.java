@@ -243,11 +243,15 @@ public class diff_compl_test_cases {
 		}
 		
 		// add to non-limiting proteins
+		Map<String, Double> remaining_protein_abundance = new HashMap<>();
 		for (String transcript:transcript_abundance.keySet()) {
 			String prot = transcript.substring(1);
-			if (limiting_protein_to_complex.containsKey(prot))
+			if (limiting_protein_to_complex.containsKey(prot)) {
+				remaining_protein_abundance.put(prot, 0.0);
 				continue;
+			}
 			float compl_abundance = rnd.nextFloat() * ((float) remaining_prefactor) * transcript_abundance.get(transcript);
+			remaining_protein_abundance.put(prot, (double) compl_abundance);
 			transcript_abundance.put(transcript, transcript_abundance.getOrDefault(transcript, 0f) + compl_abundance);
 		}
 		
@@ -256,18 +260,24 @@ public class diff_compl_test_cases {
 		Object[] output = new Object[3];
 		output[0] = qdr;
 		output[1] = artificial_complex_abundance;
+		output[2] = remaining_protein_abundance; // only remaining abundance of all proteins that are in complexes, limiting proteins have rem_abundance 0.0
 		
 		return output;
 	}
 	
 	public static double[] simulate_sample_model_run(double std_factor, double remaining_prefactor) {
+		
+		// get results of simulation
 		Object[] simulation = simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", "mixed_data/A172_1_1_ENCSR580GSX_major-transcripts.txt.gz", std_factor, remaining_prefactor);
 		QuantDACOResultSet qdr = (QuantDACOResultSet) simulation[0];
 		@SuppressWarnings("unchecked")
 		Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) simulation[1];
+		@SuppressWarnings("unchecked")
+		Map<String, Double> art_remaining_protein_abundance = (Map<String, Double>) simulation[2];
 		
-		// evaluate
+		// prepare evaluation
 		Map<HashSet<String>, Double> eval_complex_abundance = qdr.getAbundanceOfComplexes();
+		Map<String, Double> eval_remaining_protein_abundance = qdr.getRemainingAbundanceOfProteins();
 		
 		List<Double> artificial = new LinkedList<>();
 		List<Double> evaluated = new LinkedList<>();
@@ -275,33 +285,47 @@ public class diff_compl_test_cases {
 			artificial.add(artificial_complex_abundance.get(complex));
 			evaluated.add(eval_complex_abundance.get(complex));
 		}
+		List<Double> rem_artificial = new LinkedList<>();
+		List<Double> rem_evaluated = new LinkedList<>();
+		for (String protein:art_remaining_protein_abundance.keySet()) { // artificial datastructure involves all proteins that are in complexes
+			rem_artificial.add(art_remaining_protein_abundance.get(protein));
+			rem_evaluated.add(eval_remaining_protein_abundance.getOrDefault(protein, 0.0)); // here, limiting proteins are NOT listed
+		}
 		
+		// evaluate
 		PearsonsCorrelation pcorr = new PearsonsCorrelation();
-		double[] results = new double[2];
+		double[] results = new double[4];
 		results[0] = pcorr.correlation(Utilities.getDoubleArray(artificial), Utilities.getDoubleArray(evaluated));
 		results[1] = Utilities.getRMSD(artificial, evaluated);
+		results[2] = pcorr.correlation(Utilities.getDoubleArray(rem_artificial), Utilities.getDoubleArray(rem_evaluated));
+		results[3] = Utilities.getRMSD(rem_artificial, rem_evaluated);
+		
 		return results;
 	}
 	
 	// for testing purposes
 	public static void main(String[] args) {
 		
-		System.out.println("std prefactor corr_mean corr_std rmsd_mean rmsd_std");
+		System.out.println("std prefactor corr_compl rmsd_compl corr_rem rmsd_rem");
 		
 		int no_iterations = 100;
-		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25};
-		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25};
+		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
+		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5};
 		
 		for (double std:stds) 
 			for (double prefactor:prefactors) {
 				List<double[]> results = IntStream.range(0, no_iterations).boxed().parallel().map(d->simulate_sample_model_run(std, prefactor)).collect(Collectors.toList());
 				List<Double> corrs = new LinkedList<>();
 				List<Double> rmsds = new LinkedList<>();
+				List<Double> rem_corrs = new LinkedList<>();
+				List<Double> rem_rmsds = new LinkedList<>();
 				for (double[] result:results) {
 					corrs.add(result[0]);
 					rmsds.add(result[1]);
+					rem_corrs.add(result[2]);
+					rem_rmsds.add(result[3]);
 				}
-				System.out.println(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds));
+				System.out.println(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds)+ " " + Utilities.getMean(rem_corrs) + "+-" + Utilities.getStd(rem_corrs) + " " + Utilities.getMean(rem_rmsds) + "+-" + Utilities.getStd(rem_rmsds));
 			}
 	}
 }
