@@ -153,6 +153,15 @@ public class diff_compl_test_cases {
 		return output;
 	}
 	
+	/**
+	 * Realistic simulation of the "equal distribution"-model on the basis of real data and noise regarding the equality of the distribution of abundance values and 
+	 * the portion of remaining protein abundances.
+	 * @param daco_outfile
+	 * @param major_transcript_file
+	 * @param std_factor
+	 * @param remaining_prefactor
+	 * @return
+	 */
 	public static Object[] simulate_sample_model(String daco_outfile, String major_transcript_file, double std_factor, double remaining_prefactor) {
 		// load real complex result
 		QuantDACOResultSet dr = new QuantDACOResultSet(daco_outfile, "mixed_data/hocomoco_human_TFs_v10.txt.gz", major_transcript_file);
@@ -265,6 +274,12 @@ public class diff_compl_test_cases {
 		return output;
 	}
 	
+	/**
+	 * Helper function to run analyses on sample A172_1_1_ENCSR580GSX (simply the first one) in a batch fashion.
+	 * @param std_factor
+	 * @param remaining_prefactor
+	 * @return
+	 */
 	public static double[] simulate_sample_model_run(double std_factor, double remaining_prefactor) {
 		
 		// get results of simulation
@@ -307,7 +322,7 @@ public class diff_compl_test_cases {
 	public static void main(String[] args) {
 		
 		System.out.println("std prefactor corr_compl rmsd_compl corr_rem rmsd_rem");
-		
+		System.err.println("std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
 		int no_iterations = 100;
 		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
 		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5};
@@ -319,13 +334,15 @@ public class diff_compl_test_cases {
 				List<Double> rmsds = new LinkedList<>();
 				List<Double> rem_corrs = new LinkedList<>();
 				List<Double> rem_rmsds = new LinkedList<>();
+				int n = 1;
 				for (double[] result:results) {
+					System.err.println(std + " " + prefactor + " " + (n++) + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
 					corrs.add(result[0]);
 					rmsds.add(result[1]);
 					rem_corrs.add(result[2]);
 					rem_rmsds.add(result[3]);
 				}
-				System.out.println(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds)+ " " + Utilities.getMean(rem_corrs) + "+-" + Utilities.getStd(rem_corrs) + " " + Utilities.getMean(rem_rmsds) + "+-" + Utilities.getStd(rem_rmsds));
+				System.out.println(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds)+ " " + Utilities.getMedian(rem_corrs) + "+-" + Utilities.getStd(rem_corrs) + " " + Utilities.getMedian(rem_rmsds) + "+-" + Utilities.getStd(rem_rmsds));
 			}
 	}
 }
