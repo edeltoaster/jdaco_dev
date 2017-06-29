@@ -544,6 +544,61 @@ public class DataQuery {
 	}
 	
 	/**
+	 * Given the organism_core_database, retrieves all Uniprot Accs of Allosome genes (X, Y, Z or W).
+	 * @param organism_core_database
+	 * @return
+	 */
+	public static Set<String> getAllosomeProteins(String organism_core_database) {
+		
+		Set<String> allosome_proteins = new HashSet<String>();
+		
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			
+			// first, determine the right coord_system_id for the organism database
+			ResultSet rs1 = st.executeQuery("SELECT coord_system.coord_system_id FROM coord_system WHERE coord_system.name = 'chromosome' AND coord_system.attrib='default_version'");
+			String chromosome_attrib = "";
+			while (rs1.next()) {
+				chromosome_attrib = rs1.getString(1);
+			}
+			
+			// second, query proteins and where the genes are located
+			ResultSet rs2 = st.executeQuery("SELECT trans_table.dbprimary_acc, seq_region.name FROM transcript, seq_region, (SELECT translation.translation_id, xref.dbprimary_acc FROM translation, object_xref, xref WHERE translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200') AS trans_table WHERE transcript.canonical_translation_id = trans_table.translation_id AND transcript.seq_region_id = seq_region.seq_region_id AND seq_region.coord_system_id='" + chromosome_attrib + "'");
+			while (rs2.next()) {
+				String protein = rs2.getString(1);
+				String chromosome = rs2.getString(2);
+				if (chromosome.equals("X") || chromosome.equals("Y") || chromosome.equals("Z") || chromosome.equals("W"))
+					allosome_proteins.add(protein);
+			}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ENSEMBL");
+			//e.printStackTrace();
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get allosome protein data from ENSEMBL in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			DataQuery.switchServer();
+			
+			return getAllosomeProteins(organism_core_database);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
+		}
+		
+		return allosome_proteins;
+	}
+	
+	/**
 	 * Queries HGNC gene symbols to UniProt/Ensembl gene, may have ""
 	 * @param organism_core_database
 	 * @return

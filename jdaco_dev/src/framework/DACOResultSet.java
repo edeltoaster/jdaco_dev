@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -154,6 +155,16 @@ public class DACOResultSet {
 		this.rebuildData(new HashSet<>(this.abundant_seed_poteins));
 	}
 	
+	/**
+	 * Filters DACOResultSet from all complexes that include allosome/sex-specific proteins
+	 */
+	public void removeAllosomeProteins() {
+		String db = DataQuery.getEnsemblOrganismDatabaseFromProteins(this.abundant_seed_poteins);
+		Set<String> allosome = DataQuery.getAllosomeProteins(db);
+		this.result.removeIf(d -> d.stream().anyMatch(p -> allosome.contains(p)));
+		this.abundant_seed_poteins.removeIf(p -> allosome.contains(p));
+		this.rebuildData(new HashSet<>(this.abundant_seed_poteins));
+	}
 	
 	/*
 	 * Some similarity/distance functions
