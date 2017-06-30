@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -509,5 +510,73 @@ public class Utilities {
     	}
 
     	return powerSet;
+    }
+    
+    /*
+     * Graph algorithms
+     */
+    
+    private static int tarjan_index = -1;
+    
+    /**
+     * Tarjan's strongly connected component algorithm, see https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
+     * @param graph
+     */
+    public static List<Set<String>> getSCCs(Map<String, List<String>> graph) {
+    	
+    	// determine all nodes
+    	Set<String> nodes = new HashSet<>();
+    	nodes.addAll(graph.keySet());
+    	graph.values().stream().forEach(s -> nodes.addAll(s));
+    	
+    	// necessary data structures
+    	Map<String, Integer> node_index = new HashMap<>();
+    	Map<String, Integer> node_lowlink = new HashMap<>();
+    	Deque<String> stack = new LinkedList<>();
+    	Set<String> on_stack = new HashSet<>();
+    	
+    	List<Set<String>> SCCs = new LinkedList<>();
+    	tarjan_index = 0;
+    	for (String node:nodes) {
+    		if (node_index.containsKey(node))
+    			continue;
+    		tarjan_recurse(node, graph, SCCs, node_index, node_lowlink, stack, on_stack);
+    	}
+    	
+    	return SCCs;
+    }
+    
+    private static void tarjan_recurse(String node, Map<String, List<String>> graph, List<Set<String>> SCCs, Map<String, Integer> node_index, Map<String, Integer> node_lowlink, Deque<String> stack, Set<String> on_stack) {
+    	// sets depth to smallest unused index
+    	node_index.put(node, tarjan_index);
+		node_lowlink.put(node, tarjan_index);
+		tarjan_index++;
+		stack.push(node);
+		on_stack.add(node);
+		
+		// depth first search
+		if (graph.containsKey(node))
+			for (String node2:graph.get(node)) {
+				if (!node_index.containsKey(node2)) {
+					tarjan_recurse(node2, graph, SCCs, node_index, node_lowlink, stack, on_stack);
+					node_lowlink.put(node, Math.min(node_lowlink.get(node), node_lowlink.get(node2)));
+				}
+				else if (on_stack.contains(node2)) {
+					node_lowlink.put(node, Math.min(node_lowlink.get(node), node_index.get(node2)));
+				}
+			}
+		
+		// if node is a root node, pop from stack and generate SCC
+		if (node_lowlink.get(node).equals(node_index.get(node))) {
+			
+			Set<String> SCC = new HashSet<>();
+			String node2 = null;
+			do {
+				node2 = stack.pop();
+				on_stack.remove(node2);
+				SCC.add(node2);
+			} while (!node.equals(node2));
+			SCCs.add(SCC);
+		}
     }
 }
