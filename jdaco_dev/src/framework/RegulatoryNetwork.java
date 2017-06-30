@@ -1,5 +1,7 @@
 package framework;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -423,6 +425,51 @@ public class RegulatoryNetwork {
 			}
 		
 		Utilities.writeEntries(to_write, out_file);
+	}
+	
+	public void pruneToLargestSCCs() {
+		
+		// convert to general graph format
+		Map<String, List<String>> graph = new HashMap<>();
+		for (HashSet<String> complex:this.complex_to_targets.keySet())
+			graph.put("C:" + String.join("/", complex), new ArrayList<>(this.complex_to_targets.get(complex)));
+		
+		for (String tf:this.tf_to_complex.keySet())
+			graph.put(tf, this.tf_to_complex.get(tf).stream().map( c -> "C:" + String.join("/", c) ).collect(Collectors.toList()));
+		
+		List<Set<String>> SCCs = Utilities.getSCCs(graph);
+		
+		Set<String> largest_SCC = null;
+		int largest_size = 0;
+		for (Set<String> SCC:SCCs) {
+			int current_size = SCC.size();
+			if (current_size > largest_size) {
+				largest_size = current_size;
+				largest_SCC = SCC;
+			}
+		}
+		
+		// convert back to TFs, targets, complexes
+		Set<String> allowed_proteins = new HashSet<>();
+		Set<HashSet<String>> allowed_complexes = new HashSet<>();
+		for (String node:largest_SCC) {
+			// complex
+			if (node.startsWith("C:")) {
+				allowed_complexes.add(new HashSet<>(Arrays.asList(node.substring(2).split("/"))));
+			} else {
+				allowed_proteins.add(node);
+			}
+		}
+		
+		// prune to members of largest SCC
+		this.complex_to_targets.keySet().retainAll(allowed_complexes);
+		this.complex_to_targets.values().stream().map(targets -> targets.retainAll(allowed_proteins));
+		this.complex_to_targets.entrySet().removeIf(e -> e.getValue().size() == 0);
+		
+		this.tf_to_complex.keySet().retainAll(allowed_proteins);
+		this.tf_to_complex.values().stream().map(targets -> targets.retainAll(allowed_complexes));
+		this.tf_to_complex.entrySet().removeIf(e -> e.getValue().size() == 0);
+		
 	}
 	
 	/**

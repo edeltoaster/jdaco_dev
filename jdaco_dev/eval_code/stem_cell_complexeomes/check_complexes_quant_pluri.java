@@ -129,6 +129,8 @@ public class check_complexes_quant_pluri {
 		RegulatoryNetwork plurisub_regnet = new RegulatoryNetwork(plurisub_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
 		plurisub_regnet.writeRegulatoryNetwork("plurisub_regnet_only.txt");
 		plurisub_regnet.writeRegulatoryNetwork("plurisub_regnet_only_min2.txt", 2);
+		plurisub_regnet.pruneToLargestSCCs();
+		plurisub_regnet.writeRegulatoryNetwork("plurisub_SCC_regnet_only.txt");
 		
 		// adding annotational data
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
@@ -140,6 +142,8 @@ public class check_complexes_quant_pluri {
 		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
 		pluri_regnet.writeRegulatoryNetwork("pluri_regnet_only.txt");
 		pluri_regnet.writeRegulatoryNetwork("pluri_regnet_only_min2.txt", 2);
+		pluri_regnet.pruneToLargestSCCs();
+		pluri_regnet.writeRegulatoryNetwork("pluri_SCC_regnet_only.txt");
 		
 		// adding annotational data
 		annotational_data = new HashMap<>();
