@@ -128,7 +128,6 @@ public class check_complexes_quant_pluri {
 		System.out.println("Building pluri sub-regnet ...");
 		RegulatoryNetwork plurisub_regnet = new RegulatoryNetwork(plurisub_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
 		plurisub_regnet.writeRegulatoryNetwork("plurisub_regnet_only.txt");
-		plurisub_regnet.writeRegulatoryNetwork("plurisub_regnet_only_min2.txt", 2);
 		plurisub_regnet.pruneToLargestSCCs();
 		plurisub_regnet.writeRegulatoryNetwork("plurisub_SCC_regnet_only.txt");
 		
@@ -141,7 +140,6 @@ public class check_complexes_quant_pluri {
 		System.out.println("Building pluri regnet ...");
 		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
 		pluri_regnet.writeRegulatoryNetwork("pluri_regnet_only.txt");
-		pluri_regnet.writeRegulatoryNetwork("pluri_regnet_only_min2.txt", 2);
 		pluri_regnet.pruneToLargestSCCs();
 		pluri_regnet.writeRegulatoryNetwork("pluri_SCC_regnet_only.txt");
 		
@@ -157,7 +155,6 @@ public class check_complexes_quant_pluri {
 		System.out.println("Building non-pluri regnet ...");
 		RegulatoryNetwork nonpluri_regnet = new RegulatoryNetwork(nonpluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
 		nonpluri_regnet.writeRegulatoryNetwork("nonpluri_regnet_only.txt");
-		nonpluri_regnet.writeRegulatoryNetwork("nonpluri_regnet_only_min2.txt", 2);
 		
 		// also adding annotational data here
 		annotational_data = new HashMap<>();

@@ -458,6 +458,20 @@ public class Utilities {
 	}
 	
 	/**
+	 * Builds a set of all values in a multimap
+	 * @param map
+	 * @return
+	 */
+	public static <K, V> Set<V> getValueSetFromSetMultimap(Map<K, Set<V>> map) {
+		Set<V> value_set = new HashSet<>();
+		
+		for (Set<V> collection:map.values())
+			value_set.addAll(collection);
+		
+		return value_set;
+	}
+	
+	/**
 	 * Breaks a list into chunks; for best performance, input should be an ArrayList
 	 * @param input
 	 * @param chunkSize

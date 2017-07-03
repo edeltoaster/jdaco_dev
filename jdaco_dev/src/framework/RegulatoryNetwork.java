@@ -461,14 +461,51 @@ public class RegulatoryNetwork {
 			}
 		}
 		
-		// prune to members of largest SCC
-		this.complex_to_targets.keySet().retainAll(allowed_complexes);
-		this.complex_to_targets.values().stream().map(targets -> targets.retainAll(allowed_proteins));
-		this.complex_to_targets.entrySet().removeIf(e -> e.getValue().size() == 0);
+		/*
+		 *  iteratively prune to members of largest SCC to ensure all TF -> complex links exist
+		 */
 		
-		this.tf_to_complex.keySet().retainAll(allowed_proteins);
-		this.tf_to_complex.values().stream().map(targets -> targets.retainAll(allowed_complexes));
-		this.tf_to_complex.entrySet().removeIf(e -> e.getValue().size() == 0);
+		boolean prune = false;
+		int allowed_complexes_before = Integer.MAX_VALUE;
+		int allowed_proteins_before = Integer.MAX_VALUE;
+		do {
+			prune = false;
+			allowed_complexes_before = allowed_complexes.size();
+			allowed_proteins_before = allowed_proteins.size();
+			
+			// remove complexes including TFs that are not reachable
+			for (HashSet<String> complex:this.complex_to_targets.keySet())
+				// if not all TFs are allowed, the complex cannot exist
+				if (complex.stream().anyMatch(p->!allowed_proteins.contains(p)))
+					allowed_complexes.remove(complex);
+			
+			// prune complexes
+			this.complex_to_targets.keySet().retainAll(allowed_complexes);
+			// shrink to target sets that are allowed
+			this.complex_to_targets.values().stream().map(targets -> targets.retainAll(allowed_proteins));
+			// remove empty target sets
+			this.complex_to_targets.entrySet().removeIf(e -> e.getValue().size() == 0);
+			
+			// refine allowed complexes and proteins based on target set-pruning
+			allowed_complexes.retainAll(this.complex_to_targets.keySet());
+			allowed_proteins.retainAll(Utilities.getValueSetFromSetMultimap(this.complex_to_targets));
+			
+			// prune TFs
+			this.tf_to_complex.keySet().retainAll(allowed_proteins);
+			// prune complexes that are targeted
+			this.tf_to_complex.values().stream().map(targets -> targets.retainAll(allowed_complexes));
+			// remove empty target sets
+			this.tf_to_complex.entrySet().removeIf(e -> e.getValue().size() == 0);
+			
+			allowed_proteins.retainAll(this.tf_to_complex.keySet());
+			allowed_complexes.retainAll(Utilities.getValueSetFromMultimap(this.tf_to_complex));
+			
+			
+			if (allowed_complexes.size() < allowed_complexes_before || allowed_proteins.size() < allowed_proteins_before)
+				prune = true;
+			
+			// if there was pruning, repeat once more
+		} while (prune);
 		
 	}
 	
