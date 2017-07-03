@@ -106,6 +106,16 @@ public class RegulatoryNetwork {
 	}
 	
 	/**
+	 * Constructs complex_to_targets and tf_to_complex from a written RegNet file, all other fields have default initialization.
+	 * @param regnet_file
+	 */
+	public RegulatoryNetwork(String regnet_file) {
+		this.TF_complexes = null;
+		this.bdh = null;
+		this.readRegulatoryNetwork(regnet_file);
+	}
+	
+	/**
 	 * Constructs actual TF complex to target map, only considers complexes with at least min_TFs TFs
 	 * @param min_TFs
 	 */
@@ -146,7 +156,36 @@ public class RegulatoryNetwork {
 		}
 		threadpool.shutdown();
 	}
-
+	
+	/**
+	 * Constructs complex_to_targets and tf_to_complex from a written RegNet file
+	 * @param regnet_file
+	 */
+	private void readRegulatoryNetwork(String regnet_file) {
+		
+		for (String line:Utilities.readFile(regnet_file)) {
+			if (line.startsWith("TF(complex)")) // format: TF(complex) target edgetype
+				continue;
+			String[] split = line.trim().split("\\s+");
+			String edgetype = split[2];
+			String tf_compl = split[0];
+			String target = split[1];
+			
+			if (edgetype.equals("TFC/target")) {
+				HashSet<String> complex = new HashSet<String>(Arrays.asList(tf_compl.split("/")));
+				if (!this.complex_to_targets.containsKey(complex))
+					this.complex_to_targets.put(complex, new HashSet<String>());
+				this.complex_to_targets.get(complex).add(target);
+			} else { // type TF/TFC
+				HashSet<String> complex = new HashSet<String>(Arrays.asList(target.split("/")));
+				if (!this.tf_to_complex.containsKey(tf_compl))
+					this.tf_to_complex.put(tf_compl, new LinkedList<HashSet<String>>());
+				this.tf_to_complex.get(tf_compl).add(complex);
+			}
+		}
+		
+	}
+	
 	/**
 	 * Writes the TF complex -> target-association to a textfile, only writes associations with at least write_min_TFs TFs in the complex.
 	 * @param out_file
@@ -500,6 +539,11 @@ public class RegulatoryNetwork {
 			allowed_proteins.retainAll(this.tf_to_complex.keySet());
 			allowed_complexes.retainAll(Utilities.getValueSetFromMultimap(this.tf_to_complex));
 			
+			// remove complexes including TFs that are not reachable
+			for (HashSet<String> complex:this.complex_to_targets.keySet())
+				// if not all TFs are allowed, the complex cannot exist
+				if (complex.stream().anyMatch(p->!allowed_proteins.contains(p)))
+					allowed_complexes.remove(complex);
 			
 			if (allowed_complexes.size() < allowed_complexes_before || allowed_proteins.size() < allowed_proteins_before)
 				prune = true;
@@ -507,6 +551,28 @@ public class RegulatoryNetwork {
 			// if there was pruning, repeat once more
 		} while (prune);
 		
+	}
+	
+	/**
+	 * Returns [#complexes, #TFs, #compl_target_IAs, #TF_compl_IAs]
+	 * @return
+	 */
+	public int[] getSizes() {
+		int[] sizes = new int[4];
+		sizes[0] = this.complex_to_targets.size();
+		sizes[1] = this.tf_to_complex.size();
+		sizes[2] = this.complex_to_targets.values().stream().mapToInt(t -> t.size()).sum();
+		sizes[3] = this.tf_to_complex.values().stream().mapToInt(c -> c.size()).sum();
+		return sizes;
+	}
+	
+	/**
+	 * Returns "#complexes, #TFs, #compl_target_IAs, #TF_compl_IAs"
+	 * @return
+	 */
+	public String getSizesStr() {
+		int[] sizes = this.getSizes();
+		return sizes[0] + " complexes / " + sizes[1] + " TFs / " + sizes[2] + " complex_target_IAs / " + sizes[3] + " TF_complex_IAs";
 	}
 	
 	/**

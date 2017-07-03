@@ -8,7 +8,7 @@ import framework.GOAnnotator;
 import framework.Utilities;
 
 public class definitions {
-	static String daco_results_folder = "res_95_5/";
+	static String daco_results_folder = "res_99_5/";
 	static String networks_folder = "ENCODE_networks/";
 	
 	static double pvalue = 0.05;
