@@ -124,7 +124,7 @@ public class check_complexes_quant_pluri {
 		/**
 		 *  writing pluri network data
 		 */
-		
+		// TODO: revise code, add folder etc
 		System.out.println("Building pluri sub-regnet ...");
 		RegulatoryNetwork plurisub_regnet = new RegulatoryNetwork(plurisub_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
 		plurisub_regnet.writeRegulatoryNetwork("plurisub_regnet_only.txt");
