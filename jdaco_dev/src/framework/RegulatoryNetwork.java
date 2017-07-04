@@ -504,7 +504,7 @@ public class RegulatoryNetwork {
 			}
 		}
 		
-		pruneToConsistency(allowed_proteins, allowed_complexes);
+		this.pruneToConsistency(allowed_proteins, allowed_complexes);
 	}
 	
 	/**
@@ -526,13 +526,13 @@ public class RegulatoryNetwork {
 			// remove complexes including TFs that are not reachable
 			for (HashSet<String> complex:this.complex_to_targets.keySet())
 				// if not all TFs are allowed, the complex cannot exist
-				if (complex.stream().anyMatch(p->!allowed_proteins.contains(p)))
+				if (complex.stream().anyMatch(p -> !allowed_proteins.contains(p)))
 					allowed_complexes.remove(complex);
 			
 			// prune complexes
 			this.complex_to_targets.keySet().retainAll(allowed_complexes);
 			// shrink to target sets that are allowed
-			this.complex_to_targets.values().stream().forEach(targets -> targets.retainAll(allowed_proteins));
+			this.complex_to_targets.values().forEach(targets -> targets.retainAll(allowed_proteins));
 			// remove empty target sets
 			this.complex_to_targets.entrySet().removeIf(e -> e.getValue().size() == 0);
 			
@@ -543,7 +543,7 @@ public class RegulatoryNetwork {
 			// prune TFs
 			this.tf_to_complex.keySet().retainAll(allowed_proteins);
 			// prune complexes that are targeted
-			this.tf_to_complex.values().stream().forEach(targets -> targets.retainAll(allowed_complexes));
+			this.tf_to_complex.values().forEach(targets -> targets.retainAll(allowed_complexes));
 			// remove empty target sets
 			this.tf_to_complex.entrySet().removeIf(e -> e.getValue().size() == 0);
 			
@@ -557,8 +557,24 @@ public class RegulatoryNetwork {
 		} while (prune);
 	}
 	
-	public void pruneProteinSet(Set<String> proteins_to_prune) {
-		// TODO: implement
+	/**
+	 * Remove given protein set from regulatory network
+	 * @param proteins_to_prune
+	 */
+	public void removeProteinSet(Set<String> proteins_to_prune) {
+		// initialize with current network
+		Set<String> allowed_proteins = new HashSet<>(this.tf_to_complex.keySet());
+		this.complex_to_targets.values().forEach(targets -> allowed_proteins.addAll(targets));
+		Set<HashSet<String>> allowed_complexes = new HashSet<>(this.complex_to_targets.keySet());
+		
+		// remove stuff that should be pruned
+		allowed_proteins.removeAll(proteins_to_prune);
+		for (HashSet<String> complex:this.complex_to_targets.keySet())
+			// if not all TFs are allowed, the complex cannot exist
+			if (complex.stream().anyMatch(p -> !allowed_proteins.contains(p)))
+				allowed_complexes.remove(complex);
+		
+		this.pruneToConsistency(allowed_proteins, allowed_complexes);
 	}
 	
 	/**
