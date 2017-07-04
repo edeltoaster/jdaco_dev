@@ -112,10 +112,12 @@ public class check_complexes_quant_pluri {
 			}
 		}
 		
+		new File(definitions.diff_compl_output_folder).mkdir();
+		
 		// write results
-		Utilities.writeEntries(res_pos_all, "res_pos_all.txt");
-		Utilities.writeEntries(res_neg_all, "res_neg_all.txt");
-		Utilities.writeEntries(res_pos_pluri, "res_pos_pluri.txt");
+		Utilities.writeEntries(res_pos_all, definitions.diff_compl_output_folder + "res_pos_all.txt");
+		Utilities.writeEntries(res_neg_all, definitions.diff_compl_output_folder + "res_neg_all.txt");
+		Utilities.writeEntries(res_pos_pluri, definitions.diff_compl_output_folder + "res_pos_pluri.txt");
 		
 		
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
@@ -124,29 +126,24 @@ public class check_complexes_quant_pluri {
 		/**
 		 *  writing pluri network data
 		 */
-		// TODO: revise code, add folder etc
+		
 		System.out.println("Building pluri sub-regnet ...");
 		RegulatoryNetwork plurisub_regnet = new RegulatoryNetwork(plurisub_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
-		plurisub_regnet.writeRegulatoryNetwork("plurisub_regnet_only.txt");
-		plurisub_regnet.pruneToLargestSCCs();
-		plurisub_regnet.writeRegulatoryNetwork("plurisub_SCC_regnet_only.txt");
+		plurisub_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "plurisub_regnet_only.txt");
 		
 		// adding annotational data
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
 		annotational_data.put("Regulatory_effect", plurisub_effect);
-		plurisub_regnet.writeNodeTable("plurisub_node_table_only.txt", annotational_data);
-		
+		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_node_table_only.txt", annotational_data);
 		
 		System.out.println("Building pluri regnet ...");
 		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
-		pluri_regnet.writeRegulatoryNetwork("pluri_regnet_only.txt");
-		pluri_regnet.pruneToLargestSCCs();
-		pluri_regnet.writeRegulatoryNetwork("pluri_SCC_regnet_only.txt");
+		pluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "pluri_regnet_only.txt");
 		
 		// adding annotational data
 		annotational_data = new HashMap<>();
 		annotational_data.put("Regulatory_effect", plurisub_effect);
-		pluri_regnet.writeNodeTable("pluri_node_table_only.txt", annotational_data);
+		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_node_table_only.txt", annotational_data);
 		
 		/**
 		 *  writing non-pluri network data
@@ -154,11 +151,11 @@ public class check_complexes_quant_pluri {
 		
 		System.out.println("Building non-pluri regnet ...");
 		RegulatoryNetwork nonpluri_regnet = new RegulatoryNetwork(nonpluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
-		nonpluri_regnet.writeRegulatoryNetwork("nonpluri_regnet_only.txt");
+		nonpluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "nonpluri_regnet_only.txt");
 		
-		// also adding annotational data here
+		// adding annotational data
 		annotational_data = new HashMap<>();
-		annotational_data.put("Regulatory_effect", nonpluri_effect);
-		nonpluri_regnet.writeNodeTable("nonpluri_node_table_only.txt", annotational_data);
+		annotational_data.put("Regulatory_effect", plurisub_effect);
+		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_node_table_only.txt", annotational_data);
 	}
 }

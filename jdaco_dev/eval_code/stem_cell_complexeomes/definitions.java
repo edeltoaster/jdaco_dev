@@ -10,6 +10,7 @@ import framework.Utilities;
 public class definitions {
 	static String daco_results_folder = "res_99_5/";
 	static String networks_folder = "ENCODE_networks/";
+	static String diff_compl_output_folder = "diff_results_99_5/";
 	
 	static double pvalue = 0.05;
 	static boolean parametric = false; // for 0s, Welch test not really helpful
@@ -32,6 +33,7 @@ public class definitions {
 	public static void printParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
 		System.out.println("networks folder : " + networks_folder);
+		System.out.println("results output folder : " + diff_compl_output_folder);
 		
 		System.out.println("p-value : " + pvalue);
 		System.out.println("parametric : " + parametric);
