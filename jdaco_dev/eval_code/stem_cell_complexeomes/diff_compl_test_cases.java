@@ -275,7 +275,7 @@ public class diff_compl_test_cases {
 	}
 	
 	/**
-	 * Helper function to run analyses on sample A172_1_1_ENCSR580GSX (simply the first one) in a batch fashion.
+	 * Helper function to run analyses on sample A172_1_1_ENCSR580GSX (simply the very first one) in a batch fashion.
 	 * @param std_factor
 	 * @param remaining_prefactor
 	 * @return
@@ -318,8 +318,10 @@ public class diff_compl_test_cases {
 		return results;
 	}
 	
-	// for testing purposes
-	public static void main(String[] args) {
+	/**
+	 * Tests prediction to simulated data
+	 */
+	public static void benchmark() {
 		
 		System.out.println("std prefactor corr_compl rmsd_compl corr_rem rmsd_rem");
 		System.err.println("std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
@@ -344,5 +346,16 @@ public class diff_compl_test_cases {
 				}
 				System.out.println(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds)+ " " + Utilities.getMedian(rem_corrs) + "+-" + Utilities.getStd(rem_corrs) + " " + Utilities.getMedian(rem_rmsds) + "+-" + Utilities.getStd(rem_rmsds));
 			}
+	}
+	
+	public static void model_behavior() {
+		// TODO: check how big the changes due to std really are
+		
+		// distribution of complex abundances
+		// distribution of alterations to equal distribution
+	}
+	
+	public static void main(String[] args) {
+		
 	}
 }
