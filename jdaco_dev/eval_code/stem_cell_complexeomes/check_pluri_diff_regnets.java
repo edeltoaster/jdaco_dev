@@ -5,7 +5,7 @@ import java.util.Set;
 import framework.DataQuery;
 import framework.RegulatoryNetwork;
 
-public class check_regnets {
+public class check_pluri_diff_regnets {
 	public static String path = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/";
 	
 	// testing and checking some stuff first
