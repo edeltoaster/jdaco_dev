@@ -20,6 +20,7 @@ import framework.QuantDACOResultSet;
 import framework.Utilities;
 
 public class diff_compl_test_cases {
+	public static Random rnd = new Random(System.currentTimeMillis());
 	
 	// example why complexes that consist only of one protein do not work well here; gladly this cannot happen with DACO results!
 	public static void single_prot_complex_test() {
@@ -110,7 +111,6 @@ public class diff_compl_test_cases {
 					protein_to_assumed_transcript.put(protein, "T" + protein);
 		
 		// assign random abundance values to complexes
-		Random rnd = new Random(System.currentTimeMillis());
 		final double scaled_max_abundance = max_abundance - min_abundance;
 		Map<HashSet<String>, Double> artificial_complex_abundance = dr.getResult().stream().collect(Collectors.toMap(e -> e, e -> (rnd.nextDouble() * scaled_max_abundance) + min_abundance));
 		
@@ -176,7 +176,6 @@ public class diff_compl_test_cases {
 					protein_to_assumed_transcript.put(protein, "T" + protein);
 		
 		// select limiting proteins
-		Random rnd = new Random(System.currentTimeMillis());
 		HashMap<String, LinkedList<HashSet<String>>> limiting_protein_to_complex = new HashMap<>();
 		HashMap<String, LinkedList<HashSet<String>>> limiting_protein_to_all_complexes = new HashMap<>();
 		Collections.shuffle(complexes, rnd); // order is shuffled to ensure very different choices of limiting proteins
@@ -351,11 +350,25 @@ public class diff_compl_test_cases {
 	public static void model_behavior() {
 		// TODO: check how big the changes due to std really are
 		
-		// distribution of complex abundances
+		// distribution of complex abundances (across sampling)
 		// distribution of alterations to equal distribution
+		int no_iterations = 100;
+		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
+		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5};
+		for (double std:stds) 
+			for (double prefactor:prefactors) {
+				List<Object[]> results = IntStream.range(0, no_iterations).boxed().parallel().map(d->simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", "mixed_data/A172_1_1_ENCSR580GSX_major-transcripts.txt.gz", std, prefactor)).collect(Collectors.toList());
+				for (Object[] result:results) {
+					QuantDACOResultSet qdr = (QuantDACOResultSet) result[0];
+					@SuppressWarnings("unchecked")
+					Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) result[1];
+					@SuppressWarnings("unchecked")
+					Map<String, Double> art_remaining_protein_abundance = (Map<String, Double>) result[2];
+				}
+			}
 	}
 	
 	public static void main(String[] args) {
-		
+		benchmark();
 	}
 }
