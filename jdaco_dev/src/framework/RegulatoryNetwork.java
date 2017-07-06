@@ -173,6 +173,10 @@ public class RegulatoryNetwork {
 			
 			if (edgetype.equals("TFC/target")) {
 				HashSet<String> complex = new HashSet<String>(Arrays.asList(tf_compl.split("/")));
+				if (complex.size() == 1 && !this.tf_to_complex.containsKey(tf_compl)) {
+					this.tf_to_complex.put(tf_compl, new LinkedList<HashSet<String>>());
+					this.tf_to_complex.get(tf_compl).add(complex); // for consistency
+				}
 				if (!this.complex_to_targets.containsKey(complex))
 					this.complex_to_targets.put(complex, new HashSet<String>());
 				this.complex_to_targets.get(complex).add(target);

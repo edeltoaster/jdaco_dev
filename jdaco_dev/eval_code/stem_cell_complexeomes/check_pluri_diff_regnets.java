@@ -14,7 +14,7 @@ public class check_pluri_diff_regnets {
 		System.out.println(allosome_proteins.size());
 		
 		System.out.println("pluri only");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(path + definitions.diff_compl_output_folder + "pluri_regnet_only.txt");
+		RegulatoryNetwork regnet = new RegulatoryNetwork(path + definitions.diff_compl_output_folder + "pluri_regnet.txt");
 		System.out.println(regnet.getSizesStr());
 		regnet.pruneToLargestSCCs();
 		System.out.println(regnet.getSizesStr());
@@ -23,7 +23,7 @@ public class check_pluri_diff_regnets {
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/pluri_SCC.txt");
 		
 		System.out.println("plurisub only");
-		RegulatoryNetwork subregnet = new RegulatoryNetwork(path + definitions.diff_compl_output_folder + "plurisub_regnet_only.txt");
+		RegulatoryNetwork subregnet = new RegulatoryNetwork(path + definitions.diff_compl_output_folder + "plurisub_regnet.txt");
 		System.out.println(subregnet.getSizesStr());
 		subregnet.pruneToLargestSCCs();
 		System.out.println(subregnet.getSizesStr());
