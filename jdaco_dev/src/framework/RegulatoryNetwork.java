@@ -582,7 +582,8 @@ public class RegulatoryNetwork {
 	}
 	
 	/**
-	 * Returns [#complexes, #TFs, #compl_target_IAs, #TF_compl_IAs]
+	 * Returns [#complexes, #TFs, #compl_target_IAs, #TF_compl_IAs].
+	 * Note that complexes consisting of single TFs are also counted, even if they do not appear in the network visualization.
 	 * @return
 	 */
 	public int[] getSizes() {
@@ -595,7 +596,8 @@ public class RegulatoryNetwork {
 	}
 	
 	/**
-	 * Returns "#complexes, #TFs, #compl_target_IAs, #TF_compl_IAs"
+	 * Returns "#complexes, #TFs, #compl_target_IAs, #TF_compl_IAs".
+ 	 * Note that complexes consisting of single TFs are also counted, even if they do not appear in the network visualization.
 	 * @return
 	 */
 	public String getSizesStr() {

@@ -208,6 +208,7 @@ public class diff_compl_test_cases {
 		
 		// distribute limiting proteins roughly equally using normal distribution
 		Map<HashSet<String>, Double> artificial_complex_abundance = new HashMap<>();
+		Map<String, List<Double>> limiting_protein_distribution = new HashMap<>();
 		for (String limiting_protein:limiting_protein_to_complex.keySet()) {
 			int chosen_index = rnd.nextInt(tr_abundance_values.size());
 			double prot_abundance = tr_abundance_values.get(chosen_index); // will be fast as it is an array list
@@ -230,6 +231,10 @@ public class diff_compl_test_cases {
 				final double fsum = sum;
 				abundances = abundances.stream().map(d->d + fsum).collect(Collectors.toList());
 			} while (abundances.stream().anyMatch( d -> d <= 0));
+			
+			// collect for statistics
+			List<Double> relative_deviation_distribution = abundances.stream().map(a -> Math.abs(a-complex_abundance_mean)/complex_abundance_mean).collect(Collectors.toList());
+			limiting_protein_distribution.put(limiting_protein, relative_deviation_distribution);
 			
 			// shuffle and associate as many as needed values with complexes that are limited by that protein
 			Collections.shuffle(abundances, rnd);
@@ -265,10 +270,11 @@ public class diff_compl_test_cases {
 		
 		QuantDACOResultSet qdr = new QuantDACOResultSet(new HashSet<HashSet<String>>(dr.getResult()), Utilities.readEntryFile("mixed_data/hocomoco_human_TFs_v10.txt.gz"), protein_to_assumed_transcript, transcript_abundance);
 		
-		Object[] output = new Object[3];
+		Object[] output = new Object[4];
 		output[0] = qdr;
 		output[1] = artificial_complex_abundance;
 		output[2] = remaining_protein_abundance; // only remaining abundance of all proteins that are in complexes, limiting proteins have rem_abundance 0.0
+		output[3] = limiting_protein_distribution; // for statistics on the model
 		
 		return output;
 	}
@@ -352,7 +358,7 @@ public class diff_compl_test_cases {
 		
 		// distribution of complex abundances (across sampling)
 		// distribution of alterations to equal distribution
-		int no_iterations = 100;
+		int no_iterations = 3;
 		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
 		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5};
 		for (double std:stds) 
@@ -362,13 +368,21 @@ public class diff_compl_test_cases {
 					QuantDACOResultSet qdr = (QuantDACOResultSet) result[0];
 					@SuppressWarnings("unchecked")
 					Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) result[1];
+					System.out.println(std + " : " + artificial_complex_abundance.values().stream().min(Double::compareTo).get() +"<" + Utilities.getMean(artificial_complex_abundance.values()) + "+-" + Utilities.getVariance(artificial_complex_abundance.values()) + "<" + artificial_complex_abundance.values().stream().max(Double::compareTo).get());
 					@SuppressWarnings("unchecked")
 					Map<String, Double> art_remaining_protein_abundance = (Map<String, Double>) result[2];
+					@SuppressWarnings("unchecked")
+					Map<String, List<Double>> limiting_protein_distribution = (Map<String, List<Double>>) result[3];
+					
+//					List<Double> means = limiting_protein_distribution.values().stream().map(l->Utilities.getMean(l)).collect(Collectors.toList());
+//					List<Double> mins = limiting_protein_distribution.values().stream().map(l->l.stream().min(Double::compareTo).get()).collect(Collectors.toList());
+//					List<Double> maxs = limiting_protein_distribution.values().stream().map(l->l.stream().max(Double::compareTo).get()).collect(Collectors.toList());
+//					System.out.println(std + " " + Utilities.getMean(mins) + "<" + Utilities.getMean(means) + "<" + Utilities.getMean(maxs));
 				}
 			}
 	}
 	
 	public static void main(String[] args) {
-		benchmark();
+		model_behavior();
 	}
 }
