@@ -122,6 +122,7 @@ public class check_complexes_quant_pluri {
 		
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
 		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, involved_tfs, 0.0001, involved_tfs);
+		Set<String> allosome_proteins = DataQuery.getAllosomeProteins(DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		
 		/**
 		 *  writing pluri network data
@@ -129,21 +130,33 @@ public class check_complexes_quant_pluri {
 		
 		System.out.println("Building pluri sub-regnet ...");
 		RegulatoryNetwork plurisub_regnet = new RegulatoryNetwork(plurisub_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
-		plurisub_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "plurisub_regnet_only.txt");
-		
-		// adding annotational data
+		System.out.println(plurisub_regnet.getSizesStr());
+		plurisub_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "plurisub_regnet.txt");
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
 		annotational_data.put("Regulatory_effect", plurisub_effect);
-		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_node_table_only.txt", annotational_data);
+		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_nodetable.txt", annotational_data);
+		// pruning
+		plurisub_regnet.pruneToLargestSCCs();
+		System.out.println("SCC: " + plurisub_regnet.getSizesStr());
+		plurisub_regnet.removeProteinSet(allosome_proteins);
+		System.out.println("allo: " + plurisub_regnet.getSizesStr());
+		plurisub_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "plurisub_regnet_pruned.txt");
+		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_nodetable_pruned.txt", annotational_data);
 		
 		System.out.println("Building pluri regnet ...");
 		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
-		pluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "pluri_regnet_only.txt");
-		
-		// adding annotational data
+		System.out.println(pluri_regnet.getSizesStr());
+		pluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "pluri_regnet.txt");
 		annotational_data = new HashMap<>();
-		annotational_data.put("Regulatory_effect", plurisub_effect);
-		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_node_table_only.txt", annotational_data);
+		annotational_data.put("Regulatory_effect", pluri_effect);
+		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_nodetable.txt", annotational_data);
+		// pruning
+		pluri_regnet.pruneToLargestSCCs();
+		System.out.println("SCC: " + pluri_regnet.getSizesStr());
+		pluri_regnet.removeProteinSet(allosome_proteins);
+		System.out.println("allo: " + pluri_regnet.getSizesStr());
+		pluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "pluri_regnet_pruned.txt");
+		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_nodetable_pruned.txt", annotational_data);
 		
 		/**
 		 *  writing non-pluri network data
@@ -151,11 +164,17 @@ public class check_complexes_quant_pluri {
 		
 		System.out.println("Building non-pluri regnet ...");
 		RegulatoryNetwork nonpluri_regnet = new RegulatoryNetwork(nonpluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
-		nonpluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "nonpluri_regnet_only.txt");
-		
-		// adding annotational data
+		System.out.println(nonpluri_regnet.getSizesStr());
+		nonpluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "nonpluri_regnet.txt");
 		annotational_data = new HashMap<>();
-		annotational_data.put("Regulatory_effect", plurisub_effect);
-		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_node_table_only.txt", annotational_data);
+		annotational_data.put("Regulatory_effect", nonpluri_effect);
+		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_nodetable.txt", annotational_data);
+		// pruning
+		nonpluri_regnet.pruneToLargestSCCs();
+		System.out.println("SCC: " + nonpluri_regnet.getSizesStr());
+		nonpluri_regnet.removeProteinSet(allosome_proteins);
+		System.out.println("allo: " + nonpluri_regnet.getSizesStr());
+		nonpluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "nonpluri_regnet_pruned.txt");
+		nonpluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "nonpluri_nodetable_pruned.txt", annotational_data);
 	}
 }
