@@ -154,7 +154,7 @@ public class PPICompare {
 		
 		// actual calculations
 		RewiringDetector rd = new RewiringDetector(group1, group2, FDR, no_threads, null);
-		double P_rew_rounded = (double) Math.round(rd.getP_rew() * 1000d) / 1000d;
+		double P_rew_rounded = Math.round(rd.getP_rew() * 1000d) / 1000d;
 		List<String> minReasons = rd.getMinMostLikelyReasons();
 		
 		// stdout-output

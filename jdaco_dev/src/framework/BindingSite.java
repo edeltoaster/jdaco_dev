@@ -31,6 +31,7 @@ public class BindingSite implements Comparable<BindingSite> {
 		return left_test;
 	}
 	
+	@Override
 	public String toString() {
 		String sign = "+";
 		if (!plus_strand)

@@ -49,7 +49,7 @@ public class build_diff_networks {
 			Utilities.writeEntries(all_alt_splice_switches.keySet(), out_path + state1 + "_" + state2 + "_contributing_AS_proteins.txt");
 			
 			
-			double P_rew_rounded = (double) Math.round( rd1.getP_rew() * 1000d) / 1000d;
+			double P_rew_rounded = Math.round( rd1.getP_rew() * 1000d) / 1000d;
 			System.out.println(rd1.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd1.getInteractionReasonsCountMap().size() + " dIAs" );
 			
 			System.out.println(major_alt_splice_switches.keySet().size() + " alt. spliced proteins are the major reason that affect " + Utilities.getValueSetFromMultimap(major_alt_splice_switches).size() + " diff. interactions.");

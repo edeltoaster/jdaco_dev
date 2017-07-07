@@ -103,6 +103,7 @@ public class PPIXpress_GUI {
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					PPIXpress_GUI window = new PPIXpress_GUI();
@@ -144,6 +145,7 @@ public class PPIXpress_GUI {
 		btnLoadNetwork = new JButton("from file");
 		activiy_changing_components.add(btnLoadNetwork);
 		btnLoadNetwork.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
 				fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -156,7 +158,8 @@ public class PPIXpress_GUI {
 				    original_network_path = selectedFile.getAbsolutePath();
 				    activiy_changing_components.add(btnBuildNetworks);
 				    compute_thread = new Thread() {
-				    	public void run() {
+				    	@Override
+						public void run() {
 				    		try {
 				    			load_network();
 				    			computing = false;
@@ -228,6 +231,7 @@ public class PPIXpress_GUI {
 		btnLoadExpressionData = new JButton("Load expression data");
 		activiy_changing_components.add(btnLoadExpressionData);
 		btnLoadExpressionData.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
 				fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -277,6 +281,7 @@ public class PPIXpress_GUI {
 		
 		btnBuildNetworks = new JButton("Set outputfolder and start processing");
 		btnBuildNetworks.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (compute_thread == null || !compute_thread.isAlive() || !computing || btnLoadNetwork.getText().equals("Set outputfolder and start processing")) {
 					JFileChooser fileChooser = new JFileChooser();
@@ -292,7 +297,8 @@ public class PPIXpress_GUI {
 					    if (!output_folder.endsWith("/"))
 							output_folder += "/";
 					    compute_thread = new Thread() {
-					    	public void run() {
+					    	@Override
+							public void run() {
 					    		try {
 					    			process_calc();
 					    			computing = false;
@@ -353,6 +359,7 @@ public class PPIXpress_GUI {
 		chckbxSTRING = new JCheckBox("add STRING weights");
 		activiy_changing_components.add(chckbxSTRING);
 		chckbxSTRING.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxSTRING.isSelected()) 
 					STRING_weights = true;
@@ -366,6 +373,7 @@ public class PPIXpress_GUI {
 		chckbxOutputDdins = new JCheckBox("output DDINs");
 		activiy_changing_components.add(chckbxOutputDdins);
 		chckbxOutputDdins.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxOutputDdins.isSelected())
 					output_DDINs = true;
@@ -379,6 +387,7 @@ public class PPIXpress_GUI {
 		chckbxGenelevelOnly = new JCheckBox("gene-level only");
 		activiy_changing_components.add(chckbxGenelevelOnly);
 		chckbxGenelevelOnly.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxGenelevelOnly.isSelected())
 					gene_level_only = true;
@@ -394,6 +403,7 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(text_threshold);
 		activiy_changing_components.add(text_threshold);
 		text_threshold.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					if (chckbxPercentile.isSelected())
@@ -434,6 +444,7 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(chckbxPercentile);
 		activiy_changing_components.add(chckbxPercentile);
 		chckbxPercentile.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxPercentile.isSelected()) {
 					text_threshold.setText("50.0");
@@ -460,6 +471,7 @@ public class PPIXpress_GUI {
 		
 		chckbxOutputMajorTranscripts = new JCheckBox("output major transcripts");
 		chckbxOutputMajorTranscripts.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxOutputMajorTranscripts.isSelected()) {
 					output_major_transcripts = true;
@@ -479,6 +491,7 @@ public class PPIXpress_GUI {
 		
 		chckbxUpdateUniprotAccs = new JCheckBox("update UniProt accessions");
 		chckbxUpdateUniprotAccs.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxUpdateUniprotAccs.isSelected())
 					update_UniProt = true;
@@ -492,6 +505,7 @@ public class PPIXpress_GUI {
 		
 		chckboxCompressOutput = new JCheckBox("compress output");
 		chckboxCompressOutput.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckboxCompressOutput.isSelected())
 					compress_output = true;
@@ -505,6 +519,7 @@ public class PPIXpress_GUI {
 		
 		chckbxOnlyLocalDdi = new JCheckBox("only local DDI data");
 		chckbxOnlyLocalDdi.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxOnlyLocalDdi.isSelected()) {
 					up2date_DDIs = false;
@@ -521,6 +536,7 @@ public class PPIXpress_GUI {
 		
 		chckbxReference = new JCheckBox("output reference network data");
 		chckbxReference.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxReference.isSelected()) {
 					report_reference = true;
@@ -536,6 +552,7 @@ public class PPIXpress_GUI {
 		btnReset = new JButton("Reset");
 		activiy_changing_components.add(btnReset);
 		btnReset.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				text_output.setText("");
 				
@@ -602,6 +619,7 @@ public class PPIXpress_GUI {
 		activiy_changing_components.add(comboBox_server);
 		comboBox_server.setModel(new DefaultComboBoxModel<String>(new String[] {"UK", "US", "ASIA"}));
 		comboBox_server.addItemListener(new ItemListener() {
+			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (comboBox_server.getSelectedItem().toString().equals("UK"))
 					DataQuery.switchServer("ensembldb.ensembl.org:3306");
@@ -648,6 +666,7 @@ public class PPIXpress_GUI {
 		
 		btnRetrieve = new JButton("from web");
 		btnRetrieve.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				final String taxon_id = (String)JOptionPane.showInputDialog(frmPpixpress,"organism taxon:", "iRefIndex/IntAct retrieval", JOptionPane.PLAIN_MESSAGE, null, null, "9606");
 				
@@ -656,7 +675,8 @@ public class PPIXpress_GUI {
 				
 				activiy_changing_components.add(btnBuildNetworks);
 			    compute_thread = new Thread() {
-			    	public void run() {
+			    	@Override
+					public void run() {
 			    		try {
 			    			retrieve_network(taxon_id);;
 			    			computing = false;
@@ -720,6 +740,7 @@ public class PPIXpress_GUI {
 		
 		chckbxSumAbundances = new JCheckBox("summarize abundances");
 		chckbxSumAbundances.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxSumAbundances.isSelected())
 					report_gene_abundance = true;
@@ -1043,8 +1064,10 @@ public class PPIXpress_GUI {
 	        this.textArea = textArea;
 	    }
 
-	    public void write(final int b) throws IOException {
+	    @Override
+		public void write(final int b) throws IOException {
 	    	EventQueue.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					synchronized (textArea) {
 			    		textArea.append(String.valueOf((char)b));

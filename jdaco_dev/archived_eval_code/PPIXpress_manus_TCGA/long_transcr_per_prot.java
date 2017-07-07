@@ -58,7 +58,7 @@ public class long_transcr_per_prot {
 		}
 		
 		double t_p_t = 
-			((double) isoforms_tumor.values().stream().mapToDouble(
+			(isoforms_tumor.values().stream().mapToDouble(
 					s -> s.stream().mapToInt(t->t).sum() / (double) s.size() ).sum()) 
 				/ isoforms_tumor.keySet().size();
 		
@@ -84,7 +84,7 @@ public class long_transcr_per_prot {
 			}
 		}
 		double t_p_n = 
-				((double) isoforms_normal.values().stream().mapToDouble(
+				(isoforms_normal.values().stream().mapToDouble(
 						s -> s.stream().mapToInt(t->t).sum() / (double) s.size() ).sum()) 
 					/ isoforms_normal.keySet().size();
 		

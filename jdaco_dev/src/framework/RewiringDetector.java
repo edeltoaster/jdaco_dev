@@ -906,7 +906,7 @@ public class RewiringDetector {
 
 				Set<StrPair> union = new HashSet<>(i1);
 				union.addAll(i2);
-				double denominator = (double) union.size();
+				double denominator = union.size();
 
 				if (strict_denominator)
 					denominator = Math.min(i1.size(), i2.size());

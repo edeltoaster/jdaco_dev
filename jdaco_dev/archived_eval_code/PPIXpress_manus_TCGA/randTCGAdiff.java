@@ -36,7 +36,7 @@ public class randTCGAdiff {
 				continue;
 			
 			if (!test_map.containsKey(v))
-				test_map.put(v, test.binomialTest(samples, (int) Math.abs(v), P_rew, AlternativeHypothesis.GREATER_THAN));
+				test_map.put(v, test.binomialTest(samples, Math.abs(v), P_rew, AlternativeHypothesis.GREATER_THAN));
 		}
 		
 		helper.add("Protein1 Protein2 Type Count Probability p-val");
@@ -70,7 +70,7 @@ public class randTCGAdiff {
 			
 			if (v == 0)
 				continue;
-			double raw_p = test.binomialTest(samples, (int) Math.abs(v), P_rew, AlternativeHypothesis.GREATER_THAN);
+			double raw_p = test.binomialTest(samples, Math.abs(v), P_rew, AlternativeHypothesis.GREATER_THAN);
 			test_map.put(pair, raw_p);
 			
 			if (!p2pair.containsKey(raw_p))

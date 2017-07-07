@@ -33,7 +33,7 @@ public class ENCODEdiff {
 			
 			if (v == 0)
 				continue;
-			double raw_p = test.binomialTest(samples, (int) Math.abs(v), P_rew, AlternativeHypothesis.GREATER_THAN);
+			double raw_p = test.binomialTest(samples, Math.abs(v), P_rew, AlternativeHypothesis.GREATER_THAN);
 			test_map.put(pair, raw_p);
 			
 			if (!p2pair.containsKey(raw_p))

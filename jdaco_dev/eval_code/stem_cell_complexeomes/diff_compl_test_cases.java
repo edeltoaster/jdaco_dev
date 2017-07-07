@@ -297,12 +297,12 @@ public class diff_compl_test_cases {
 		@SuppressWarnings("unchecked")
 		Map<String, List<Double>> limiting_protein_distribution = (Map<String, List<Double>>) simulation[3];
 		
-		// used before
+		// TODO: include something that makes sense
 		// System.out.println(std + " : " + artificial_complex_abundance.values().stream().min(Double::compareTo).get() +"<" + Utilities.getMean(artificial_complex_abundance.values()) + "+-" + Utilities.getVariance(artificial_complex_abundance.values()) + "<" + artificial_complex_abundance.values().stream().max(Double::compareTo).get());
-//		List<Double> means = limiting_protein_distribution.values().stream().map(l->Utilities.getMean(l)).collect(Collectors.toList());
-//		List<Double> mins = limiting_protein_distribution.values().stream().map(l->l.stream().min(Double::compareTo).get()).collect(Collectors.toList());
-//		List<Double> maxs = limiting_protein_distribution.values().stream().map(l->l.stream().max(Double::compareTo).get()).collect(Collectors.toList());
-//		System.err.println(std + " " + Utilities.getMean(mins) + "<" + Utilities.getMean(means) + "<" + Utilities.getMean(maxs));
+		List<Double> means = limiting_protein_distribution.values().stream().map(l->Utilities.getMean(l)).collect(Collectors.toList());
+		List<Double> mins = limiting_protein_distribution.values().stream().map(l->l.stream().min(Double::compareTo).get()).collect(Collectors.toList());
+		List<Double> maxs = limiting_protein_distribution.values().stream().map(l->l.stream().max(Double::compareTo).get()).collect(Collectors.toList());
+		System.err.println(std_factor + " " + Utilities.getMean(mins) + "<" + Utilities.getMean(means) + "<" + Utilities.getMean(maxs));
 		
 		// prepare evaluation
 		Map<HashSet<String>, Double> eval_complex_abundance = qdr.getAbundanceOfComplexes();
@@ -328,6 +328,8 @@ public class diff_compl_test_cases {
 		results[1] = Utilities.getRMSD(artificial, evaluated);
 		results[2] = pcorr.correlation(Utilities.getDoubleArray(rem_artificial), Utilities.getDoubleArray(rem_evaluated));
 		results[3] = Utilities.getRMSD(rem_artificial, rem_evaluated);
+		
+		// TODO: return statistics regarding constructed model: complex abundances, limiting protein distribution equality, remaining abundances
 		
 		return results;
 	}
