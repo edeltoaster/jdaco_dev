@@ -10,7 +10,7 @@ import framework.Utilities;
 public class definitions {
 	static String daco_results_folder = "res_99_5/";
 	static String networks_folder = "ENCODE_networks/";
-	static String diff_compl_output_folder = "diff_results_99_5/";
+	static String diff_compl_output_folder = "diff_results_99_5_-10-10/";
 	
 	static double pvalue = 0.05;
 	static boolean parametric = false; // for 0s, Welch test not really helpful
@@ -24,8 +24,8 @@ public class definitions {
 	static Set<String> pluri_factors = new HashSet<>(Arrays.asList("Q01860", "P48431", "Q9H9S0"));
 	
 	static String binding_data = "mixed_data/hocomoco_v10_EPD_v4_5k.txt.gz";
-	static int d_min = -30;
-	static int d_max = 30;
+	static int d_min = -10;
+	static int d_max = 10;
 	
 	static String GOA_def_file = "mixed_data/stem_tags_retrieved.txt.gz";
 	static GOAnnotator goa = new GOAnnotator(GOA_def_file);

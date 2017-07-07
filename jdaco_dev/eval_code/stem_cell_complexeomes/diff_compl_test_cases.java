@@ -358,7 +358,7 @@ public class diff_compl_test_cases {
 		
 		// distribution of complex abundances (across sampling)
 		// distribution of alterations to equal distribution
-		int no_iterations = 3;
+		int no_iterations = 5;
 		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
 		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5};
 		for (double std:stds) 
