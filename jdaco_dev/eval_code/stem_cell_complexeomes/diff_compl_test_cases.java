@@ -294,6 +294,15 @@ public class diff_compl_test_cases {
 		Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) simulation[1];
 		@SuppressWarnings("unchecked")
 		Map<String, Double> art_remaining_protein_abundance = (Map<String, Double>) simulation[2];
+		@SuppressWarnings("unchecked")
+		Map<String, List<Double>> limiting_protein_distribution = (Map<String, List<Double>>) simulation[3];
+		
+		// used before
+		// System.out.println(std + " : " + artificial_complex_abundance.values().stream().min(Double::compareTo).get() +"<" + Utilities.getMean(artificial_complex_abundance.values()) + "+-" + Utilities.getVariance(artificial_complex_abundance.values()) + "<" + artificial_complex_abundance.values().stream().max(Double::compareTo).get());
+//		List<Double> means = limiting_protein_distribution.values().stream().map(l->Utilities.getMean(l)).collect(Collectors.toList());
+//		List<Double> mins = limiting_protein_distribution.values().stream().map(l->l.stream().min(Double::compareTo).get()).collect(Collectors.toList());
+//		List<Double> maxs = limiting_protein_distribution.values().stream().map(l->l.stream().max(Double::compareTo).get()).collect(Collectors.toList());
+//		System.err.println(std + " " + Utilities.getMean(mins) + "<" + Utilities.getMean(means) + "<" + Utilities.getMean(maxs));
 		
 		// prepare evaluation
 		Map<HashSet<String>, Double> eval_complex_abundance = qdr.getAbundanceOfComplexes();
@@ -328,8 +337,11 @@ public class diff_compl_test_cases {
 	 */
 	public static void benchmark() {
 		
-		System.out.println("std prefactor corr_compl rmsd_compl corr_rem rmsd_rem");
-		System.err.println("std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
+		List<String> all_iterations = new LinkedList<>();
+		List<String> averaged = new LinkedList<>();
+		averaged.add("std prefactor corr_compl rmsd_compl corr_rem rmsd_rem");
+		all_iterations.add("std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
+		
 		int no_iterations = 100;
 		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
 		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5};
@@ -343,46 +355,20 @@ public class diff_compl_test_cases {
 				List<Double> rem_rmsds = new LinkedList<>();
 				int n = 1;
 				for (double[] result:results) {
-					System.err.println(std + " " + prefactor + " " + (n++) + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+					all_iterations.add(std + " " + prefactor + " " + (n++) + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
 					corrs.add(result[0]);
 					rmsds.add(result[1]);
 					rem_corrs.add(result[2]);
 					rem_rmsds.add(result[3]);
 				}
-				System.out.println(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds)+ " " + Utilities.getMedian(rem_corrs) + "+-" + Utilities.getStd(rem_corrs) + " " + Utilities.getMedian(rem_rmsds) + "+-" + Utilities.getStd(rem_rmsds));
+				averaged.add(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds)+ " " + Utilities.getMedian(rem_corrs) + "+-" + Utilities.getStd(rem_corrs) + " " + Utilities.getMedian(rem_rmsds) + "+-" + Utilities.getStd(rem_rmsds));
 			}
-	}
-	
-	public static void model_behavior() {
-		// TODO: check how big the changes due to std really are
 		
-		// distribution of complex abundances (across sampling)
-		// distribution of alterations to equal distribution
-		int no_iterations = 5;
-		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
-		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5};
-		for (double std:stds) 
-			for (double prefactor:prefactors) {
-				List<Object[]> results = IntStream.range(0, no_iterations).boxed().parallel().map(d->simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", "mixed_data/A172_1_1_ENCSR580GSX_major-transcripts.txt.gz", std, prefactor)).collect(Collectors.toList());
-				for (Object[] result:results) {
-					QuantDACOResultSet qdr = (QuantDACOResultSet) result[0];
-					@SuppressWarnings("unchecked")
-					Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) result[1];
-					System.out.println(std + " : " + artificial_complex_abundance.values().stream().min(Double::compareTo).get() +"<" + Utilities.getMean(artificial_complex_abundance.values()) + "+-" + Utilities.getVariance(artificial_complex_abundance.values()) + "<" + artificial_complex_abundance.values().stream().max(Double::compareTo).get());
-					@SuppressWarnings("unchecked")
-					Map<String, Double> art_remaining_protein_abundance = (Map<String, Double>) result[2];
-					@SuppressWarnings("unchecked")
-					Map<String, List<Double>> limiting_protein_distribution = (Map<String, List<Double>>) result[3];
-					
-//					List<Double> means = limiting_protein_distribution.values().stream().map(l->Utilities.getMean(l)).collect(Collectors.toList());
-//					List<Double> mins = limiting_protein_distribution.values().stream().map(l->l.stream().min(Double::compareTo).get()).collect(Collectors.toList());
-//					List<Double> maxs = limiting_protein_distribution.values().stream().map(l->l.stream().max(Double::compareTo).get()).collect(Collectors.toList());
-//					System.out.println(std + " " + Utilities.getMean(mins) + "<" + Utilities.getMean(means) + "<" + Utilities.getMean(maxs));
-				}
-			}
+		Utilities.writeEntries(all_iterations, "all_iterations.txt");
+		Utilities.writeEntries(averaged, "averaged.txt");
 	}
 	
 	public static void main(String[] args) {
-		model_behavior();
+		benchmark();
 	}
 }
