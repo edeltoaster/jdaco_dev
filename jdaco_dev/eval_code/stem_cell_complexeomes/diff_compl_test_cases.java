@@ -285,7 +285,7 @@ public class diff_compl_test_cases {
 	 * @param remaining_prefactor
 	 * @return
 	 */
-	public static double[] simulate_sample_model_run(double std_factor, double remaining_prefactor) {
+	public static double[] simulate_sample_model_run(double std_factor, double remaining_prefactor, int iteration, String[] sample_construction_outputs) {
 		
 		// get results of simulation
 		Object[] simulation = simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", "mixed_data/A172_1_1_ENCSR580GSX_major-transcripts.txt.gz", std_factor, remaining_prefactor);
@@ -297,12 +297,24 @@ public class diff_compl_test_cases {
 		@SuppressWarnings("unchecked")
 		Map<String, List<Double>> limiting_protein_distribution = (Map<String, List<Double>>) simulation[3];
 		
-		// TODO: include something that makes sense
-		// System.out.println(std + " : " + artificial_complex_abundance.values().stream().min(Double::compareTo).get() +"<" + Utilities.getMean(artificial_complex_abundance.values()) + "+-" + Utilities.getVariance(artificial_complex_abundance.values()) + "<" + artificial_complex_abundance.values().stream().max(Double::compareTo).get());
+		// get some sample construction values
+		double complex_abundance_min = artificial_complex_abundance.values().stream().min(Double::compareTo).get();
+		double complex_abundance_mean = Utilities.getMean(artificial_complex_abundance.values());
+		double complex_abundance_std = Utilities.getStd(artificial_complex_abundance.values());
+		double complex_abundance_max = artificial_complex_abundance.values().stream().max(Double::compareTo).get();
+		
 		List<Double> means = limiting_protein_distribution.values().stream().map(l->Utilities.getMean(l)).collect(Collectors.toList());
 		List<Double> mins = limiting_protein_distribution.values().stream().map(l->l.stream().min(Double::compareTo).get()).collect(Collectors.toList());
 		List<Double> maxs = limiting_protein_distribution.values().stream().map(l->l.stream().max(Double::compareTo).get()).collect(Collectors.toList());
-		System.err.println(std_factor + " " + Utilities.getMean(mins) + "<" + Utilities.getMean(means) + "<" + Utilities.getMean(maxs));
+		double lim_distr_min = Utilities.getMean(mins);
+		double lim_distr_mean = Utilities.getMean(means);
+		double lim_distr_std = Utilities.getStd(means);
+		double lim_distr_max = Utilities.getMean(maxs);
+		
+		double rem_abundance_min = art_remaining_protein_abundance.values().stream().min(Double::compareTo).get();
+		double rem_abundance_mean = Utilities.getMean(art_remaining_protein_abundance.values());
+		double rem_abundance_std = Utilities.getStd(art_remaining_protein_abundance.values());
+		double rem_abundance_max = art_remaining_protein_abundance.values().stream().max(Double::compareTo).get();
 		
 		// prepare evaluation
 		Map<HashSet<String>, Double> eval_complex_abundance = qdr.getAbundanceOfComplexes();
@@ -329,7 +341,10 @@ public class diff_compl_test_cases {
 		results[2] = pcorr.correlation(Utilities.getDoubleArray(rem_artificial), Utilities.getDoubleArray(rem_evaluated));
 		results[3] = Utilities.getRMSD(rem_artificial, rem_evaluated);
 		
-		// TODO: return statistics regarding constructed model: complex abundances, limiting protein distribution equality, remaining abundances
+		if (sample_construction_outputs != null) {
+			String out = std_factor + " " + remaining_prefactor + " " + (iteration+1) + " " + complex_abundance_min + " " + complex_abundance_mean + " " + complex_abundance_std + " " + complex_abundance_max + " " + lim_distr_min + " " + lim_distr_mean + " " + lim_distr_std + " " + lim_distr_max + " " + rem_abundance_min + " " + rem_abundance_mean + " " +rem_abundance_std + " " + rem_abundance_max;
+			sample_construction_outputs[iteration] = out;
+		}
 		
 		return results;
 	}
@@ -341,8 +356,10 @@ public class diff_compl_test_cases {
 		
 		List<String> all_iterations = new LinkedList<>();
 		List<String> averaged = new LinkedList<>();
+		List<String> sample_construction = new LinkedList<>();
 		averaged.add("std prefactor corr_compl rmsd_compl corr_rem rmsd_rem");
 		all_iterations.add("std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
+		sample_construction.add("std prefactor iter complex_abundance_min complex_abundance_mean complex_abundance_std complex_abundance_max lim_distr_min lim_distr_mean lim_distr_std lim_distr_max rem_abundance_min rem_abundance_mean rem_abundance_std rem_abundance_max");
 		
 		int no_iterations = 100;
 		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
@@ -350,24 +367,28 @@ public class diff_compl_test_cases {
 		
 		for (double std:stds) 
 			for (double prefactor:prefactors) {
-				List<double[]> results = IntStream.range(0, no_iterations).boxed().parallel().map(d->simulate_sample_model_run(std, prefactor)).collect(Collectors.toList());
+				String[] sample_construction_outputs = new String[no_iterations];
+				List<double[]> results = IntStream.range(0, no_iterations).boxed().parallel().map(d->simulate_sample_model_run(std, prefactor, d, sample_construction_outputs)).collect(Collectors.toList());
 				List<Double> corrs = new LinkedList<>();
 				List<Double> rmsds = new LinkedList<>();
 				List<Double> rem_corrs = new LinkedList<>();
 				List<Double> rem_rmsds = new LinkedList<>();
 				int n = 1;
 				for (double[] result:results) {
-					all_iterations.add(std + " " + prefactor + " " + (n++) + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+					all_iterations.add(std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+					sample_construction.add(sample_construction_outputs[n-1]);
 					corrs.add(result[0]);
 					rmsds.add(result[1]);
 					rem_corrs.add(result[2]);
 					rem_rmsds.add(result[3]);
+					++n;
 				}
 				averaged.add(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds)+ " " + Utilities.getMedian(rem_corrs) + "+-" + Utilities.getStd(rem_corrs) + " " + Utilities.getMedian(rem_rmsds) + "+-" + Utilities.getStd(rem_rmsds));
 			}
 		
-		Utilities.writeEntries(all_iterations, "all_iterations.txt");
-		Utilities.writeEntries(averaged, "averaged.txt");
+		Utilities.writeEntries(all_iterations, "perf_all_iterations.txt");
+		Utilities.writeEntries(averaged, "perf_averaged.txt");
+		Utilities.writeEntries(sample_construction, "sample_construction.txt");
 	}
 	
 	public static void main(String[] args) {
