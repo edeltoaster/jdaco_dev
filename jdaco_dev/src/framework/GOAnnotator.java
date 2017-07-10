@@ -91,7 +91,7 @@ public class GOAnnotator {
 				out += "-";
 			}
 			else if (occ[0] == 0 && occ[1] == 0) {
-				out += "/";
+				continue; // shorten String if there's nothing to say
 			}
 			else {
 				out += "!(" + occ[0] + "," + occ[1] + "," + occ[2] + ")";
@@ -100,7 +100,10 @@ public class GOAnnotator {
 			attributes.add(out);
 		}
 		
-		return String.join(",", attributes);
+		if (attributes.isEmpty())
+			return "/";
+		else
+			return String.join(",", attributes);
 	}
 	
 	public String rateCollectionOfProteins(Collection<Set<String>> query_sets) {

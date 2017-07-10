@@ -45,11 +45,13 @@ public class GOAnnotationTag {
 		
 		this.positive_GO_terms = new HashSet<>();
 		for (String GO_term:data[1].split(","))
-			this.positive_GO_terms.add(GO_term);
+			if (!GO_term.equals("/"))
+				this.positive_GO_terms.add(GO_term);
 		
 		this.negative_GO_terms = new HashSet<>();
 		for (String GO_term:data[2].split(","))
-			this.negative_GO_terms.add(GO_term);
+			if (!GO_term.equals("/"))
+				this.negative_GO_terms.add(GO_term);
 		
 		this.retrieveAndProcessData();
 	}
@@ -65,11 +67,13 @@ public class GOAnnotationTag {
 		
 		this.positive_GO_terms = new HashSet<>();
 		for (String GO_term:data[2].split(","))
-			this.positive_GO_terms.add(GO_term);
+			if (!GO_term.equals("/"))
+				this.positive_GO_terms.add(GO_term);
 		
 		this.negative_GO_terms = new HashSet<>();
 		for (String GO_term:data[3].split(","))
-			this.negative_GO_terms.add(GO_term);
+			if (!GO_term.equals("/"))
+				this.negative_GO_terms.add(GO_term);
 		
 		if (data[4].equals("IEA"))
 			this.include_IEA = true;
@@ -142,8 +146,16 @@ public class GOAnnotationTag {
 		List<String> to_string = new LinkedList<>();
 		to_string.add(this.taxon);
 		to_string.add(this.tag_name);
-		to_string.add(String.join(",", this.positive_GO_terms));
-		to_string.add(String.join(",", this.negative_GO_terms));
+		
+		if (this.positive_GO_terms.isEmpty())
+			to_string.add("/");
+		else
+			to_string.add(String.join(",", this.positive_GO_terms));
+		
+		if (this.negative_GO_terms.isEmpty())
+			to_string.add("/");
+		else
+			to_string.add(String.join(",", this.negative_GO_terms));
 		
 		if (this.include_IEA)
 			to_string.add("IEA");
@@ -240,8 +252,16 @@ public class GOAnnotationTag {
 		// tag_name positive_GO_term(s) negative_GO_term(s) taxon include_IEA #positive_proteins #negative_proteins #mixed_proteins
 		List<String> to_string = new LinkedList<>();
 		to_string.add(this.tag_name);
-		to_string.add(String.join(",", this.positive_GO_terms));
-		to_string.add(String.join(",", this.negative_GO_terms));
+		
+		if (this.positive_GO_terms.isEmpty())
+			to_string.add("/");
+		else
+			to_string.add(String.join(",", this.positive_GO_terms));
+		
+		if (this.negative_GO_terms.isEmpty())
+			to_string.add("/");
+		else
+			to_string.add(String.join(",", this.negative_GO_terms));
 		
 		to_string.add(this.taxon);
 		

@@ -1,9 +1,14 @@
+# important repressive mark H3K27me
+# histone H3-K27 methylation/demethylation (process)
+H3K27meX GO:0070734 GO:0071557
+# important other activating mark in stem cells (from "Single-molecule decoding of combinatorially modified nucleosomes" or "Epigenetic regulation in pluripotent stem cells: a key to breaking the epigenetic barrier")
+# GO process
+H3K4meX GO:0051568 GO:0034720
+# transcriptionally inactive chromatin has this mark in stem cells ("Epigenetic regulation in pluripotent stem cells: a key to breaking the epigenetic barrier")
+# GO process, no demethylation annotated in GO
+H3K9meX GO:0051567 /
+# histone acetyltransferases and deacetylase activity
+H_ac GO:0016573 GO:0016575
+DNA_me GO:0006306 GO:0080111
 regulation GO:0045944 GO:0000122
 coregulation GO:0003713 GO:0003714
-# acetylase and deacetylase activity
-h_ac GO:0004402 GO:0004407
-# important repressive mark H3K27me, histone H3-K27 methylation (process)
-H3K27meX GO:0070734 GO:0071557
-# important other activating mark in stem cells (from "Single-molecule decoding of combinatorially modified nucleosomes")
-H3K4meX GO:0051568 GO:0034720
-DNA_me GO:0006306 GO:0080111
