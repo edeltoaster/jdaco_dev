@@ -527,7 +527,7 @@ public class RegulatoryNetwork {
 			allowed_complexes_before = allowed_complexes.size();
 			allowed_proteins_before = allowed_proteins.size();
 			
-			// remove complexes including TFs that are not reachable
+			// remove complexes including TFs that are not allowed
 			for (HashSet<String> complex:this.complex_to_targets.keySet())
 				// if not all TFs are allowed, the complex cannot exist
 				if (complex.stream().anyMatch(p -> !allowed_proteins.contains(p)))

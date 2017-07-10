@@ -20,9 +20,9 @@ public class check_pluri_diff_regnets {
 		System.out.println(regnet.getSizesStr());
 		regnet.removeProteinSet(allosome_proteins);
 		System.out.println(regnet.getSizesStr());
-		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/pluri_SCC.txt");
-		regnet.writeNodeTable("/Users/tho/Desktop/pluri_SCC_node.txt");
-		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/pluri_SCC2.txt", 2);
+//		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/pluri_SCC.txt");
+//		regnet.writeNodeTable("/Users/tho/Desktop/pluri_SCC_node.txt");
+//		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/pluri_SCC2.txt", 2);
 		
 		System.out.println("plurisub only");
 		RegulatoryNetwork subregnet = new RegulatoryNetwork(path + definitions.diff_compl_output_folder + "plurisub_regnet.txt");
@@ -31,8 +31,8 @@ public class check_pluri_diff_regnets {
 		System.out.println(subregnet.getSizesStr());
 		subregnet.removeProteinSet(allosome_proteins);
 		System.out.println(subregnet.getSizesStr());
-		subregnet.writeRegulatoryNetwork("/Users/tho/Desktop/plurisub_SCC.txt");
-		subregnet.writeNodeTable("/Users/tho/Desktop/plurisub_SCC_node.txt");
+//		subregnet.writeRegulatoryNetwork("/Users/tho/Desktop/plurisub_SCC.txt");
+//		subregnet.writeNodeTable("/Users/tho/Desktop/plurisub_SCC_node.txt");
 		
 		System.out.println("nonpluri only");
 		RegulatoryNetwork nonregnet = new RegulatoryNetwork(path + definitions.diff_compl_output_folder + "nonpluri_regnet.txt");
@@ -41,7 +41,7 @@ public class check_pluri_diff_regnets {
 		System.out.println(nonregnet.getSizesStr());
 		nonregnet.removeProteinSet(allosome_proteins);
 		System.out.println(nonregnet.getSizesStr());
-		nonregnet.writeRegulatoryNetwork("/Users/tho/Desktop/nonpluri.txt");
-		nonregnet.writeNodeTable("/Users/tho/Desktop/nonpluri_node.txt");
+//		nonregnet.writeRegulatoryNetwork("/Users/tho/Desktop/nonpluri.txt");
+//		nonregnet.writeNodeTable("/Users/tho/Desktop/nonpluri_node.txt");
 	}
 }
