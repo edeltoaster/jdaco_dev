@@ -1,11 +1,13 @@
 package framework;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
@@ -37,6 +39,7 @@ public class DiffComplexDetector {
 	private Map<HashSet<String>, Double> group2_medians;
 	
 	// differential analysis results
+	private Map<HashSet<String>, Double> variants_raw_pvalues;
 	private final Map<HashSet<String>, Double> significance_variants_pvalues;
 	private final List<HashSet<String>> significance_sorted_variants;
 	
@@ -173,6 +176,7 @@ public class DiffComplexDetector {
 			test_results.put(variant, pm);
 		}
 		
+		this.variants_raw_pvalues = test_results;
 		return Utilities.convertRawPValuesToBHFDR(test_results, this.FDR);
 	}
 	
@@ -189,6 +193,7 @@ public class DiffComplexDetector {
 			test_results.put(variant, pm);
 		}
 		
+		this.variants_raw_pvalues = test_results;
 		return Utilities.convertRawPValuesToBHFDR(test_results, this.FDR);
 	}
 	
@@ -199,6 +204,90 @@ public class DiffComplexDetector {
 	}
 
 	// TODO: think about what is helpful, probably inherit classes that are more specific, like TF complexes
+	
+	/**
+	 * Custom compareTo function that first sorts by the log-scores and breaks ties using the differences of the median between groups
+	 * @param v1
+	 * @param v2
+	 * @param scores
+	 * @return
+	 */
+	private int diffScoresCompareTo(HashSet<String> v1, HashSet<String> v2, Map<HashSet<String>, Double> scores) {
+		int sign_compareTo = scores.get(v1).compareTo(scores.get(v2));
+		
+		if (sign_compareTo == 0) {
+			double v1_med_diff = this.group2_medians.get(v1) - this.group1_medians.get(v1);
+			double v2_med_diff = this.group2_medians.get(v2) - this.group1_medians.get(v2);
+			return Double.compare(v1_med_diff, v2_med_diff);
+		} else
+			return sign_compareTo;
+	}
+	
+	/**
+	 * Calculates enrichment score in the fashion of GSEA
+	 * @param query_TF
+	 * @param scores
+	 * @param complex_list
+	 * @return
+	 */
+	private double calculateEnrichmentScore(String query_TF, double[] scores, HashSet<String>[] complex_list) {
+		double running_sum = 0.0;
+		double max_sum = 0.0;
+		
+		for (int i = 0; i< scores.length; i++) {
+			if (complex_list[i].contains(query_TF))
+				running_sum += scores[i];
+			else
+				running_sum -= scores[i];
+			
+			if (Math.abs(running_sum) > Math.abs(max_sum))
+				max_sum = running_sum;
+		}
+		
+		return max_sum;
+	}
+	
+	public Map<String, Double> determineGSEAStyle(double FDR, int iterations) {
+		Map<HashSet<String>, Double> scores = new HashMap<>();
+		for (HashSet<String> variant:this.variants_raw_pvalues.keySet()) {
+			double med_diff = this.group2_medians.get(variant) - this.group1_medians.get(variant);
+			double score = Math.log(this.variants_raw_pvalues.get(variant));
+			if (med_diff < 0)
+				score *= -1;
+			scores.put(variant, score);
+		}
+		
+		// construct sorted matching arrays of variant/score
+		@SuppressWarnings("unchecked")
+		HashSet<String>[] sorted_complex_list = (HashSet<String>[]) scores.keySet().toArray(new Object[scores.size()]);
+		Arrays.sort(sorted_complex_list, (v1, v2) -> diffScoresCompareTo(v2, v1, scores)); // sorts positive to negative
+		double[] sorted_scores = new double[sorted_complex_list.length];
+		for (int i = 0; i< sorted_scores.length; i++)
+			sorted_scores[i] = scores.get(sorted_complex_list[i]);
+		
+		// determine all TFs
+		Set<String> TFs = new HashSet<>();
+		this.variants_raw_pvalues.keySet().stream().forEach(v -> TFs.addAll(v));
+		
+		// for each TF: calc. enrichment score
+		Map<String, Double> tf_enrichment_scores = new HashMap<>();
+		TFs.stream().forEach(tf -> tf_enrichment_scores.put(tf, calculateEnrichmentScore(tf, sorted_scores, sorted_complex_list)));
+		
+		// get distr of NULL distributions by permutation
+		List<HashSet<String>[]> randomized_complex_lists = new ArrayList<>(iterations);
+		Random rnd = new Random(System.currentTimeMillis());
+		for (int i = 0; i< iterations; i++) {
+			HashSet<String>[] complex_list = sorted_complex_list.clone();
+			// TODO: start here again, shuffling simpler with Collection :-/
+		}
+		// check p-val for each
+		Map<String, Double> tf_raw_pvalues = new HashMap<>();
+		// p-value correction
+		
+		return null;
+		
+	}
+	
 	
 	/**
 	 * Returns data of group1
@@ -288,6 +377,14 @@ public class DiffComplexDetector {
 		return significance_variants_pvalues;
 	}
 
+	/**
+	 * Returns map of seed combination variants and associated raw p-values
+	 * @return
+	 */
+	public Map<HashSet<String>, Double> getVariantsRawPValues() {
+		return variants_raw_pvalues;
+	}
+	
 	/**
 	 * Returns a list of significantly deregulated seed combination variants in their order of significance
 	 * @return

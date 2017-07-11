@@ -347,16 +347,6 @@ public class Utilities {
 	 * @return
 	 */
 	public static <T> Map<T, Double> convertRawPValuesToBHFDR(Map<T, Double> raw_pvalues, double FDR) {
-		return convertRawPValuesToBHFDR(raw_pvalues, FDR, true);
-	}
-	
-	/**
-	 * Converts raw pvalues to Benjamini-Hochberg adjusted pvalues according to given FDR.
-	 * @param raw_pvalues
-	 * @param FDR
-	 * @return
-	 */
-	public static <T> Map<T, Double> convertRawPValuesToBHFDR(Map<T, Double> raw_pvalues, double FDR, boolean return_only_significant) {
 		// initialize reverse map
 		Map<Double, List<T>> p_to_obj = new HashMap<>();
 		for (T obj:raw_pvalues.keySet()) {
@@ -389,7 +379,7 @@ public class Utilities {
 			raw_to_adj_p.put(p, adj_p);
 			adj_p_before = adj_p;
 			
-			if (return_only_significant && adj_p >= FDR) //skip calculations for non-significant
+			if (adj_p >= FDR) //skip calculations for non-significant
 				continue;
 			
 			for (T obj:p_to_obj.get(p))
