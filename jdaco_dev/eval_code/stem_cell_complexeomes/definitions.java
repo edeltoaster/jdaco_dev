@@ -8,9 +8,9 @@ import framework.GOAnnotator;
 import framework.Utilities;
 
 public class definitions {
-	static String daco_results_folder = "res_99_5/";
+	static String daco_results_folder = "res_99_6/";
 	static String networks_folder = "ENCODE_networks/";
-	static String diff_compl_output_folder = "diff_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
+	static String diff_compl_output_folder = "diff_results_99_6_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
 	
 	static double pvalue = 0.05;
 	static boolean parametric = false; // for 0s, Welch test not really helpful
