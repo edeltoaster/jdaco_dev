@@ -8,13 +8,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TTest;
@@ -269,15 +266,17 @@ public class DiffComplexDetector {
 	}
 	
 	/**
-	 * Calculates enrichment score in the fashion of GSEA
+	 * Calculates enrichment score in the fashion of GSEA, 
+	 * handles enrichment and depletion independently, returns [max_ES, min_ES]
 	 * @param query_TF
 	 * @param scores
 	 * @param complex_list
 	 * @return
 	 */
-	private double calculateEnrichmentScore(String query_TF, double[] scores, List<HashSet<String>> complex_list) {
+	private Double[] calculateEnrichmentScore(String query_TF, double[] scores, List<HashSet<String>> complex_list) {
 		double running_sum = 0.0;
 		double max_sum = 0.0;
+		double min_sum = 0.0;
 		
 		int i = 0;
 		for (HashSet<String> complex:complex_list) {
@@ -285,18 +284,20 @@ public class DiffComplexDetector {
 				running_sum += scores[i];
 			else
 				running_sum -= scores[i];
-			
-			if (Math.abs(running_sum) > Math.abs(max_sum))
+			// TODO: do differently
+			if (running_sum > max_sum)
 				max_sum = running_sum;
+			else if (running_sum < min_sum)
+				min_sum = running_sum;
 			
 			++i;
 		}
 		
-		return max_sum;
+		return new Double[]{max_sum, min_sum};
 	}
 	
 	public Map<String, Double> determineGSEAStyle(double FDR, int iterations) {
-		
+		// TODO: extra class
 		Map<HashSet<String>, Double> scores = new HashMap<>();
 		for (HashSet<String> variant:this.variants_raw_pvalues.keySet()) {
 			double med_diff = this.group2_medians.get(variant) - this.group1_medians.get(variant);
@@ -320,7 +321,12 @@ public class DiffComplexDetector {
 		
 		// for each TF: calc. enrichment score
 		Map<String, Double> tf_enrichment_scores = new HashMap<>();
-		TFs.stream().forEach(tf -> tf_enrichment_scores.put(tf, calculateEnrichmentScore(tf, sorted_scores, sorted_complex_list)));
+		Map<String, Double> tf_depletion_scores = new HashMap<>();
+		for (String tf:TFs) {
+			Double[] tf_ES = calculateEnrichmentScore(tf, sorted_scores, sorted_complex_list);
+			tf_enrichment_scores.put(tf, tf_ES[0].doubleValue());
+			tf_depletion_scores.put(tf, tf_ES[1].doubleValue());
+		}
 		
 		// get distr of NULL distributions by permutation
 		List<List<HashSet<String>>> randomized_complex_lists = new ArrayList<>(iterations);
@@ -331,34 +337,31 @@ public class DiffComplexDetector {
 		}
 		
 		// check p-val for each
-		Map<String, Double> tf_raw_pvalues = new HashMap<>();
+		Map<String, Double> tfdir_raw_pvalues = new HashMap<>();
 		ForkJoinPool pool = new ForkJoinPool(this.no_threads);
-		int n = 1;
 		for (String tf:TFs) {
-			double tf_ES = Math.abs(tf_enrichment_scores.get(tf));
-			ForkJoinTask<Long> rnd_counts = pool.submit(() -> randomized_complex_lists.parallelStream().map(l -> calculateEnrichmentScore(tf, sorted_scores, l)).filter(rnd_ES -> Math.abs(rnd_ES) > tf_ES).count());
-			long counts = 1;
+			double tf_ES = tf_enrichment_scores.get(tf);
+			double tf_DS = tf_depletion_scores.get(tf);
+			ForkJoinTask<List<Double[]>> rnd_counts = pool.submit(() -> randomized_complex_lists.parallelStream().map(l -> calculateEnrichmentScore(tf, sorted_scores, l)).collect(Collectors.toList()));
+			List<Double[]> rnd_data = null;
 			try {
-				counts = Math.max(rnd_counts.get(), 1);
+				rnd_data = rnd_counts.get();
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(1);
 			}
-			double raw_p = counts / (double) iterations;
-			tf_raw_pvalues.put(tf, raw_p);
 			
-			if (tf.equals("Q01860") || tf.equals("Q9H9S0")) {
-				System.out.println(DataQuery.getHGNCNameFromProtein(tf) + " " + raw_p);
-			}
-			if (n%10 == 0) {
-				System.out.println(n + "/" + TFs.size());
-				System.out.flush();
-			}
-			n++;
+			long enrich_counts = Math.max(rnd_data.stream().filter(d -> d[0].doubleValue() > tf_ES).count(), 1);
+			long depl_counts = Math.max(rnd_data.stream().filter(d -> d[1].doubleValue() < tf_DS).count(), 1);
+			
+			double enrich_p = enrich_counts / (double) iterations;
+			double depl_p = depl_counts / (double) iterations;
+			tfdir_raw_pvalues.put("+" + tf, enrich_p);
+			tfdir_raw_pvalues.put("-" + tf, depl_p);
 		}
 		
 		// p-value correction and return
-		return Utilities.convertRawPValuesToBHFDR(tf_raw_pvalues, FDR);
+		return Utilities.convertRawPValuesToBHFDR(tfdir_raw_pvalues, FDR);
 		
 	}
 	
