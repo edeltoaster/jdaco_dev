@@ -248,125 +248,6 @@ public class DiffComplexDetector {
 	// TODO: think about what is helpful, probably inherit classes that are more specific, like TF complexes
 	
 	/**
-	 * Custom compareTo function that first sorts by the log-scores and breaks ties using the differences of the median between groups
-	 * @param v1
-	 * @param v2
-	 * @param scores
-	 * @return
-	 */
-	private int diffScoresCompareTo(HashSet<String> v1, HashSet<String> v2, Map<HashSet<String>, Double> scores) {
-		int sign_compareTo = scores.get(v1).compareTo(scores.get(v2));
-		
-		if (sign_compareTo == 0) {
-			double v1_med_diff = this.group2_medians.get(v1) - this.group1_medians.get(v1);
-			double v2_med_diff = this.group2_medians.get(v2) - this.group1_medians.get(v2);
-			return Double.compare(v1_med_diff, v2_med_diff);
-		} else
-			return sign_compareTo;
-	}
-	
-	/**
-	 * Calculates enrichment score in the fashion of GSEA, 
-	 * handles enrichment and depletion independently, returns [max_ES, min_ES]
-	 * @param query_TF
-	 * @param scores
-	 * @param complex_list
-	 * @return
-	 */
-	private Double[] calculateEnrichmentScore(String query_TF, double[] scores, List<HashSet<String>> complex_list) {
-		double running_sum = 0.0;
-		double max_sum = 0.0;
-		double min_sum = 0.0;
-		
-		int i = 0;
-		for (HashSet<String> complex:complex_list) {
-			if (complex.contains(query_TF))
-				running_sum += scores[i];
-			else
-				running_sum -= scores[i];
-			// TODO: do differently
-			if (running_sum > max_sum)
-				max_sum = running_sum;
-			else if (running_sum < min_sum)
-				min_sum = running_sum;
-			
-			++i;
-		}
-		
-		return new Double[]{max_sum, min_sum};
-	}
-	
-	public Map<String, Double> determineGSEAStyle(double FDR, int iterations) {
-		// TODO: extra class
-		Map<HashSet<String>, Double> scores = new HashMap<>();
-		for (HashSet<String> variant:this.variants_raw_pvalues.keySet()) {
-			double med_diff = this.group2_medians.get(variant) - this.group1_medians.get(variant);
-			double score = -Math.log(this.variants_raw_pvalues.get(variant));
-			
-			if (med_diff < 0)
-				score *= -1;
-			scores.put(variant, score);
-		}
-		
-		// construct sorted matching arrays of variant/score
-		List<HashSet<String>> sorted_complex_list = new ArrayList<>(scores.keySet());
-		sorted_complex_list.sort((v1, v2) -> diffScoresCompareTo(v2, v1, scores));
-		double[] sorted_scores = new double[sorted_complex_list.size()];
-		for (int i = 0; i< sorted_scores.length; i++)
-			sorted_scores[i] = scores.get(sorted_complex_list.get(i));
-		
-		// determine all TFs
-		Set<String> TFs = new HashSet<>();
-		this.variants_raw_pvalues.keySet().stream().forEach(v -> TFs.addAll(v));
-		
-		// for each TF: calc. enrichment score
-		Map<String, Double> tf_enrichment_scores = new HashMap<>();
-		Map<String, Double> tf_depletion_scores = new HashMap<>();
-		for (String tf:TFs) {
-			Double[] tf_ES = calculateEnrichmentScore(tf, sorted_scores, sorted_complex_list);
-			tf_enrichment_scores.put(tf, tf_ES[0].doubleValue());
-			tf_depletion_scores.put(tf, tf_ES[1].doubleValue());
-		}
-		
-		// get distr of NULL distributions by permutation
-		List<List<HashSet<String>>> randomized_complex_lists = new ArrayList<>(iterations);
-		for (int i = 0; i< iterations; i++) {
-			List<HashSet<String>> complex_list = new ArrayList<>(sorted_complex_list);
-			Collections.shuffle(complex_list);
-			randomized_complex_lists.add(complex_list);
-		}
-		
-		// check p-val for each
-		Map<String, Double> tfdir_raw_pvalues = new HashMap<>();
-		ForkJoinPool pool = new ForkJoinPool(this.no_threads);
-		for (String tf:TFs) {
-			double tf_ES = tf_enrichment_scores.get(tf);
-			double tf_DS = tf_depletion_scores.get(tf);
-			ForkJoinTask<List<Double[]>> rnd_counts = pool.submit(() -> randomized_complex_lists.parallelStream().map(l -> calculateEnrichmentScore(tf, sorted_scores, l)).collect(Collectors.toList()));
-			List<Double[]> rnd_data = null;
-			try {
-				rnd_data = rnd_counts.get();
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-			
-			long enrich_counts = Math.max(rnd_data.stream().filter(d -> d[0].doubleValue() > tf_ES).count(), 1);
-			long depl_counts = Math.max(rnd_data.stream().filter(d -> d[1].doubleValue() < tf_DS).count(), 1);
-			
-			double enrich_p = enrich_counts / (double) iterations;
-			double depl_p = depl_counts / (double) iterations;
-			tfdir_raw_pvalues.put("+" + tf, enrich_p);
-			tfdir_raw_pvalues.put("-" + tf, depl_p);
-		}
-		
-		// p-value correction and return
-		return Utilities.convertRawPValuesToBHFDR(tfdir_raw_pvalues, FDR);
-		
-	}
-	
-	
-	/**
 	 * Returns data of group1
 	 * @return
 	 */
@@ -470,4 +351,155 @@ public class DiffComplexDetector {
 		return significance_sorted_variants;
 	}
 	
+	public TFEnrichment calculateTFEnrichment(double FDR, int iterations) {
+		return new TFEnrichment(FDR, iterations);
+	}
+	
+	/**
+	 * Compute TF enrichment in the fashion of GSEA, 
+	 * see Subramanian et al. (2005)
+	 */
+	public final class TFEnrichment {
+		
+		private final double[] sorted_scores;
+		private final Map<String, Double> tf_in_complex_count;
+		private final double no_complexes;
+		
+		public TFEnrichment(double FDR, int iterations) {
+			
+			Map<HashSet<String>, Double> scores = new HashMap<>();
+			for (HashSet<String> variant:variants_raw_pvalues.keySet()) {
+				double med_diff = group2_medians.get(variant) - group1_medians.get(variant);
+				double score = -Math.log(variants_raw_pvalues.get(variant));
+				
+				if (med_diff < 0)
+					score *= -1;
+				scores.put(variant, score);
+			}
+			
+			// construct sorted matching arrays of variant/score
+			List<HashSet<String>> sorted_complex_list = new ArrayList<>(scores.keySet());
+			sorted_complex_list.sort((v1, v2) -> diffScoresCompareTo(v2, v1, scores));
+			sorted_scores = new double[sorted_complex_list.size()];
+			for (int i = 0; i< sorted_scores.length; i++)
+				sorted_scores[i] = scores.get(sorted_complex_list.get(i));
+			
+			// determine complex participation of each TF (analogous to N_H in org. paper)
+			tf_in_complex_count = new HashMap<>();
+			variants_raw_pvalues.keySet().stream().forEach(tfs -> tfs.stream().forEach(tf -> tf_in_complex_count.put(tf, tf_in_complex_count.getOrDefault(tf, 0.0))));
+			
+			// precompute #complexes (analogou to N in org. paper)
+			no_complexes = sorted_scores.length;
+			
+			// for each TF: calc. enrichment score
+			Map<String, Double> tf_enrichment_scores = new HashMap<>();
+			for (String tf:tf_in_complex_count.keySet())
+				tf_enrichment_scores.put(tf, calculateEnrichmentScore(tf, sorted_complex_list));
+
+			// get distr of NULL distributions by permutation
+			List<List<HashSet<String>>> randomized_complex_lists = new ArrayList<>(iterations);
+			for (int i = 0; i< iterations; i++) {
+				List<HashSet<String>> complex_list = new ArrayList<>(sorted_complex_list);
+				Collections.shuffle(complex_list);
+				randomized_complex_lists.add(complex_list);
+			}
+			
+			// check p-val for each
+			Map<String, Double> tfdir_raw_pvalues = new HashMap<>();
+			ForkJoinPool pool = new ForkJoinPool(no_threads);
+			for (String tf:tf_in_complex_count.keySet()) {
+				double tf_ES = tf_enrichment_scores.get(tf);
+				ForkJoinTask<List<Double>> rnd_counts = pool.submit(() -> randomized_complex_lists.parallelStream().map(l -> calculateEnrichmentScore(tf, l)).collect(Collectors.toList()));
+				List<Double> rnd_data = null;
+				try {
+					rnd_data = rnd_counts.get();
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
+				
+				String dir = "+";
+				if (tf_ES < 0)
+					dir = "-";
+				
+				long enrich_counts = 0;
+				if (dir.equals("+"))
+					enrich_counts = Math.max(rnd_data.stream().filter(d -> d.doubleValue() > tf_ES).count(), 1);
+				else
+					enrich_counts = Math.max(rnd_data.stream().filter(d -> d.doubleValue() < tf_ES).count(), 1);
+				
+				double enrich_p = enrich_counts / (double) iterations;
+				tfdir_raw_pvalues.put(dir+tf, enrich_p);
+			}
+			
+			// TODO: pvalue correction from paper?
+			// p-value correction and return
+			Map<String, Double> sign_TFs_dirs = Utilities.convertRawPValuesToBHFDR(tfdir_raw_pvalues, FDR);
+			List<String> sign_sorted_TFs_dirs = new ArrayList<>(sign_TFs_dirs.keySet());
+			sign_sorted_TFs_dirs.sort((tf1, tf2) -> sign_TFs_dirs.get(tf1).compareTo(sign_TFs_dirs.get(tf2))); // TODO: probably sort more concise
+			for (String tfdir:sign_sorted_TFs_dirs) {
+				String dir = tfdir.substring(0, 1);
+				String tf = tfdir.substring(1);
+				String name = DataQuery.getHGNCNameFromProtein(tf);
+				double pvalue = sign_TFs_dirs.get(tfdir);
+				System.out.println(dir + " " + name + " " + pvalue);
+			}
+		}
+		
+		/**
+		 * Custom compareTo function that first sorts by the log-scores and breaks ties using the differences of the median between groups
+		 * @param v1
+		 * @param v2
+		 * @param scores
+		 * @return
+		 */
+		private int diffScoresCompareTo(HashSet<String> v1, HashSet<String> v2, Map<HashSet<String>, Double> scores) {
+			int sign_compareTo = scores.get(v1).compareTo(scores.get(v2));
+			
+			if (sign_compareTo == 0) {
+				double v1_med_diff = group2_medians.get(v1) - group1_medians.get(v1);
+				double v2_med_diff = group2_medians.get(v2) - group1_medians.get(v2);
+				return Double.compare(v1_med_diff, v2_med_diff);
+			} else
+				return sign_compareTo;
+		}
+		
+		/**
+		 * Calculates enrichment score in the fashion of GSEA, 
+		 * handles enrichment and depletion independently, returns [max_ES, min_ES]
+		 * @param query_TF
+		 * @param scores
+		 * @param complex_list
+		 * @return
+		 */
+		private double calculateEnrichmentScore(String query_TF, List<HashSet<String>> complex_list) {
+			// determine sum of scores (N_R in org. paper)
+			int i = 0;
+			double N_R = 0.0;
+			for (HashSet<String> complex:complex_list) {
+				if (complex.contains(query_TF))
+					N_R += Math.abs(sorted_scores[i]);
+				++i;
+			}
+			
+			double N_H = tf_in_complex_count.get(query_TF);
+			double running_sum = 0.0;
+			double max_dev = 0.0;
+			i = 0;
+			for (HashSet<String> complex:complex_list) {
+				if (complex.contains(query_TF))
+					running_sum += (Math.abs(sorted_scores[i]) / N_R);
+				else
+					running_sum -= 1.0 / (no_complexes - N_H);
+				
+				if (Math.abs(running_sum) > Math.abs(max_dev))
+					max_dev = running_sum;
+
+				
+				++i;
+			}
+			
+			return max_dev;
+		}
+	}
 }
