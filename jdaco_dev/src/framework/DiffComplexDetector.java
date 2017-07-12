@@ -2,6 +2,7 @@ package framework;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,9 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TTest;
@@ -89,7 +92,7 @@ public class DiffComplexDetector {
 			this.group2_medians = group2_task.get();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(0);
+			System.exit(1);
 		}
 		
 		// determine differential abundance, apply multiple hypothesis correction and filter to significant seed variants
@@ -103,6 +106,48 @@ public class DiffComplexDetector {
 		this.significance_sorted_variants.sort( (v1, v2) -> diffCompareTo(v1, v2));
 		
 		pool.shutdownNow();
+	}
+	
+	/**
+	 * Constructor only for testing
+	 * @param raw_pvalues_medians_file
+	 * @param FDR
+	 * @param no_threads
+	 */
+	public DiffComplexDetector(String raw_pvalues_medians_file, double FDR, int no_threads) {
+		// empty parameters
+		this.group1 = null;
+		this.group2 = null;
+		this.FDR = FDR;
+		this.parametric = false;
+		this.incorporate_supersets = false;
+		this.no_threads = no_threads;
+		
+		// empty results
+		this.significance_variants_pvalues = null;
+		this.significance_sorted_variants = null;
+		this.seed_combination_variants = null;
+		this.seed_combination_variant_superset = null;
+		this.pool = null;
+		this.group1_abundances = null;
+		this.group2_abundances = null;
+		
+		// read data
+		this.variants_raw_pvalues = new HashMap<>();
+		this.group1_medians = new HashMap<>();
+		this.group2_medians = new HashMap<>();
+		
+		for (String line:Utilities.readFile(raw_pvalues_medians_file)) {
+			String[] spl = line.trim().split("\\s+");
+			HashSet<String> variant = new HashSet<>(Arrays.asList(spl[0].split(",")));
+			double raw_p = Double.parseDouble(spl[1]);
+			double group1_med = Double.parseDouble(spl[2]);
+			double group2_med = Double.parseDouble(spl[3]);
+			this.variants_raw_pvalues.put(variant, raw_p);
+			this.group1_medians.put(variant, group1_med);
+			this.group2_medians.put(variant, group2_med);
+		}
+		
 	}
 	
 	/**
@@ -141,7 +186,7 @@ public class DiffComplexDetector {
 			precomputed_sample_abundances = task.get();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(0);
+			System.exit(1);
 		}
 		
 		for (String sample:group.keySet()) {
@@ -230,40 +275,44 @@ public class DiffComplexDetector {
 	 * @param complex_list
 	 * @return
 	 */
-	private double calculateEnrichmentScore(String query_TF, double[] scores, HashSet<String>[] complex_list) {
+	private double calculateEnrichmentScore(String query_TF, double[] scores, List<HashSet<String>> complex_list) {
 		double running_sum = 0.0;
 		double max_sum = 0.0;
 		
-		for (int i = 0; i< scores.length; i++) {
-			if (complex_list[i].contains(query_TF))
+		int i = 0;
+		for (HashSet<String> complex:complex_list) {
+			if (complex.contains(query_TF))
 				running_sum += scores[i];
 			else
 				running_sum -= scores[i];
 			
 			if (Math.abs(running_sum) > Math.abs(max_sum))
 				max_sum = running_sum;
+			
+			++i;
 		}
 		
 		return max_sum;
 	}
 	
 	public Map<String, Double> determineGSEAStyle(double FDR, int iterations) {
+		
 		Map<HashSet<String>, Double> scores = new HashMap<>();
 		for (HashSet<String> variant:this.variants_raw_pvalues.keySet()) {
 			double med_diff = this.group2_medians.get(variant) - this.group1_medians.get(variant);
-			double score = Math.log(this.variants_raw_pvalues.get(variant));
+			double score = -Math.log(this.variants_raw_pvalues.get(variant));
+			
 			if (med_diff < 0)
 				score *= -1;
 			scores.put(variant, score);
 		}
 		
 		// construct sorted matching arrays of variant/score
-		@SuppressWarnings("unchecked")
-		HashSet<String>[] sorted_complex_list = (HashSet<String>[]) scores.keySet().toArray(new Object[scores.size()]);
-		Arrays.sort(sorted_complex_list, (v1, v2) -> diffScoresCompareTo(v2, v1, scores)); // sorts positive to negative
-		double[] sorted_scores = new double[sorted_complex_list.length];
+		List<HashSet<String>> sorted_complex_list = new ArrayList<>(scores.keySet());
+		sorted_complex_list.sort((v1, v2) -> diffScoresCompareTo(v2, v1, scores));
+		double[] sorted_scores = new double[sorted_complex_list.size()];
 		for (int i = 0; i< sorted_scores.length; i++)
-			sorted_scores[i] = scores.get(sorted_complex_list[i]);
+			sorted_scores[i] = scores.get(sorted_complex_list.get(i));
 		
 		// determine all TFs
 		Set<String> TFs = new HashSet<>();
@@ -274,17 +323,42 @@ public class DiffComplexDetector {
 		TFs.stream().forEach(tf -> tf_enrichment_scores.put(tf, calculateEnrichmentScore(tf, sorted_scores, sorted_complex_list)));
 		
 		// get distr of NULL distributions by permutation
-		List<HashSet<String>[]> randomized_complex_lists = new ArrayList<>(iterations);
-		Random rnd = new Random(System.currentTimeMillis());
+		List<List<HashSet<String>>> randomized_complex_lists = new ArrayList<>(iterations);
 		for (int i = 0; i< iterations; i++) {
-			HashSet<String>[] complex_list = sorted_complex_list.clone();
-			// TODO: start here again, shuffling simpler with Collection :-/
+			List<HashSet<String>> complex_list = new ArrayList<>(sorted_complex_list);
+			Collections.shuffle(complex_list);
+			randomized_complex_lists.add(complex_list);
 		}
+		
 		// check p-val for each
 		Map<String, Double> tf_raw_pvalues = new HashMap<>();
-		// p-value correction
+		ForkJoinPool pool = new ForkJoinPool(this.no_threads);
+		int n = 1;
+		for (String tf:TFs) {
+			double tf_ES = Math.abs(tf_enrichment_scores.get(tf));
+			ForkJoinTask<Long> rnd_counts = pool.submit(() -> randomized_complex_lists.parallelStream().map(l -> calculateEnrichmentScore(tf, sorted_scores, l)).filter(rnd_ES -> Math.abs(rnd_ES) > tf_ES).count());
+			long counts = 1;
+			try {
+				counts = Math.max(rnd_counts.get(), 1);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			double raw_p = counts / (double) iterations;
+			tf_raw_pvalues.put(tf, raw_p);
+			
+			if (tf.equals("Q01860") || tf.equals("Q9H9S0")) {
+				System.out.println(DataQuery.getHGNCNameFromProtein(tf) + " " + raw_p);
+			}
+			if (n%10 == 0) {
+				System.out.println(n + "/" + TFs.size());
+				System.out.flush();
+			}
+			n++;
+		}
 		
-		return null;
+		// p-value correction and return
+		return Utilities.convertRawPValuesToBHFDR(tf_raw_pvalues, FDR);
 		
 	}
 	

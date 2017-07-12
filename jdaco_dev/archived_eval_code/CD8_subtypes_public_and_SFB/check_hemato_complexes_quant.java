@@ -86,8 +86,8 @@ public class check_hemato_complexes_quant {
 			if (pt <0.05)
 				sig_t = "+";
 			
-			mwu_out.add(sig_m + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pm + "  -> " + CLP_TFV_abundance.get(TFvariant) + " vs " + CD4_TFV_abundance.get(TFvariant));
-			tt_out.add(sig_t + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + pt + "  -> " + CLP_TFV_abundance.get(TFvariant) + " vs " + CD4_TFV_abundance.get(TFvariant));
+			mwu_out.add(sig_m + " " + DataQuery.batchHGNCNamesFromProteins(TFvariant) + " : " + pm + "  -> " + CLP_TFV_abundance.get(TFvariant) + " vs " + CD4_TFV_abundance.get(TFvariant));
+			tt_out.add(sig_t + " " + DataQuery.batchHGNCNamesFromProteins(TFvariant) + " : " + pt + "  -> " + CLP_TFV_abundance.get(TFvariant) + " vs " + CD4_TFV_abundance.get(TFvariant));
 		}
 		
 		Utilities.writeEntries(mwu_out, "/Users/tho/Desktop/mwu_out.txt");
@@ -170,7 +170,7 @@ public class check_hemato_complexes_quant {
 							complexes.addAll(results.get(sample).getSeedToComplexMap().get(TFvariant));
 				}
 				
-				out.add(direction + " " + DataQuery.batchHGNCProteinsGenes(TFvariant) + " : " + goa.rateCollectionOfProteins(complexes) + ", "+ adj_test_results.get(TFvariant) + "  -> " + test_median + " vs " + other_median + " -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
+				out.add(direction + " " + DataQuery.batchHGNCNamesFromProteins(TFvariant) + " : " + goa.rateCollectionOfProteins(complexes) + ", "+ adj_test_results.get(TFvariant) + "  -> " + test_median + " vs " + other_median + " -> " + test_TFV_abundance.get(TFvariant) + " vs " + other_TFV_abundance.get(TFvariant));
 				effect.put(TFvariant.toString(), goa.rateCollectionOfProteins(complexes));
 			}		
 			

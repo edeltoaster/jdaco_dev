@@ -37,7 +37,7 @@ public class check_specific_interactions {
 			List<String> list = new ArrayList<>(2);
 			list.add(pair.getL());
 			list.add(pair.getR());
-			System.out.println("Checking " + DataQuery.batchHGNCProteinsGenes(list));
+			System.out.println("Checking " + DataQuery.batchHGNCNamesFromProteins(list));
 			
 			// check reference
 			if (!containsIA("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/human_mentha_8_jul.txt.gz", pair)) { // strictly speaking more than the old hematopoiesis data

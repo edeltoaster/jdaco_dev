@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import framework.BindingDataHandler;
@@ -46,6 +47,14 @@ public class check_complexes_quant_pluri {
 		Set<String> involved_tfs = new HashSet<>();
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.pvalue, definitions.parametric, definitions.check_supersets, definitions.no_threads);
 		
+		// for simplification of debugging
+		System.out.println("Build some debugging info");
+		List<String> raw_pvalues_output = new LinkedList<>();
+		for (Entry<HashSet<String>, Double> entry:dcd.getVariantsRawPValues().entrySet()) {
+			raw_pvalues_output.add(String.join(",", entry.getKey()) + " " + entry.getValue().toString() + " " + dcd.getGroup1MedianAbundances().get(entry.getKey()).toString() + " " + dcd.getGroup2MedianAbundances().get(entry.getKey()).toString());
+		}
+		Utilities.writeEntries(raw_pvalues_output, definitions.diff_compl_output_folder + "raw_pvalues_medians.txt.gz");
+		
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> pluri_effect = new HashMap<>();
 		List<HashSet<String>> plurisub_tf_variants = new LinkedList<>();
@@ -56,14 +65,14 @@ public class check_complexes_quant_pluri {
 		List<String> res_pos_pluri = new LinkedList<>();
 		List<String> res_neg_all = new LinkedList<>();
 		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
-			double median_tissues = Utilities.getMedian(dcd.getGroup1Abundances().get(variant));
-			double median_ESCs = Utilities.getMedian(dcd.getGroup2Abundances().get(variant));
+			double median_tissues = dcd.getGroup1MedianAbundances().get(variant);
+			double median_ESCs = dcd.getGroup2MedianAbundances().get(variant);
 			
 			String sign = "-";
 			if (median_ESCs > median_tissues)
 				sign = "+";
 			
-			String hgncs = DataQuery.batchHGNCProteinsGenes(variant).toString();
+			String hgncs = DataQuery.batchHGNCNamesFromProteins(variant).toString();
 			double pval = dcd.getSignificanceVariantsPValues().get(variant);
 			involved_tfs.addAll(variant);
 			

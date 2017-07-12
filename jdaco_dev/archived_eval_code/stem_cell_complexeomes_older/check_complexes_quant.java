@@ -48,7 +48,7 @@ public class check_complexes_quant {
 			if (median_ESCs > median_tissues)
 				sign = "+";
 			
-			String hgncs = DataQuery.batchHGNCProteinsGenes(variant).toString();
+			String hgncs = DataQuery.batchHGNCNamesFromProteins(variant).toString();
 			double pval = dcd.getSignificanceVariantsPValues().get(variant);
 			
 			// filter for increases abundance

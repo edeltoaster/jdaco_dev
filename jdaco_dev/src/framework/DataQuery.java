@@ -67,6 +67,7 @@ public class DataQuery {
 	private static Map<String, Map<String, String>> cache_ucsc = new HashMap<>();
 	private static Map<String, String> cache_ensembl_db = new HashMap<>();
 	private static List<String[]> cache_HGNC;
+	private static Map<String, String> cache_uniprot_HGNC;
 	private static Map<String, String> uniprot_sec_accs;
 	private static String uniprot_release;
 	
@@ -659,19 +660,43 @@ public class DataQuery {
 	 * @param input
 	 * @return
 	 */
-	public static List<String> batchHGNCProteinsGenes(Collection<String> input) {
-		List<String[]> HGNC_map = DataQuery.getHGNCProteinsGenes();
-		Map<String, String> up_hgnc = new HashMap<String, String>();
-		for (String[] s:HGNC_map) {
-			up_hgnc.put(s[1], s[0]);
+	public static List<String> batchHGNCNamesFromProteins(Collection<String> input) {
+		
+		// if not cached, get data
+		if (cache_uniprot_HGNC == null) {
+			List<String[]> HGNC_map = DataQuery.getHGNCProteinsGenes();
+			cache_uniprot_HGNC = new HashMap<String, String>();
+			for (String[] s:HGNC_map) {
+				cache_uniprot_HGNC.put(s[1], s[0]);
+			}
 		}
 		
 		List<String> output = new LinkedList<String>();
 		for (String in:input)
-			if (up_hgnc.containsKey(in))
-				output.add(up_hgnc.get(in));
+			if (cache_uniprot_HGNC.containsKey(in))
+				output.add(cache_uniprot_HGNC.get(in));
 		
 		return output;
+	}
+	
+	/**
+	 * Translates a human UniProt accessions to a HGNC gene symbol,
+	 * returns an empty string if not mappable.
+	 * @param Uniprot_acc
+	 * @return
+	 */
+	public static String getHGNCNameFromProtein(String Uniprot_acc) {
+		
+		// if not cached, get data
+		if (cache_uniprot_HGNC == null) {
+			List<String[]> HGNC_map = DataQuery.getHGNCProteinsGenes();
+			cache_uniprot_HGNC = new HashMap<String, String>();
+			for (String[] s:HGNC_map) {
+				cache_uniprot_HGNC.put(s[1], s[0]);
+			}
+		}
+		
+		return cache_uniprot_HGNC.getOrDefault(Uniprot_acc, "");
 	}
 	
 	/**
