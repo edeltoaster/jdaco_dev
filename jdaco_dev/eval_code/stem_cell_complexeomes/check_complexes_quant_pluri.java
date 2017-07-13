@@ -145,6 +145,19 @@ public class check_complexes_quant_pluri {
 		System.out.println("allo: " + plurisub_regnet.getSizesStr());
 		plurisub_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "plurisub_regnet_pruned.txt");
 		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_nodetable_pruned.txt", annotational_data);
+		// more very concise output
+		List<String> res_pos_pluri_network = new LinkedList<>();
+		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
+			if (!plurisub_regnet.getComplexToTargets().keySet().contains(variant))
+				continue;
+			String sign = dcd.getSignificantVariantsDirections().get(variant);
+			String hgncs = DataQuery.batchHGNCNamesFromProteins(variant).toString();
+			double pval = dcd.getSignificantVariantsQValues().get(variant);
+			involved_tfs.addAll(variant);
+			String out_string = sign + " " + hgncs + ", " + pval;
+			res_pos_pluri_network.add(out_string);
+		}
+		Utilities.writeEntries(res_pos_pluri_network, definitions.diff_compl_output_folder + "res_pos_pluri_network.txt");
 		
 		System.out.println("Building pluri regnet ...");
 		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, definitions.d_min, definitions.d_max, definitions.no_threads, 1);
