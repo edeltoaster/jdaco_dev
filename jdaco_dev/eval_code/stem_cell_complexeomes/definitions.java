@@ -30,6 +30,9 @@ public class definitions {
 	static String GOA_def_file = "mixed_data/stem_tags_retrieved.txt.gz";
 	static GOAnnotator goa = new GOAnnotator(GOA_def_file);
 	
+	static int SPEnrich_iterations = 10000;
+	static int SPEnrich_compl_part_threshold = 10;
+	
 	public static void printParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
 		System.out.println("networks folder : " + networks_folder);
@@ -50,6 +53,9 @@ public class definitions {
 		System.out.println("d_max : " + d_max);
 		
 		System.out.println("GOA definition file : " + GOA_def_file);
+		
+		System.out.println("SPE iterations : " + SPEnrich_iterations);
+		System.out.println("SPE compl. part. threshold : " + SPEnrich_compl_part_threshold);
 	}
 	
 	public static void main(String[] args) {

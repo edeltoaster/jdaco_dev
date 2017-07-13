@@ -189,11 +189,19 @@ public class check_complexes_quant_pluri {
 		 */
 		
 		System.out.println("Calculating TF enrichment ...");
-		SPEnrichment tf_enrich = dcd.calculateTFEnrichment(definitions.qvalue, 5000, 10);
-		List<String> tf_enrich_out = new LinkedList<>();
+		SPEnrichment tf_enrich = dcd.calculateTFEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
+		List<String> pos_tf_enrich_out = new LinkedList<>();
+		List<String> neg_tf_enrich_out = new LinkedList<>();
 		for (String tf:tf_enrich.getSignificanceSortedSeedProteins()) {
-			tf_enrich_out.add(tf_enrich.getSignificantSeedProteinDirections().get(tf) + " " + DataQuery.getHGNCNameFromProtein(tf) + " " + tf_enrich.getSignificantSeedProteinQvalues().get(tf));
+			String dir = tf_enrich.getSignificantSeedProteinDirections().get(tf);
+			String out = tf + " " + DataQuery.getHGNCNameFromProtein(tf) + " " + tf_enrich.getSignificantSeedProteinQvalues().get(tf);
+			
+			if (dir.equals("+"))
+				pos_tf_enrich_out.add(out);
+			else
+				neg_tf_enrich_out.add(out);
 		}
-		Utilities.writeEntries(tf_enrich_out, definitions.diff_compl_output_folder + "tf_enrich.txt");
+		Utilities.writeEntries(pos_tf_enrich_out, definitions.diff_compl_output_folder + "tf_enrich_pos.txt");
+		Utilities.writeEntries(neg_tf_enrich_out, definitions.diff_compl_output_folder + "tf_enrich_neg.txt");
 	}
 }
