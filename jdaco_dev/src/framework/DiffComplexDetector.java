@@ -351,8 +351,8 @@ public class DiffComplexDetector {
 		return significance_sorted_variants;
 	}
 	
-	public TFEnrichment calculateTFEnrichment(double FDR, int iterations) {
-		return new TFEnrichment(FDR, iterations);
+	public TFEnrichment calculateTFEnrichment(double FDR, int iterations, int complex_participation_cutoff) {
+		return new TFEnrichment(FDR, iterations, complex_participation_cutoff);
 	}
 	
 	/**
@@ -365,7 +365,7 @@ public class DiffComplexDetector {
 		private final Map<String, Double> tf_in_complex_count;
 		private final double no_complexes;
 		
-		public TFEnrichment(double qvalue_threshold, int iterations) {
+		public TFEnrichment(double qvalue_threshold, int iterations, int complex_participation_cutoff) {
 			// TODO: introduce size threshold
 			Map<HashSet<String>, Double> scores = new HashMap<>();
 			for (HashSet<String> variant:variants_raw_pvalues.keySet()) {
@@ -386,7 +386,9 @@ public class DiffComplexDetector {
 			
 			// determine complex participation of each TF (analogous to N_H in org. paper)
 			tf_in_complex_count = new HashMap<>();
-			variants_raw_pvalues.keySet().stream().forEach(tfs -> tfs.stream().forEach(tf -> tf_in_complex_count.put(tf, tf_in_complex_count.getOrDefault(tf, 0.0))));
+			variants_raw_pvalues.keySet().stream().forEach(tfs -> tfs.stream().forEach(tf -> tf_in_complex_count.put(tf, tf_in_complex_count.getOrDefault(tf, 0.0) + 1)));
+			// remove TFs that are not in complexes very often
+			tf_in_complex_count.keySet().removeIf(tf -> tf_in_complex_count.get(tf).doubleValue() < complex_participation_cutoff);
 			
 			// precompute #complexes (analogou to N in org. paper)
 			no_complexes = sorted_scores.length;
