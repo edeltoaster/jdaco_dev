@@ -7,6 +7,6 @@ public class fast_tests {
 	
 	public static void main(String[] args) {
 		DiffComplexDetector dcd = new DiffComplexDetector("raw_pvalues_medians.txt.gz", 0.05, 64);
-		TFEnrichment tf_enrich = dcd.calculateTFEnrichment(0.05, 5000);
+		TFEnrichment tf_enrich = dcd.calculateTFEnrichment(0.05, 2000);
 	}
 }

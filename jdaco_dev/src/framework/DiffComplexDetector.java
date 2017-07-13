@@ -365,8 +365,8 @@ public class DiffComplexDetector {
 		private final Map<String, Double> tf_in_complex_count;
 		private final double no_complexes;
 		
-		public TFEnrichment(double FDR, int iterations) {
-			
+		public TFEnrichment(double qvalue_threshold, int iterations) {
+			// TODO: introduce size threshold
 			Map<HashSet<String>, Double> scores = new HashMap<>();
 			for (HashSet<String> variant:variants_raw_pvalues.keySet()) {
 				double med_diff = group2_medians.get(variant) - group1_medians.get(variant);
@@ -405,8 +405,12 @@ public class DiffComplexDetector {
 			}
 			
 			// check p-val for each
-			Map<String, Double> tfdir_raw_pvalues = new HashMap<>();
+			Map<String, Double> tfdir_nominal_pvalues = new HashMap<>();
 			ForkJoinPool pool = new ForkJoinPool(no_threads);
+			Map<String, Double> normalized_pos_tf_ES = new HashMap<>();
+			Map<String, Double> normalized_neg_tf_ES = new HashMap<>();
+			List<Double> normalized_pos_rnd_data = new LinkedList<>();
+			List<Double> normalized_neg_rnd_data = new LinkedList<>();
 			for (String tf:tf_in_complex_count.keySet()) {
 				double tf_ES = tf_enrichment_scores.get(tf);
 				ForkJoinTask<List<Double>> rnd_counts = pool.submit(() -> randomized_complex_lists.parallelStream().map(l -> calculateEnrichmentScore(tf, l)).collect(Collectors.toList()));
@@ -422,27 +426,63 @@ public class DiffComplexDetector {
 				if (tf_ES < 0)
 					dir = "-";
 				
+				// calculate nominal pvalue
 				long enrich_counts = 0;
 				if (dir.equals("+"))
-					enrich_counts = Math.max(rnd_data.stream().filter(d -> d.doubleValue() > tf_ES).count(), 1);
+					enrich_counts = Math.max(rnd_data.stream().filter(d -> d.doubleValue() >= tf_ES).count(), 1);
 				else
-					enrich_counts = Math.max(rnd_data.stream().filter(d -> d.doubleValue() < tf_ES).count(), 1);
+					enrich_counts = Math.max(rnd_data.stream().filter(d -> d.doubleValue() <= tf_ES).count(), 1);
 				
 				double enrich_p = enrich_counts / (double) iterations;
-				tfdir_raw_pvalues.put(dir+tf, enrich_p);
+				tfdir_nominal_pvalues.put(dir+tf, enrich_p);
+				
+				// towards multiple hypothesis correction
+				double pos_mean = Utilities.getMean(rnd_data.stream().filter(d -> d.doubleValue() >= 0).collect(Collectors.toList()));
+				double neg_mean = Utilities.getMean(rnd_data.stream().filter(d -> d.doubleValue() <= 0).map(d -> Math.abs(d)).collect(Collectors.toList()));
+				
+				for (double d:rnd_data) {
+					if (d > 0)
+						normalized_pos_rnd_data.add(d / pos_mean);
+					else if (d < 0)
+						normalized_neg_rnd_data.add(d / neg_mean); // neg_mean is absolute -> will still be negative
+					else {// 0 in both, just for correctness
+						normalized_pos_rnd_data.add(d);
+						normalized_neg_rnd_data.add(d);
+					}
+				}
+				
+				if (tf_ES >= 0)
+					normalized_pos_tf_ES.put(tf, tf_ES / pos_mean);
+				else
+					normalized_neg_tf_ES.put(tf, tf_ES / neg_mean);
+				
 			}
 			
-			// TODO: pvalue correction from paper?
-			// p-value correction and return
-			Map<String, Double> sign_TFs_dirs = Utilities.convertRawPValuesToBHFDR(tfdir_raw_pvalues, FDR);
-			List<String> sign_sorted_TFs_dirs = new ArrayList<>(sign_TFs_dirs.keySet());
-			sign_sorted_TFs_dirs.sort((tf1, tf2) -> sign_TFs_dirs.get(tf1).compareTo(sign_TFs_dirs.get(tf2))); // TODO: probably sort more concise
-			for (String tfdir:sign_sorted_TFs_dirs) {
+			// corrected FDR qvalues
+			Map<String, Double> tfdir_qvalue = new HashMap<>();
+			for (String tf:normalized_pos_tf_ES.keySet()) {
+				double norm_ES = normalized_pos_tf_ES.get(tf);
+				// calculate qvalue
+				double FDR_q = Math.max(normalized_pos_rnd_data.stream().filter(d -> d.doubleValue() >= norm_ES).count(), 1) / (double) normalized_pos_rnd_data.size();
+				FDR_q /= normalized_pos_tf_ES.keySet().stream().filter(tf2 -> normalized_pos_tf_ES.get(tf2).doubleValue() >= norm_ES).count() / (double) normalized_pos_tf_ES.keySet().size(); // will be >1 since norm_ES is in there
+				tfdir_qvalue.put("+"+tf, FDR_q);
+			}
+			for (String tf:normalized_neg_tf_ES.keySet()) {
+				double norm_ES = normalized_neg_tf_ES.get(tf);
+				// calculate qvalue
+				double FDR_q = Math.max(normalized_neg_rnd_data.stream().filter(d -> d.doubleValue() <= norm_ES).count(), 1) / (double) normalized_neg_rnd_data.size();
+				FDR_q /= normalized_neg_tf_ES.keySet().stream().filter(tf2 -> normalized_neg_tf_ES.get(tf2).doubleValue() <= norm_ES).count() / (double) normalized_neg_tf_ES.keySet().size(); // will be >1 since norm_ES is in there
+				tfdir_qvalue.put("-"+tf, FDR_q);
+			}
+			
+			// output?
+			for (String tfdir:tfdir_qvalue.keySet()) {
+				double qvalue = tfdir_qvalue.get(tfdir);
+				if (qvalue >= qvalue_threshold)
+					continue;
 				String dir = tfdir.substring(0, 1);
 				String tf = tfdir.substring(1);
-				String name = DataQuery.getHGNCNameFromProtein(tf);
-				double pvalue = sign_TFs_dirs.get(tfdir);
-				System.out.println(dir + " " + name + " " + pvalue);
+				System.out.println(dir + " " + DataQuery.getHGNCNameFromProtein(tf) + " " + tfdir_nominal_pvalues.get(tfdir) + " " + tfdir_qvalue.get(tfdir));
 			}
 		}
 		
