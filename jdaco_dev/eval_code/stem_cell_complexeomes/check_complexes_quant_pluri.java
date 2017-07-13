@@ -139,10 +139,10 @@ public class check_complexes_quant_pluri {
 		annotational_data.put("Regulatory_effect", plurisub_effect);
 		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_nodetable.txt", annotational_data);
 		// pruning
-		plurisub_regnet.removeProteinSet(allosome_proteins);
-		System.out.println("allo: " + plurisub_regnet.getSizesStr());
 		plurisub_regnet.pruneToLargestSCCs();
 		System.out.println("SCC: " + plurisub_regnet.getSizesStr());
+		plurisub_regnet.removeProteinSet(allosome_proteins);
+		System.out.println("allo: " + plurisub_regnet.getSizesStr());
 		plurisub_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "plurisub_regnet_pruned.txt");
 		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_nodetable_pruned.txt", annotational_data);
 		
@@ -154,10 +154,10 @@ public class check_complexes_quant_pluri {
 		annotational_data.put("Regulatory_effect", pluri_effect);
 		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_nodetable.txt", annotational_data);
 		// pruning
-		pluri_regnet.removeProteinSet(allosome_proteins);
-		System.out.println("allo: " + pluri_regnet.getSizesStr());
 		pluri_regnet.pruneToLargestSCCs();
 		System.out.println("SCC: " + pluri_regnet.getSizesStr());
+		pluri_regnet.removeProteinSet(allosome_proteins);
+		System.out.println("allo: " + pluri_regnet.getSizesStr());
 		pluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "pluri_regnet_pruned.txt");
 		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_nodetable_pruned.txt", annotational_data);
 		
@@ -173,10 +173,10 @@ public class check_complexes_quant_pluri {
 		annotational_data.put("Regulatory_effect", nonpluri_effect);
 		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_nodetable.txt", annotational_data);
 		// pruning
-		nonpluri_regnet.removeProteinSet(allosome_proteins);
-		System.out.println("allo: " + nonpluri_regnet.getSizesStr());
 		nonpluri_regnet.pruneToLargestSCCs();
 		System.out.println("SCC: " + nonpluri_regnet.getSizesStr());
+		nonpluri_regnet.removeProteinSet(allosome_proteins);
+		System.out.println("allo: " + nonpluri_regnet.getSizesStr());
 		nonpluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "nonpluri_regnet_pruned.txt");
 		nonpluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "nonpluri_nodetable_pruned.txt", annotational_data);
 		
