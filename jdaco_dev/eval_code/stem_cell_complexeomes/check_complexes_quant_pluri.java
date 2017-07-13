@@ -32,8 +32,6 @@ public class check_complexes_quant_pluri {
 			String sample = f.getName().split("\\.")[0];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, definitions.networks_folder + sample + "_major-transcripts.txt.gz");
 			
-			//qdr.removeOpposinglyAnnotatedComplexes(definitions.goa);
-			
 			if (!sample.contains("H1-hESC") && !sample.contains("H7-hESC") && !sample.contains("induced-pluripotent-stem-cell"))
 				group1.put(sample, qdr);
 			else {
@@ -43,17 +41,11 @@ public class check_complexes_quant_pluri {
 		System.out.println("non-stem : " + group1.size());
 		System.out.println("stem samples : " + group2.size());
 		
+		Set<String> allosome_proteins = DataQuery.getAllosomeProteins(DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
+		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.check_supersets, definitions.no_threads);
-		
-		// for simplification of debugging
-//		System.out.println("Build some debugging info");
-//		List<String> raw_pvalues_output = new LinkedList<>();
-//		for (Entry<HashSet<String>, Double> entry:dcd.getVariantsRawPValues().entrySet()) {
-//			raw_pvalues_output.add(String.join(",", entry.getKey()) + " " + entry.getValue().toString() + " " + dcd.getGroup1MedianAbundances().get(entry.getKey()).toString() + " " + dcd.getGroup2MedianAbundances().get(entry.getKey()).toString());
-//		}
-//		Utilities.writeEntries(raw_pvalues_output, definitions.diff_compl_output_folder + "raw_pvalues_medians.txt.gz");
 		
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> pluri_effect = new HashMap<>();
@@ -63,21 +55,21 @@ public class check_complexes_quant_pluri {
 		Map<String, String> nonpluri_effect = new HashMap<>();
 		List<String> res_pos_all = new LinkedList<>();
 		List<String> res_pos_pluri = new LinkedList<>();
+		List<String> res_pos_all_noallo = new LinkedList<>();
+		List<String> res_pos_pluri_noallo = new LinkedList<>();
 		List<String> res_neg_all = new LinkedList<>();
 		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
-//			double median_tissues = dcd.getGroup1MedianAbundances().get(variant);
-//			double median_ESCs = dcd.getGroup2MedianAbundances().get(variant);
 			
 			String sign = dcd.getSignificantVariantsDirections().get(variant);
 			
 			String hgncs = DataQuery.batchHGNCNamesFromProteins(variant).toString();
 			double pval = dcd.getSignificantVariantsQValues().get(variant);
 			involved_tfs.addAll(variant);
+			String out_string = sign + " " + hgncs + ", " + pval;
 			
 			// distinguish between increased/positive abundance and diminishing/negative abundance
 			if (sign.equals("-")) {
-				res_neg_all.add(sign + " " + hgncs + ", " + pval);
-				
+				res_neg_all.add(out_string);
 				nonpluri_tf_variants.add(variant);
 				
 				// determine actual complexes
@@ -88,9 +80,11 @@ public class check_complexes_quant_pluri {
 				nonpluri_effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
 			} else {
 				// everything in pluri-network
-				res_pos_all.add(sign + " " + hgncs + ", " + pval);
-				
+				res_pos_all.add(out_string);
 				pluri_tf_variants.add(variant);
+				
+				if (variant.stream().noneMatch(p -> allosome_proteins.contains(p)))
+					res_pos_all_noallo.add(out_string);
 				
 				// determine actual complexes
 				List<Set<String>> complexes = new LinkedList<>();
@@ -106,9 +100,11 @@ public class check_complexes_quant_pluri {
 				if (overlap.size() == 0)
 					continue;
 				
-				res_pos_pluri.add(sign + " " + hgncs + ", " + pval);
-				
+				res_pos_pluri.add(out_string);
 				plurisub_tf_variants.add(variant);
+				
+				if (variant.stream().noneMatch(p -> allosome_proteins.contains(p)))
+					res_pos_pluri_noallo.add(out_string);
 				
 				// determine actual complexes
 				complexes = new LinkedList<>();
@@ -125,11 +121,11 @@ public class check_complexes_quant_pluri {
 		Utilities.writeEntries(res_pos_all, definitions.diff_compl_output_folder + "res_pos_all.txt");
 		Utilities.writeEntries(res_neg_all, definitions.diff_compl_output_folder + "res_neg_all.txt");
 		Utilities.writeEntries(res_pos_pluri, definitions.diff_compl_output_folder + "res_pos_pluri.txt");
-		
+		Utilities.writeEntries(res_pos_all_noallo, definitions.diff_compl_output_folder + "res_pos_all_noallo.txt");
+		Utilities.writeEntries(res_pos_pluri_noallo, definitions.diff_compl_output_folder + "res_pos_pluri_noallo.txt");
 		
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
 		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, involved_tfs, 0.0001, involved_tfs);
-		Set<String> allosome_proteins = DataQuery.getAllosomeProteins(DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		
 		/**
 		 *  writing pluri network data
