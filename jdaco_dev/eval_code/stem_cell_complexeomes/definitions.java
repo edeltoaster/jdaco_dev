@@ -12,7 +12,7 @@ public class definitions {
 	static String networks_folder = "ENCODE_networks/";
 	static String diff_compl_output_folder = "diff_results_99_6_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
 	
-	static double pvalue = 0.05;
+	static double qvalue = 0.05;
 	static boolean parametric = false; // for 0s, Welch test not really helpful
 	static boolean check_supersets = false;
 	
@@ -35,7 +35,7 @@ public class definitions {
 		System.out.println("networks folder : " + networks_folder);
 		System.out.println("results output folder : " + diff_compl_output_folder);
 		
-		System.out.println("p-value : " + pvalue);
+		System.out.println("q-value : " + qvalue);
 		System.out.println("parametric : " + parametric);
 		System.out.println("checking supersets : " + check_supersets);
 		

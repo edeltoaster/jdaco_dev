@@ -7,12 +7,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import framework.BindingDataHandler;
 import framework.DataQuery;
 import framework.DiffComplexDetector;
+import framework.DiffComplexDetector.SPEnrichment;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
@@ -45,15 +45,15 @@ public class check_complexes_quant_pluri {
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.pvalue, definitions.parametric, definitions.check_supersets, definitions.no_threads);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.check_supersets, definitions.no_threads);
 		
 		// for simplification of debugging
-		System.out.println("Build some debugging info");
-		List<String> raw_pvalues_output = new LinkedList<>();
-		for (Entry<HashSet<String>, Double> entry:dcd.getVariantsRawPValues().entrySet()) {
-			raw_pvalues_output.add(String.join(",", entry.getKey()) + " " + entry.getValue().toString() + " " + dcd.getGroup1MedianAbundances().get(entry.getKey()).toString() + " " + dcd.getGroup2MedianAbundances().get(entry.getKey()).toString());
-		}
-		Utilities.writeEntries(raw_pvalues_output, definitions.diff_compl_output_folder + "raw_pvalues_medians.txt.gz");
+//		System.out.println("Build some debugging info");
+//		List<String> raw_pvalues_output = new LinkedList<>();
+//		for (Entry<HashSet<String>, Double> entry:dcd.getVariantsRawPValues().entrySet()) {
+//			raw_pvalues_output.add(String.join(",", entry.getKey()) + " " + entry.getValue().toString() + " " + dcd.getGroup1MedianAbundances().get(entry.getKey()).toString() + " " + dcd.getGroup2MedianAbundances().get(entry.getKey()).toString());
+//		}
+//		Utilities.writeEntries(raw_pvalues_output, definitions.diff_compl_output_folder + "raw_pvalues_medians.txt.gz");
 		
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> pluri_effect = new HashMap<>();
@@ -65,15 +65,13 @@ public class check_complexes_quant_pluri {
 		List<String> res_pos_pluri = new LinkedList<>();
 		List<String> res_neg_all = new LinkedList<>();
 		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
-			double median_tissues = dcd.getGroup1MedianAbundances().get(variant);
-			double median_ESCs = dcd.getGroup2MedianAbundances().get(variant);
+//			double median_tissues = dcd.getGroup1MedianAbundances().get(variant);
+//			double median_ESCs = dcd.getGroup2MedianAbundances().get(variant);
 			
-			String sign = "-";
-			if (median_ESCs > median_tissues)
-				sign = "+";
+			String sign = dcd.getSignificantVariantsDirections().get(variant);
 			
 			String hgncs = DataQuery.batchHGNCNamesFromProteins(variant).toString();
-			double pval = dcd.getSignificanceVariantsPValues().get(variant);
+			double pval = dcd.getSignificantVariantsQValues().get(variant);
 			involved_tfs.addAll(variant);
 			
 			// distinguish between increased/positive abundance and diminishing/negative abundance
@@ -185,5 +183,17 @@ public class check_complexes_quant_pluri {
 		System.out.println("SCC: " + nonpluri_regnet.getSizesStr());
 		nonpluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "nonpluri_regnet_pruned.txt");
 		nonpluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "nonpluri_nodetable_pruned.txt", annotational_data);
+		
+		/**
+		 * Playing around with seed protein enrichment
+		 */
+		
+		System.out.println("Calculating TF enrichment ...");
+		SPEnrichment tf_enrich = dcd.calculateTFEnrichment(definitions.qvalue, 5000, 10);
+		List<String> tf_enrich_out = new LinkedList<>();
+		for (String tf:tf_enrich.getSignificanceSortedSeedProteins()) {
+			tf_enrich_out.add(tf_enrich.getSignificantSeedProteinDirections().get(tf) + " " + DataQuery.getHGNCNameFromProtein(tf) + " " + tf_enrich.getSignificantSeedProteinQvalues().get(tf));
+		}
+		Utilities.writeEntries(tf_enrich_out, definitions.diff_compl_output_folder + "tf_enrich.txt");
 	}
 }

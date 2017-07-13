@@ -40,8 +40,9 @@ public class DiffComplexDetector {
 	
 	// differential analysis results
 	private Map<HashSet<String>, Double> variants_raw_pvalues;
-	private final Map<HashSet<String>, Double> significance_variants_pvalues;
+	private final Map<HashSet<String>, Double> significant_variants_qvalues;
 	private final List<HashSet<String>> significance_sorted_variants;
+	private final Map<HashSet<String>, String> significance_variants_directions;
 	
 	// helper objects
 	private final ForkJoinPool pool;
@@ -94,13 +95,15 @@ public class DiffComplexDetector {
 		
 		// determine differential abundance, apply multiple hypothesis correction and filter to significant seed variants
 		if (this.parametric) // parametric Welch test
-			this.significance_variants_pvalues = this.determinePValuesParametric();
+			this.significant_variants_qvalues = this.determinePValuesParametric();
 		else // non-parametric MWU test
-			this.significance_variants_pvalues = this.determinePValuesNonParametric();
+			this.significant_variants_qvalues = this.determinePValuesNonParametric();
 		
 		// sort from most to least significant
-		this.significance_sorted_variants = new ArrayList<>(this.significance_variants_pvalues.keySet());
+		this.significance_sorted_variants = new ArrayList<>(this.significant_variants_qvalues.keySet());
 		this.significance_sorted_variants.sort( (v1, v2) -> diffCompareTo(v1, v2));
+		
+		this.significance_variants_directions = this.determineDirections();
 		
 		pool.shutdownNow();
 	}
@@ -121,8 +124,7 @@ public class DiffComplexDetector {
 		this.no_threads = no_threads;
 		
 		// empty results
-		this.significance_variants_pvalues = null;
-		this.significance_sorted_variants = null;
+		this.significant_variants_qvalues = null;
 		this.seed_combination_variants = null;
 		this.seed_combination_variant_superset = null;
 		this.pool = null;
@@ -145,16 +147,18 @@ public class DiffComplexDetector {
 			this.group2_medians.put(variant, group2_med);
 		}
 		
+		this.significance_sorted_variants = new ArrayList<>(this.variants_raw_pvalues.keySet()); // only for testing
+		this.significance_variants_directions = this.determineDirections();
 	}
 	
 	/**
-	 * Custom compareTo function that first sorts by the adjusted p-value and breaks ties using the absolute differences of the median between groups
+	 * Custom compareTo function that first sorts by the adjusted p-value/q-value and breaks ties using the absolute differences of the median between groups
 	 * @param v1
 	 * @param v2
 	 * @return
 	 */
 	private int diffCompareTo(HashSet<String> v1, HashSet<String> v2) {
-		int sign_compareTo = this.significance_variants_pvalues.get(v1).compareTo(this.significance_variants_pvalues.get(v2));
+		int sign_compareTo = this.significant_variants_qvalues.get(v1).compareTo(this.significant_variants_qvalues.get(v2));
 		
 		if (sign_compareTo == 0) {
 			double v1_med_diff = Math.abs(this.group1_medians.get(v1) - this.group2_medians.get(v1));
@@ -239,9 +243,30 @@ public class DiffComplexDetector {
 		return Utilities.convertRawPValuesToBHFDR(test_results, this.FDR);
 	}
 	
+	/**
+	 * Precomputes directions of change
+	 * @return
+	 */
+	private Map<HashSet<String>, String> determineDirections() {
+		
+		Map<HashSet<String>, String> significance_variants_directions = new HashMap<>();
+		for (HashSet<String> variant:this.significance_sorted_variants) {
+			double median_g1 = this.group1_medians.get(variant);
+			double median_g2 = this.group2_medians.get(variant);
+			
+			String sign = "-";
+			if (median_g2 > median_g1)
+				sign = "+";
+			
+			significance_variants_directions.put(variant, sign);
+		}
+		
+		return significance_variants_directions;
+	}
+	
 	public void printResults() {
 		for (HashSet<String> variant: this.significance_sorted_variants) {
-			System.out.println(variant + " " + this.significance_variants_pvalues.get(variant));
+			System.out.println(variant + " " + this.significant_variants_qvalues.get(variant));
 		}
 	}
 
@@ -328,11 +353,11 @@ public class DiffComplexDetector {
 	}
 	
 	/**
-	 * Returns map of significant seed combination variants and associated adjusted p-values
+	 * Returns map of significant seed combination variants and associated adjusted p-values / q-values
 	 * @return
 	 */
-	public Map<HashSet<String>, Double> getSignificanceVariantsPValues() {
-		return significance_variants_pvalues;
+	public Map<HashSet<String>, Double> getSignificantVariantsQValues() {
+		return significant_variants_qvalues;
 	}
 
 	/**
@@ -351,22 +376,42 @@ public class DiffComplexDetector {
 		return significance_sorted_variants;
 	}
 	
-	public TFEnrichment calculateTFEnrichment(double FDR, int iterations, int complex_participation_cutoff) {
-		return new TFEnrichment(FDR, iterations, complex_participation_cutoff);
+	/**
+	 * Returns a map of sign. seed variants to their direction of change as + / -
+	 * @return
+	 */
+	public Map<HashSet<String>, String> getSignificantVariantsDirections() {
+		return this.significance_variants_directions;
 	}
 	
 	/**
-	 * Compute TF enrichment in the fashion of GSEA, 
+	 * Compute seed protein enrichment in the fashion of GSEA, 
+	 * see Subramanian et al. (2005)
+	 * @param FDR
+	 * @param iterations
+	 * @param complex_participation_cutoff
+	 * @return
+	 */
+	public SPEnrichment calculateTFEnrichment(double FDR, int iterations, int complex_participation_cutoff) {
+		return new SPEnrichment(FDR, iterations, complex_participation_cutoff);
+	}
+	
+	/**
+	 * Compute seed protein enrichment in the fashion of GSEA, 
 	 * see Subramanian et al. (2005)
 	 */
-	public final class TFEnrichment {
+	public final class SPEnrichment {
 		
 		private final double[] sorted_scores;
-		private final Map<String, Double> tf_in_complex_count;
+		private final Map<String, Double> sp_in_complex_count;
 		private final double no_complexes;
+		private final List<String> sign_sorted_sps;
+		private final Map<String, Double> sign_sp_qvalue;
+		private final Map<String, String> sign_sp_direction;
 		
-		public TFEnrichment(double qvalue_threshold, int iterations, int complex_participation_cutoff) {
-			// TODO: introduce size threshold
+		public SPEnrichment(double FDR, int iterations, int complex_participation_cutoff) {
+			
+			// -log p-values -> scores
 			Map<HashSet<String>, Double> scores = new HashMap<>();
 			for (HashSet<String> variant:variants_raw_pvalues.keySet()) {
 				double med_diff = group2_medians.get(variant) - group1_medians.get(variant);
@@ -384,19 +429,19 @@ public class DiffComplexDetector {
 			for (int i = 0; i< sorted_scores.length; i++)
 				sorted_scores[i] = scores.get(sorted_complex_list.get(i));
 			
-			// determine complex participation of each TF (analogous to N_H in org. paper)
-			tf_in_complex_count = new HashMap<>();
-			variants_raw_pvalues.keySet().stream().forEach(tfs -> tfs.stream().forEach(tf -> tf_in_complex_count.put(tf, tf_in_complex_count.getOrDefault(tf, 0.0) + 1)));
-			// remove TFs that are not in complexes very often
-			tf_in_complex_count.keySet().removeIf(tf -> tf_in_complex_count.get(tf).doubleValue() < complex_participation_cutoff);
+			// determine complex participation of each seed protein (analogous to N_H in org. paper)
+			sp_in_complex_count = new HashMap<>();
+			variants_raw_pvalues.keySet().stream().forEach(sps -> sps.stream().forEach(sp -> sp_in_complex_count.put(sp, sp_in_complex_count.getOrDefault(sp, 0.0) + 1)));
+			// remove SPs that are not in complexes very often
+			sp_in_complex_count.keySet().removeIf(sp -> sp_in_complex_count.get(sp).doubleValue() < complex_participation_cutoff);
 			
-			// precompute #complexes (analogou to N in org. paper)
+			// precompute #complexes (analogous to N in org. paper)
 			no_complexes = sorted_scores.length;
 			
 			// for each TF: calc. enrichment score
-			Map<String, Double> tf_enrichment_scores = new HashMap<>();
-			for (String tf:tf_in_complex_count.keySet())
-				tf_enrichment_scores.put(tf, calculateEnrichmentScore(tf, sorted_complex_list));
+			Map<String, Double> sp_enrichment_scores = new HashMap<>();
+			for (String sp:sp_in_complex_count.keySet())
+				sp_enrichment_scores.put(sp, calculateEnrichmentScore(sp, sorted_complex_list));
 
 			// get distr of NULL distributions by permutation
 			List<List<HashSet<String>>> randomized_complex_lists = new ArrayList<>(iterations);
@@ -406,16 +451,15 @@ public class DiffComplexDetector {
 				randomized_complex_lists.add(complex_list);
 			}
 			
-			// check p-val for each
-			Map<String, Double> tfdir_nominal_pvalues = new HashMap<>();
+			// compute ES and distributions for each seed protein of interest
 			ForkJoinPool pool = new ForkJoinPool(no_threads);
-			Map<String, Double> normalized_pos_tf_ES = new HashMap<>();
-			Map<String, Double> normalized_neg_tf_ES = new HashMap<>();
+			Map<String, Double> normalized_pos_sp_ES = new HashMap<>();
+			Map<String, Double> normalized_neg_sp_ES = new HashMap<>();
 			List<Double> normalized_pos_rnd_data = new LinkedList<>();
 			List<Double> normalized_neg_rnd_data = new LinkedList<>();
-			for (String tf:tf_in_complex_count.keySet()) {
-				double tf_ES = tf_enrichment_scores.get(tf);
-				ForkJoinTask<List<Double>> rnd_counts = pool.submit(() -> randomized_complex_lists.parallelStream().map(l -> calculateEnrichmentScore(tf, l)).collect(Collectors.toList()));
+			for (String sp:sp_in_complex_count.keySet()) {
+				double sp_ES = sp_enrichment_scores.get(sp);
+				ForkJoinTask<List<Double>> rnd_counts = pool.submit(() -> randomized_complex_lists.parallelStream().map(l -> calculateEnrichmentScore(sp, l)).collect(Collectors.toList()));
 				List<Double> rnd_data = null;
 				try {
 					rnd_data = rnd_counts.get();
@@ -423,20 +467,6 @@ public class DiffComplexDetector {
 					e.printStackTrace();
 					System.exit(1);
 				}
-				
-				String dir = "+";
-				if (tf_ES < 0)
-					dir = "-";
-				
-				// calculate nominal pvalue
-				long enrich_counts = 0;
-				if (dir.equals("+"))
-					enrich_counts = Math.max(rnd_data.stream().filter(d -> d.doubleValue() >= tf_ES).count(), 1);
-				else
-					enrich_counts = Math.max(rnd_data.stream().filter(d -> d.doubleValue() <= tf_ES).count(), 1);
-				
-				double enrich_p = enrich_counts / (double) iterations;
-				tfdir_nominal_pvalues.put(dir+tf, enrich_p);
 				
 				// towards multiple hypothesis correction
 				double pos_mean = Utilities.getMean(rnd_data.stream().filter(d -> d.doubleValue() >= 0).collect(Collectors.toList()));
@@ -453,39 +483,37 @@ public class DiffComplexDetector {
 					}
 				}
 				
-				if (tf_ES >= 0)
-					normalized_pos_tf_ES.put(tf, tf_ES / pos_mean);
+				if (sp_ES >= 0)
+					normalized_pos_sp_ES.put(sp, sp_ES / pos_mean);
 				else
-					normalized_neg_tf_ES.put(tf, tf_ES / neg_mean);
+					normalized_neg_sp_ES.put(sp, sp_ES / neg_mean);
 				
 			}
 			
-			// corrected FDR qvalues
-			Map<String, Double> tfdir_qvalue = new HashMap<>();
-			for (String tf:normalized_pos_tf_ES.keySet()) {
-				double norm_ES = normalized_pos_tf_ES.get(tf);
-				// calculate qvalue
+			// corrected FDR q-values
+			sign_sp_qvalue = new HashMap<>();
+			sign_sp_direction = new HashMap<>();
+			for (String sp:normalized_pos_sp_ES.keySet()) {
+				double norm_ES = normalized_pos_sp_ES.get(sp);
+				// calculate q-value
 				double FDR_q = Math.max(normalized_pos_rnd_data.stream().filter(d -> d.doubleValue() >= norm_ES).count(), 1) / (double) normalized_pos_rnd_data.size();
-				FDR_q /= normalized_pos_tf_ES.keySet().stream().filter(tf2 -> normalized_pos_tf_ES.get(tf2).doubleValue() >= norm_ES).count() / (double) normalized_pos_tf_ES.keySet().size(); // will be >1 since norm_ES is in there
-				tfdir_qvalue.put("+"+tf, FDR_q);
+				FDR_q /= normalized_pos_sp_ES.keySet().stream().filter(tf2 -> normalized_pos_sp_ES.get(tf2).doubleValue() >= norm_ES).count() / (double) normalized_pos_sp_ES.keySet().size(); // will be >1 since norm_ES is in there
+				sign_sp_qvalue.put(sp, FDR_q);
+				sign_sp_direction.put(sp, "+");
 			}
-			for (String tf:normalized_neg_tf_ES.keySet()) {
-				double norm_ES = normalized_neg_tf_ES.get(tf);
-				// calculate qvalue
+			for (String sp:normalized_neg_sp_ES.keySet()) {
+				double norm_ES = normalized_neg_sp_ES.get(sp);
+				// calculate q-value
 				double FDR_q = Math.max(normalized_neg_rnd_data.stream().filter(d -> d.doubleValue() <= norm_ES).count(), 1) / (double) normalized_neg_rnd_data.size();
-				FDR_q /= normalized_neg_tf_ES.keySet().stream().filter(tf2 -> normalized_neg_tf_ES.get(tf2).doubleValue() <= norm_ES).count() / (double) normalized_neg_tf_ES.keySet().size(); // will be >1 since norm_ES is in there
-				tfdir_qvalue.put("-"+tf, FDR_q);
+				FDR_q /= normalized_neg_sp_ES.keySet().stream().filter(tf2 -> normalized_neg_sp_ES.get(tf2).doubleValue() <= norm_ES).count() / (double) normalized_neg_sp_ES.keySet().size(); // will be >1 since norm_ES is in there
+				sign_sp_qvalue.put(sp, FDR_q);
+				sign_sp_direction.put(sp, "-");
 			}
 			
-			// output?
-			for (String tfdir:tfdir_qvalue.keySet()) {
-				double qvalue = tfdir_qvalue.get(tfdir);
-				if (qvalue >= qvalue_threshold)
-					continue;
-				String dir = tfdir.substring(0, 1);
-				String tf = tfdir.substring(1);
-				System.out.println(dir + " " + DataQuery.getHGNCNameFromProtein(tf) + " " + tfdir_nominal_pvalues.get(tfdir) + " " + tfdir_qvalue.get(tfdir));
-			}
+			// only retain those below threshold
+			sign_sp_qvalue.keySet().removeIf(tf -> sign_sp_qvalue.get(tf).doubleValue() >= FDR);
+			sign_sorted_sps = new ArrayList<>(sign_sp_qvalue.keySet());
+			sign_sorted_sps.sort((v1, v2) -> sign_sp_qvalue.get(v1).compareTo(sign_sp_qvalue.get(v2)));
 		}
 		
 		/**
@@ -524,7 +552,7 @@ public class DiffComplexDetector {
 				++i;
 			}
 			
-			double N_H = tf_in_complex_count.get(query_TF);
+			double N_H = sp_in_complex_count.get(query_TF);
 			double running_sum = 0.0;
 			double max_dev = 0.0;
 			i = 0;
@@ -542,6 +570,30 @@ public class DiffComplexDetector {
 			}
 			
 			return max_dev;
+		}
+		
+		/**
+		 * Returns sign. seed variants sorted by q-value
+		 * @return
+		 */
+		public List<String> getSignificanceSortedSeedProteins() {
+			return sign_sorted_sps;
+		}
+		
+		/**
+		 * Returns map of sign. seed proteins and their respective q-values
+		 * @return
+		 */
+		public Map<String, Double> getSignificantSeedProteinQvalues() {
+			return sign_sp_qvalue;
+		}
+		
+		/**
+		 * Returns map of sign. seed proteins and their direction of change as + / -
+		 * @return
+		 */
+		public Map<String, String> getSignificantSeedProteinDirections() {
+			return sign_sp_direction;
 		}
 	}
 }

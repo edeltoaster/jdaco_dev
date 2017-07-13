@@ -49,7 +49,7 @@ public class check_complexes_quant {
 				sign = "+";
 			
 			String hgncs = DataQuery.batchHGNCNamesFromProteins(variant).toString();
-			double pval = dcd.getSignificanceVariantsPValues().get(variant);
+			double pval = dcd.getSignificantVariantsQValues().get(variant);
 			
 			// filter for increases abundance
 			if (sign.equals("-"))
