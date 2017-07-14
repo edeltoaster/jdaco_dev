@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import framework.BindingDataHandler;
 import framework.DataQuery;
@@ -51,6 +52,8 @@ public class check_complexes_quant_pluri {
 		Map<String, String> pluri_effect = new HashMap<>();
 		List<HashSet<String>> plurisub_tf_variants = new LinkedList<>();
 		Map<String, String> plurisub_effect = new HashMap<>();
+		Map<String, String> plurisub_actual_complexes = new HashMap<>();
+		Map<String, String> pluri_actual_complexes = new HashMap<>();
 		List<HashSet<String>> nonpluri_tf_variants = new LinkedList<>();
 		Map<String, String> nonpluri_effect = new HashMap<>();
 		List<String> res_pos_all = new LinkedList<>();
@@ -92,7 +95,8 @@ public class check_complexes_quant_pluri {
 					if (qdr.getSeedToComplexMap().containsKey(variant))
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
 				pluri_effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
-				
+				String complexes_string = String.join(",", complexes.stream().map(c -> String.join("/", DataQuery.batchHGNCNamesFromProteins(c))).collect(Collectors.toList()));
+				pluri_actual_complexes.put(variant.toString(), complexes_string);
 				
 				// filter for those including pluri factors
 				Set<String> overlap = new HashSet<>(definitions.pluri_factors);
@@ -112,6 +116,8 @@ public class check_complexes_quant_pluri {
 					if (qdr.getSeedToComplexMap().containsKey(variant))
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
 				plurisub_effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
+				complexes_string = String.join(",", complexes.stream().map(c -> String.join("/", DataQuery.batchHGNCNamesFromProteins(c))).collect(Collectors.toList()));
+				plurisub_actual_complexes.put(variant.toString(), complexes_string);
 			}
 		}
 		
@@ -137,6 +143,7 @@ public class check_complexes_quant_pluri {
 		plurisub_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "plurisub_regnet.txt");
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
 		annotational_data.put("Regulatory_effect", plurisub_effect);
+		annotational_data.put("Actual_complexes", plurisub_actual_complexes);
 		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_nodetable.txt", annotational_data);
 		// pruning
 		plurisub_regnet.pruneToLargestSCCs();
@@ -165,6 +172,7 @@ public class check_complexes_quant_pluri {
 		pluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "pluri_regnet.txt");
 		annotational_data = new HashMap<>();
 		annotational_data.put("Regulatory_effect", pluri_effect);
+		annotational_data.put("Actual_complexes", pluri_actual_complexes);
 		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_nodetable.txt", annotational_data);
 		// pruning
 		pluri_regnet.pruneToLargestSCCs();
