@@ -20,7 +20,7 @@ import framework.Utilities;
 import stem_cell_complexeomes.definitions;
 
 
-public class check_complexes_quant_pluri {
+public class check_pluri_diffcomplexes {
 	
 	public static void main(String[] args) {
 		definitions.printParameters();
