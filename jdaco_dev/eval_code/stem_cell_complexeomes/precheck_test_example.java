@@ -21,10 +21,9 @@ public class precheck_test_example {
 		Set<String> relevant_tfs = new HashSet<>();
 		relevant_tfs.add("O43474"); // KLF4
 		relevant_tfs.add("Q01860"); // POU5F1
-		String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
-		System.out.println(db);
 		Map<String, List<String>> transcr_prot_map = new HashMap<>();
-		for (String[] genes_transcr_prot:DataQuery.getGenesTranscriptsProteins(db)) {
+		DataQuery.extendTimeout(999999);
+		for (String[] genes_transcr_prot:DataQuery.getGenesTranscriptsProteins("homo_sapiens_core_89_38")) {
 			String transcript = genes_transcr_prot[1];
 			String protein = genes_transcr_prot[2];
 			if (!transcr_prot_map.containsKey(transcript))
@@ -32,18 +31,21 @@ public class precheck_test_example {
 			transcr_prot_map.get(transcript).add(protein);
 		}
 		
+		System.out.println("reading binding data");
 		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz", 0.0001, relevant_tfs);
 		Set<String> targets = bdh.getAdjacencyPossibilities(relevant_tfs, definitions.d_min, definitions.d_max, false);
+		System.out.println(targets.size() + " targets");
 		Map<String, Map<String, Float>> protein_abundance_per_sample = new HashMap<>();
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(expr_data, ".tsv.gz")) {
 			String sample = f.getName().split("\\.")[0];
-			
+
 			if (!sample.contains("H1-hESC") && !sample.contains("H7-hESC") && !sample.contains("induced-pluripotent-stem-cell"))
 				continue;
-			
-			Map<String, Float> expr_per_prot = TranscriptAbundanceReader.readSample(f.getAbsolutePath(), -1, true, "");
-			for (String transcr:expr_per_prot.keySet()) {
-				float transcr_expr = expr_per_prot.get(transcr);
+			System.out.println("processing " + sample);
+			Map<String, Float> expr_per_trans = TranscriptAbundanceReader.readSample(f.getAbsolutePath(), -1, false, "");
+			Map<String, Float> expr_per_prot = new HashMap<>();
+			for (String transcr:expr_per_trans.keySet()) {
+				float transcr_expr = expr_per_trans.get(transcr);
 				if (!transcr_prot_map.containsKey(transcr))
 					continue;
 				for (String prot:transcr_prot_map.get(transcr))
@@ -52,6 +54,7 @@ public class precheck_test_example {
 			protein_abundance_per_sample.put(sample, expr_per_prot);
 		}
 		
+		System.out.println("prepping output");
 		Set<String> all_proteins = new HashSet<>();
 		protein_abundance_per_sample.values().forEach(s->all_proteins.addAll(s.keySet()));
 		List<String> to_write = new LinkedList<>();
