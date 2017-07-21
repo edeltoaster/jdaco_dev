@@ -27,7 +27,7 @@ public class definitions {
 	static int d_min = -25;
 	static int d_max = 25;
 	
-	static String GOA_def_file = "mixed_data/stem_tags_retrieved.txt.gz";
+	static String GOA_def_file = "mixed_data/ENCODE_histone_marks_retrieved.txt.gz";
 	static GOAnnotator goa = new GOAnnotator(GOA_def_file);
 	
 	static int SPEnrich_iterations = 10000;
@@ -60,8 +60,8 @@ public class definitions {
 	
 	public static void main(String[] args) {
 		// running updates the GO annotations
-		GOAnnotator goa = new GOAnnotator("9606", true, "/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/stem_tags.txt");
-		goa.writeRetrievedData("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/stem_tags_retrieved.txt.gz");
+		GOAnnotator goa = new GOAnnotator("9606", true, "/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/ENCODE_histone_marks.txt");
+		goa.writeRetrievedData("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/ENCODE_histone_marks_retrieved.txt.gz");
 		goa.printTagInformation();
 	}
 }
