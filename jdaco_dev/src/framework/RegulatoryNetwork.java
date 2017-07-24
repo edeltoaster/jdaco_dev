@@ -191,7 +191,7 @@ public class RegulatoryNetwork {
 	}
 	
 	/**
-	 * Writes the TF complex -> target-association to a textfile, only writes associations with at least write_min_TFs TFs in the complex.
+	 * Writes the TF complex -> target-association to a text file, only writes associations with at least write_min_TFs TFs in the complex.
 	 * @param out_file
 	 * @param write_min_TFs
 	 */
@@ -226,7 +226,7 @@ public class RegulatoryNetwork {
 	}
 	
 	/**
-	 * Writes the TF complex -> target-association to a textfile
+	 * Writes the TF complex -> target-association to a text file
 	 * @param out_file
 	 */
 	public void writeRegulatoryNetwork(String out_file) {
@@ -234,7 +234,7 @@ public class RegulatoryNetwork {
 	}
 	
 	/**
-	 * Writes further information to all nodes in a textfile
+	 * Writes further information to all nodes in a text file
 	 * @param out_file
 	 */
 	public void writeSimpleNodeTable(String out_file) {
@@ -242,7 +242,7 @@ public class RegulatoryNetwork {
 	}
 	
 	/**
-	 * Writes further information to all nodes in a textfile, automatically retrieves gene names
+	 * Writes further information to all nodes in a text file, automatically retrieves gene names.
 	 * @param out_file
 	 */
 	public void writeNodeTable(String out_file) {
@@ -261,8 +261,9 @@ public class RegulatoryNetwork {
 	}
 	
 	/**
-	 * Writes further information to all nodes in a textfile, automatically retrieves gene names
+	 * Writes further information to all nodes in a text file, automatically retrieves gene names and can add additional custom information.
 	 * @param out_file
+	 * @param annotational_data
 	 */
 	public void writeNodeTable(String out_file, Map<String, Map<String, String>> annotational_data) {
 		
@@ -279,8 +280,9 @@ public class RegulatoryNetwork {
 		writeNodeTable(out_file, up_to_name, annotational_data);
 	}
 	
+	@Deprecated
 	/**
-	 * Writes further information to all nodes in a textfile, adds HGNC identifiers and user-given boolean labels
+	 * Writes further information to all nodes in a text file, adds HGNC identifiers and user-given boolean labels
 	 * @param out_file
 	 */
 	public void writeHumanNodeTableOld(String out_file, Map<String, Set<String>> additional_data) {
@@ -369,8 +371,9 @@ public class RegulatoryNetwork {
 		Utilities.writeEntries(to_write, out_file);
 	}
 	
+	@Deprecated
 	/**
-	 * Writes further information to all nodes in a textfile, adds HGNC identifiers
+	 * Writes further information to all nodes in a text file, adds HGNC identifiers
 	 * @param out_file
 	 */
 	public void writeHumanNodeTable(String out_file) {
@@ -378,8 +381,10 @@ public class RegulatoryNetwork {
 	}
 	
 	/**
-	 * Writes further information to all nodes in a textfile
+	 * Writes further information to all nodes in a text file.
 	 * @param out_file
+	 * @param name_conversion
+	 * @param annotational_data
 	 */
 	public void writeNodeTable(String out_file, Map<String, String> name_conversion, Map<String, Map<String, String>> annotational_data) {
 		List<String> to_write = new LinkedList<>();
@@ -469,6 +474,10 @@ public class RegulatoryNetwork {
 		
 		Utilities.writeEntries(to_write, out_file);
 	}
+	
+	/*
+	 * graph-theoretic algorithms
+	 */
 	
 	/**
 	 * Prunes regulatory network to largest strongly connected component 
@@ -580,6 +589,10 @@ public class RegulatoryNetwork {
 		
 		this.pruneToConsistency(allowed_proteins, allowed_complexes);
 	}
+	
+	/*
+	 * getters
+	 */
 	
 	/**
 	 * Returns [#complexes, #TFs, #compl_target_IAs, #TF_compl_IAs].

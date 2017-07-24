@@ -77,6 +77,11 @@ public class GOAnnotator {
 	 * Utilities
 	 */
 	
+	/**
+	 * Annotates a collection of proteins with tags (if possible).
+	 * @param query_proteins
+	 * @return
+	 */
 	public String rateProteins(Collection<String> query_proteins) {
 		List<String> attributes = new LinkedList<>();
 		
@@ -106,32 +111,45 @@ public class GOAnnotator {
 			return String.join(",", attributes);
 	}
 	
+	/**
+	 * Annotates a collection of protein complexes with tags (if possible)
+	 * @param query_sets
+	 * @return
+	 */
 	public String rateCollectionOfProteins(Collection<Set<String>> query_sets) {
 		List<String> attributes = new LinkedList<>();
 		
 		for (GOAnnotationTag tag:this.tags) {
 			
 			String out = tag.getTagName();
-			
+			boolean nothing_found = true;
 			for (Collection<String> query_proteins:query_sets) {
 				int[] occ = tag.countProteins(query_proteins);
 				
 				if (occ[0] > 0 && occ[1] == 0) {
 					out += "+";
+					nothing_found = false;
 				}
 				else if (occ[0] == 0 && occ[1] > 0) {
 					out += "-";
+					nothing_found = false;
 				}
 				else if (occ[0] == 0 && occ[1] == 0) {
 					out += "/";
 				}
 				else {
 					out += "!(" + occ[0] + "," + occ[1] + "," + occ[2] + ")";
+					nothing_found = false;
 				}
 			}
 			
-			attributes.add(out);
+			if (!nothing_found)
+				attributes.add(out);
 		}
+		
+		// if nothing at all was found
+		if (attributes.isEmpty())
+			return "/";
 		
 		return String.join(",", attributes);
 	}
