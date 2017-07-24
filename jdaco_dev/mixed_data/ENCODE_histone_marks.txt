@@ -1,19 +1,19 @@
 # great source: http://epigenie.com/key-epigenetic-players/histone-proteins-and-modifications/histone-h3k27/
-# activity; exact term found
+# activity
 H3K27ac GO:0043974 /
-# tightly associated with inactive promoters, m1 with active -> differentiate; exact term for +, demeth. for -
-H3K27me3 GO:0098532 GO:0071557
-# serves as a mark for HDAC binding in promoters to define transcription direction, may define exons; exact term for +, demeth. for - ;not really helpful?
-#H3K36me3 GO:0097198 GO:0070544
-# me3 defines actively transcribed genes; bivalent with repressive marks like H3K27me3; exact terms for +, only exact term for me3 in -, remaining demeth.
-H3K4me1 GO:0097692 GO:0034720
-H3K4me2 GO:0044648 GO:0034720
+# tightly associated with inactive promoters, m1 with active -> differentiate
+H3K27me3 GO:0098532 /
+# serves as a mark for HDAC binding in promoters to define transcription direction, may define exons
+#H3K36me3 GO:0097198 /
+# me3 defines actively transcribed genes; bivalent with repressive marks like H3K27me3
+H3K4me1 GO:0097692 /
+H3K4me2 GO:0044648 /
 H3K4me3 GO:0080182 GO:0034721
 #H3K79me2 nothing described
 # highly correlated with active promoters
 H3K9ac GO:0043970 GO:1990619
-# me1 enriched at TSS of active genes, me3 tendency to silenced but correlation only modest; me3 exact +, me1 meth +, demeth -
-H3K9me1 GO:0051567 GO:0033169
-H3K9me3 GO:0036124 GO:0033169
-# marks transcriptional activation; exact term for +, deeth. for -
-H4K20me1 GO:0034771 GO:0035574
+# me1 enriched at TSS of active genes, me3 tendency to silenced but correlation only modest; me3 exact +, me1 only general
+#H3K9me1 GO:0051567 GO:0033169
+H3K9me3 GO:0036124 /
+# marks transcriptional activation
+H4K20me1 GO:0034771 /
