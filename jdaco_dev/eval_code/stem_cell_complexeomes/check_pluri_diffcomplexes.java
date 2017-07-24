@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import framework.BindingDataHandler;
 import framework.DataQuery;
@@ -94,9 +93,9 @@ public class check_pluri_diffcomplexes {
 				for (QuantDACOResultSet qdr:group2.values())
 					if (qdr.getSeedToComplexMap().containsKey(variant))
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
-				pluri_effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
-				String complexes_string = String.join(",", complexes.stream().map(c -> String.join("/", DataQuery.batchHGNCNamesFromProteins(c))).collect(Collectors.toList()));
-				pluri_actual_complexes.put(variant.toString(), complexes_string);
+				String[] annotation_data = DiffComplexDetector.getOccSortedStringsOfAllComplexesAndGOAnnotations(complexes, definitions.goa);
+				pluri_effect.put(variant.toString(), annotation_data[1]);
+				pluri_actual_complexes.put(variant.toString(), annotation_data[0]);
 				
 				// filter for those including pluri factors
 				Set<String> overlap = new HashSet<>(definitions.pluri_factors);
@@ -115,9 +114,9 @@ public class check_pluri_diffcomplexes {
 				for (QuantDACOResultSet qdr:group2.values())
 					if (qdr.getSeedToComplexMap().containsKey(variant))
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
-				plurisub_effect.put(variant.toString(), definitions.goa.rateCollectionOfProteins(complexes));
-				complexes_string = String.join(",", complexes.stream().map(c -> String.join("/", DataQuery.batchHGNCNamesFromProteins(c))).collect(Collectors.toList()));
-				plurisub_actual_complexes.put(variant.toString(), complexes_string);
+				annotation_data = DiffComplexDetector.getOccSortedStringsOfAllComplexesAndGOAnnotations(complexes, definitions.goa);
+				plurisub_effect.put(variant.toString(), annotation_data[1]);
+				plurisub_actual_complexes.put(variant.toString(), annotation_data[0]);
 			}
 		}
 		

@@ -700,6 +700,23 @@ public class DataQuery {
 	}
 	
 	/**
+	 * Retrieves naming data to provide Uniprot -> gene name map
+	 * @return
+	 */
+	public static Map<String, String> getUniprotToGeneNameMap(Collection<String> sample_proteins) {
+		String organism_db = DataQuery.getEnsemblOrganismDatabaseFromProteins(sample_proteins);
+		Map<String, String> gene_to_name = DataQuery.getGenesCommonNames(organism_db);
+		Map<String, String> up_to_name = new HashMap<>();
+		for (String[] data:DataQuery.getGenesTranscriptsProteins(organism_db)) {
+			String gene = data[0];
+			String protein = data[2];
+			up_to_name.put(protein, gene_to_name.get(gene));
+		}
+		
+		return up_to_name;
+	}
+	
+	/**
 	 * Queries Uniprot biomart to determine organism, then get mapping to ensembl
 	 * @return
 	 */

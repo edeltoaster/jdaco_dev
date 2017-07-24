@@ -384,6 +384,39 @@ public class DiffComplexDetector {
 		return this.significance_variants_directions;
 	}
 	
+	
+	/*
+	 * generic helper functions
+	 */
+	
+	/**
+	 * Given the protein complexes occurring across samples and a GOA definition, count and sort their appearances as well as their inferred GO annotations.
+	 * Returns [sorted actual complexes string, sorted GO annotations string]
+	 * @param complexes
+	 * @param goa
+	 * @return
+	 */
+	public static String[] getOccSortedStringsOfAllComplexesAndGOAnnotations(List<Set<String>> complexes, GOAnnotator goa) {
+		Map<String, String> up_name = DataQuery.getUniprotToGeneNameMap(complexes.get(0));
+		Map<Set<String>, Integer> count_map = new HashMap<>();
+		complexes.stream().forEach(c -> count_map.put(c, count_map.getOrDefault(c, 0) + 1));
+		List<Set<String>> occ_sorted_complexes = new ArrayList<>(count_map.keySet());
+		occ_sorted_complexes.sort( (c1, c2) -> count_map.get(c2).compareTo(count_map.get(c1)));
+		
+		String sorted_complexes = String.join(",", occ_sorted_complexes.stream().map(c->String.join("/", c.stream().map(p->up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + count_map.get(c)).collect(Collectors.toList()));
+		String sorted_GOAnnotationString = String.join(",", occ_sorted_complexes.stream().map(c->String.join("/", c.stream().map(p->up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + goa.rateProteins(c)).collect(Collectors.toList()));
+		
+		String[] output = new String[2];
+		output[0] = sorted_complexes;
+		output[1] = sorted_GOAnnotationString;
+		
+		return output;
+	}
+	
+	/*
+	 * Seed protein enrichment calculations
+	 */
+	
 	/**
 	 * Compute seed protein enrichment in the fashion of GSEA, 
 	 * see Subramanian et al. (2005)

@@ -186,7 +186,7 @@ public class checkENC_among_H1_exkl_only {
 		RegulatoryNetwork regnet = new RegulatoryNetwork(ESC_tfc, bdh, -50, 50, 3, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only_min2.txt", 2);
-		regnet.writeHumanNodeTable("/Users/tho/Desktop/node_table_only.txt");
+		regnet.writeNodeTable("/Users/tho/Desktop/node_table_only.txt");
 		
 	}
 }
