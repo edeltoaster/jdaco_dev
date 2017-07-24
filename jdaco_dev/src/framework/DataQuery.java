@@ -713,6 +713,9 @@ public class DataQuery {
 			up_to_name.put(protein, gene_to_name.get(gene));
 		}
 		
+		// remove broken naming information
+		up_to_name.entrySet().removeIf(e -> e.getValue() == null);
+		
 		return up_to_name;
 	}
 	

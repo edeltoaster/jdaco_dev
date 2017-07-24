@@ -49,6 +49,7 @@ public class check_pluri_diffcomplexes {
 		
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> pluri_effect = new HashMap<>();
+		Map<String, String> pluri_summarized_effect = new HashMap<>();
 		List<HashSet<String>> plurisub_tf_variants = new LinkedList<>();
 		Map<String, String> plurisub_effect = new HashMap<>();
 		Map<String, String> plurisub_actual_complexes = new HashMap<>();
@@ -95,6 +96,7 @@ public class check_pluri_diffcomplexes {
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
 				String[] annotation_data = DiffComplexDetector.getOccSortedStringsOfAllComplexesAndGOAnnotations(complexes, definitions.goa);
 				pluri_effect.put(variant.toString(), annotation_data[1]);
+				pluri_summarized_effect.put(variant.toString(), annotation_data[2]);
 				pluri_actual_complexes.put(variant.toString(), annotation_data[0]);
 				
 				// filter for those including pluri factors
@@ -141,7 +143,7 @@ public class check_pluri_diffcomplexes {
 		System.out.println(plurisub_regnet.getSizesStr());
 		plurisub_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "plurisub_regnet.txt");
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
-		annotational_data.put("Regulatory_effect", plurisub_effect);
+		annotational_data.put("Epi_effect_details", plurisub_effect);
 		annotational_data.put("Actual_complexes", plurisub_actual_complexes);
 		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_nodetable.txt", annotational_data);
 		// pruning
@@ -170,7 +172,8 @@ public class check_pluri_diffcomplexes {
 		System.out.println(pluri_regnet.getSizesStr());
 		pluri_regnet.writeRegulatoryNetwork(definitions.diff_compl_output_folder + "pluri_regnet.txt");
 		annotational_data = new HashMap<>();
-		annotational_data.put("Regulatory_effect", pluri_effect);
+		annotational_data.put("Epi_effect", pluri_summarized_effect);
+		annotational_data.put("Epi_effect_details", pluri_effect);
 		annotational_data.put("Actual_complexes", pluri_actual_complexes);
 		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_nodetable.txt", annotational_data);
 		// pruning

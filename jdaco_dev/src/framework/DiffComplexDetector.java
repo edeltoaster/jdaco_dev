@@ -391,7 +391,7 @@ public class DiffComplexDetector {
 	
 	/**
 	 * Given the protein complexes occurring across samples and a GOA definition, count and sort their appearances as well as their inferred GO annotations.
-	 * Returns [sorted actual complexes string, sorted GO annotations string]
+	 * Returns [sorted actual complexes string, sorted GO annotations string, set of all GO annotations found]
 	 * @param complexes
 	 * @param goa
 	 * @return
@@ -403,12 +403,25 @@ public class DiffComplexDetector {
 		List<Set<String>> occ_sorted_complexes = new ArrayList<>(count_map.keySet());
 		occ_sorted_complexes.sort( (c1, c2) -> count_map.get(c2).compareTo(count_map.get(c1)));
 		
-		String sorted_complexes = String.join(",", occ_sorted_complexes.stream().map(c->String.join("/", c.stream().map(p->up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + count_map.get(c)).collect(Collectors.toList()));
-		String sorted_GOAnnotationString = String.join(",", occ_sorted_complexes.stream().map(c->String.join("/", c.stream().map(p->up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + goa.rateProteins(c)).collect(Collectors.toList()));
+		String sorted_complexes = String.join(",", occ_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + count_map.get(c)).collect(Collectors.toList()));
 		
-		String[] output = new String[2];
+		
+		Map<Set<String>, String> GOA_map = new HashMap<>();
+		occ_sorted_complexes.stream().forEach(c -> GOA_map.put(c, goa.rateProteins(c)));
+		GOA_map.entrySet().removeIf(e -> e.getValue().equals("/"));
+		
+		String sorted_GOAnnotationString = "/";
+		String GOAnnotationString = "/";
+		occ_sorted_complexes.retainAll(GOA_map.keySet());
+		if (!occ_sorted_complexes.isEmpty()) {
+			sorted_GOAnnotationString = String.join(",", occ_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + GOA_map.get(c)).collect(Collectors.toList()));
+			GOAnnotationString = String.join(",", occ_sorted_complexes.stream().map(c->GOA_map.get(c)).collect(Collectors.toSet()));
+		}
+		
+		String[] output = new String[3];
 		output[0] = sorted_complexes;
 		output[1] = sorted_GOAnnotationString;
+		output[2] = GOAnnotationString;
 		
 		return output;
 	}

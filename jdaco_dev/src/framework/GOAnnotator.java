@@ -78,7 +78,7 @@ public class GOAnnotator {
 	 */
 	
 	/**
-	 * Annotates a collection of proteins with tags (if possible).
+	 * Annotates a collection of proteins with tags (if possible), "/ otherwise".
 	 * @param query_proteins
 	 * @return
 	 */
@@ -108,11 +108,11 @@ public class GOAnnotator {
 		if (attributes.isEmpty())
 			return "/";
 		else
-			return String.join(",", attributes);
+			return String.join("|", attributes);
 	}
 	
 	/**
-	 * Annotates a collection of protein complexes with tags (if possible)
+	 * Annotates a collection of protein complexes with tags (if possible), "/ otherwise".
 	 * @param query_sets
 	 * @return
 	 */
@@ -151,7 +151,7 @@ public class GOAnnotator {
 		if (attributes.isEmpty())
 			return "/";
 		
-		return String.join(",", attributes);
+		return String.join("|", attributes);
 	}
 	
 	/**
