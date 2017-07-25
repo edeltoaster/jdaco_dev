@@ -1,4 +1,4 @@
-package stem_cell_complexeomes;
+package diff_complexeomes;
 
 
 import java.io.File;
@@ -10,10 +10,9 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
+import diff_complexeomes.definitions;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
-
-import stem_cell_complexeomes.definitions;
 
 public class check_corr_abundance_complexes {
 	

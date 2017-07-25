@@ -1,4 +1,4 @@
-package stem_cell_complexeomes;
+package diff_complexeomes;
 
 
 import java.io.File;
@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import diff_complexeomes.definitions;
 import framework.BindingDataHandler;
 import framework.DataQuery;
 import framework.DiffComplexDetector;
@@ -16,7 +17,6 @@ import framework.DiffComplexDetector.SPEnrichment;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
-import stem_cell_complexeomes.definitions;
 
 
 public class check_pluri_diffcomplexes {

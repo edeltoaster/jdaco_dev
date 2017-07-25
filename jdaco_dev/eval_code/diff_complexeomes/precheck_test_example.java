@@ -1,4 +1,4 @@
-package stem_cell_complexeomes;
+package diff_complexeomes;
 
 import java.io.File;
 import java.util.HashMap;
