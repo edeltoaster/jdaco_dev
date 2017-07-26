@@ -391,37 +391,48 @@ public class DiffComplexDetector {
 	
 	/**
 	 * Given the protein complexes occurring across samples and a GOA definition, count and sort their appearances as well as their inferred GO annotations.
-	 * Returns [sorted actual complexes string, sorted GO annotations string, set of all GO annotations found]
+	 * Returns [sorted actual complexes string, sorted GO annotations string, set of all GO annotations found, sorted mean abundances (rounded to 2 positions)]
 	 * @param complexes
 	 * @param goa
 	 * @return
 	 */
-	public static String[] getOccSortedStringsOfAllComplexesAndGOAnnotations(List<Set<String>> complexes, GOAnnotator goa) {
+	public static String[] getSortedComplexesAnnotations(List<Set<String>> complexes, GOAnnotator goa, Map<String, QuantDACOResultSet> group) {
+		// get naming data
 		Map<String, String> up_name = DataQuery.getUniprotToGeneNameMap(complexes.get(0));
+		
+		// count occurrences across group samples
 		Map<Set<String>, Integer> count_map = new HashMap<>();
 		complexes.stream().forEach(c -> count_map.put(c, count_map.getOrDefault(c, 0) + 1));
 		List<Set<String>> occ_sorted_complexes = new ArrayList<>(count_map.keySet());
 		occ_sorted_complexes.sort( (c1, c2) -> count_map.get(c2).compareTo(count_map.get(c1)));
+		String occ_sorted_complexes_string = String.join(",", occ_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + count_map.get(c)).collect(Collectors.toList()));
 		
-		String sorted_complexes = String.join(",", occ_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + count_map.get(c)).collect(Collectors.toList()));
-		
-		
+		// annotate with GO annotations
 		Map<Set<String>, String> GOA_map = new HashMap<>();
 		occ_sorted_complexes.stream().forEach(c -> GOA_map.put(c, goa.rateProteins(c)));
 		GOA_map.entrySet().removeIf(e -> e.getValue().equals("/"));
 		
-		String sorted_GOAnnotationString = "/";
-		String GOAnnotationString = "/";
+		String sorted_GOAnnotation_string = "/";
+		String GOAnnotation_string = "/";
 		occ_sorted_complexes.retainAll(GOA_map.keySet());
 		if (!occ_sorted_complexes.isEmpty()) {
-			sorted_GOAnnotationString = String.join(",", occ_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + GOA_map.get(c)).collect(Collectors.toList()));
-			GOAnnotationString = String.join(",", occ_sorted_complexes.stream().map(c->GOA_map.get(c)).collect(Collectors.toSet()));
+			sorted_GOAnnotation_string = String.join(",", occ_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + GOA_map.get(c)).collect(Collectors.toList()));
+			GOAnnotation_string = String.join(",", occ_sorted_complexes.stream().map(c->GOA_map.get(c)).collect(Collectors.toSet()));
 		}
 		
-		String[] output = new String[3];
-		output[0] = sorted_complexes;
-		output[1] = sorted_GOAnnotationString;
-		output[2] = GOAnnotationString;
+		// determine abundance values
+		Map<Set<String>, Double> mean_abundances = new HashMap<>();
+		List<Set<String>> abun_sorted_complexes = new ArrayList<>(new HashSet<>(complexes));
+		abun_sorted_complexes.stream().forEach(c -> mean_abundances.put(c, Utilities.getMean(group.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault((HashSet<String>) c, 0.0)).collect(Collectors.toList()))));
+		abun_sorted_complexes.sort( (c1, c2) -> mean_abundances.get(c2).compareTo(mean_abundances.get(c1)));
+		String abun_sorted_complexes_string = String.join(",", abun_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + String.format("%.2f", mean_abundances.get(c)) ).collect(Collectors.toList()));
+		
+		// build output datastructure
+		String[] output = new String[4];
+		output[0] = occ_sorted_complexes_string;
+		output[1] = sorted_GOAnnotation_string;
+		output[2] = GOAnnotation_string;
+		output[3] = abun_sorted_complexes_string;
 		
 		return output;
 	}

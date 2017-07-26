@@ -50,10 +50,12 @@ public class check_pluri_diffcomplexes {
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> pluri_effect = new HashMap<>();
 		Map<String, String> pluri_summarized_effect = new HashMap<>();
+		Map<String, String> pluri_abundances = new HashMap<>();
 		List<HashSet<String>> plurisub_tf_variants = new LinkedList<>();
 		Map<String, String> plurisub_effect = new HashMap<>();
 		Map<String, String> plurisub_actual_complexes = new HashMap<>();
 		Map<String, String> pluri_actual_complexes = new HashMap<>();
+		Map<String, String> plurisub_abundances = new HashMap<>();
 		List<HashSet<String>> nonpluri_tf_variants = new LinkedList<>();
 		Map<String, String> nonpluri_effect = new HashMap<>();
 		List<String> res_pos_all = new LinkedList<>();
@@ -94,10 +96,11 @@ public class check_pluri_diffcomplexes {
 				for (QuantDACOResultSet qdr:group2.values())
 					if (qdr.getSeedToComplexMap().containsKey(variant))
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
-				String[] annotation_data = DiffComplexDetector.getOccSortedStringsOfAllComplexesAndGOAnnotations(complexes, definitions.goa);
+				String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(complexes, definitions.goa, group2);
 				pluri_effect.put(variant.toString(), annotation_data[1]);
 				pluri_summarized_effect.put(variant.toString(), annotation_data[2]);
 				pluri_actual_complexes.put(variant.toString(), annotation_data[0]);
+				pluri_abundances.put(variant.toString(), annotation_data[3]);
 				
 				// filter for those including pluri factors
 				Set<String> overlap = new HashSet<>(definitions.pluri_factors);
@@ -116,9 +119,10 @@ public class check_pluri_diffcomplexes {
 				for (QuantDACOResultSet qdr:group2.values())
 					if (qdr.getSeedToComplexMap().containsKey(variant))
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
-				annotation_data = DiffComplexDetector.getOccSortedStringsOfAllComplexesAndGOAnnotations(complexes, definitions.goa);
+				annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(complexes, definitions.goa, group2);
 				plurisub_effect.put(variant.toString(), annotation_data[1]);
 				plurisub_actual_complexes.put(variant.toString(), annotation_data[0]);
+				plurisub_abundances.put(variant.toString(), annotation_data[3]);
 			}
 		}
 		
@@ -145,6 +149,7 @@ public class check_pluri_diffcomplexes {
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
 		annotational_data.put("Epi_effect_details", plurisub_effect);
 		annotational_data.put("Actual_complexes", plurisub_actual_complexes);
+		annotational_data.put("Mean_abundances", plurisub_abundances);
 		plurisub_regnet.writeNodeTable(definitions.diff_compl_output_folder + "plurisub_nodetable.txt", annotational_data);
 		// pruning
 		plurisub_regnet.pruneToLargestSCCs();
@@ -175,6 +180,7 @@ public class check_pluri_diffcomplexes {
 		annotational_data.put("Epi_effect", pluri_summarized_effect);
 		annotational_data.put("Epi_effect_details", pluri_effect);
 		annotational_data.put("Actual_complexes", pluri_actual_complexes);
+		annotational_data.put("Mean_abundances", pluri_abundances);
 		pluri_regnet.writeNodeTable(definitions.diff_compl_output_folder + "pluri_nodetable.txt", annotational_data);
 		// pruning
 		pluri_regnet.pruneToLargestSCCs();

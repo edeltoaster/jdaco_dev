@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
 
@@ -36,23 +37,32 @@ public class check_pluri_epi {
 		// load and parse data to check
 		Map<Set<String>, List<String>> to_check = new HashMap<>();
 		Map<Set<String>, String> actualcompl_epi_map = new HashMap<>();
-		Map<Set<String>, String> actualcompl_abun_map = new HashMap<>();
+		Map<Set<String>, String> actualcompl_meanabun_map = new HashMap<>();
+		Map<String, String> meanabun_map = new HashMap<>();
+		Map<Set<String>, String> actualcompl_sampleabun_map = new HashMap<>();
 		Set<String> TFs_seen = new HashSet<>();
 		for (String line:Utilities.readFile(nodetable_file)) {
 			if (line.startsWith("Node"))
 				continue;
 			String[] spl = line.trim().split("\\s+");
+			// Node Nodetype Gene Mean_abundances Epi_effect_details Epi_effect Actual_complexes
+			String epi_effect = spl[5];
 			
-			if (spl[4].equals("/"))
+			if (epi_effect.equals("/"))
 				continue;
 
 			Set<String> tf_combinations = new HashSet<>(Arrays.asList(spl[0].split("/")));
 			TFs_seen.addAll(tf_combinations);
 			
-			List<String> modifications = Arrays.asList(spl[4].split(","));
+			List<String> modifications = Arrays.asList(epi_effect.split(","));
 			to_check.put(tf_combinations, modifications);
-			actualcompl_epi_map.put(tf_combinations, spl[3]);
-			actualcompl_abun_map.put(tf_combinations, spl[5]);
+			actualcompl_epi_map.put(tf_combinations, spl[4]);
+			String mean_abundances = spl[3];
+			actualcompl_meanabun_map.put(tf_combinations, mean_abundances);
+			actualcompl_sampleabun_map.put(tf_combinations, spl[6]);
+			
+			// parse mean abundances to gain a map in the form of complex->complex:abundance
+			Arrays.asList(mean_abundances.split(",")).stream().forEach(s -> meanabun_map.put(s.split(":")[0], s));
 		}
 		
 		// check
@@ -61,9 +71,16 @@ public class check_pluri_epi {
 		List<String> all_targets = new ArrayList<>(bnd.getTargetsToTFsMap().keySet());
 		for (Set<String> tf_combinations:to_check.keySet()) {
 			Set<String> targets = bnd.getAdjacencyPossibilities(tf_combinations, definitions.d_min, definitions.d_max, false);
+			
+			// pre-outputs
 			System.out.println(tf_combinations + " <-> " + DataQuery.batchHGNCNamesFromProteins(tf_combinations));
-			System.out.println("occ: " + actualcompl_abun_map.get(tf_combinations));
-			System.out.println("epi: " + actualcompl_epi_map.get(tf_combinations));
+			System.out.println("socc: " + actualcompl_sampleabun_map.get(tf_combinations));
+			System.out.println("mabun: " + actualcompl_meanabun_map.get(tf_combinations));
+			String epi_string = actualcompl_epi_map.get(tf_combinations);
+			System.out.println("epi: " + epi_string);
+			String epi_abun_string = String.join(",", Arrays.asList(epi_string.split(",")).stream().map(s -> meanabun_map.get(s.split(":")[0])).collect(Collectors.toList()));
+			System.out.println("epi_ab: " + epi_abun_string);
+			
 			for (String modification_string:to_check.get(tf_combinations)) {
 				Set<String> overlap_set = new HashSet<>(targets);
 				Set<String> complete_set = new HashSet<>(all_targets);
