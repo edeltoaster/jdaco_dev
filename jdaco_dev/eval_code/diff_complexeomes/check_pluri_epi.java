@@ -35,6 +35,8 @@ public class check_pluri_epi {
 		
 		// load and parse data to check
 		Map<Set<String>, List<String>> to_check = new HashMap<>();
+		Map<Set<String>, String> actualcompl_epi_map = new HashMap<>();
+		Map<Set<String>, String> actualcompl_abun_map = new HashMap<>();
 		Set<String> TFs_seen = new HashSet<>();
 		for (String line:Utilities.readFile(nodetable_file)) {
 			if (line.startsWith("Node"))
@@ -43,12 +45,14 @@ public class check_pluri_epi {
 			
 			if (spl[4].equals("/"))
 				continue;
-			
+
 			Set<String> tf_combinations = new HashSet<>(Arrays.asList(spl[0].split("/")));
 			TFs_seen.addAll(tf_combinations);
 			
 			List<String> modifications = Arrays.asList(spl[4].split(","));
 			to_check.put(tf_combinations, modifications);
+			actualcompl_epi_map.put(tf_combinations, spl[3]);
+			actualcompl_abun_map.put(tf_combinations, spl[4]);
 		}
 		
 		// check
@@ -57,7 +61,7 @@ public class check_pluri_epi {
 		List<String> all_targets = new ArrayList<>(bnd.getTargetsToTFsMap().keySet());
 		for (Set<String> tf_combinations:to_check.keySet()) {
 			Set<String> targets = bnd.getAdjacencyPossibilities(tf_combinations, definitions.d_min, definitions.d_max, false);
-			System.out.println(tf_combinations + " <-> " + DataQuery.batchHGNCNamesFromProteins(tf_combinations));
+			System.out.println(tf_combinations + " <-> " + DataQuery.batchHGNCNamesFromProteins(tf_combinations) + " " + actualcompl_epi_map.get(tf_combinations) + " " + actualcompl_abun_map.get(tf_combinations));
 			for (String modification_string:to_check.get(tf_combinations)) {
 				Set<String> overlap_set = new HashSet<>(targets);
 				Set<String> complete_set = new HashSet<>(all_targets);
