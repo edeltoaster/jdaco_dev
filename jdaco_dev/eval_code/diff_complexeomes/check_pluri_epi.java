@@ -52,7 +52,7 @@ public class check_pluri_epi {
 			List<String> modifications = Arrays.asList(spl[4].split(","));
 			to_check.put(tf_combinations, modifications);
 			actualcompl_epi_map.put(tf_combinations, spl[3]);
-			actualcompl_abun_map.put(tf_combinations, spl[4]);
+			actualcompl_abun_map.put(tf_combinations, spl[5]);
 		}
 		
 		// check
@@ -61,7 +61,9 @@ public class check_pluri_epi {
 		List<String> all_targets = new ArrayList<>(bnd.getTargetsToTFsMap().keySet());
 		for (Set<String> tf_combinations:to_check.keySet()) {
 			Set<String> targets = bnd.getAdjacencyPossibilities(tf_combinations, definitions.d_min, definitions.d_max, false);
-			System.out.println(tf_combinations + " <-> " + DataQuery.batchHGNCNamesFromProteins(tf_combinations) + " " + actualcompl_epi_map.get(tf_combinations) + " " + actualcompl_abun_map.get(tf_combinations));
+			System.out.println(tf_combinations + " <-> " + DataQuery.batchHGNCNamesFromProteins(tf_combinations));
+			System.out.println("occ: " + actualcompl_abun_map.get(tf_combinations));
+			System.out.println("epi: " + actualcompl_epi_map.get(tf_combinations));
 			for (String modification_string:to_check.get(tf_combinations)) {
 				Set<String> overlap_set = new HashSet<>(targets);
 				Set<String> complete_set = new HashSet<>(all_targets);
