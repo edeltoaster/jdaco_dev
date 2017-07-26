@@ -133,6 +133,9 @@ public class check_pluri_epi {
 					}
 
 				}
+				
+				System.out.println();
+				
 			}
 			
 		}
