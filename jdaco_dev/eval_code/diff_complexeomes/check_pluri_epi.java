@@ -12,11 +12,13 @@ import java.util.Set;
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
 
 import framework.BindingDataHandler;
+import framework.DataQuery;
 import framework.Utilities;
 
 public class check_pluri_epi {
 	public static String pluri_epi_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/pluri_epi_check/";
 	public static String binding_data = "/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz";
+	public static String nodetable_file = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/diff_results_99_5_-25-25/pluri_nodetable_pruned.txt";
 	
 	public static void main(String[] args) {
 		
@@ -34,11 +36,18 @@ public class check_pluri_epi {
 		// load and parse data to check
 		Map<Set<String>, List<String>> to_check = new HashMap<>();
 		Set<String> TFs_seen = new HashSet<>();
-		for (String line:Utilities.readFile(pluri_epi_folder + "scripts/to_check.txt")) {
+		for (String line:Utilities.readFile(nodetable_file)) {
+			if (line.startsWith("Node"))
+				continue;
 			String[] spl = line.trim().split("\\s+");
+			
+			if (spl[4].equals("/"))
+				continue;
+			
 			Set<String> tf_combinations = new HashSet<>(Arrays.asList(spl[0].split("/")));
 			TFs_seen.addAll(tf_combinations);
-			List<String> modifications = Arrays.asList(spl[1].split(","));
+			
+			List<String> modifications = Arrays.asList(spl[4].split(","));
 			to_check.put(tf_combinations, modifications);
 		}
 		
@@ -48,7 +57,7 @@ public class check_pluri_epi {
 		List<String> all_targets = new ArrayList<>(bnd.getTargetsToTFsMap().keySet());
 		for (Set<String> tf_combinations:to_check.keySet()) {
 			Set<String> targets = bnd.getAdjacencyPossibilities(tf_combinations, definitions.d_min, definitions.d_max, false);
-			System.out.println(tf_combinations);
+			System.out.println(tf_combinations + " <-> " + DataQuery.batchHGNCNamesFromProteins(tf_combinations));
 			for (String modification_string:to_check.get(tf_combinations)) {
 				Set<String> overlap_set = new HashSet<>(targets);
 				Set<String> complete_set = new HashSet<>(all_targets);
