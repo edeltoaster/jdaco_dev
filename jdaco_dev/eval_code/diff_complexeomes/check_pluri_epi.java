@@ -3,12 +3,13 @@ package diff_complexeomes;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.math3.distribution.HypergeometricDistribution;
 
 import framework.BindingDataHandler;
 import framework.Utilities;
@@ -16,10 +17,10 @@ import framework.Utilities;
 public class check_pluri_epi {
 	public static String pluri_epi_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/pluri_epi_check/";
 	public static String binding_data = "/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz";
-	static int iterations = 10000;
 	
 	public static void main(String[] args) {
 		
+		// TODO: determine abundances, quantiles ...
 		// load ENCODE ChIP-seq data on histone marks in H1
 		Map<String, Set<String>> covered_promoters = new HashMap<>();
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(pluri_epi_folder + "covered_promoters/", ".bed.gz")) {
@@ -50,40 +51,56 @@ public class check_pluri_epi {
 			System.out.println(tf_combinations);
 			for (String modification_string:to_check.get(tf_combinations)) {
 				Set<String> overlap_set = new HashSet<>(targets);
+				Set<String> complete_set = new HashSet<>(all_targets);
 				for (String modification:modification_string.split("\\|")) {
 					String sign = modification.substring(modification.length()-1);
 					String mark = modification.substring(0, modification.length()-1);
 					Set<String> mark_covered = covered_promoters.get(mark);
 					
-					if (sign.equals("+"))
+					if (sign.equals("+")) {
 						overlap_set.retainAll(mark_covered);
-					else
+						complete_set.retainAll(mark_covered);
+					}
+					else {
 						overlap_set.removeAll(mark_covered);
+						complete_set.removeAll(mark_covered);
+					}
 				}
-				
+				// hypergeometric test
+				HypergeometricDistribution hyper = new HypergeometricDistribution(all_targets.size(), complete_set.size(), targets.size());
+				// calculates P(X >= overlap)
+				double hyper_p = hyper.upperCumulativeProbability(overlap_set.size());
 				double ref_overlap_fraction = overlap_set.size() / (double) targets.size();
+
+				System.out.println(modification_string + " " + ref_overlap_fraction + "% -> " + hyper_p);
 				
-				// see if by chance
-				double count = 0.0;
-				for (int i = 0; i < iterations; i++) {
+				if (modification_string.contains("|")) {
 					for (String modification:modification_string.split("\\|")) {
+						overlap_set = new HashSet<>(targets);
+						complete_set = new HashSet<>(all_targets);
 						String sign = modification.substring(modification.length()-1);
 						String mark = modification.substring(0, modification.length()-1);
 						Set<String> mark_covered = covered_promoters.get(mark);
-						Collections.shuffle(all_targets);
-						overlap_set = new HashSet<>(all_targets.subList(0, targets.size()));
-						if (sign.equals("+"))
+						
+						if (sign.equals("+")) {
 							overlap_set.retainAll(mark_covered);
-						else
+							complete_set.retainAll(mark_covered);
+						}
+						else {
 							overlap_set.removeAll(mark_covered);
+							complete_set.removeAll(mark_covered);
+						}
+						
+						// hypergeometric test
+						hyper = new HypergeometricDistribution(all_targets.size(), complete_set.size(), targets.size());
+						// calculates P(X >= overlap)
+						hyper_p = hyper.upperCumulativeProbability(overlap_set.size());
+						ref_overlap_fraction = overlap_set.size() / (double) targets.size();
+
+						System.out.println("  " + modification + " " + ref_overlap_fraction + "% -> " + hyper_p);
 					}
-					double overlap_fraction = overlap_set.size() / (double) targets.size();
-					if (overlap_fraction > ref_overlap_fraction)
-						count += 1;
+
 				}
-				
-				double p = Math.max(1.0 / iterations, count / iterations);
-				System.out.println(modification_string + " " + ref_overlap_fraction + " " + p);
 			}
 			
 		}
