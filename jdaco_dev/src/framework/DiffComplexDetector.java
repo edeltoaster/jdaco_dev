@@ -425,7 +425,7 @@ public class DiffComplexDetector {
 		List<Set<String>> abun_sorted_complexes = new ArrayList<>(new HashSet<>(complexes));
 		abun_sorted_complexes.stream().forEach(c -> mean_abundances.put(c, Utilities.getMean(group.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault((HashSet<String>) c, 0.0)).collect(Collectors.toList()))));
 		abun_sorted_complexes.sort( (c1, c2) -> mean_abundances.get(c2).compareTo(mean_abundances.get(c1)));
-		String abun_sorted_complexes_string = String.join(",", abun_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + String.format("%.2f", mean_abundances.get(c)) ).collect(Collectors.toList()));
+		String abun_sorted_complexes_string = String.join(",", abun_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + String.format("%.3g", mean_abundances.get(c)) ).collect(Collectors.toList()));
 		
 		// build output datastructure
 		String[] output = new String[4];

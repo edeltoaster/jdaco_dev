@@ -21,7 +21,7 @@ import framework.Utilities;
 
 public class check_hemato_diffcomplexes {
 	
-	public static String daco_results_folder = "res_95_5/";
+	public static String daco_results_folder = "res_99_5/";
 	public static String networks_folder = "BP_networks/"; // intended to be run on the servers
 	public static String diff_compl_output_folder = "BP_out/";
 	
