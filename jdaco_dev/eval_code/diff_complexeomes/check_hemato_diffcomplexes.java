@@ -28,6 +28,7 @@ public class check_hemato_diffcomplexes {
 	public static void main(String[] args) {
 		definitions.printParameters();
 		System.out.println("folders overwritten for BLUEPRINT stuff");
+		System.out.println("parametric");
 		
 		System.out.println("Reading data ...");
 		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
@@ -37,9 +38,9 @@ public class check_hemato_diffcomplexes {
 			String sample = f.getName().split("\\.")[0];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, networks_folder + sample + "_major-transcripts.txt.gz");
 			
-			if (!sample.contains("CD4") && sample.contains("CLP")) // pairwise or more?
+			if (sample.contains("CLP")) // pairwise or more?
 				group1.put(sample, qdr);
-			else {
+			else if (sample.contains("CD4")) {
 				group2.put(sample, qdr);
 			}
 		}
@@ -50,7 +51,7 @@ public class check_hemato_diffcomplexes {
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.check_supersets, definitions.no_threads);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.check_supersets, definitions.no_threads);
 		
 		List<HashSet<String>> cd4_tf_variants = new LinkedList<>();
 		Map<String, String> cd4_effect = new HashMap<>();

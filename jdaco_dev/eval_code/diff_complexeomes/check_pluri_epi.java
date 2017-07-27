@@ -132,12 +132,9 @@ public class check_pluri_epi {
 						System.out.println("  " + modification + " " + ref_overlap_fraction + "% -> " + hyper_p);
 					}
 
-				}
-				
-				System.out.println();
-				
+				}		
 			}
-			
+			System.out.println();
 		}
 	}
 }
