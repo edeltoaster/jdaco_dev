@@ -378,11 +378,15 @@ public class RegulatoryNetwork {
 				header += " " + label;
 		
 		to_write.add(header);
-		
+		String data = null;
 		Set<String> seen_targets = new HashSet<>();
 		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet()) {
 			String complex = String.join("/", tfs_in_complex);
-			String data = complex + " complex";
+			data = complex + " complex";
+			
+			// mark single TF complexes so that the are correctly annotated as complexes only rather than also as TFs
+			if (tfs_in_complex.size() == 1)
+				seen_targets.addAll(tfs_in_complex);
 			
 			// converts names, names protein by UniProt Acc if not in map
 			if (name_conversion != null) {
@@ -397,7 +401,10 @@ public class RegulatoryNetwork {
 					data += " " + annotation_map.getOrDefault(tfs_in_complex.toString(), "/");
 				}
 			to_write.add(data);
-			
+		}
+		
+		// second iteration ensures that TFs that are also sole complexes are named correctly
+		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet())
 			for (String target:this.complex_to_targets.get(tfs_in_complex)) {
 				
 				// don't do twice
@@ -424,7 +431,6 @@ public class RegulatoryNetwork {
 					}
 				to_write.add(data);
 			}
-		}
 		
 		// ensure that all TFs were described, even if they are in no target set
 		for (HashSet<String> tfs_in_complex:this.complex_to_targets.keySet())
@@ -433,7 +439,7 @@ public class RegulatoryNetwork {
 					continue;
 				seen_targets.add(tf);
 				
-				String data = tf + " TF";
+				data = tf + " TF";
 				
 				// converts name, names protein by UniProt Acc if not in map
 				if (name_conversion != null) {

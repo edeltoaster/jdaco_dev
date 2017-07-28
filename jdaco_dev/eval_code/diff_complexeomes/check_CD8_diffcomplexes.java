@@ -15,6 +15,7 @@ import framework.BindingDataHandler;
 import framework.DataQuery;
 import framework.DiffComplexDetector;
 import framework.DiffComplexDetector.SPEnrichment;
+import framework.GOAnnotator;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
@@ -43,6 +44,7 @@ public class check_CD8_diffcomplexes {
 		Set<String> interesting_targets = new HashSet<>(increased);
 		interesting_targets.addAll(expressed_effectors);
 		interesting_targets.addAll(not_expressed);
+		GOAnnotator goa = new GOAnnotator("9606", false, "mixed_data/stem_tags.txt");
 		
 		System.out.println("Reading data ...");
 		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
@@ -101,7 +103,7 @@ public class check_CD8_diffcomplexes {
 				for (QuantDACOResultSet qdr:group2.values())
 					if (qdr.getSeedToComplexMap().containsKey(variant))
 						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
-				String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(complexes, definitions.goa, group2);
+				String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(complexes, goa, group2);
 				effect.put(variant.toString(), annotation_data[1]);
 				summarized_effect.put(variant.toString(), annotation_data[2]);
 				actual_complexes.put(variant.toString(), annotation_data[0]);
@@ -304,6 +306,7 @@ public class check_CD8_diffcomplexes {
 		definitions.printParameters();
 		System.out.println("folders overwritten for CD8 stuff");
 		
-		TMNP_vs_N_parametric();
+		TMNP_vs_all_parametric();
+		//TMNP_vs_N_parametric();
 	}
 }
