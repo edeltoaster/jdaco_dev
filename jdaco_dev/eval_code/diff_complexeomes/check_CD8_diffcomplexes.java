@@ -24,7 +24,7 @@ import framework.Utilities;
 public class check_CD8_diffcomplexes {
 	
 	public static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/CD8_subtypes/res_99_5/";
-	public static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/CD8_subtypes/old_CD8_networks/";
+	public static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/CD8_subtypes/CD8_networks/";
 	public static String diff_compl_output_folder = "/Users/tho/Desktop/CD8_out/";
 	
 	public static void TMNP_vs_all_parametric() {
@@ -67,7 +67,7 @@ public class check_CD8_diffcomplexes {
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.check_supersets, 3);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.check_supersets, 6);
 		
 		List<HashSet<String>> tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
