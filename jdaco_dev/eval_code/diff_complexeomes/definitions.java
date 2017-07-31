@@ -30,7 +30,7 @@ public class definitions {
 	static String GOA_def_file = "mixed_data/ENCODE_histone_marks_retrieved.txt.gz";
 	static GOAnnotator goa = new GOAnnotator(GOA_def_file);
 	
-	static int SPEnrich_iterations = 10000;
+	static int SPEnrich_iterations = 1000;
 	static int SPEnrich_compl_part_threshold = 10;
 	
 	public static void printParameters() {
