@@ -88,18 +88,13 @@ public class check_CD8_diffcomplexes {
 			tf_variants.add(variant);
 			directions.put(variant.toString(), sign);
 			
-			// determine actual complexes
-			List<Set<String>> complexes = new LinkedList<>();
-			for (QuantDACOResultSet qdr:group2.values())
-				if (qdr.getSeedToComplexMap().containsKey(variant))
-					complexes.addAll(qdr.getSeedToComplexMap().get(variant));
-			String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(complexes, goa, group2);
+			String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(variant, sign, goa, group1, group2);
 			effect.put(variant.toString(), annotation_data[1]);
 			summarized_effect.put(variant.toString(), annotation_data[2]);
 			actual_complexes.put(variant.toString(), annotation_data[0]);
 			abundances.put(variant.toString(), annotation_data[3]);
 		}
-		
+		System.out.println(res_pos_all.size() +"+, " + res_neg_all.size() + "-");
 		// write results
 		Utilities.writeEntries(res_pos_all, output_folder + "res_pos_all.txt");
 		Utilities.writeEntries(res_neg_all, output_folder + "res_neg_all.txt");
@@ -155,6 +150,7 @@ public class check_CD8_diffcomplexes {
 	public static void main(String[] args) {
 		definitions.printParameters();
 		System.out.println("folders and more overwritten for CD8 stuff");
+		System.out.println();
 		
 		new File(diff_compl_output_folder).mkdir();
 		
@@ -172,7 +168,7 @@ public class check_CD8_diffcomplexes {
 				group2.put(sample, qdr);
 			}
 		}
-		System.out.println("other T samples : " + group1.size());
+		System.out.println("all other T samples : " + group1.size());
 		System.out.println("T_MNP samples : " + group2.size());
 		
 		check_diff_compl("TMNP_vs_all_parametric", group1, group2);

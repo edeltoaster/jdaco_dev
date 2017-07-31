@@ -469,6 +469,9 @@ public class RegulatoryNetwork {
 	 */
 	public void pruneToLargestSCCs() {
 		
+		if (this.complex_to_targets.size() == 0)
+			return;
+		
 		// convert to general graph format
 		Map<String, List<String>> graph = new HashMap<>();
 		for (HashSet<String> complex:this.complex_to_targets.keySet())

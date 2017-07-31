@@ -704,6 +704,9 @@ public class DataQuery {
 	 * @return
 	 */
 	public static Map<String, String> getUniprotToGeneNameMap(Collection<String> sample_proteins) {
+		if (sample_proteins.size() == 0)
+			return new HashMap<String, String>();
+		
 		String organism_db = DataQuery.getEnsemblOrganismDatabaseFromProteins(sample_proteins);
 		Map<String, String> gene_to_name = DataQuery.getGenesCommonNames(organism_db);
 		Map<String, String> up_to_name = new HashMap<>();

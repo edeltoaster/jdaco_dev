@@ -390,13 +390,23 @@ public class DiffComplexDetector {
 	 */
 	
 	/**
-	 * Given the protein complexes occurring across samples and a GOA definition, count and sort their appearances as well as their inferred GO annotations.
+	 * Given the seed variant occurring across samples, direction, sample data and a GOA definition, count and sort their appearances as well as their inferred GO annotations.
 	 * Returns [sorted actual complexes string, sorted GO annotations string, set of all GO annotations found, sorted mean abundances (rounded to 2 positions)]
 	 * @param complexes
 	 * @param goa
 	 * @return
 	 */
-	public static String[] getSortedComplexesAnnotations(List<Set<String>> complexes, GOAnnotator goa, Map<String, QuantDACOResultSet> group) {
+	public static String[] getSortedComplexesAnnotations(HashSet<String> variant, String sign, GOAnnotator goa, Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2) {
+		Map<String, QuantDACOResultSet> group_to_check = group1;
+		if (sign.equals("+"))
+			group_to_check = group2;
+		
+		// determine actual complexes
+		List<Set<String>> complexes = new LinkedList<>();
+		for (QuantDACOResultSet qdr:group_to_check.values())
+			if (qdr.getSeedToComplexMap().containsKey(variant))
+				complexes.addAll(qdr.getSeedToComplexMap().get(variant));
+		
 		// get naming data
 		Map<String, String> up_name = DataQuery.getUniprotToGeneNameMap(complexes.get(0));
 		
@@ -423,7 +433,8 @@ public class DiffComplexDetector {
 		// determine abundance values
 		Map<Set<String>, Double> mean_abundances = new HashMap<>();
 		List<Set<String>> abun_sorted_complexes = new ArrayList<>(new HashSet<>(complexes));
-		abun_sorted_complexes.stream().forEach(c -> mean_abundances.put(c, Utilities.getMean(group.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault((HashSet<String>) c, 0.0)).collect(Collectors.toList()))));
+		final Map<String, QuantDACOResultSet> group_final = group_to_check;
+		abun_sorted_complexes.stream().forEach(c -> mean_abundances.put(c, Utilities.getMean(group_final.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault((HashSet<String>) c, 0.0)).collect(Collectors.toList()))));
 		abun_sorted_complexes.sort( (c1, c2) -> mean_abundances.get(c2).compareTo(mean_abundances.get(c1)));
 		String abun_sorted_complexes_string = String.join(",", abun_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + String.format("%.3g", mean_abundances.get(c)) ).collect(Collectors.toList()));
 		

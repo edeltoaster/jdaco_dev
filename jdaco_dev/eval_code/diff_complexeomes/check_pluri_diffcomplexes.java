@@ -91,12 +91,7 @@ public class check_pluri_diffcomplexes {
 				if (variant.stream().noneMatch(p -> allosome_proteins.contains(p)))
 					res_pos_all_noallo.add(out_string);
 				
-				// determine actual complexes
-				List<Set<String>> complexes = new LinkedList<>();
-				for (QuantDACOResultSet qdr:group2.values())
-					if (qdr.getSeedToComplexMap().containsKey(variant))
-						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
-				String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(complexes, definitions.goa, group2);
+				String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(variant, sign, definitions.goa, group1, group2);
 				pluri_effect.put(variant.toString(), annotation_data[1]);
 				pluri_summarized_effect.put(variant.toString(), annotation_data[2]);
 				pluri_actual_complexes.put(variant.toString(), annotation_data[0]);
@@ -114,12 +109,7 @@ public class check_pluri_diffcomplexes {
 				if (variant.stream().noneMatch(p -> allosome_proteins.contains(p)))
 					res_pos_pluri_noallo.add(out_string);
 				
-				// determine actual complexes
-				complexes = new LinkedList<>();
-				for (QuantDACOResultSet qdr:group2.values())
-					if (qdr.getSeedToComplexMap().containsKey(variant))
-						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
-				annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(complexes, definitions.goa, group2);
+				annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(variant, sign, definitions.goa, group1, group2);
 				plurisub_effect.put(variant.toString(), annotation_data[1]);
 				plurisub_actual_complexes.put(variant.toString(), annotation_data[0]);
 				plurisub_abundances.put(variant.toString(), annotation_data[3]);

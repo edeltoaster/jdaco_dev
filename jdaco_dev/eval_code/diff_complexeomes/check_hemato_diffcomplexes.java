@@ -80,12 +80,7 @@ public class check_hemato_diffcomplexes {
 				if (variant.stream().noneMatch(p -> allosome_proteins.contains(p)))
 					res_pos_all_noallo.add(out_string);
 				
-				// determine actual complexes
-				List<Set<String>> complexes = new LinkedList<>();
-				for (QuantDACOResultSet qdr:group2.values())
-					if (qdr.getSeedToComplexMap().containsKey(variant))
-						complexes.addAll(qdr.getSeedToComplexMap().get(variant));
-				String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(complexes, definitions.goa, group2);
+				String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(variant, sign, definitions.goa, group1, group2);
 				cd4_effect.put(variant.toString(), annotation_data[1]);
 				cd4_summarized_effect.put(variant.toString(), annotation_data[2]);
 				cd4_actual_complexes.put(variant.toString(), annotation_data[0]);
