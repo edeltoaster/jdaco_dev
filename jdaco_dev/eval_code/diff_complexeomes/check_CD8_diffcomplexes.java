@@ -38,7 +38,7 @@ public class check_CD8_diffcomplexes {
 	public static GOAnnotator goa = new GOAnnotator("9606", false, "mixed_data/stem_tags.txt");
 	
 	
-	public static void check_diff_compl(String result_string, Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2) {
+	public static void check_diff_compl(String result_string, Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, boolean parametric) {
 		System.out.println("Running " + result_string);
 		
 		String output_folder = diff_compl_output_folder + result_string + "/";
@@ -56,7 +56,7 @@ public class check_CD8_diffcomplexes {
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.check_supersets, no_threads);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, parametric, definitions.check_supersets, no_threads);
 		
 		List<HashSet<String>> tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
@@ -171,7 +171,7 @@ public class check_CD8_diffcomplexes {
 		System.out.println("all other T samples : " + group1.size());
 		System.out.println("T_MNP samples : " + group2.size());
 		
-		check_diff_compl("TMNP_vs_all_parametric", group1, group2);
+		check_diff_compl("TMNP_vs_all_parametric", group1, group2, true);
 		group1.clear();
 		group2.clear();
 		
@@ -192,7 +192,7 @@ public class check_CD8_diffcomplexes {
 		System.out.println("T_N samples : " + group1.size());
 		System.out.println("T_MNP samples : " + group2.size());
 		
-		check_diff_compl("TMNP_vs_N_parametric", group1, group2);
+		check_diff_compl("TMNP_vs_N_parametric", group1, group2, true);
 		group1.clear();
 		group2.clear();
 		
@@ -213,7 +213,7 @@ public class check_CD8_diffcomplexes {
 		System.out.println("T_EM(RA) samples : " + group1.size());
 		System.out.println("T_MNP samples : " + group2.size());
 		
-		check_diff_compl("TMNP_vs_Eff_parametric", group1, group2);
+		check_diff_compl("TMNP_vs_Eff_parametric", group1, group2, true);
 		group1.clear();
 		group2.clear();
 		
@@ -234,7 +234,7 @@ public class check_CD8_diffcomplexes {
 		System.out.println("T_CM samples : " + group1.size());
 		System.out.println("T_MNP samples : " + group2.size());
 		
-		check_diff_compl("TMNP_vs_Mem_parametric", group1, group2);
+		check_diff_compl("TMNP_vs_Mem_parametric", group1, group2, true);
 		group1.clear();
 		group2.clear();
 		
@@ -255,7 +255,7 @@ public class check_CD8_diffcomplexes {
 		System.out.println("T_N samples : " + group1.size());
 		System.out.println("T_EM(RA) samples : " + group2.size());
 		
-		check_diff_compl("N_to_Eff_parametric", group1, group2);
+		check_diff_compl("N_to_Eff_parametric", group1, group2, true);
 		group1.clear();
 		group2.clear();
 		
@@ -276,7 +276,91 @@ public class check_CD8_diffcomplexes {
 		System.out.println("T_N samples : " + group1.size());
 		System.out.println("T_CM samples : " + group2.size());
 		
-		check_diff_compl("N_to_Mem_parametric", group1, group2);
+		check_diff_compl("N_to_Mem_parametric", group1, group2, true);
+		group1.clear();
+		group2.clear();
+		
+		// TMNP vs all non-para
+		group1 = new HashMap<>();
+		group2 = new HashMap<>();
+		
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv.gz")) {
+			String sample = f.getName().split("\\.")[0];
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, networks_folder + sample + "_major-transcripts.txt.gz");
+			
+			if (!sample.contains("TMNP"))
+				group1.put(sample, qdr);
+			else {
+				group2.put(sample, qdr);
+			}
+		}
+		System.out.println("all other samples : " + group1.size());
+		System.out.println("T_TMNP samples : " + group2.size());
+		
+		check_diff_compl("TMNP_vs_all_non-paramtetric", group1, group2, false);
+		group1.clear();
+		group2.clear();
+		
+		// Eff vs all non-para
+		group1 = new HashMap<>();
+		group2 = new HashMap<>();
+		
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv.gz")) {
+			String sample = f.getName().split("\\.")[0];
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, networks_folder + sample + "_major-transcripts.txt.gz");
+			
+			if (!sample.contains("EM"))
+				group1.put(sample, qdr);
+			else {
+				group2.put(sample, qdr);
+			}
+		}
+		System.out.println("all other samples : " + group1.size());
+		System.out.println("T_EM(RA) samples : " + group2.size());
+		
+		check_diff_compl("Eff_vs_all_non-paramtetric", group1, group2, false);
+		group1.clear();
+		group2.clear();
+		
+		// Mem vs all non-para
+		group1 = new HashMap<>();
+		group2 = new HashMap<>();
+		
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv.gz")) {
+			String sample = f.getName().split("\\.")[0];
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, networks_folder + sample + "_major-transcripts.txt.gz");
+			
+			if (!sample.contains("CM"))
+				group1.put(sample, qdr);
+			else {
+				group2.put(sample, qdr);
+			}
+		}
+		System.out.println("all other samples : " + group1.size());
+		System.out.println("T_CM samples : " + group2.size());
+		
+		check_diff_compl("Mem_vs_all_non-paramtetric", group1, group2, false);
+		group1.clear();
+		group2.clear();
+		
+		// N vs all non-para
+		group1 = new HashMap<>();
+		group2 = new HashMap<>();
+		
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv.gz")) {
+			String sample = f.getName().split("\\.")[0];
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, networks_folder + sample + "_major-transcripts.txt.gz");
+			
+			if (!sample.contains("N_"))
+				group1.put(sample, qdr);
+			else {
+				group2.put(sample, qdr);
+			}
+		}
+		System.out.println("all other samples : " + group1.size());
+		System.out.println("T_N samples : " + group2.size());
+		
+		check_diff_compl("N_vs_all_non-paramtetric", group1, group2, false);
 		group1.clear();
 		group2.clear();
 	}
