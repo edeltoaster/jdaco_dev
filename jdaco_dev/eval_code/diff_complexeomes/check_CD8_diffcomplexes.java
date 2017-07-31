@@ -43,8 +43,6 @@ public class check_CD8_diffcomplexes {
 		
 		String output_folder = diff_compl_output_folder + result_string + "/";
 		
-		new File(output_folder).mkdir();
-		
 		// for annotations
 		Map<String, String> proteins_of_interest = new HashMap<>();
 		increased.stream().forEach(p -> proteins_of_interest.put(p, "increased"));
@@ -68,6 +66,10 @@ public class check_CD8_diffcomplexes {
 		List<String> res_neg_all = new LinkedList<>();
 		
 		System.out.println(dcd.getSignificanceSortedVariants().size() + " diff. TF variants.");
+		
+		if (dcd.getSignificanceSortedVariants().size() == 0)
+			return;
+		
 		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
 			
 			String sign = dcd.getSignificantVariantsDirections().get(variant);
@@ -94,7 +96,11 @@ public class check_CD8_diffcomplexes {
 			actual_complexes.put(variant.toString(), annotation_data[0]);
 			abundances.put(variant.toString(), annotation_data[3]);
 		}
+		
 		System.out.println(res_pos_all.size() +"+, " + res_neg_all.size() + "-");
+		
+		new File(output_folder).mkdir();
+		
 		// write results
 		Utilities.writeEntries(res_pos_all, output_folder + "res_pos_all.txt");
 		Utilities.writeEntries(res_neg_all, output_folder + "res_neg_all.txt");
