@@ -297,7 +297,7 @@ public class check_CD8_diffcomplexes {
 		System.out.println("all other samples : " + group1.size());
 		System.out.println("T_TMNP samples : " + group2.size());
 		
-		check_diff_compl("TMNP_vs_all_non-paramtetric", group1, group2, false);
+		check_diff_compl("TMNP_vs_all_non-parametric", group1, group2, false);
 		group1.clear();
 		group2.clear();
 		
@@ -318,7 +318,7 @@ public class check_CD8_diffcomplexes {
 		System.out.println("all other samples : " + group1.size());
 		System.out.println("T_EM(RA) samples : " + group2.size());
 		
-		check_diff_compl("Eff_vs_all_non-paramtetric", group1, group2, false);
+		check_diff_compl("Eff_vs_all_non-parametric", group1, group2, false);
 		group1.clear();
 		group2.clear();
 		
@@ -339,7 +339,7 @@ public class check_CD8_diffcomplexes {
 		System.out.println("all other samples : " + group1.size());
 		System.out.println("T_CM samples : " + group2.size());
 		
-		check_diff_compl("Mem_vs_all_non-paramtetric", group1, group2, false);
+		check_diff_compl("Mem_vs_all_non-parametric", group1, group2, false);
 		group1.clear();
 		group2.clear();
 		
@@ -360,7 +360,70 @@ public class check_CD8_diffcomplexes {
 		System.out.println("all other samples : " + group1.size());
 		System.out.println("T_N samples : " + group2.size());
 		
-		check_diff_compl("N_vs_all_non-paramtetric", group1, group2, false);
+		check_diff_compl("N_vs_all_non-parametric", group1, group2, false);
+		group1.clear();
+		group2.clear();
+		
+		// Eff vs all para
+		group1 = new HashMap<>();
+		group2 = new HashMap<>();
+		
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv.gz")) {
+			String sample = f.getName().split("\\.")[0];
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, networks_folder + sample + "_major-transcripts.txt.gz");
+			
+			if (!sample.contains("EM"))
+				group1.put(sample, qdr);
+			else {
+				group2.put(sample, qdr);
+			}
+		}
+		System.out.println("all other samples : " + group1.size());
+		System.out.println("T_EM(RA) samples : " + group2.size());
+		
+		check_diff_compl("Eff_vs_all_parametric", group1, group2, true);
+		group1.clear();
+		group2.clear();
+		
+		// Mem vs all para
+		group1 = new HashMap<>();
+		group2 = new HashMap<>();
+		
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv.gz")) {
+			String sample = f.getName().split("\\.")[0];
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, networks_folder + sample + "_major-transcripts.txt.gz");
+			
+			if (!sample.contains("CM"))
+				group1.put(sample, qdr);
+			else {
+				group2.put(sample, qdr);
+			}
+		}
+		System.out.println("all other samples : " + group1.size());
+		System.out.println("T_CM samples : " + group2.size());
+		
+		check_diff_compl("Mem_vs_all_parametric", group1, group2, true);
+		group1.clear();
+		group2.clear();
+		
+		// N vs all para
+		group1 = new HashMap<>();
+		group2 = new HashMap<>();
+		
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(daco_results_folder, ".csv.gz")) {
+			String sample = f.getName().split("\\.")[0];
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, networks_folder + sample + "_major-transcripts.txt.gz");
+			
+			if (!sample.contains("N_"))
+				group1.put(sample, qdr);
+			else {
+				group2.put(sample, qdr);
+			}
+		}
+		System.out.println("all other samples : " + group1.size());
+		System.out.println("T_N samples : " + group2.size());
+		
+		check_diff_compl("N_vs_all_parametric", group1, group2, true);
 		group1.clear();
 		group2.clear();
 	}
