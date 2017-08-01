@@ -307,7 +307,7 @@ public class check_hemato_diffcomplexes {
 			
 			if (sample.contains("GMP"))
 				group1.put(sample, qdr);
-			else if (sample.contains("M-")){
+			else if (sample.contains("M-v")){
 				group2.put(sample, qdr);
 			}
 		}
