@@ -65,10 +65,13 @@ public class check_CD8_diffcomplexes {
 		List<String> res_pos_all = new LinkedList<>();
 		List<String> res_neg_all = new LinkedList<>();
 		
+		System.out.println(dcd.getNumberOfTests() + " TF variants tested.");
 		System.out.println(dcd.getSignificanceSortedVariants().size() + " diff. TF variants.");
 		
-		if (dcd.getSignificanceSortedVariants().size() == 0)
+		if (dcd.getSignificanceSortedVariants().size() == 0) {
+			System.out.println();
 			return;
+		}
 		
 		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
 			
