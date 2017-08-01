@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
@@ -444,7 +445,7 @@ public class DiffComplexDetector {
 		final Map<String, QuantDACOResultSet> group_final = group_to_check;
 		abun_sorted_complexes.stream().forEach(c -> mean_abundances.put(c, Utilities.getMean(group_final.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault((HashSet<String>) c, 0.0)).collect(Collectors.toList()))));
 		abun_sorted_complexes.sort( (c1, c2) -> mean_abundances.get(c2).compareTo(mean_abundances.get(c1)));
-		String abun_sorted_complexes_string = String.join(",", abun_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + String.format("%.2f", mean_abundances.get(c)) ).collect(Collectors.toList()));
+		String abun_sorted_complexes_string = String.join(",", abun_sorted_complexes.stream().map(c -> String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList())) + ":" + String.format(Locale.US, "%.2g", mean_abundances.get(c)) ).collect(Collectors.toList()));
 		
 		// build output datastructure
 		String[] output = new String[4];
