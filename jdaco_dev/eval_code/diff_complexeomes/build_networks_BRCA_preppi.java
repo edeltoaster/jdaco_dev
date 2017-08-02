@@ -11,10 +11,10 @@ import framework.Utilities;
 
 public class build_networks_BRCA_preppi {
 	static String expr_folder = "expr_data/"; // intended to be run on server
-	static String network_folder = "BRCA_networks_1/";
+	static String network_folder = "BRCA_networks_0/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
-	static double transcr_threshold = 1.0; // as in PPIXpress paper
+	static double transcr_threshold = 0.0;
 	
 	public static void preprocess() {
 		System.out.println("Original PPIN: " + "mixed_data/human_PrePPI_17_01_17_hc.txt.gz"); // PrePPI, jan 2017
@@ -55,7 +55,7 @@ public class build_networks_BRCA_preppi {
 			file_name = patient + "_" + condition;
 			System.out.println("Processing " + file_name);
 			
-			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.convertToPMMeasure(TranscriptAbundanceReader.readTCGAIsoformRSEM(path, -1), transcr_threshold), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
+			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEMFile(path, transcr_threshold, false, true), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
 			cn.getPPIN().writePPIN(network_folder + file_name + "_ppin.txt.gz");
 			cn.getDDIN().writeDDIN(network_folder + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(network_folder + file_name + "_major-transcripts.txt.gz");

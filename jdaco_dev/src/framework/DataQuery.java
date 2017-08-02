@@ -65,6 +65,7 @@ public class DataQuery {
 	private static Map<String, String> cache_db = new HashMap<>();
 	private static Map<String, PPIN> cache_STRING = new HashMap<>();
 	private static Map<String, Map<String, String>> cache_ucsc = new HashMap<>();
+	private static Map<String, Map<String, Integer>> cache_transcript_length = new HashMap<>();
 	private static Map<String, String> cache_ensembl_db = new HashMap<>();
 	private static List<String[]> cache_HGNC;
 	private static Map<String, String> cache_uniprot_HGNC;
@@ -980,7 +981,9 @@ public class DataQuery {
 	 */
 	public static Map<String, Integer> getTranscriptsCDNALength(String organism_core_database) {
 		
-		// TODO: caching
+		// check cache
+		if (DataQuery.cache_transcript_length.containsKey(organism_core_database))
+			return DataQuery.cache_transcript_length.get(organism_core_database);
 		
 		Map <String, Integer> transcript_bp_count = new HashMap<>();
 		Connection connection = null;
@@ -1020,7 +1023,8 @@ public class DataQuery {
 			}
 		}
 		
-		// TODO: caching
+		// caching
+		DataQuery.cache_transcript_length.put(organism_core_database, transcript_bp_count);
 		
 		return transcript_bp_count;
 	}

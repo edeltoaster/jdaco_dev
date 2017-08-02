@@ -559,14 +559,14 @@ public class TranscriptAbundanceReader {
 	}
 	
 	/**
-	 * Reads TCGA normalized isoform RSEM files of UCSC transcripts (gzipped also fine, ending .gz assumed there)
+	 * Reads TCGA quantile-normalized isoform RSEM files of UCSC transcripts (gzipped also fine, ending .gz assumed there)
 	 * and returns either transcripts or genes and their expression level
 	 * @param file
 	 * @param transcript_threshold
 	 * @param boolean return_gene_level
 	 * @return map Ensembl transcript or gene -> RSEM (if transcript > threshold)
 	 */
-	public static Map<String, Float> readTCGAIsoformRSEMFile(String file, double transcript_threshold, boolean return_gene_level) {
+	public static Map<String, Float> readTCGAIsoformRSEMFile(String file, double transcript_threshold, boolean return_gene_level, boolean length_normalization) {
 		Map<String, Float> abundance = new HashMap<>(1024);
 		String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
 		Map<String, String> ucsc_to_ensembl = DataQuery.getUSCStoTranscriptMap(db);
@@ -587,7 +587,7 @@ public class TranscriptAbundanceReader {
 				float rsem = Float.parseFloat(split[1]);
 				
 				// ensures consistency across transcr./genes.
-				if (!ucsc_to_ensembl.containsKey(transcript) || rsem <= transcript_threshold)
+				if (!ucsc_to_ensembl.containsKey(transcript))
 					continue;
 				
 				// UCSC -> Ensembl
@@ -609,6 +609,14 @@ public class TranscriptAbundanceReader {
 			} catch (Exception e) {
 			}
 		}
+		
+		// normalizes counts by the length of the mapped transcripts to increase comparability between transcripts
+		if (length_normalization) {
+			abundance = TranscriptAbundanceReader.normalizeByTranscriptLength(abundance, db);
+		}
+		
+		// check for threshold
+		abundance.entrySet().removeIf(e -> e.getValue().floatValue() <= transcript_threshold);
 		
 		// if gene-level wanted: convert
 		if (return_gene_level) {
@@ -644,7 +652,7 @@ public class TranscriptAbundanceReader {
 	 * @return map Ensembl transcript -> RSEM (if > threshold)
 	 */
 	public static Map<String, Float> readTCGAIsoformRSEM(String file, double threshold) {
-		return readTCGAIsoformRSEMFile(file, threshold, false);
+		return readTCGAIsoformRSEMFile(file, threshold, false, false);
 	}
 	
 	/**
@@ -654,7 +662,7 @@ public class TranscriptAbundanceReader {
 	 * @return map Ensembl gene -> RSEM (if any of its transcripts above threshold)
 	 */
 	public static Map<String, Float> readTCGAIsoformRSEMAsGenes(String file, double transcript_threshold) {
-		return readTCGAIsoformRSEMFile(file, transcript_threshold, true);
+		return readTCGAIsoformRSEMFile(file, transcript_threshold, true, false);
 	}
 	
 	/**
@@ -724,7 +732,7 @@ public class TranscriptAbundanceReader {
 	 * @return set of transcribed Ensembl genes with transcripts above threshold
 	 */
 	public static Set<String> getGeneAbundanceFromTCGAIsoformRSEM(String file, double threshold) {
-		return readTCGAIsoformRSEMFile(file, threshold, true).keySet();
+		return readTCGAIsoformRSEMFile(file, threshold, true, false).keySet();
 	}
 	
 	/**
@@ -970,6 +978,24 @@ public class TranscriptAbundanceReader {
 		}
 		
 		return tpms;
+	}
+	
+	/**
+	 * Normalizes transcript count data by the length of the mapped transcript
+	 * @param expr_data
+	 * @return length-normalized data
+	 */
+	public static Map<String, Float> normalizeByTranscriptLength(Map<String, Float> expr_data, String ensembl_db) {
+		Map<String, Integer> transcript_length = DataQuery.getTranscriptsCDNALength(ensembl_db);
+		Map<String, Float> norm_data = new HashMap<>();
+		
+		for (String transcript:expr_data.keySet()) {
+			if (!transcript_length.containsKey(transcript))
+				continue;
+			norm_data.put(transcript, expr_data.get(transcript) / transcript_length.get(transcript));
+		}
+		
+		return norm_data;
 	}
 	
 	/**
