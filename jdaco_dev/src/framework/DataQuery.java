@@ -974,6 +974,58 @@ public class DataQuery {
 	}
 	
 	/**
+	 * Queries Ensembl for length information of transcripts
+	 * @param organism_core_database
+	 * @return map of Ensembl transcripts to length of exons in bp
+	 */
+	public static Map<String, Integer> getTranscriptsCDNALength(String organism_core_database) {
+		
+		// TODO: caching
+		
+		Map <String, Integer> transcript_bp_count = new HashMap<>();
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, exon.seq_region_start, exon.seq_region_end FROM transcript, exon_transcript, exon "
+					+ "WHERE transcript.transcript_id = exon_transcript.transcript_id AND exon.exon_id = exon_transcript.exon_id");
+			
+			while (rs.next()) {
+				String transcript = rs.getString(1);
+				int start = rs.getInt(2);
+				int end = rs.getInt(3);
+				int length = 1 + end - start;
+				transcript_bp_count.put(transcript, transcript_bp_count.getOrDefault(transcript, 0) + length);
+			}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ENSEMBL");
+			
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get transcript length data from ENSEMBL in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			DataQuery.switchServer();
+			
+			return getTranscriptsCDNALength(organism_core_database);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
+		}
+		
+		// TODO: caching
+		
+		return transcript_bp_count;
+	}
+	
+	/**
 	 * Returns those translated Ensembl transcripts that are associated with either "nonsense_mediated_decay" or "non_stop_decay".
 	 * @param organism_core_database
 	 * @return
