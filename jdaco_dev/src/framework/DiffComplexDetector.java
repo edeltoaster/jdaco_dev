@@ -28,6 +28,7 @@ public class DiffComplexDetector {
 	private final Map<String, QuantDACOResultSet> group2;
 	private final double FDR;
 	private final boolean parametric;
+	private final boolean paired;
 	private final boolean incorporate_supersets;
 	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	
@@ -48,11 +49,12 @@ public class DiffComplexDetector {
 	// helper objects
 	private final ForkJoinPool pool;
 	
-	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean incorporate_supersets, int no_threads) {
+	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, int no_threads) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
 		this.parametric = parametric;
+		this.paired = paired;
 		this.incorporate_supersets = incorporate_supersets;
 		this.no_threads = no_threads;
 		
@@ -94,11 +96,13 @@ public class DiffComplexDetector {
 			System.exit(1);
 		}
 		
+		// TODO: add paired testing
+		
 		// determine differential abundance, apply multiple hypothesis correction and filter to significant seed variants
 		if (this.parametric) // parametric Welch test
-			this.significant_variants_qvalues = this.determinePValuesParametric();
+			this.significant_variants_qvalues = this.determineUnpairedPValuesParametric();
 		else // non-parametric MWU test
-			this.significant_variants_qvalues = this.determinePValuesNonParametric();
+			this.significant_variants_qvalues = this.determineUnpairedPValuesNonParametric();
 		
 		// sort from most to least significant
 		this.significance_sorted_variants = new ArrayList<>(this.significant_variants_qvalues.keySet());
@@ -121,6 +125,7 @@ public class DiffComplexDetector {
 		this.group2 = null;
 		this.FDR = FDR;
 		this.parametric = false;
+		this.paired = false;
 		this.incorporate_supersets = false;
 		this.no_threads = no_threads;
 		
@@ -214,7 +219,7 @@ public class DiffComplexDetector {
 	 * Applies parametric heteroscedastic two-sample t-test/Welch test and FDR-correction
 	 * @return
 	 */
-	private Map<HashSet<String>, Double> determinePValuesParametric() {
+	private Map<HashSet<String>, Double> determineUnpairedPValuesParametric() {
 		TTest tt = new TTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
 		for (HashSet<String> variant:this.seed_combination_variants) {
@@ -231,7 +236,7 @@ public class DiffComplexDetector {
 	 * Applies non-parametric MWU test and FDR-correction
 	 * @return
 	 */
-	private Map<HashSet<String>, Double> determinePValuesNonParametric() {
+	private Map<HashSet<String>, Double> determineUnpairedPValuesNonParametric() {
 		MannWhitneyUTest mwu = new MannWhitneyUTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
 		for (HashSet<String> variant:this.seed_combination_variants) {
@@ -271,7 +276,6 @@ public class DiffComplexDetector {
 		}
 	}
 
-	// TODO: think about what is helpful, probably inherit classes that are more specific, like TF complexes
 	
 	/**
 	 * Returns data of group1
@@ -298,11 +302,19 @@ public class DiffComplexDetector {
 	}
 
 	/**
-	 * Returns the if a parametric test or a non-parametric test was used
+	 * Returns the if parametric tests or non-parametric tests were used
 	 * @return
 	 */
-	public boolean getParametricTestUsed() {
+	public boolean getParametricTestsUsed() {
 		return this.parametric;
+	}
+	
+	/**
+	 * Returns the if a paired tests were used
+	 * @return
+	 */
+	public boolean getPairedTestsUsed() {
+		return this.paired;
 	}
 	
 	/**

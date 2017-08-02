@@ -44,7 +44,7 @@ public class check_complexes_quant_pluri {
 		}
 		
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.01, false, check_supersets, 4);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.01, false, false, check_supersets, 4);
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
 		List<String> res_pos = new LinkedList<>();
