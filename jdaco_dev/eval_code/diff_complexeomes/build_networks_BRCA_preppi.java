@@ -9,11 +9,12 @@ import framework.PPIN;
 import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
-public class build_networks_ENC_preppi {
-	static String expr_folder = "quantified_samples/"; // intended to be run on server
-	static String network_folder = "ENCODE_networks/";
+public class build_networks_BRCA_preppi {
+	static String expr_folder = "expr_data/"; // intended to be run on server
+	static String network_folder = "BRCA_networks_1/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
+	static double transcr_threshold = 1.0; // as in PPIXpress paper
 	
 	public static void preprocess() {
 		System.out.println("Original PPIN: " + "mixed_data/human_PrePPI_17_01_17_hc.txt.gz"); // PrePPI, jan 2017
@@ -35,13 +36,26 @@ public class build_networks_ENC_preppi {
 	
 	public static void process() {
 		
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(expr_folder, ".tsv.gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(expr_folder, ".txt.gz")) {
 			String path = f.getAbsolutePath();
 			String[] path_split = path.split("/");
 			String file_name = path_split[path_split.length-1].split("\\.")[0];
+			String[] sample_annotations = file_name.split("_");
+			String cancer_type = sample_annotations[0];
+			String patient = sample_annotations[1];
+			String quant_granularity = sample_annotations[2];
+			String condition = sample_annotations[3];
+			
+			if (!cancer_type.equals("BRCA"))
+				continue;
+			
+			if (!quant_granularity.equals("transcripts"))
+				continue;
+			
+			file_name = patient + "_" + condition;
 			System.out.println("Processing " + file_name);
 			
-			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readKallistoFile(path, 0.0), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
+			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(path, transcr_threshold), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
 			cn.getPPIN().writePPIN(network_folder + file_name + "_ppin.txt.gz");
 			cn.getDDIN().writeDDIN(network_folder + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(network_folder + file_name + "_major-transcripts.txt.gz");
