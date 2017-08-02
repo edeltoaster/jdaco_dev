@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TTest;
+import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 
 /**
  * Class for differential DACO complexes
@@ -60,6 +61,13 @@ public class DiffComplexDetector {
 		
 		pool = new ForkJoinPool(this.no_threads);
 		
+		// ensure every sample has a matching counterpart in the other group
+		if (this.paired)
+			if (!group1.keySet().equals(group2.keySet())) {
+				System.err.println("Non-equal sample groups supplied as matched data.");
+				System.exit(1);
+			}
+		
 		// determine potentially relevant seed variant combinations ...
 		this.seed_combination_variants = new HashSet<>();
 		for (QuantDACOResultSet qdr:group1.values())
@@ -96,13 +104,22 @@ public class DiffComplexDetector {
 			System.exit(1);
 		}
 		
-		// TODO: add paired testing
-		
 		// determine differential abundance, apply multiple hypothesis correction and filter to significant seed variants
-		if (this.parametric) // parametric Welch test
-			this.significant_variants_qvalues = this.determineUnpairedPValuesParametric();
-		else // non-parametric MWU test
-			this.significant_variants_qvalues = this.determineUnpairedPValuesNonParametric();
+		if (!this.paired) {
+			
+			if (this.parametric) // parametric Welch test
+				this.significant_variants_qvalues = this.determineUnpairedPValuesParametric();
+			else // non-parametric MWU test
+				this.significant_variants_qvalues = this.determineUnpairedPValuesNonParametric();
+			
+		} else {
+			
+			if (this.parametric) // paired t-test
+				this.significant_variants_qvalues = this.determinePairedPValuesParametric();
+			else // Wilcoxon signed-rank test
+				this.significant_variants_qvalues = this.determinePairedPValuesNonParametric();
+			
+		}
 		
 		// sort from most to least significant
 		this.significance_sorted_variants = new ArrayList<>(this.significant_variants_qvalues.keySet());
@@ -175,7 +192,8 @@ public class DiffComplexDetector {
 	}
 	
 	/**
-	 * Determines the abundance values of each seed variant found with the overall abundance of complexes containing the exact variant in the samples of the groups.
+	 * Determines the abundance values of each seed variant found with the overall abundance of complexes containing the exact variant in the samples of the groups. 
+	 * Ordering of samples is ensured to order paired data correctly.
 	 * @param group
 	 * @return map of seed variant and abundance in each sample
 	 */
@@ -196,7 +214,11 @@ public class DiffComplexDetector {
 			System.exit(1);
 		}
 		
-		for (String sample:group.keySet()) {
+		// ensures ordering of samples for paired data even when different datastructures are used
+		List<String> samples = new ArrayList<>(group.keySet());
+		samples.sort(String::compareTo);
+		
+		for (String sample:samples) {
 			Map<HashSet<String>, Double> sample_abundances = precomputed_sample_abundances.get(sample);
 			for (HashSet<String> variant:this.seed_combination_variants) {
 				double abundance_values = sample_abundances.getOrDefault(variant, 0.0);
@@ -242,6 +264,40 @@ public class DiffComplexDetector {
 		for (HashSet<String> variant:this.seed_combination_variants) {
 			// MWU test
 			double pm = mwu.mannWhitneyUTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
+			test_results.put(variant, pm);
+		}
+		
+		this.variants_raw_pvalues = test_results;
+		return Utilities.convertRawPValuesToBHFDR(test_results, this.FDR);
+	}
+	
+	/**
+	 * Applies paired t-test and FDR-correction
+	 * @return
+	 */
+	private Map<HashSet<String>, Double> determinePairedPValuesParametric() {
+		TTest tt = new TTest();
+		Map<HashSet<String>, Double> test_results = new HashMap<>();
+		for (HashSet<String> variant:this.seed_combination_variants) {
+			// paired t-test
+			double pm = tt.pairedT(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
+			test_results.put(variant, pm);
+		}
+		
+		this.variants_raw_pvalues = test_results;
+		return Utilities.convertRawPValuesToBHFDR(test_results, this.FDR);
+	}
+	
+	/**
+	 * Applies non-parametric Wilcoxon signed-rank test test and FDR-correction
+	 * @return
+	 */
+	private Map<HashSet<String>, Double> determinePairedPValuesNonParametric() {
+		WilcoxonSignedRankTest wsrt = new WilcoxonSignedRankTest();
+		Map<HashSet<String>, Double> test_results = new HashMap<>();
+		for (HashSet<String> variant:this.seed_combination_variants) {
+			// Wilcoxon signed-rank test
+			double pm = wsrt.wilcoxonSignedRank(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
 			test_results.put(variant, pm);
 		}
 		
