@@ -55,7 +55,7 @@ public class build_networks_BRCA_preppi {
 			file_name = patient + "_" + condition;
 			System.out.println("Processing " + file_name);
 			
-			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEM(path, transcr_threshold), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
+			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.convertToPMMeasure(TranscriptAbundanceReader.readTCGAIsoformRSEM(path, -1), transcr_threshold), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
 			cn.getPPIN().writePPIN(network_folder + file_name + "_ppin.txt.gz");
 			cn.getDDIN().writeDDIN(network_folder + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(network_folder + file_name + "_major-transcripts.txt.gz");

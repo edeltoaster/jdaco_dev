@@ -953,19 +953,17 @@ public class TranscriptAbundanceReader {
 	}
 	
 	/**
-	 * Convert expression data reported as FPKM to TPM values (better comparability across samples) 
-	 * @param fpkm_values (non-pruned FPKM expression values for dataset)
+	 * Convert expression data to counts/transcripts per million (better comparability across samples) 
+	 * @param expr_data (non-pruned expression values)
 	 * @param threshold
-	 * @return TPM values of transcripts/genes with expression above threshold
+	 * @return normalized "per million" values of transcripts/genes with expression above threshold
 	 */
-	public static Map<String, Float> convertFPKMtoTPM(Map<String, Float> fpkm_values, double threshold) {
-		double norm_sum = 0.0;
-		for (float f:fpkm_values.values())
-			norm_sum += f;
+	public static Map<String, Float> convertToPMMeasure(Map<String, Float> expr_data, double threshold) {
+		float norm_sum = expr_data.values().stream().reduce(0f, Float::sum);
 		Map<String, Float> tpms = new HashMap<>();
 		
-		for (String t:fpkm_values.keySet()) {
-			float f = (float) (1000000 * fpkm_values.get(t) / norm_sum);
+		for (String t:expr_data.keySet()) {
+			float f = (float) (1000000 * expr_data.get(t) / norm_sum);
 			
 			if (f > threshold)
 				tpms.put(t, f);
