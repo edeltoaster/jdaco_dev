@@ -27,7 +27,7 @@ public class check_BRCA_diffcomplexes {
 	public static String diff_compl_output_folder = "diffnet_results/";
 	public static int no_threads = 48;
 	
-	public static GOAnnotator goa = new GOAnnotator("9606", false, "mixed_data/stem_tags.txt");
+	public static GOAnnotator goa;
 	
 	
 	public static void check_paired_diff_compl(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, boolean parametric, boolean paired) {
@@ -143,6 +143,16 @@ public class check_BRCA_diffcomplexes {
 		System.out.println("folders and more overwritten for BRCA stuff");
 		System.out.println();
 		
+		if (new File("mixed_data/stem_tags_retrieved.txt.gz").exists())
+			goa = new GOAnnotator("mixed_data/stem_tags_retrieved.txt.gz");
+		else {
+			goa = new GOAnnotator("9606", false, "mixed_data/stem_tags.txt");
+			goa.writeRetrievedData("mixed_data/stem_tags_retrieved.txt.gz");
+		}
+		
+		goa.printTagInformation();
+		
+		System.out.println();
 		new File(diff_compl_output_folder).mkdir();
 		
 		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
