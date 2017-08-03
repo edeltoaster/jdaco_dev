@@ -1104,7 +1104,7 @@ public class DataQuery {
 		Set<String> entries = new HashSet<>();
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("http://www.ebi.ac.uk/QuickGO/GAnnotation?format=tsv&gz=true&limit=-1&db=UniProtKB&tax="+ taxon +"&goid=" + GO_id);
+			URL server = new URL("http://www.ebi.ac.uk/QuickGO-Old/GAnnotation?format=tsv&gz=true&limit=-1&db=UniProtKB&tax="+ taxon +"&goid=" + GO_id);
 			URLConnection connection = server.openConnection();
 			
 			// read
