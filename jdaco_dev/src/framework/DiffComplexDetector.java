@@ -320,6 +320,16 @@ public class DiffComplexDetector {
 			if (median_g2 > median_g1)
 				sign = "+";
 			
+			if (median_g1 == median_g2) {
+				// get means instead
+				double mean_g1 = Utilities.getMean(this.group1_abundances.get(variant));
+				double mean_g2 = Utilities.getMean(this.group2_abundances.get(variant));
+				
+				sign = "-";
+				if (mean_g2 > mean_g1)
+					sign = "+";
+			}
+			
 			significance_variants_directions.put(variant, sign);
 		}
 		
