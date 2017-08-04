@@ -280,7 +280,7 @@ public class DiffComplexDetector {
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
 		for (HashSet<String> variant:this.seed_combination_variants) {
 			// paired t-test
-			double pm = tt.pairedT(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
+			double pm = tt.pairedTTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
 			test_results.put(variant, pm);
 		}
 		
@@ -297,7 +297,7 @@ public class DiffComplexDetector {
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
 		for (HashSet<String> variant:this.seed_combination_variants) {
 			// Wilcoxon signed-rank test
-			double pm = wsrt.wilcoxonSignedRank(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
+			double pm = wsrt.wilcoxonSignedRankTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)), true);
 			test_results.put(variant, pm);
 		}
 		
