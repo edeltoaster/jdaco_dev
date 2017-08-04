@@ -50,7 +50,7 @@ public class DiffComplexDetector {
 	// helper objects
 	private final ForkJoinPool pool;
 	
-	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, int no_threads) {
+	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
@@ -69,11 +69,16 @@ public class DiffComplexDetector {
 			}
 		
 		// determine potentially relevant seed variant combinations ...
-		this.seed_combination_variants = new HashSet<>();
-		for (QuantDACOResultSet qdr:group1.values())
-			this.seed_combination_variants.addAll(qdr.getSeedToComplexMap().keySet());
-		for (QuantDACOResultSet qdr:group2.values())
-			this.seed_combination_variants.addAll(qdr.getSeedToComplexMap().keySet());
+		Map<HashSet<String>, Integer> count_map = new HashMap<>();
+		group1.values().stream().forEach(sample -> sample.getSeedToComplexMap().keySet().stream().forEach(var -> count_map.put(var, count_map.getOrDefault(var, 0) + 1)));
+		double min_count_g1 = min_variant_fraction * group1.size();
+		count_map.entrySet().removeIf(e -> e.getValue().intValue() < min_count_g1);
+		this.seed_combination_variants = new HashSet<>(count_map.keySet());
+		count_map.clear();
+		group2.values().stream().forEach(sample -> sample.getSeedToComplexMap().keySet().stream().forEach(var -> count_map.put(var, count_map.getOrDefault(var, 0) + 1)));
+		double min_count_g2 = min_variant_fraction * group2.size();
+		count_map.entrySet().removeIf(e -> e.getValue().intValue() < min_count_g2);
+		this.seed_combination_variants.addAll(count_map.keySet());
 		
 		// ... and subsets (if necessary)
 		if (this.incorporate_supersets) {
@@ -129,6 +134,18 @@ public class DiffComplexDetector {
 		
 		pool.shutdownNow();
 	}
+	
+	/**
+	 * Minimal constructor
+	 * @param group1
+	 * @param group2
+	 * @param FDR
+	 * @param parametric
+	 * @param paired
+	 */
+	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired) {
+		this(group1, group2, FDR, parametric, paired, false, 0.0, Runtime.getRuntime().availableProcessors());
+	} 
 	
 	/**
 	 * Constructor only for testing

@@ -14,6 +14,7 @@ public class BRCA_definitions {
 	static boolean parametric = false;
 	static boolean paired = true;
 	static boolean check_supersets = false;
+	static double min_variant_fraction = 0.5;
 	
 	static int no_threads = 48;
 	
@@ -39,6 +40,7 @@ public class BRCA_definitions {
 		System.out.println("parametric : " + parametric);
 		System.out.println("paired : " + paired);
 		System.out.println("checking supersets : " + check_supersets);
+		System.out.println("min variant fraction : " + min_variant_fraction);
 		
 		System.out.println("no_threads : " + no_threads);
 		
