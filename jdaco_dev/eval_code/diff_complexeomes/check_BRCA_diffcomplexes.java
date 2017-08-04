@@ -54,7 +54,7 @@ public class check_BRCA_diffcomplexes {
 			
 			String sign = dcd.getSignificantVariantsDirections().get(variant);
 			
-			String tf_comb = String.join(" / ", variant.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()));
+			String tf_comb = variant.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
 			double pval = dcd.getSignificantVariantsQValues().get(variant);
 			involved_tfs.addAll(variant);
 			String out_string = sign + " " + tf_comb + " -> " + String.format(Locale.US, "%.4g", pval);
