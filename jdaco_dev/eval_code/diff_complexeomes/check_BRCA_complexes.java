@@ -13,27 +13,25 @@ import java.util.stream.Collectors;
 
 import framework.BindingDataHandler;
 import framework.DataQuery;
-import framework.DiffSeedVarDetector;
-import framework.DiffSeedVarDetector.SPEnrichment;
+import framework.DiffComplexDetector;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
 
 
-public class check_BRCA_diffcomplexes {
+public class check_BRCA_complexes {
 	
 	public static Map<String, String> up_name_map;
 	
 	public static void check_paired_diff_compl(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2) {
-		String output_folder = BRCA_definitions.diff_compl_output_folder;
+		String output_folder = "cdiffnet_results_99_5_-25-25/";
 	
 		Set<String> interesting_targets = new HashSet<>();
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffSeedVarDetector dcd = new DiffSeedVarDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.check_supersets, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
 		
-		List<HashSet<String>> tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
 		Map<String, String> summarized_effect = new HashMap<>();
 		Map<String, String> abundances = new HashMap<>();
@@ -42,22 +40,31 @@ public class check_BRCA_diffcomplexes {
 		List<String> res_pos_all = new LinkedList<>();
 		List<String> res_neg_all = new LinkedList<>();
 		
-		System.out.println(dcd.getNumberOfTests() + " TF variants tested.");
-		System.out.println(dcd.getSignificanceSortedVariants().size() + " diff. TF variants.");
+		System.out.println(dcd.getNumberOfTests() + " TF complexes tested.");
+		System.out.println(dcd.getSignificanceSortedVariants().size() + " diff. TF complexes.");
 		
 		if (dcd.getSignificanceSortedVariants().size() == 0) {
 			System.out.println();
 			return;
 		}
 		
-		for (HashSet<String> variant:dcd.getSignificanceSortedVariants()) {
+		Map<HashSet<String>, List<HashSet<String>>> tfs_to_complexes = new HashMap<>();
+		for (HashSet<String> complex:dcd.getSignificanceSortedVariants()) {
 			
-			String sign = dcd.getSignificantVariantsDirections().get(variant);
+			String sign = dcd.getSignificantVariantsDirections().get(complex);
+			HashSet<String> tfs = new HashSet<>(complex);
+			tfs.retainAll(BRCA_definitions.seed);
 			
-			String tf_comb = variant.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
-			double pval = dcd.getSignificantVariantsQValues().get(variant);
-			involved_tfs.addAll(variant);
-			String out_string = sign + " " + tf_comb + " -> " + String.format(Locale.US, "%.4g", pval);
+			if (!tfs_to_complexes.containsKey(tfs))
+				tfs_to_complexes.put(tfs, new LinkedList<HashSet<String>>());
+			tfs_to_complexes.get(tfs).add(complex);
+			
+			String compl_string = complex.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
+			String tfs_string = tfs.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
+			double pval = dcd.getSignificantVariantsQValues().get(complex);
+			involved_tfs.addAll(tfs);
+			
+			String out_string = sign + " " + tfs_string + " : " + compl_string + " -> " + String.format(Locale.US, "%.4g", pval);
 			
 			// distinguish between increased/positive abundance and diminishing/negative abundance
 			if (sign.equals("-")) {
@@ -67,14 +74,11 @@ public class check_BRCA_diffcomplexes {
 				res_pos_all.add(out_string);
 			}
 			
-			tf_variants.add(variant);
-			directions.put(variant.toString(), sign);
-			
-			String[] annotation_data = DiffSeedVarDetector.getSortedComplexesAnnotations(variant, sign, BRCA_definitions.goa, group1, group2);
-			effect.put(variant.toString(), annotation_data[1]);
-			summarized_effect.put(variant.toString(), annotation_data[2]);
-			actual_complexes.put(variant.toString(), annotation_data[0]);
-			abundances.put(variant.toString(), annotation_data[3]);
+			directions.put(tfs.toString(), sign);
+		}
+		
+		for (HashSet<String> tf_comb:tfs_to_complexes.keySet()) {
+			actual_complexes.put(tf_comb.toString(), String.join(",", tfs_to_complexes.get(tf_comb).stream().map(c -> String.join("/", c.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()))).collect(Collectors.toList())));
 		}
 		
 		System.out.println(res_pos_all.size() +"+, " + res_neg_all.size() + "-");
@@ -86,6 +90,7 @@ public class check_BRCA_diffcomplexes {
 		Utilities.writeEntries(res_neg_all, output_folder + "res_neg_all.txt");
 		
 		interesting_targets.addAll(involved_tfs);
+		
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
 		BindingDataHandler bdh = new BindingDataHandler(BRCA_definitions.binding_data, involved_tfs, 0.0001, interesting_targets);
 		
@@ -94,7 +99,7 @@ public class check_BRCA_diffcomplexes {
 		 */
 		
 		System.out.println("Building ...");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(tf_variants, bdh, BRCA_definitions.d_min, BRCA_definitions.d_max, BRCA_definitions.no_threads, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(tfs_to_complexes.keySet(), bdh, BRCA_definitions.d_min, BRCA_definitions.d_max, BRCA_definitions.no_threads, 1);
 		System.out.println(regnet.getSizesStr());
 		regnet.writeRegulatoryNetwork(output_folder + "regnet.txt");
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
@@ -109,27 +114,6 @@ public class check_BRCA_diffcomplexes {
 		System.out.println("SCC: " + regnet.getSizesStr());
 		regnet.writeRegulatoryNetwork(output_folder + "regnet_pruned.txt");
 		regnet.writeNodeTable(output_folder + "nodetable_pruned.txt", annotational_data);
-		
-		/**
-		 * Playing around with seed protein enrichment
-		 */
-		
-		System.out.println("Calculating TF enrichment ...");
-		SPEnrichment tf_enrich = dcd.calculateTFEnrichment(BRCA_definitions.qvalue, BRCA_definitions.SPEnrich_iterations, BRCA_definitions.SPEnrich_compl_part_threshold);
-		List<String> pos_tf_enrich_out = new LinkedList<>();
-		List<String> neg_tf_enrich_out = new LinkedList<>();
-		for (String tf:tf_enrich.getSignificanceSortedSeedProteins()) {
-			String dir = tf_enrich.getSignificantSeedProteinDirections().get(tf);
-			String out = tf + " " + up_name_map.getOrDefault(tf, tf) + " " + tf_enrich.getSignificantSeedProteinQvalues().get(tf);
-			
-			if (dir.equals("+"))
-				pos_tf_enrich_out.add(out);
-			else
-				neg_tf_enrich_out.add(out);
-		}
-		Utilities.writeEntries(pos_tf_enrich_out, output_folder + "tf_enrich_pos.txt");
-		Utilities.writeEntries(neg_tf_enrich_out, output_folder + "tf_enrich_neg.txt");
-		System.out.println();
 	}
 
 	public static void main(String[] args) {
