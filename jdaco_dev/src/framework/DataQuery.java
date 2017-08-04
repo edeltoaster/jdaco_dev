@@ -658,7 +658,7 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Translates collection of human UniProt accessions to a list of HGNC gene symbols
+	 * Translates collection of human UniProt accessions to a list of HGNC gene symbols.
 	 * @param input
 	 * @return
 	 */
@@ -774,6 +774,27 @@ public class DataQuery {
 		}
 		
 		return DataQuery.cache_uniprot_gene_map.get(organism_db).getOrDefault(Uniprot_acc, Uniprot_acc);
+	}
+	
+	/**
+	 * Translates collection of human UniProt accessions to a list of gene symbols.
+	 * @param input
+	 * @return
+	 */
+	public static List<String> batchGeneNamesFromProteins(Collection<String> input) {
+		
+		String organism_db = DataQuery.getEnsemblOrganismDatabaseFromProteins(input);
+		
+		// if not cached, get data
+		if (!DataQuery.cache_uniprot_gene_map.containsKey(organism_db)) {
+			DataQuery.getUniprotToGeneNameMap(organism_db);
+		}
+		
+		List<String> output = new LinkedList<String>();
+		for (String in:input)
+			output.add(cache_uniprot_gene_map.get(organism_db).getOrDefault(in, in));
+		
+		return output;
 	}
 	
 	/**
