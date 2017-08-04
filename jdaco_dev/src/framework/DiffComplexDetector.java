@@ -295,9 +295,15 @@ public class DiffComplexDetector {
 	private Map<HashSet<String>, Double> determinePairedPValuesNonParametric() {
 		WilcoxonSignedRankTest wsrt = new WilcoxonSignedRankTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
+		
+		// above 20 samples, test statistic W is approx. normally distributed
+		boolean compute_exact_p = true;
+		if (this.group1.size() > 20)
+			compute_exact_p = false;
+		
 		for (HashSet<String> variant:this.seed_combination_variants) {
 			// Wilcoxon signed-rank test
-			double pm = wsrt.wilcoxonSignedRankTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)), true);
+			double pm = wsrt.wilcoxonSignedRankTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)), compute_exact_p);
 			test_results.put(variant, pm);
 		}
 		
