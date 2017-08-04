@@ -11,7 +11,7 @@ import java.util.Set;
 
 import framework.BindingDataHandler;
 import framework.DataQuery;
-import framework.DiffComplexDetector;
+import framework.DiffSeedVarDetector;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
@@ -36,7 +36,7 @@ public class check_complexes_quant {
 		}
 		
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, 0.01, false, false, check_supersets, 0.0, 4);
+		DiffSeedVarDetector dcd = new DiffSeedVarDetector(group1, group2, 0.01, false, false, check_supersets, 0.0, 4);
 		Map<String, String> effect = new HashMap<>();
 		List<String> res_pos = new LinkedList<>();
 		List<HashSet<String>> tf_variants = new LinkedList<>();

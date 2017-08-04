@@ -12,8 +12,8 @@ import java.util.Set;
 import diff_complexeomes.definitions;
 import framework.BindingDataHandler;
 import framework.DataQuery;
-import framework.DiffComplexDetector;
-import framework.DiffComplexDetector.SPEnrichment;
+import framework.DiffSeedVarDetector;
+import framework.DiffSeedVarDetector.SPEnrichment;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
@@ -45,7 +45,7 @@ public class check_pluri_diffcomplexes {
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, false, definitions.check_supersets, 0.0, definitions.no_threads);
+		DiffSeedVarDetector dcd = new DiffSeedVarDetector(group1, group2, definitions.qvalue, definitions.parametric, false, definitions.check_supersets, 0.0, definitions.no_threads);
 		
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> pluri_effect = new HashMap<>();
@@ -91,7 +91,7 @@ public class check_pluri_diffcomplexes {
 				if (variant.stream().noneMatch(p -> allosome_proteins.contains(p)))
 					res_pos_all_noallo.add(out_string);
 				
-				String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(variant, sign, definitions.goa, group1, group2);
+				String[] annotation_data = DiffSeedVarDetector.getSortedComplexesAnnotations(variant, sign, definitions.goa, group1, group2);
 				pluri_effect.put(variant.toString(), annotation_data[1]);
 				pluri_summarized_effect.put(variant.toString(), annotation_data[2]);
 				pluri_actual_complexes.put(variant.toString(), annotation_data[0]);
@@ -109,7 +109,7 @@ public class check_pluri_diffcomplexes {
 				if (variant.stream().noneMatch(p -> allosome_proteins.contains(p)))
 					res_pos_pluri_noallo.add(out_string);
 				
-				annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(variant, sign, definitions.goa, group1, group2);
+				annotation_data = DiffSeedVarDetector.getSortedComplexesAnnotations(variant, sign, definitions.goa, group1, group2);
 				plurisub_effect.put(variant.toString(), annotation_data[1]);
 				plurisub_actual_complexes.put(variant.toString(), annotation_data[0]);
 				plurisub_abundances.put(variant.toString(), annotation_data[3]);

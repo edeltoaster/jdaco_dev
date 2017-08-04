@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 
 import framework.BindingDataHandler;
 import framework.DataQuery;
-import framework.DiffComplexDetector;
-import framework.DiffComplexDetector.SPEnrichment;
+import framework.DiffSeedVarDetector;
+import framework.DiffSeedVarDetector.SPEnrichment;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
@@ -31,7 +31,7 @@ public class check_BRCA_diffcomplexes {
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.check_supersets, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
+		DiffSeedVarDetector dcd = new DiffSeedVarDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.check_supersets, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
 		
 		List<HashSet<String>> tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
@@ -70,7 +70,7 @@ public class check_BRCA_diffcomplexes {
 			tf_variants.add(variant);
 			directions.put(variant.toString(), sign);
 			
-			String[] annotation_data = DiffComplexDetector.getSortedComplexesAnnotations(variant, sign, BRCA_definitions.goa, group1, group2);
+			String[] annotation_data = DiffSeedVarDetector.getSortedComplexesAnnotations(variant, sign, BRCA_definitions.goa, group1, group2);
 			effect.put(variant.toString(), annotation_data[1]);
 			summarized_effect.put(variant.toString(), annotation_data[2]);
 			actual_complexes.put(variant.toString(), annotation_data[0]);

@@ -22,7 +22,7 @@ import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
  * Class for differential DACO complexes
  * @author Thorsten Will
  */
-public class DiffComplexDetector {
+public class DiffSeedVarDetector {
 	
 	// given data
 	private final Map<String, QuantDACOResultSet> group1;
@@ -50,7 +50,7 @@ public class DiffComplexDetector {
 	// helper objects
 	private final ForkJoinPool pool;
 	
-	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
+	public DiffSeedVarDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
@@ -143,7 +143,7 @@ public class DiffComplexDetector {
 	 * @param parametric
 	 * @param paired
 	 */
-	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired) {
+	public DiffSeedVarDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired) {
 		this(group1, group2, FDR, parametric, paired, false, 0.0, Runtime.getRuntime().availableProcessors());
 	} 
 	
@@ -153,7 +153,7 @@ public class DiffComplexDetector {
 	 * @param FDR
 	 * @param no_threads
 	 */
-	public DiffComplexDetector(String raw_pvalues_medians_file, double FDR, int no_threads) {
+	public DiffSeedVarDetector(String raw_pvalues_medians_file, double FDR, int no_threads) {
 		// empty parameters
 		this.group1 = null;
 		this.group2 = null;
