@@ -67,6 +67,7 @@ public class DataQuery {
 	private static Map<String, Map<String, String>> cache_ucsc = new HashMap<>();
 	private static Map<String, Map<String, Integer>> cache_transcript_length = new HashMap<>();
 	private static Map<String, String> cache_ensembl_db = new HashMap<>();
+	private static Map<String, Map<String, String>> cache_uniprot_gene_map = new HashMap<>();
 	private static List<String[]> cache_HGNC;
 	private static Map<String, String> cache_uniprot_HGNC;
 	private static Map<String, String> uniprot_sec_accs;
@@ -674,15 +675,14 @@ public class DataQuery {
 		
 		List<String> output = new LinkedList<String>();
 		for (String in:input)
-			if (cache_uniprot_HGNC.containsKey(in))
-				output.add(cache_uniprot_HGNC.get(in));
+			output.add(cache_uniprot_HGNC.getOrDefault(in, in));
 		
 		return output;
 	}
 	
 	/**
 	 * Translates a human UniProt accessions to a HGNC gene symbol,
-	 * returns an empty string if not mappable.
+	 * returns the UniProt accession if not mappable.
 	 * @param Uniprot_acc
 	 * @return
 	 */
@@ -697,18 +697,24 @@ public class DataQuery {
 			}
 		}
 		
-		return cache_uniprot_HGNC.getOrDefault(Uniprot_acc, "");
+		return cache_uniprot_HGNC.getOrDefault(Uniprot_acc, Uniprot_acc);
 	}
 	
 	/**
-	 * Retrieves naming data to provide Uniprot -> gene name map
+	 * Retrieves naming data to provide Uniprot -> gene name map.
 	 * @return
 	 */
 	public static Map<String, String> getUniprotToGeneNameMap(Collection<String> sample_proteins) {
+		
 		if (sample_proteins.size() == 0)
 			return new HashMap<String, String>();
 		
 		String organism_db = DataQuery.getEnsemblOrganismDatabaseFromProteins(sample_proteins);
+		
+		// get from cache
+		if (DataQuery.cache_uniprot_gene_map.containsKey(organism_db))
+			return DataQuery.cache_uniprot_gene_map.get(organism_db);
+		
 		Map<String, String> gene_to_name = DataQuery.getGenesCommonNames(organism_db);
 		Map<String, String> up_to_name = new HashMap<>();
 		for (String[] data:DataQuery.getGenesTranscriptsProteins(organism_db)) {
@@ -720,7 +726,54 @@ public class DataQuery {
 		// remove broken naming information
 		up_to_name.entrySet().removeIf(e -> e.getValue() == null);
 		
+		// save in cache
+		DataQuery.cache_uniprot_gene_map.put(organism_db, up_to_name);
+		
 		return up_to_name;
+	}
+	
+	/**
+	 * Retrieves naming data to provide Uniprot -> gene name map.
+	 * @return
+	 */
+	public static Map<String, String> getUniprotToGeneNameMap(String organism_db) {
+		
+		// get from cache
+		if (DataQuery.cache_uniprot_gene_map.containsKey(organism_db))
+			return DataQuery.cache_uniprot_gene_map.get(organism_db);
+		
+		Map<String, String> gene_to_name = DataQuery.getGenesCommonNames(organism_db);
+		Map<String, String> up_to_name = new HashMap<>();
+		for (String[] data:DataQuery.getGenesTranscriptsProteins(organism_db)) {
+			String gene = data[0];
+			String protein = data[2];
+			up_to_name.put(protein, gene_to_name.get(gene));
+		}
+		
+		// remove broken naming information
+		up_to_name.entrySet().removeIf(e -> e.getValue() == null);
+		
+		// save in cache
+		DataQuery.cache_uniprot_gene_map.put(organism_db, up_to_name);
+		
+		return up_to_name;
+	}
+	
+	/**
+	 * Translates a human UniProt accessions to a gene symbol,
+	 * returns the UniProt accession if not mappable.
+	 * @param Uniprot_acc
+	 * @return
+	 */
+	public static String getGeneNameFromProtein(String Uniprot_acc) {
+		String organism_db = DataQuery.getEnsemblOrganismDatabaseFromName(DataQuery.getOrganismFromUniprot(Uniprot_acc));
+		
+		// if not cached, get data
+		if (!DataQuery.cache_uniprot_gene_map.containsKey(organism_db)) {
+			DataQuery.getUniprotToGeneNameMap(organism_db);
+		}
+		
+		return DataQuery.cache_uniprot_gene_map.get(organism_db).getOrDefault(Uniprot_acc, Uniprot_acc);
 	}
 	
 	/**
