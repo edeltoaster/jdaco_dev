@@ -30,7 +30,7 @@ public class check_BRCA_complexes {
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, false, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
 		
 		Map<String, String> effect = new HashMap<>();
 		Map<String, String> summarized_effect = new HashMap<>();

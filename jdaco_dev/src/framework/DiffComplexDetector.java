@@ -27,10 +27,11 @@ public class DiffComplexDetector {
 	private final double FDR;
 	private final boolean parametric;
 	private final boolean paired;
+	private final boolean incorporate_supersets;
 	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	
 	// processed / determined data
-	private final Set<HashSet<String>> relevant_complexes;
+	private final Map<HashSet<String>, LinkedList<HashSet<String>>> relevant_complexes;
 	private final Map<HashSet<String>, LinkedList<Double>> group1_abundances;
 	private final Map<HashSet<String>, LinkedList<Double>> group2_abundances;
 	private Map<HashSet<String>, Double> group1_medians;
@@ -45,12 +46,13 @@ public class DiffComplexDetector {
 	// helper objects
 	private final ForkJoinPool pool;
 	
-	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, double min_variant_fraction, int no_threads) {
+	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
 		this.parametric = parametric;
 		this.paired = paired;
+		this.incorporate_supersets = incorporate_supersets;
 		this.no_threads = no_threads;
 		
 		pool = new ForkJoinPool(this.no_threads);
@@ -62,17 +64,37 @@ public class DiffComplexDetector {
 				System.exit(1);
 			}
 		
-		// determine potentially relevant seed variant combinations ...
-		Map<HashSet<String>, Integer> count_map = new HashMap<>();
-		group1.values().stream().forEach(sample -> sample.getSeedToComplexMap().values().stream().forEach(cl -> cl.stream().forEach(c -> count_map.put(c, count_map.getOrDefault(c, 0) + 1))));
+		// bookmark and countall potentially relevant complexes ...
+		Map<HashSet<String>, Integer> count_map_g1 = new HashMap<>();
+		group1.values().stream().forEach(sample -> sample.getSeedToComplexMap().values().stream().forEach(cl -> cl.stream().forEach(c -> count_map_g1.put(c, count_map_g1.getOrDefault(c, 0) + 1))));
+		Map<HashSet<String>, Integer> count_map_g2 = new HashMap<>();
+		group2.values().stream().forEach(sample -> sample.getSeedToComplexMap().values().stream().forEach(cl -> cl.stream().forEach(c -> count_map_g2.put(c, count_map_g2.getOrDefault(c, 0) + 1))));
+		Set<HashSet<String>> unfiltered_complexes = new HashSet<>(count_map_g1.keySet());
+		unfiltered_complexes.addAll(count_map_g2.keySet());
+		
+		// check if above consideration threshold and determine subsets (if necessary)
+		this.relevant_complexes = new HashMap<>();
 		double min_count_g1 = min_variant_fraction * group1.size();
-		count_map.entrySet().removeIf(e -> e.getValue().intValue() < min_count_g1);
-		this.relevant_complexes = new HashSet<>(count_map.keySet());
-		count_map.clear();
-		group2.values().stream().forEach(sample -> sample.getSeedToComplexMap().values().stream().forEach(cl -> cl.stream().forEach(c -> count_map.put(c, count_map.getOrDefault(c, 0) + 1))));
 		double min_count_g2 = min_variant_fraction * group2.size();
-		count_map.entrySet().removeIf(e -> e.getValue().intValue() < min_count_g2);
-		this.relevant_complexes.addAll(count_map.keySet());
+		for (HashSet<String> complex:unfiltered_complexes) {
+			this.relevant_complexes.put(complex, new LinkedList<HashSet<String>>());
+			this.relevant_complexes.get(complex).add(complex);
+			int count_g1 = count_map_g1.getOrDefault(complex, 0);
+			int count_g2 = count_map_g2.getOrDefault(complex, 0);
+			
+			if (this.incorporate_supersets)
+				for (HashSet<String> current_complex:unfiltered_complexes) 
+					if (current_complex.containsAll(complex) && !current_complex.equals(complex)) {
+						this.relevant_complexes.get(complex).add(current_complex);
+						count_g1 += count_map_g1.getOrDefault(current_complex, 0);
+						count_g2 += count_map_g2.getOrDefault(current_complex, 0);
+					}
+			// filter
+			if (count_g1 < min_count_g1 && count_g2 < min_count_g2)
+				relevant_complexes.remove(complex);
+		}
+		
+		// TODO: remove subsets if exact set is also above threshold!
 
 		// determine abundance values
 		this.group1_abundances = this.determineComplexesAbundances(group1);
@@ -141,7 +163,7 @@ public class DiffComplexDetector {
 	private Map<HashSet<String>, LinkedList<Double>> determineComplexesAbundances(Map<String, QuantDACOResultSet> group) {
 		// init empty data structure for abundance data
 		Map<HashSet<String>, LinkedList<Double>> group_abundances = new HashMap<>();
-		for (HashSet<String> complex:this.relevant_complexes) {
+		for (HashSet<String> complex:this.relevant_complexes.keySet()) {
 			group_abundances.put(complex, new LinkedList<Double>());
 		}
 		
@@ -154,14 +176,22 @@ public class DiffComplexDetector {
 			System.exit(1);
 		}
 		
-		// ensures ordering of samples for paired data even when different datastructures are used
+		// ensures ordering of samples for paired data even when different data structures are used
 		List<String> samples = new ArrayList<>(group.keySet());
 		samples.sort(String::compareTo);
 		
 		for (String sample:samples) {
 			Map<HashSet<String>, Double> sample_abundances = precomputed_sample_abundances.get(sample);
-			for (HashSet<String> complex:this.relevant_complexes) {
+			for (HashSet<String> complex:this.relevant_complexes.keySet()) {
 				double abundance_values = sample_abundances.getOrDefault(complex, 0.0);
+				
+				// if intended, also take supersets into account
+				if (this.incorporate_supersets) {
+					for (HashSet<String> current_complex:this.relevant_complexes.get(complex)) { // sufficient to sum over sample as it is zero anyhow
+						abundance_values += sample_abundances.getOrDefault(current_complex, 0.0);
+					}
+				}
+				
 				group_abundances.get(complex).add(abundance_values);
 			}
 		}
@@ -176,7 +206,7 @@ public class DiffComplexDetector {
 	private Map<HashSet<String>, Double> determineUnpairedPValuesParametric() {
 		TTest tt = new TTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
-		for (HashSet<String> complex:this.relevant_complexes) {
+		for (HashSet<String> complex:this.relevant_complexes.keySet()) {
 			// two-sample two-tailed Welch test, t-test with differing variances (heteroscedastic)
 			double pm = tt.tTest(Utilities.getDoubleArray(this.group1_abundances.get(complex)), Utilities.getDoubleArray(this.group2_abundances.get(complex)));
 			test_results.put(complex, pm);
@@ -193,7 +223,7 @@ public class DiffComplexDetector {
 	private Map<HashSet<String>, Double> determineUnpairedPValuesNonParametric() {
 		MannWhitneyUTest mwu = new MannWhitneyUTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
-		for (HashSet<String> complex:this.relevant_complexes) {
+		for (HashSet<String> complex:this.relevant_complexes.keySet()) {
 			// MWU test
 			double pm = mwu.mannWhitneyUTest(Utilities.getDoubleArray(this.group1_abundances.get(complex)), Utilities.getDoubleArray(this.group2_abundances.get(complex)));
 			test_results.put(complex, pm);
@@ -210,7 +240,7 @@ public class DiffComplexDetector {
 	private Map<HashSet<String>, Double> determinePairedPValuesParametric() {
 		TTest tt = new TTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
-		for (HashSet<String> complex:this.relevant_complexes) {
+		for (HashSet<String> complex:this.relevant_complexes.keySet()) {
 			// paired t-test
 			double pm = tt.pairedTTest(Utilities.getDoubleArray(this.group1_abundances.get(complex)), Utilities.getDoubleArray(this.group2_abundances.get(complex)));
 			test_results.put(complex, pm);
@@ -233,7 +263,7 @@ public class DiffComplexDetector {
 		if (this.group1.size() > 20)
 			compute_exact_p = false;
 		
-		for (HashSet<String> complex:this.relevant_complexes) {
+		for (HashSet<String> complex:this.relevant_complexes.keySet()) {
 			// Wilcoxon signed-rank test
 			double pm = wsrt.wilcoxonSignedRankTest(Utilities.getDoubleArray(this.group1_abundances.get(complex)), Utilities.getDoubleArray(this.group2_abundances.get(complex)), compute_exact_p);
 			test_results.put(complex, pm);
@@ -275,8 +305,8 @@ public class DiffComplexDetector {
 	}
 	
 	public void printResults() {
-		for (HashSet<String> variant: this.significance_sorted_complexes) {
-			System.out.println(variant + " " + this.qvalues.get(variant));
+		for (HashSet<String> complex: this.significance_sorted_complexes) {
+			System.out.println(complex + " " + this.qvalues.get(complex));
 		}
 	}
 
@@ -322,10 +352,10 @@ public class DiffComplexDetector {
 	}
 	
 	/**
-	 * Returns all complexes assessed
+	 * Returns all (sub)complexes assessed and which variants of them are found
 	 * @return
 	 */
-	public Set<HashSet<String>> getRelevantComplexes() {
+	public Map<HashSet<String>, LinkedList<HashSet<String>>> getRelevantComplexes() {
 		return relevant_complexes;
 	}
 
