@@ -14,7 +14,9 @@ public class definitions {
 	
 	static double qvalue = 0.05;
 	static boolean parametric = false; // for 0s, Welch test not really helpful
+	static boolean paired = false;
 	static boolean check_supersets = false;
+	static double min_variant_fraction = 0.5;
 	
 	static int no_threads = 48;
 	
@@ -40,7 +42,9 @@ public class definitions {
 		
 		System.out.println("q-value : " + qvalue);
 		System.out.println("parametric : " + parametric);
+		System.out.println("paired : " + paired);
 		System.out.println("checking supersets : " + check_supersets);
+		System.out.println("min_variant_fraction : " + min_variant_fraction);
 		
 		System.out.println("no_threads : " + no_threads);
 		

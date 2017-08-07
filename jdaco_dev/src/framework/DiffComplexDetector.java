@@ -322,7 +322,7 @@ public class DiffComplexDetector {
 	 * All output is written to the specified folder.
 	 * @param output_folder
 	 */
-	public void diffTFCompl(String output_folder, GOAnnotator goa, String binding_data_path, double binding_data_threshold, int binding_d_min, int binding_d_max, boolean also_compute_SCC, Set<String> proteins_to_remove) {
+	public void diffTFComplAnalysis(String output_folder, GOAnnotator goa, String binding_data_path, double binding_data_threshold, int binding_d_min, int binding_d_max, boolean also_compute_SCC, Set<String> proteins_to_remove) {
 
 		// some first output
 		System.out.println(this.getNumberOfTests() + " complexes tested.");
@@ -359,7 +359,6 @@ public class DiffComplexDetector {
 				tfc_to_complexes.put(tfs, new LinkedList<HashSet<String>>());
 			tfc_to_complexes.get(tfs).add(complex);
 			
-			
 			String compl_string = complex.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
 			String tfs_string = tfs.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
 			double pval = this.getSignificantVariantsQValues().get(complex);
@@ -382,6 +381,43 @@ public class DiffComplexDetector {
 		Utilities.writeEntries(res_pos_all, output_folder + "res_pos_all.txt");
 		Utilities.writeEntries(res_neg_all, output_folder + "res_neg_all.txt");
 		
+		// do the same with some given proteins not considered
+		if (proteins_to_remove != null) {
+			res_pos_all.clear();
+			res_neg_all.clear();
+			for (HashSet<String> complex:this.getSignificanceSortedVariants()) {
+				
+				// skip complexes that involve a protein that should be removed/not be considered
+				if (complex.stream().anyMatch(p -> proteins_to_remove.contains(p)))
+					continue;
+				
+				String sign = this.getSignificantVariantsDirections().get(complex);
+				
+				// determine TFs that are involved
+				HashSet<String> tfs = new HashSet<>(complex);
+				tfs.retainAll(seed_tfs);
+				
+				String compl_string = complex.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
+				String tfs_string = tfs.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
+				double pval = this.getSignificantVariantsQValues().get(complex);
+				String out_string = sign + " " + tfs_string + " : " + compl_string + " -> " + String.format(Locale.US, "%.4g", pval);
+				
+				// distinguish between increased/positive abundance and diminishing/negative abundance
+				if (sign.equals("-")) {
+					res_neg_all.add(out_string);
+				} else {
+					res_pos_all.add(out_string);
+				}
+			}
+			
+			System.out.println(res_pos_all.size() +"+, " + res_neg_all.size() + "- diff. complexes (pruned).");
+			
+			// write results
+			if (!new File(output_folder).exists())
+				new File(output_folder).mkdir();
+			Utilities.writeEntries(res_pos_all, output_folder + "res_pos_pruned.txt");
+			Utilities.writeEntries(res_neg_all, output_folder + "res_neg_pruned.txt");
+		}
 		
 		/*
 		 * build regulatory network
@@ -415,8 +451,8 @@ public class DiffComplexDetector {
 		
 		// write annotation data
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
-		annotational_data.put("G1_med_abundance", med_abun_g1);
-		annotational_data.put("G2_med_abundance", med_abun_g2);
+		annotational_data.put("Med_abundance_G1", med_abun_g1);
+		annotational_data.put("Med_abundance_G2", med_abun_g2);
 		annotational_data.put("Direction", directions);
 		annotational_data.put("GO_details", GO_details);
 		annotational_data.put("GO_overall", GO_overall);

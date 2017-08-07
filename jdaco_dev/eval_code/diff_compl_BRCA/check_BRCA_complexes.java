@@ -38,9 +38,11 @@ public class check_BRCA_complexes {
 		System.out.println("normal samples : " + group1.size());
 		System.out.println("tumor samples : " + group2.size());
 		
+		System.out.println("Determining diff. complexes ...");
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.check_supersets, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
-		dcd.diffTFCompl(BRCA_definitions.diff_compl_output_folder, BRCA_definitions.goa, BRCA_definitions.binding_data, 0.0001, BRCA_definitions.d_min, BRCA_definitions.d_max, true, null);
+		dcd.diffTFComplAnalysis(BRCA_definitions.diff_compl_output_folder, BRCA_definitions.goa, BRCA_definitions.binding_data, 0.0001, BRCA_definitions.d_min, BRCA_definitions.d_max, true, null);
 		
+		System.out.println("Determining enriched TFs ...");
 		SPEnrichment tf_enrich = dcd.calculateSPEnrichment(BRCA_definitions.qvalue, BRCA_definitions.SPEnrich_iterations, BRCA_definitions.SPEnrich_compl_part_threshold);
 		tf_enrich.writeSignificantSeedProteins(BRCA_definitions.diff_compl_output_folder + "enriched_pos_TFs.txt", BRCA_definitions.diff_compl_output_folder + "enriched_neg_TFs");
 	}

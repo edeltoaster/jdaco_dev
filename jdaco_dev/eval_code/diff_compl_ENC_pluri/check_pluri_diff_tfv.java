@@ -18,7 +18,7 @@ import framework.RegulatoryNetwork;
 import framework.Utilities;
 
 
-public class check_pluri_diffcomplexes {
+public class check_pluri_diff_tfv {
 	
 	public static void main(String[] args) {
 		definitions.printParameters();
