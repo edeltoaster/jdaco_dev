@@ -1,9 +1,8 @@
-package diff_complexeomes;
+package diff_compl_ENC_pluri;
 
 
 import java.io.File;
 
-import diff_complexeomes.definitions;
 import framework.DACOResultSet;
 import framework.Utilities;
 

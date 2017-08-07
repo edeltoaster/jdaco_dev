@@ -1,4 +1,4 @@
-package diff_complexeomes;
+package diff_compl_ENC_pluri;
 
 
 import java.io.File;
@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
-import diff_complexeomes.definitions;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 

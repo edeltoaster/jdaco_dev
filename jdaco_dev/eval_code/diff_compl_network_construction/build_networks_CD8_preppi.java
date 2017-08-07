@@ -1,4 +1,4 @@
-package diff_complexeomes;
+package diff_compl_network_construction;
 
 import java.io.File;
 

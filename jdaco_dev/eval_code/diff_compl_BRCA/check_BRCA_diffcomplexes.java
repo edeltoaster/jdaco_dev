@@ -1,4 +1,4 @@
-package diff_complexeomes;
+package diff_compl_BRCA;
 
 
 import java.io.File;
@@ -111,11 +111,11 @@ public class check_BRCA_diffcomplexes {
 		regnet.writeNodeTable(output_folder + "nodetable_pruned.txt", annotational_data);
 		
 		/**
-		 * Playing around with seed protein enrichment
+		 * Seed protein enrichment
 		 */
 		
 		System.out.println("Calculating TF enrichment ...");
-		SPEnrichment tf_enrich = dcd.calculateTFEnrichment(BRCA_definitions.qvalue, BRCA_definitions.SPEnrich_iterations, BRCA_definitions.SPEnrich_compl_part_threshold);
+		SPEnrichment tf_enrich = dcd.calculateSPEnrichment(BRCA_definitions.qvalue, BRCA_definitions.SPEnrich_iterations, BRCA_definitions.SPEnrich_compl_part_threshold);
 		List<String> pos_tf_enrich_out = new LinkedList<>();
 		List<String> neg_tf_enrich_out = new LinkedList<>();
 		for (String tf:tf_enrich.getSignificanceSortedSeedProteins()) {

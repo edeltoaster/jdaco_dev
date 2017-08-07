@@ -1,4 +1,4 @@
-package diff_complexeomes;
+package diff_compl_network_construction;
 
 import java.io.File;
 
@@ -9,9 +9,9 @@ import framework.PPIN;
 import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
-public class build_networks_ENC_preppi {
-	static String expr_folder = "quantified_samples/"; // intended to be run on server
-	static String network_folder = "ENCODE_networks/";
+public class build_networks_BP_preppi {
+	static String expr_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_expr/";
+	static String network_folder = "/Users/tho/Desktop/BP_networks/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
 	
@@ -38,13 +38,15 @@ public class build_networks_ENC_preppi {
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(expr_folder, ".tsv.gz")) {
 			String path = f.getAbsolutePath();
 			String[] path_split = path.split("/");
+			String cell_type = path_split[path_split.length-2];
 			String file_name = path_split[path_split.length-1].split("\\.")[0];
-			System.out.println("Processing " + file_name);
+			String sample_name = cell_type + "-" + file_name;
+			System.out.println("Processing " + sample_name);
 			
-			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readKallistoFile(path, 0.0), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
-			cn.getPPIN().writePPIN(network_folder + file_name + "_ppin.txt.gz");
-			cn.getDDIN().writeDDIN(network_folder + file_name + "_ddin.txt.gz");
-			cn.writeProteinToAssumedTranscriptMap(network_folder + file_name + "_major-transcripts.txt.gz");
+			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readRSEMFile(path, 0.0, false), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
+			cn.getPPIN().writePPIN(network_folder + sample_name + "_ppin.txt.gz");
+			cn.getDDIN().writeDDIN(network_folder + sample_name + "_ddin.txt.gz");
+			cn.writeProteinToAssumedTranscriptMap(network_folder + sample_name + "_major-transcripts.txt.gz");
 			System.out.println(cn.getPPIN().getSizesStr());
 		}
 		

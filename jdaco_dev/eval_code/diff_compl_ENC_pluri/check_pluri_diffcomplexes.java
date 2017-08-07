@@ -1,4 +1,4 @@
-package diff_complexeomes;
+package diff_compl_ENC_pluri;
 
 
 import java.io.File;
@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import diff_complexeomes.definitions;
 import framework.BindingDataHandler;
 import framework.DataQuery;
 import framework.DiffSeedVarDetector;
@@ -204,7 +203,7 @@ public class check_pluri_diffcomplexes {
 		 */
 		
 		System.out.println("Calculating TF enrichment ...");
-		SPEnrichment tf_enrich = dcd.calculateTFEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
+		SPEnrichment tf_enrich = dcd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
 		List<String> pos_tf_enrich_out = new LinkedList<>();
 		List<String> neg_tf_enrich_out = new LinkedList<>();
 		for (String tf:tf_enrich.getSignificanceSortedSeedProteins()) {

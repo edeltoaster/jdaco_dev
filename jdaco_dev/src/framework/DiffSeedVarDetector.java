@@ -570,7 +570,7 @@ public class DiffSeedVarDetector {
 	 * @param complex_participation_cutoff
 	 * @return
 	 */
-	public SPEnrichment calculateTFEnrichment(double FDR, int iterations, int complex_participation_cutoff) {
+	public SPEnrichment calculateSPEnrichment(double FDR, int iterations, int complex_participation_cutoff) {
 		return new SPEnrichment(FDR, iterations, complex_participation_cutoff);
 	}
 	

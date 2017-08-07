@@ -1,4 +1,4 @@
-package diff_complexeomes;
+package diff_compl_BRCA;
 
 
 import java.io.File;
@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import framework.BindingDataHandler;
 import framework.DataQuery;
 import framework.DiffComplexDetector;
+import framework.DiffComplexDetector.SPEnrichment;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
@@ -23,14 +24,13 @@ public class check_BRCA_complexes {
 	
 	public static Map<String, String> up_name_map;
 	
-	public static void check_paired_diff_compl(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2) {
-		String output_folder = "cdiffnet_results_99_5_-25-25/";
+	public static void check_paired_diff_compl(String output_folder, Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2) {
 	
 		Set<String> interesting_targets = new HashSet<>();
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, false, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.check_supersets, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
 		
 		Map<String, String> effect = new HashMap<>();
 		Map<String, String> summarized_effect = new HashMap<>();
@@ -114,6 +114,27 @@ public class check_BRCA_complexes {
 		System.out.println("SCC: " + regnet.getSizesStr());
 		regnet.writeRegulatoryNetwork(output_folder + "regnet_pruned.txt");
 		regnet.writeNodeTable(output_folder + "nodetable_pruned.txt", annotational_data);
+		
+		/**
+		 * Seed protein enrichment
+		 */
+		
+		System.out.println("Calculating TF enrichment ...");
+		SPEnrichment tf_enrich = dcd.calculateSPEnrichment(BRCA_definitions.qvalue, BRCA_definitions.SPEnrich_iterations, BRCA_definitions.SPEnrich_compl_part_threshold);
+		List<String> pos_tf_enrich_out = new LinkedList<>();
+		List<String> neg_tf_enrich_out = new LinkedList<>();
+		for (String tf:tf_enrich.getSignificanceSortedSeedProteins()) {
+			String dir = tf_enrich.getSignificantSeedProteinDirections().get(tf);
+			String out = tf + " " + up_name_map.getOrDefault(tf, tf) + " " + tf_enrich.getSignificantSeedProteinQvalues().get(tf);
+			
+			if (dir.equals("+"))
+				pos_tf_enrich_out.add(out);
+			else
+				neg_tf_enrich_out.add(out);
+		}
+		Utilities.writeEntries(pos_tf_enrich_out, output_folder + "tf_enrich_pos.txt");
+		Utilities.writeEntries(neg_tf_enrich_out, output_folder + "tf_enrich_neg.txt");
+		System.out.println();
 	}
 
 	public static void main(String[] args) {
@@ -143,6 +164,6 @@ public class check_BRCA_complexes {
 		System.out.println("normal samples : " + group1.size());
 		System.out.println("tumor samples : " + group2.size());
 		
-		check_paired_diff_compl(group1, group2);
+		check_paired_diff_compl(BRCA_definitions.diff_compl_output_folder, group1, group2);
 	}
 }
