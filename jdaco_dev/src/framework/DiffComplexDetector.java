@@ -510,10 +510,6 @@ public class DiffComplexDetector {
 		
 		if (proteins_of_interest != null && POI_sign_tfcs.size() > 0) {
 			regnet = new RegulatoryNetwork(POI_sign_tfcs, bdh, binding_d_min, binding_d_max, no_threads, 1);
-			if (also_compute_SCC)
-				regnet.pruneToLargestSCCs();
-			if (proteins_to_remove != null)
-				regnet.removeProteinSet(proteins_to_remove);
 			System.out.println("POI: " + regnet.getSizesStr());
 			regnet.writeRegulatoryNetwork(output_folder + "regnet_POI.txt");
 			regnet.writeNodeTable(output_folder + "nodetable_POI.txt", annotational_data);
@@ -695,6 +691,7 @@ public class DiffComplexDetector {
 		// precompute naming data
 		Map<String, String> up_name = this.getUniprotToGeneMap();
 		Map<HashSet<String>, String> names_map = new HashMap<>();
+		// complexes sorted by p-val
 		complexes.stream().forEach(c -> names_map.put(c, String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList()))));
 		
 		// determine median abundance values

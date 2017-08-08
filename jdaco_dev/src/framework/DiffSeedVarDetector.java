@@ -389,10 +389,12 @@ public class DiffSeedVarDetector {
 		List<String> res_pos_all = new LinkedList<>();
 		List<String> res_neg_all = new LinkedList<>();
 		Map<HashSet<String>, List<HashSet<String>>> tfc_to_complexes = new HashMap<>();
+		Map<String, String> directions_map = new HashMap<>();
 		for (HashSet<String> tfc:this.getSignificanceSortedVariants()) {
 			
 			String sign = this.getSignificantVariantsDirections().get(tfc);
 			involved_tfs.addAll(tfc);
+			directions_map.put(tfc.toString(), sign);
 			
 			String compl_string = tfc.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
 			double pval = this.getSignificantVariantsQValues().get(tfc);
@@ -486,26 +488,25 @@ public class DiffSeedVarDetector {
 			Utilities.writeEntries(res_neg_all, output_folder + "res_neg_POI.txt");
 		}
 		
+		
 		/*
 		 * build regulatory network
 		 */
 		
 		// build information for regulatory network
-		Map<String, String> occ_across_samples = new HashMap<>();
+		//Map<String, String> occ_across_samples = new HashMap<>();
 		Map<String, String> med_abun_g1 = new HashMap<>();
 		Map<String, String> med_abun_g2 = new HashMap<>();
-		Map<String, String> directions = new HashMap<>();
 		Map<String, String> GO_details = new HashMap<>();
 		Map<String, String> GO_overall = new HashMap<>();
 		for (HashSet<String> tf_comb:tfc_to_complexes.keySet()) {
 			String[] annotation_output = this.getSPCAnnotations(tf_comb, tfc_to_complexes.get(tf_comb), goa);
 			String tfc = tf_comb.toString();
-			occ_across_samples.put(tfc, annotation_output[0]);
+			//occ_across_samples.put(tfc, annotation_output[0]);
 			med_abun_g1.put(tfc, annotation_output[1]);
 			med_abun_g2.put(tfc, annotation_output[2]);
-			directions.put(tfc, annotation_output[3]);
-			GO_details.put(tfc, annotation_output[4]);
-			GO_overall.put(tfc, annotation_output[5]);
+			GO_details.put(tfc, annotation_output[3]);
+			GO_overall.put(tfc, annotation_output[4]);
 		}
 		
 		// read binding data
@@ -522,7 +523,7 @@ public class DiffSeedVarDetector {
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();
 		annotational_data.put("Med_abundance_G1", med_abun_g1);
 		annotational_data.put("Med_abundance_G2", med_abun_g2);
-		annotational_data.put("Direction", directions);
+		annotational_data.put("Direction", directions_map);
 		annotational_data.put("GO_details", GO_details);
 		annotational_data.put("GO_overall", GO_overall);
 		regnet.writeNodeTable(output_folder + "nodetable.txt", annotational_data);
@@ -544,10 +545,6 @@ public class DiffSeedVarDetector {
 		
 		if (proteins_of_interest != null && POI_sign_tfcs.size() > 0) {
 			regnet = new RegulatoryNetwork(POI_sign_tfcs, bdh, binding_d_min, binding_d_max, no_threads, 1);
-			if (also_compute_SCC)
-				regnet.pruneToLargestSCCs();
-			if (proteins_to_remove != null)
-				regnet.removeProteinSet(proteins_to_remove);
 			System.out.println("POI: " + regnet.getSizesStr());
 			regnet.writeRegulatoryNetwork(output_folder + "regnet_POI.txt");
 			regnet.writeNodeTable(output_folder + "nodetable_POI.txt", annotational_data);
@@ -712,7 +709,7 @@ public class DiffSeedVarDetector {
 	
 	/**
 	 * Given the seed protein combinations occurring across samples, direction, sample data and a GOA definition, count and sort their appearances as well as their inferred GO annotations.
-	 * Returns [occurrences across samples, mean abundances group1 (rounded to 2 positions), mean abundances group2 (rounded to 2 positions), directions of change per complex, GO annotations details string, set of all GO annotations found]
+	 * Returns [occurrences across samples, mean abundances group1 (rounded to 2 positions), mean abundances group2 (rounded to 2 positions), GO annotations details string, set of all GO annotations found]
 	 * @param complexes
 	 * @param goa
 	 * @return
@@ -739,9 +736,6 @@ public class DiffSeedVarDetector {
 		occ_sorted_complexes.stream().forEach(c -> group2_med_abundances.put(c, Utilities.getMedian(this.group2.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault(c, 0.0)).collect(Collectors.toList()))));
 		String abun_g2_string = String.join(",", occ_sorted_complexes.stream().map(c -> names_map.get(c) + ":" + String.format(Locale.US, "%.2g", group2_med_abundances.get(c)) ).collect(Collectors.toList()));
 		
-		// get direction of change
-		String directions_string = String.join(",", occ_sorted_complexes.stream().map(c -> names_map.get(c) + ":" + this.getSignificantVariantsDirections().get(c)).collect(Collectors.toList()));
-		
 		// annotate with GO annotations
 		Map<Set<String>, String> GOA_map = new HashMap<>();
 		occ_sorted_complexes.stream().forEach(c -> GOA_map.put(c, goa.rateProteins(c)));
@@ -757,11 +751,10 @@ public class DiffSeedVarDetector {
 		}
 		
 		// build output datastructure
-		String[] output = new String[6];
+		String[] output = new String[5];
 		output[0] = occ_sorted_complexes_string;
-		output[0] = abun_g1_string;
-		output[1] = abun_g2_string;
-		output[2] = directions_string;
+		output[1] = abun_g1_string;
+		output[2] = abun_g2_string;
 		output[3] = GOAnnotation_string_details;
 		output[4] = GOAnnotation_string_overall;
 		
