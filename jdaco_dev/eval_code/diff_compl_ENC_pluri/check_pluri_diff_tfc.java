@@ -45,6 +45,5 @@ public class check_pluri_diff_tfc {
 		System.out.println("Determining enriched TFs ...");
 		SPEnrichment tf_enrich = dsvd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
 		tf_enrich.writeSignificantSeedProteins(definitions.diff_compl_output_folder + "enriched_pos_TFs.txt", definitions.diff_compl_output_folder + "enriched_neg_TFs");
-	
 	}
 }

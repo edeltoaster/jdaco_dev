@@ -8,15 +8,16 @@ import framework.Utilities;
 public class BRCA_definitions {
 	static String daco_results_folder = "res_99_5/";
 	static String networks_folder = "BRCA_networks_0/";
-	static String diff_compl_output_folder = "diffnet_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
+	static String diff_complex_output_folder = "diffcompl_results_99_5_-25-25/";
+	static String diff_tfc_output_folder = "difftfc_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
 	
-	static double qvalue = 0.05;
+	static double qvalue = 0.01;
 	static boolean parametric = false;
 	static boolean paired = true;
-	static boolean check_supersets = true;
-	static double min_variant_fraction = 0.5;
+	static boolean check_supersets = false;
+	static double min_variant_fraction = 0.7;
 	
-	static int no_threads = 48;
+	static int no_threads = 50;
 	
 	static String seed_file = "mixed_data/hocomoco_human_TFs_v10.txt.gz";
 	static Set<String> seed = Utilities.readEntryFile(seed_file);
@@ -34,7 +35,8 @@ public class BRCA_definitions {
 	public static void printParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
 		System.out.println("networks folder : " + networks_folder);
-		System.out.println("results output folder : " + diff_compl_output_folder);
+		System.out.println("diff compl results output folder : " + diff_complex_output_folder);
+		System.out.println("diff tfc results output folder : " + diff_tfc_output_folder);
 		
 		System.out.println("q-value : " + qvalue);
 		System.out.println("parametric : " + parametric);
@@ -49,8 +51,6 @@ public class BRCA_definitions {
 		System.out.println("binding data file : " + binding_data);
 		System.out.println("d_min : " + d_min);
 		System.out.println("d_max : " + d_max);
-		
-		//System.out.println("GOA definition file : " + GOA_def_file);
 		
 		System.out.println("SPE iterations : " + SPEnrich_iterations);
 		System.out.println("SPE compl. part. threshold : " + SPEnrich_compl_part_threshold);
