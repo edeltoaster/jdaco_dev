@@ -17,7 +17,7 @@ public class definitions {
 	static boolean parametric = false; // for 0s, Welch test not really helpful
 	static boolean paired = false;
 	static boolean check_supersets = false;
-	static double min_variant_fraction = 0.3; // so many samples in non-pluri
+	static double min_variant_fraction = 0.7;
 	
 	static int no_threads = 50;
 	

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.stream.Collectors;
@@ -520,7 +521,7 @@ public class DiffSeedVarDetector {
 		regnet.writeRegulatoryNetwork(output_folder + "regnet.txt");
 		
 		// write annotation data
-		Map<String, Map<String,String>> annotational_data = new HashMap<>();
+		Map<String, Map<String,String>> annotational_data = new TreeMap<>();
 		annotational_data.put("Med_abundance_G1", med_abun_g1);
 		annotational_data.put("Med_abundance_G2", med_abun_g2);
 		annotational_data.put("Direction", directions_map);
