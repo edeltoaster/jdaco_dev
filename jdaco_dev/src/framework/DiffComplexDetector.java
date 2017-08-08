@@ -70,7 +70,7 @@ public class DiffComplexDetector {
 				System.exit(1);
 			}
 		
-		// bookmark and countall potentially relevant complexes ...
+		// bookmark and count all potentially relevant complexes ...
 		Map<HashSet<String>, Integer> count_map_g1 = new HashMap<>();
 		group1.values().stream().forEach(sample -> sample.getSeedToComplexMap().values().stream().forEach(cl -> cl.stream().forEach(c -> count_map_g1.put(c, count_map_g1.getOrDefault(c, 0) + 1))));
 		Map<HashSet<String>, Integer> count_map_g2 = new HashMap<>();
