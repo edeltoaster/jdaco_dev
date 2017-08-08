@@ -953,6 +953,7 @@ public class DiffComplexDetector {
 		private final double[] sorted_scores;
 		private final Map<HashSet<String>, Double> spc_in_complex_count;
 		private final double no_complexes;
+		private final Map<HashSet<String>, HashSet<String>> complex_to_spc;
 		private final List<HashSet<String>> sign_sorted_sps;
 		private final Map<HashSet<String>, Double> sign_spc_qvalue;
 		private final Map<HashSet<String>, String> sign_spc_direction;
@@ -979,14 +980,16 @@ public class DiffComplexDetector {
 			
 			// determine seed proteins
 			Set<String> seed_proteins = getSeedProteins();
-			
+			complex_to_spc = new HashMap<>();
 			spc_in_complex_count = new HashMap<>();
 			for (HashSet<String> complex:raw_pvalues.keySet()) {
 				HashSet<String> spc_in_complex = new HashSet<>(complex);
 				spc_in_complex.retainAll(seed_proteins);
 				
-				if (spc_in_complex.size() > 0)
+				if (spc_in_complex.size() > 0) {
 					spc_in_complex_count.put(spc_in_complex, spc_in_complex_count.getOrDefault(spc_in_complex, 0.0) + 1);
+					complex_to_spc.put(complex, spc_in_complex);
+				}
 			}
 			
 			// remove SPCs that are not in complexes very often
@@ -1104,7 +1107,7 @@ public class DiffComplexDetector {
 			int i = 0;
 			double N_R = 0.0;
 			for (HashSet<String> complex:complex_list) {
-				if (complex.containsAll(query_SPC))
+				if (complex_to_spc.get(complex).equals(query_SPC))
 					N_R += Math.abs(sorted_scores[i]);
 				++i;
 			}
@@ -1114,7 +1117,7 @@ public class DiffComplexDetector {
 			double max_dev = 0.0;
 			i = 0;
 			for (HashSet<String> complex:complex_list) {
-				if (complex.containsAll(query_SPC))
+				if (complex_to_spc.get(complex).equals(query_SPC))
 					running_sum += (Math.abs(sorted_scores[i]) / N_R);
 				else
 					running_sum -= 1.0 / (no_complexes - N_H);
@@ -1136,7 +1139,7 @@ public class DiffComplexDetector {
 			Map<String, String> up_to_gene_map = getUniprotToGeneMap();
 			for (HashSet<String> spc:this.getSignificanceSortedSeedProteinCombinations()) {
 				String dir = this.getSignificantSeedProteinCombDirections().get(spc);
-				String out = spc + " " + spc.stream().map(p -> up_to_gene_map.getOrDefault(p, p)) + " " + this.getSignificantSeedProteinCombQvalues().get(spc);
+				String out = spc + " " + spc.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toList()).toString() + " " + this.getSignificantSeedProteinCombQvalues().get(spc);
 				
 				if (dir.equals("+"))
 					pos_spc_enrich_out.add(out);
