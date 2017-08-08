@@ -40,10 +40,10 @@ public class check_pluri_diff_tfc {
 		
 		System.out.println("Determining diff. TF combinations ...");
 		DiffSeedVarDetector dsvd = new DiffSeedVarDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-		dsvd.diffTFComplAnalysis(definitions.diff_compl_output_folder, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, allosome_proteins, definitions.pluri_factors);
+		dsvd.diffTFComplAnalysis(definitions.diff_tfc_output_folder, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, allosome_proteins, definitions.pluri_factors);
 		
 		System.out.println("Determining enriched TFs ...");
 		SPEnrichment tf_enrich = dsvd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
-		tf_enrich.writeSignificantSeedProteins(definitions.diff_compl_output_folder + "enriched_pos_TFs.txt", definitions.diff_compl_output_folder + "enriched_neg_TFs");
+		tf_enrich.writeSignificantSeedProteins(definitions.diff_tfc_output_folder + "enriched_pos_TFs.txt", definitions.diff_tfc_output_folder + "enriched_neg_TFs");
 	}
 }

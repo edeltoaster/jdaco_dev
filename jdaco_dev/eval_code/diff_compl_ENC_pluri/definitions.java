@@ -10,15 +10,16 @@ import framework.Utilities;
 public class definitions {
 	static String daco_results_folder = "res_99_5/";
 	static String networks_folder = "ENCODE_networks/";
-	static String diff_compl_output_folder = "diff_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
+	static String diff_complex_output_folder = "diffcompl_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
+	static String diff_tfc_output_folder = "difftfc_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
 	
-	static double qvalue = 0.05;
+	static double qvalue = 0.01;
 	static boolean parametric = false; // for 0s, Welch test not really helpful
 	static boolean paired = false;
 	static boolean check_supersets = false;
-	static double min_variant_fraction = 0.5;
+	static double min_variant_fraction = 0.3; // so many samples in non-pluri
 	
-	static int no_threads = 48;
+	static int no_threads = 50;
 	
 	static String seed_file = "mixed_data/hocomoco_human_TFs_v10.txt.gz";
 	static Set<String> seed = Utilities.readEntryFile(seed_file);
@@ -38,7 +39,8 @@ public class definitions {
 	public static void printParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
 		System.out.println("networks folder : " + networks_folder);
-		System.out.println("results output folder : " + diff_compl_output_folder);
+		System.out.println("diff compl output folder : " + diff_complex_output_folder);
+		System.out.println("diff TFC output folder : " + diff_tfc_output_folder);
 		
 		System.out.println("q-value : " + qvalue);
 		System.out.println("parametric : " + parametric);

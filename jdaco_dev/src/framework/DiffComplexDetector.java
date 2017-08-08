@@ -447,10 +447,10 @@ public class DiffComplexDetector {
 				}
 			}
 			
-			System.out.println(res_pos_all.size() +"+, " + res_neg_all.size() + "- diff. complexes (pruned).");
+			System.out.println(res_pos_all.size() +"+, " + res_neg_all.size() + "- diff. complexes (POI).");
 			
-			Utilities.writeEntries(res_pos_all, output_folder + "res_pos_pruned.txt");
-			Utilities.writeEntries(res_neg_all, output_folder + "res_neg_pruned.txt");
+			Utilities.writeEntries(res_pos_all, output_folder + "res_pos_POI.txt");
+			Utilities.writeEntries(res_neg_all, output_folder + "res_neg_POI.txt");
 		}
 		
 		

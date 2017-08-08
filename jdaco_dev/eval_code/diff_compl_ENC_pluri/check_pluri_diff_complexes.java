@@ -42,14 +42,14 @@ public class check_pluri_diff_complexes {
 		
 		System.out.println("Determining diff. complexes ...");
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-		dcd.diffTFComplAnalysis(definitions.diff_compl_output_folder, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, allosome_proteins, definitions.pluri_factors);
+		dcd.diffTFComplAnalysis(definitions.diff_complex_output_folder, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, allosome_proteins, definitions.pluri_factors);
 		
 		System.out.println("Determine enriched TF combinations ...");
 		SPCEnrichment tfc_enrich = dcd.calculateSPCEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
-		tfc_enrich.writeSignificantSeedProteinCombinations(definitions.diff_compl_output_folder + "enriched_pos_TFCs.txt", definitions.diff_compl_output_folder + "enriched_neg_TFCs");
+		tfc_enrich.writeSignificantSeedProteinCombinations(definitions.diff_complex_output_folder + "enriched_pos_TFCs.txt", definitions.diff_complex_output_folder + "enriched_neg_TFCs");
 		
 		System.out.println("Determining enriched TFs ...");
 		SPEnrichment tf_enrich = dcd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
-		tf_enrich.writeSignificantSeedProteins(definitions.diff_compl_output_folder + "enriched_pos_TFs.txt", definitions.diff_compl_output_folder + "enriched_neg_TFs");
+		tf_enrich.writeSignificantSeedProteins(definitions.diff_complex_output_folder + "enriched_pos_TFs.txt", definitions.diff_complex_output_folder + "enriched_neg_TFs");
 	}
 }
