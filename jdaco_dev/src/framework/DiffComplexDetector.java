@@ -418,13 +418,13 @@ public class DiffComplexDetector {
 		
 		// do the same with only some given proteins considered
 		Set<HashSet<String>> POI_sign_tfcs = new HashSet<>();
-		if (proteins_to_remove != null) {
+		if (proteins_of_interest != null) {
 			res_pos_all.clear();
 			res_neg_all.clear();
 			for (HashSet<String> complex:this.getSignificanceSortedVariants()) {
 				
 				// skip complexes that involve a protein that should be removed/not be considered
-				if (!complex.stream().anyMatch(p -> proteins_to_remove.contains(p)))
+				if (!complex.stream().anyMatch(p -> proteins_of_interest.contains(p)))
 					continue;
 				
 				String sign = this.getSignificantVariantsDirections().get(complex);
