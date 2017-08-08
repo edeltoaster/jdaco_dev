@@ -745,7 +745,7 @@ public class DiffComplexDetector {
 			// precompute #complexes (analogous to N in org. paper)
 			no_complexes = sorted_scores.length;
 			
-			// for each TF: calc. enrichment score
+			// for each seed protein: calc. enrichment score
 			Map<String, Double> sp_enrichment_scores = new HashMap<>();
 			for (String sp:sp_in_complex_count.keySet())
 				sp_enrichment_scores.put(sp, calculateEnrichmentScore(sp, sorted_complex_list));
@@ -844,27 +844,27 @@ public class DiffComplexDetector {
 		/**
 		 * Calculates enrichment score in the fashion of GSEA, 
 		 * handles enrichment and depletion independently, returns [max_ES, min_ES]
-		 * @param query_TF
+		 * @param query_SP
 		 * @param scores
 		 * @param complex_list
 		 * @return
 		 */
-		private double calculateEnrichmentScore(String query_TF, List<HashSet<String>> complex_list) {
+		private double calculateEnrichmentScore(String query_SP, List<HashSet<String>> complex_list) {
 			// determine sum of scores (N_R in org. paper)
 			int i = 0;
 			double N_R = 0.0;
 			for (HashSet<String> complex:complex_list) {
-				if (complex.contains(query_TF))
+				if (complex.contains(query_SP))
 					N_R += Math.abs(sorted_scores[i]);
 				++i;
 			}
 			
-			double N_H = sp_in_complex_count.get(query_TF);
+			double N_H = sp_in_complex_count.get(query_SP);
 			double running_sum = 0.0;
 			double max_dev = 0.0;
 			i = 0;
 			for (HashSet<String> complex:complex_list) {
-				if (complex.contains(query_TF))
+				if (complex.contains(query_SP))
 					running_sum += (Math.abs(sorted_scores[i]) / N_R);
 				else
 					running_sum -= 1.0 / (no_complexes - N_H);
@@ -879,22 +879,27 @@ public class DiffComplexDetector {
 			return max_dev;
 		}
 		
+		/**
+		 * Writes result into two specified text files.
+		 * @param pos_out_path
+		 * @param neg_out_path
+		 */
 		public void writeSignificantSeedProteins(String pos_out_path, String neg_out_path) {
 			
-			List<String> pos_tf_enrich_out = new LinkedList<>();
-			List<String> neg_tf_enrich_out = new LinkedList<>();
+			List<String> pos_sp_enrich_out = new LinkedList<>();
+			List<String> neg_sp_enrich_out = new LinkedList<>();
 			Map<String, String> up_to_gene_map = getUniprotToGeneMap();
-			for (String tf:this.getSignificanceSortedSeedProteins()) {
-				String dir = this.getSignificantSeedProteinDirections().get(tf);
-				String out = tf + " " + up_to_gene_map.getOrDefault(tf, tf) + " " + this.getSignificantSeedProteinQvalues().get(tf);
+			for (String sp:this.getSignificanceSortedSeedProteins()) {
+				String dir = this.getSignificantSeedProteinDirections().get(sp);
+				String out = sp + " " + up_to_gene_map.getOrDefault(sp, sp) + " " + this.getSignificantSeedProteinQvalues().get(sp);
 				
 				if (dir.equals("+"))
-					pos_tf_enrich_out.add(out);
+					pos_sp_enrich_out.add(out);
 				else
-					neg_tf_enrich_out.add(out);
+					neg_sp_enrich_out.add(out);
 			}
-			Utilities.writeEntries(pos_tf_enrich_out, pos_out_path);
-			Utilities.writeEntries(neg_tf_enrich_out, neg_out_path);
+			Utilities.writeEntries(pos_sp_enrich_out, pos_out_path);
+			Utilities.writeEntries(neg_sp_enrich_out, neg_out_path);
 		}
 		
 		/**
@@ -919,6 +924,251 @@ public class DiffComplexDetector {
 		 */
 		public Map<String, String> getSignificantSeedProteinDirections() {
 			return sign_sp_direction;
+		}
+	}
+	
+	
+	/*
+	 * Seed protein combination enrichment
+	 */
+	
+	/**
+	 * Compute seed protein combination enrichment in the fashion of GSEA, 
+	 * see Subramanian et al. (2005)
+	 * @param FDR
+	 * @param iterations
+	 * @param complex_participation_cutoff
+	 * @return
+	 */
+	public SPCEnrichment calculateSPCEnrichment(double FDR, int iterations, int complex_participation_cutoff) {
+		return new SPCEnrichment(FDR, iterations, complex_participation_cutoff);
+	}
+	
+	/**
+	 * Compute seed protein enrichment in the fashion of GSEA, 
+	 * see Subramanian et al. (2005)
+	 */
+	public final class SPCEnrichment {
+		
+		private final double[] sorted_scores;
+		private final Map<HashSet<String>, Double> spc_in_complex_count;
+		private final double no_complexes;
+		private final List<HashSet<String>> sign_sorted_sps;
+		private final Map<HashSet<String>, Double> sign_spc_qvalue;
+		private final Map<HashSet<String>, String> sign_spc_direction;
+		
+		public SPCEnrichment(double FDR, int iterations, int complex_participation_cutoff) {
+			
+			// -log p-values -> scores
+			Map<HashSet<String>, Double> scores = new HashMap<>();
+			for (HashSet<String> complexes:raw_pvalues.keySet()) {
+				double med_diff = group2_medians.get(complexes) - group1_medians.get(complexes);
+				double score = -Math.log(raw_pvalues.get(complexes));
+				
+				if (med_diff < 0)
+					score *= -1;
+				scores.put(complexes, score);
+			}
+			
+			// construct sorted matching arrays of variant/score
+			List<HashSet<String>> sorted_complex_list = new ArrayList<>(scores.keySet());
+			sorted_complex_list.sort((v1, v2) -> diffScoresCompareTo(v2, v1, scores));
+			sorted_scores = new double[sorted_complex_list.size()];
+			for (int i = 0; i< sorted_scores.length; i++)
+				sorted_scores[i] = scores.get(sorted_complex_list.get(i));
+			
+			// determine seed proteins
+			Set<String> seed_proteins = getSeedProteins();
+			
+			spc_in_complex_count = new HashMap<>();
+			for (HashSet<String> complex:raw_pvalues.keySet()) {
+				HashSet<String> spc_in_complex = new HashSet<>(complex);
+				spc_in_complex.retainAll(seed_proteins);
+				
+				if (spc_in_complex.size() > 0)
+					spc_in_complex_count.put(spc_in_complex, spc_in_complex_count.getOrDefault(spc_in_complex, 0.0) + 1);
+			}
+			
+			// remove SPCs that are not in complexes very often
+			spc_in_complex_count.keySet().removeIf(spc -> spc_in_complex_count.get(spc).doubleValue() < complex_participation_cutoff);
+			
+			// precompute #complexes (analogous to N in org. paper)
+			no_complexes = sorted_scores.length;
+			
+			// for each seed protein combination: calc. enrichment score
+			Map<HashSet<String>, Double> spc_enrichment_scores = new HashMap<>();
+			for (HashSet<String> spc:spc_in_complex_count.keySet())
+				spc_enrichment_scores.put(spc, calculateEnrichmentScore(spc, sorted_complex_list));
+
+			// get distr of NULL distributions by permutation
+			List<List<HashSet<String>>> randomized_complex_lists = new ArrayList<>(iterations);
+			for (int i = 0; i< iterations; i++) {
+				List<HashSet<String>> complex_list = new ArrayList<>(sorted_complex_list);
+				Collections.shuffle(complex_list);
+				randomized_complex_lists.add(complex_list);
+			}
+			
+			// compute ES and distributions for each seed protein combination of interest
+			ForkJoinPool pool = new ForkJoinPool(no_threads);
+			Map<HashSet<String>, Double> normalized_pos_sp_ES = new HashMap<>();
+			Map<HashSet<String>, Double> normalized_neg_sp_ES = new HashMap<>();
+			List<Double> normalized_pos_rnd_data = new LinkedList<>();
+			List<Double> normalized_neg_rnd_data = new LinkedList<>();
+			for (HashSet<String> spc:spc_in_complex_count.keySet()) {
+				double spc_ES = spc_enrichment_scores.get(spc);
+				ForkJoinTask<List<Double>> rnd_counts = pool.submit(() -> randomized_complex_lists.parallelStream().map(l -> calculateEnrichmentScore(spc, l)).collect(Collectors.toList()));
+				List<Double> rnd_data = null;
+				try {
+					rnd_data = rnd_counts.get();
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
+				
+				// towards multiple hypothesis correction
+				double pos_mean = Utilities.getMean(rnd_data.stream().filter(d -> d.doubleValue() >= 0).collect(Collectors.toList()));
+				double neg_mean = Utilities.getMean(rnd_data.stream().filter(d -> d.doubleValue() <= 0).map(d -> Math.abs(d)).collect(Collectors.toList()));
+				
+				for (double d:rnd_data) {
+					if (d > 0)
+						normalized_pos_rnd_data.add(d / pos_mean);
+					else if (d < 0)
+						normalized_neg_rnd_data.add(d / neg_mean); // neg_mean is absolute -> will still be negative
+					else {// 0 in both, just for correctness
+						normalized_pos_rnd_data.add(d);
+						normalized_neg_rnd_data.add(d);
+					}
+				}
+				
+				if (spc_ES >= 0)
+					normalized_pos_sp_ES.put(spc, spc_ES / pos_mean);
+				else
+					normalized_neg_sp_ES.put(spc, spc_ES / neg_mean);
+				
+			}
+			
+			// corrected FDR q-values
+			sign_spc_qvalue = new HashMap<>();
+			sign_spc_direction = new HashMap<>();
+			for (HashSet<String> spc:normalized_pos_sp_ES.keySet()) {
+				double norm_ES = normalized_pos_sp_ES.get(spc);
+				// calculate q-value
+				double FDR_q = Math.max(normalized_pos_rnd_data.stream().filter(d -> d.doubleValue() >= norm_ES).count(), 1) / (double) normalized_pos_rnd_data.size();
+				FDR_q /= normalized_pos_sp_ES.keySet().stream().filter(tf2 -> normalized_pos_sp_ES.get(tf2).doubleValue() >= norm_ES).count() / (double) normalized_pos_sp_ES.keySet().size(); // will be >1 since norm_ES is in there
+				sign_spc_qvalue.put(spc, FDR_q);
+				sign_spc_direction.put(spc, "+");
+			}
+			for (HashSet<String> spc:normalized_neg_sp_ES.keySet()) {
+				double norm_ES = normalized_neg_sp_ES.get(spc);
+				// calculate q-value
+				double FDR_q = Math.max(normalized_neg_rnd_data.stream().filter(d -> d.doubleValue() <= norm_ES).count(), 1) / (double) normalized_neg_rnd_data.size();
+				FDR_q /= normalized_neg_sp_ES.keySet().stream().filter(tf2 -> normalized_neg_sp_ES.get(tf2).doubleValue() <= norm_ES).count() / (double) normalized_neg_sp_ES.keySet().size(); // will be >1 since norm_ES is in there
+				sign_spc_qvalue.put(spc, FDR_q);
+				sign_spc_direction.put(spc, "-");
+			}
+			
+			// only retain those below threshold
+			sign_spc_qvalue.keySet().removeIf(tf -> sign_spc_qvalue.get(tf).doubleValue() >= FDR);
+			sign_sorted_sps = new ArrayList<>(sign_spc_qvalue.keySet());
+			sign_sorted_sps.sort((v1, v2) -> sign_spc_qvalue.get(v1).compareTo(sign_spc_qvalue.get(v2)));
+		}
+		
+		/**
+		 * Custom compareTo function that first sorts by the log-scores and breaks ties using the differences of the median between groups.
+		 * @param v1
+		 * @param v2
+		 * @param scores
+		 * @return
+		 */
+		private int diffScoresCompareTo(HashSet<String> v1, HashSet<String> v2, Map<HashSet<String>, Double> scores) {
+			int sign_compareTo = scores.get(v1).compareTo(scores.get(v2));
+			
+			if (sign_compareTo == 0) {
+				double v1_med_diff = group2_medians.get(v1) - group1_medians.get(v1);
+				double v2_med_diff = group2_medians.get(v2) - group1_medians.get(v2);
+				return Double.compare(v1_med_diff, v2_med_diff);
+			} else
+				return sign_compareTo;
+		}
+		
+		/**
+		 * Calculates enrichment score in the fashion of GSEA, 
+		 * handles enrichment and depletion independently, returns [max_ES, min_ES]
+		 * @param query_SPC
+		 * @param scores
+		 * @param complex_list
+		 * @return
+		 */
+		private double calculateEnrichmentScore(HashSet<String> query_SPC, List<HashSet<String>> complex_list) {
+			// determine sum of scores (N_R in org. paper)
+			int i = 0;
+			double N_R = 0.0;
+			for (HashSet<String> complex:complex_list) {
+				if (complex.containsAll(query_SPC))
+					N_R += Math.abs(sorted_scores[i]);
+				++i;
+			}
+			
+			double N_H = spc_in_complex_count.get(query_SPC);
+			double running_sum = 0.0;
+			double max_dev = 0.0;
+			i = 0;
+			for (HashSet<String> complex:complex_list) {
+				if (complex.containsAll(query_SPC))
+					running_sum += (Math.abs(sorted_scores[i]) / N_R);
+				else
+					running_sum -= 1.0 / (no_complexes - N_H);
+				
+				if (Math.abs(running_sum) > Math.abs(max_dev))
+					max_dev = running_sum;
+
+				
+				++i;
+			}
+			
+			return max_dev;
+		}
+		
+		public void writeSignificantSeedProteinCombinations(String pos_out_path, String neg_out_path) {
+			
+			List<String> pos_spc_enrich_out = new LinkedList<>();
+			List<String> neg_spc_enrich_out = new LinkedList<>();
+			Map<String, String> up_to_gene_map = getUniprotToGeneMap();
+			for (HashSet<String> spc:this.getSignificanceSortedSeedProteinCombinations()) {
+				String dir = this.getSignificantSeedProteinCombDirections().get(spc);
+				String out = spc + " " + spc.stream().map(p -> up_to_gene_map.getOrDefault(p, p)) + " " + this.getSignificantSeedProteinCombQvalues().get(spc);
+				
+				if (dir.equals("+"))
+					pos_spc_enrich_out.add(out);
+				else
+					neg_spc_enrich_out.add(out);
+			}
+			Utilities.writeEntries(pos_spc_enrich_out, pos_out_path);
+			Utilities.writeEntries(neg_spc_enrich_out, neg_out_path);
+		}
+		
+		/**
+		 * Returns sign. seed protein combinations sorted by q-value
+		 * @return
+		 */
+		public List<HashSet<String>> getSignificanceSortedSeedProteinCombinations() {
+			return sign_sorted_sps;
+		}
+		
+		/**
+		 * Returns map of sign. seed protein combinations and their respective q-values
+		 * @return
+		 */
+		public Map<HashSet<String>, Double> getSignificantSeedProteinCombQvalues() {
+			return sign_spc_qvalue;
+		}
+		
+		/**
+		 * Returns map of sign. seed proteins and their direction of change as + / -
+		 * @return
+		 */
+		public Map<HashSet<String>, String> getSignificantSeedProteinCombDirections() {
+			return sign_spc_direction;
 		}
 	}
 }

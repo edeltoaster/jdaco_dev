@@ -616,7 +616,7 @@ public class DiffSeedVarDetector {
 			// precompute #complexes (analogous to N in org. paper)
 			no_complexes = sorted_scores.length;
 			
-			// for each TF: calc. enrichment score
+			// for each seed protein: calc. enrichment score
 			Map<String, Double> sp_enrichment_scores = new HashMap<>();
 			for (String sp:sp_in_complex_count.keySet())
 				sp_enrichment_scores.put(sp, calculateEnrichmentScore(sp, sorted_complex_list));
@@ -715,27 +715,27 @@ public class DiffSeedVarDetector {
 		/**
 		 * Calculates enrichment score in the fashion of GSEA, 
 		 * handles enrichment and depletion independently, returns [max_ES, min_ES]
-		 * @param query_TF
+		 * @param query_SP
 		 * @param scores
 		 * @param complex_list
 		 * @return
 		 */
-		private double calculateEnrichmentScore(String query_TF, List<HashSet<String>> complex_list) {
+		private double calculateEnrichmentScore(String query_SP, List<HashSet<String>> complex_list) {
 			// determine sum of scores (N_R in org. paper)
 			int i = 0;
 			double N_R = 0.0;
 			for (HashSet<String> complex:complex_list) {
-				if (complex.contains(query_TF))
+				if (complex.contains(query_SP))
 					N_R += Math.abs(sorted_scores[i]);
 				++i;
 			}
 			
-			double N_H = sp_in_complex_count.get(query_TF);
+			double N_H = sp_in_complex_count.get(query_SP);
 			double running_sum = 0.0;
 			double max_dev = 0.0;
 			i = 0;
 			for (HashSet<String> complex:complex_list) {
-				if (complex.contains(query_TF))
+				if (complex.contains(query_SP))
 					running_sum += (Math.abs(sorted_scores[i]) / N_R);
 				else
 					running_sum -= 1.0 / (no_complexes - N_H);
