@@ -1,4 +1,4 @@
-package diff_compl_ENC_pluri;
+package diff_compl_ENC;
 
 
 import java.io.File;
@@ -27,9 +27,9 @@ public class check_corr_abundance_complexes {
 		PearsonsCorrelation pcorr = new PearsonsCorrelation();
 		
 		List<Double> corrs = new LinkedList<>();
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(definitions.daco_results_folder, ".csv.gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(pluri_definitions.daco_results_folder, ".csv.gz")) {
 			String sample = f.getName().split("\\.")[0];
-			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, definitions.networks_folder + sample + "_major-transcripts.txt.gz");
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), pluri_definitions.seed, pluri_definitions.networks_folder + sample + "_major-transcripts.txt.gz");
 			Map<String, Double> protein_complex_association = count_complex_participation(qdr);
 			
 			List<Double> counts = new LinkedList<>();

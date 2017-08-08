@@ -1,4 +1,4 @@
-package diff_compl_ENC_pluri;
+package diff_compl_ENC;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class check_pluri_epi {
 		BindingDataHandler bnd = new BindingDataHandler(binding_data, TFs_seen);
 		List<String> all_targets = new ArrayList<>(bnd.getTargetsToTFsMap().keySet());
 		for (Set<String> tf_combinations:to_check.keySet()) {
-			Set<String> targets = bnd.getAdjacencyPossibilities(tf_combinations, definitions.d_min, definitions.d_max, false);
+			Set<String> targets = bnd.getAdjacencyPossibilities(tf_combinations, pluri_definitions.d_min, pluri_definitions.d_max, false);
 			
 			// pre-outputs
 			System.out.println(tf_combinations + " <-> " + DataQuery.batchHGNCNamesFromProteins(tf_combinations));

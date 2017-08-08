@@ -1,4 +1,4 @@
-package diff_compl_ENC_pluri;
+package diff_compl_ENC;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -7,7 +7,7 @@ import java.util.Set;
 import framework.GOAnnotator;
 import framework.Utilities;
 
-public class definitions {
+public class pluri_definitions {
 	static String daco_results_folder = "res_99_5/";
 	static String networks_folder = "ENCODE_networks/";
 	static String diff_complex_output_folder = "diffcompl_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
