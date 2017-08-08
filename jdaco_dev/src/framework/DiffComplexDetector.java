@@ -412,9 +412,6 @@ public class DiffComplexDetector {
 			
 			System.out.println(res_pos_all.size() +"+, " + res_neg_all.size() + "- diff. complexes (pruned).");
 			
-			// write results
-			if (!new File(output_folder).exists())
-				new File(output_folder).mkdir();
 			Utilities.writeEntries(res_pos_all, output_folder + "res_pos_pruned.txt");
 			Utilities.writeEntries(res_neg_all, output_folder + "res_neg_pruned.txt");
 		}
@@ -1057,7 +1054,7 @@ public class DiffComplexDetector {
 				double norm_ES = normalized_pos_sp_ES.get(spc);
 				// calculate q-value
 				double FDR_q = Math.max(normalized_pos_rnd_data.stream().filter(d -> d.doubleValue() >= norm_ES).count(), 1) / (double) normalized_pos_rnd_data.size();
-				FDR_q /= normalized_pos_sp_ES.keySet().stream().filter(tf2 -> normalized_pos_sp_ES.get(tf2).doubleValue() >= norm_ES).count() / (double) normalized_pos_sp_ES.keySet().size(); // will be >1 since norm_ES is in there
+				FDR_q /= normalized_pos_sp_ES.keySet().stream().filter(sp2 -> normalized_pos_sp_ES.get(sp2).doubleValue() >= norm_ES).count() / (double) normalized_pos_sp_ES.keySet().size(); // will be >1 since norm_ES is in there
 				sign_spc_qvalue.put(spc, FDR_q);
 				sign_spc_direction.put(spc, "+");
 			}
@@ -1065,7 +1062,7 @@ public class DiffComplexDetector {
 				double norm_ES = normalized_neg_sp_ES.get(spc);
 				// calculate q-value
 				double FDR_q = Math.max(normalized_neg_rnd_data.stream().filter(d -> d.doubleValue() <= norm_ES).count(), 1) / (double) normalized_neg_rnd_data.size();
-				FDR_q /= normalized_neg_sp_ES.keySet().stream().filter(tf2 -> normalized_neg_sp_ES.get(tf2).doubleValue() <= norm_ES).count() / (double) normalized_neg_sp_ES.keySet().size(); // will be >1 since norm_ES is in there
+				FDR_q /= normalized_neg_sp_ES.keySet().stream().filter(sp2 -> normalized_neg_sp_ES.get(sp2).doubleValue() <= norm_ES).count() / (double) normalized_neg_sp_ES.keySet().size(); // will be >1 since norm_ES is in there
 				sign_spc_qvalue.put(spc, FDR_q);
 				sign_spc_direction.put(spc, "-");
 			}
@@ -1132,6 +1129,11 @@ public class DiffComplexDetector {
 			return max_dev;
 		}
 		
+		/**
+		 * Writes result into two specified text files.
+		 * @param pos_out_path
+		 * @param neg_out_path
+		 */
 		public void writeSignificantSeedProteinCombinations(String pos_out_path, String neg_out_path) {
 			
 			List<String> pos_spc_enrich_out = new LinkedList<>();
