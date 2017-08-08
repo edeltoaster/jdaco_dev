@@ -40,7 +40,7 @@ public class check_BRCA_complexes {
 		
 		System.out.println("Determining diff. complexes ...");
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.check_supersets, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
-		dcd.diffTFComplAnalysis(BRCA_definitions.diff_compl_output_folder, BRCA_definitions.goa, BRCA_definitions.binding_data, 0.0001, BRCA_definitions.d_min, BRCA_definitions.d_max, true, null);
+		dcd.diffTFComplAnalysis(BRCA_definitions.diff_compl_output_folder, BRCA_definitions.goa, BRCA_definitions.binding_data, 0.0001, BRCA_definitions.d_min, BRCA_definitions.d_max, true, null, null);
 		
 		System.out.println("Determining enriched TFs ...");
 		SPEnrichment tf_enrich = dcd.calculateSPEnrichment(BRCA_definitions.qvalue, BRCA_definitions.SPEnrich_iterations, BRCA_definitions.SPEnrich_compl_part_threshold);

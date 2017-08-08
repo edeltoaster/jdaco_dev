@@ -322,7 +322,7 @@ public class DiffComplexDetector {
 	 * All output is written to the specified folder.
 	 * @param output_folder
 	 */
-	public void diffTFComplAnalysis(String output_folder, GOAnnotator goa, String binding_data_path, double binding_data_threshold, int binding_d_min, int binding_d_max, boolean also_compute_SCC, Set<String> proteins_to_remove) {
+	public void diffTFComplAnalysis(String output_folder, GOAnnotator goa, String binding_data_path, double binding_data_threshold, int binding_d_min, int binding_d_max, boolean also_compute_SCC, Set<String> proteins_to_remove, Set<String> proteins_of_interest) {
 
 		// some first output
 		System.out.println(this.getNumberOfTests() + " complexes tested.");
@@ -416,6 +416,44 @@ public class DiffComplexDetector {
 			Utilities.writeEntries(res_neg_all, output_folder + "res_neg_pruned.txt");
 		}
 		
+		// do the same with only some given proteins considered
+		Set<HashSet<String>> POI_sign_tfcs = new HashSet<>();
+		if (proteins_to_remove != null) {
+			res_pos_all.clear();
+			res_neg_all.clear();
+			for (HashSet<String> complex:this.getSignificanceSortedVariants()) {
+				
+				// skip complexes that involve a protein that should be removed/not be considered
+				if (!complex.stream().anyMatch(p -> proteins_to_remove.contains(p)))
+					continue;
+				
+				String sign = this.getSignificantVariantsDirections().get(complex);
+				
+				// determine TFs that are involved
+				HashSet<String> tfs = new HashSet<>(complex);
+				tfs.retainAll(seed_tfs);
+				POI_sign_tfcs.add(tfs);
+				
+				String compl_string = complex.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
+				String tfs_string = tfs.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
+				double pval = this.getSignificantVariantsQValues().get(complex);
+				String out_string = sign + " " + tfs_string + " : " + compl_string + " -> " + String.format(Locale.US, "%.4g", pval);
+				
+				// distinguish between increased/positive abundance and diminishing/negative abundance
+				if (sign.equals("-")) {
+					res_neg_all.add(out_string);
+				} else {
+					res_pos_all.add(out_string);
+				}
+			}
+			
+			System.out.println(res_pos_all.size() +"+, " + res_neg_all.size() + "- diff. complexes (pruned).");
+			
+			Utilities.writeEntries(res_pos_all, output_folder + "res_pos_pruned.txt");
+			Utilities.writeEntries(res_neg_all, output_folder + "res_neg_pruned.txt");
+		}
+		
+		
 		/*
 		 * build regulatory network
 		 */
@@ -468,6 +506,17 @@ public class DiffComplexDetector {
 			System.out.println("pruned: " + regnet.getSizesStr());
 			regnet.writeRegulatoryNetwork(output_folder + "regnet_pruned.txt");
 			regnet.writeNodeTable(output_folder + "nodetable_pruned.txt", annotational_data);
+		}
+		
+		if (proteins_of_interest != null && POI_sign_tfcs.size() > 0) {
+			regnet = new RegulatoryNetwork(POI_sign_tfcs, bdh, binding_d_min, binding_d_max, no_threads, 1);
+			if (also_compute_SCC)
+				regnet.pruneToLargestSCCs();
+			if (proteins_to_remove != null)
+				regnet.removeProteinSet(proteins_to_remove);
+			System.out.println("POI: " + regnet.getSizesStr());
+			regnet.writeRegulatoryNetwork(output_folder + "regnet_POI.txt");
+			regnet.writeNodeTable(output_folder + "nodetable_POI.txt", annotational_data);
 		}
 	}
 
