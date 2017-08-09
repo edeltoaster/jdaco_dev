@@ -1,5 +1,7 @@
 package diff_compl_BRCA;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import framework.GOAnnotator;
@@ -31,6 +33,21 @@ public class BRCA_definitions {
 	
 	static int SPEnrich_iterations = 10000;
 	static int SPEnrich_compl_part_threshold = 10;
+	
+	public static Map<String, String> readSubtypes() {
+		Map<String, String> subtypes = new HashMap<>();
+		
+		for (String s:Utilities.readFile("mixed_data/BRCA_subtypes.txt.gz")) {
+			String[] spl = s.trim().split("\\s+");
+			
+			if (spl.length == 2)
+				subtypes.put(spl[0], spl[1]);
+			else
+				subtypes.put(spl[0], spl[1] + "_" + spl[2]);
+		}
+		
+		return subtypes;
+	}
 	
 	public static void printParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
