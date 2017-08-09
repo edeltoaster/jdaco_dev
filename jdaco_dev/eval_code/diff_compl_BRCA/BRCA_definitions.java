@@ -11,7 +11,7 @@ public class BRCA_definitions {
 	static String diff_complex_output_folder = "diffcompl_results_99_5_-25-25/";
 	static String diff_tfc_output_folder = "difftfc_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
 	
-	static double qvalue = 0.01;
+	static double qvalue = 0.05;
 	static boolean parametric = false;
 	static boolean paired = true;
 	static boolean check_supersets = false;

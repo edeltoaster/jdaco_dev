@@ -6,6 +6,7 @@ import java.util.Map;
 
 import framework.DiffComplexDetector;
 import framework.DiffSeedVarDetector;
+import framework.GOAnnotator;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
@@ -15,10 +16,9 @@ public class check_MCF7_diff_complexes {
 		pluri_definitions.diff_complex_output_folder = "BRCA_complex_results_99_5_-25-25/";
 		pluri_definitions.diff_tfc_output_folder = "BRCA_tfc_results_99_5_-25-25/";
 		pluri_definitions.qvalue = 0.05;
+		pluri_definitions.goa = new GOAnnotator("mixed_data/stem_tags_retrieved.txt.gz");
 		
 		pluri_definitions.printParameters();
-		
-		pluri_definitions.goa.printTagInformation();
 		
 		System.out.println();
 
