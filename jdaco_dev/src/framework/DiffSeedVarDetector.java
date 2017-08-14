@@ -36,8 +36,7 @@ public class DiffSeedVarDetector {
 	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	
 	// processed / determined data
-	private final Set<HashSet<String>> seed_combination_variants;
-	private final Map<HashSet<String>, LinkedList<HashSet<String>>> seed_combination_variant_superset;
+	private final Map<HashSet<String>, LinkedList<HashSet<String>>> seed_combination_variants;
 	private final Map<HashSet<String>, LinkedList<Double>> group1_abundances;
 	private final Map<HashSet<String>, LinkedList<Double>> group2_abundances;
 	private Map<HashSet<String>, Double> group1_medians;
@@ -72,31 +71,41 @@ public class DiffSeedVarDetector {
 			}
 		
 		// determine potentially relevant seed variant combinations ...
-		Map<HashSet<String>, Integer> count_map = new HashMap<>();
-		group1.values().stream().forEach(sample -> sample.getSeedToComplexMap().keySet().stream().forEach(var -> count_map.put(var, count_map.getOrDefault(var, 0) + 1)));
-		double min_count_g1 = min_variant_fraction * group1.size();
-		count_map.entrySet().removeIf(e -> e.getValue().intValue() < min_count_g1);
-		this.seed_combination_variants = new HashSet<>(count_map.keySet());
-		count_map.clear();
-		group2.values().stream().forEach(sample -> sample.getSeedToComplexMap().keySet().stream().forEach(var -> count_map.put(var, count_map.getOrDefault(var, 0) + 1)));
-		double min_count_g2 = min_variant_fraction * group2.size();
-		count_map.entrySet().removeIf(e -> e.getValue().intValue() < min_count_g2);
-		this.seed_combination_variants.addAll(count_map.keySet());
+		Map<HashSet<String>, Integer> count_map_g1 = new HashMap<>();
+		group1.values().stream().forEach(sample -> sample.getSeedToComplexMap().keySet().stream().forEach(var -> count_map_g1.put(var, count_map_g1.getOrDefault(var, 0) + 1)));
+		Map<HashSet<String>, Integer> count_map_g2 = new HashMap<>();
+		group2.values().stream().forEach(sample -> sample.getSeedToComplexMap().keySet().stream().forEach(var -> count_map_g2.put(var, count_map_g2.getOrDefault(var, 0) + 1)));
 		
-		// ... and subsets (if necessary)
-		if (this.incorporate_supersets) {
-			this.seed_combination_variant_superset = new HashMap<>();
-			for (HashSet<String> variant:this.seed_combination_variants)
-				for (HashSet<String> current_variant:this.seed_combination_variants) 
-					if (current_variant.containsAll(variant) && !current_variant.equals(variant)) {
-						if (!this.seed_combination_variant_superset.containsKey(variant))
-							this.seed_combination_variant_superset.put(variant, new LinkedList<HashSet<String>>());
-						this.seed_combination_variant_superset.get(variant).add(current_variant);
+		Set<HashSet<String>> unfiltered_complexes = new HashSet<>(count_map_g1.keySet());
+		unfiltered_complexes.addAll(count_map_g2.keySet());
+
+		// check if above consideration threshold and determine subsets (if necessary)
+		this.seed_combination_variants = new HashMap<>();
+		double min_count_g1 = min_variant_fraction * group1.size();
+		double min_count_g2 = min_variant_fraction * group2.size();
+		for (HashSet<String> tfc:unfiltered_complexes) {
+			this.seed_combination_variants.put(tfc, new LinkedList<HashSet<String>>());
+			this.seed_combination_variants.get(tfc).add(tfc);
+			int count_g1 = count_map_g1.getOrDefault(tfc, 0);
+			int count_g2 = count_map_g2.getOrDefault(tfc, 0);
+			
+			if (this.incorporate_supersets)
+				for (HashSet<String> current_tfc:unfiltered_complexes) 
+					if (current_tfc.containsAll(tfc) && !current_tfc.equals(tfc)) {
+						this.seed_combination_variants.get(tfc).add(current_tfc);
+						count_g1 += count_map_g1.getOrDefault(current_tfc, 0);
+						count_g2 += count_map_g2.getOrDefault(current_tfc, 0);
 					}
-		} else {
-			this.seed_combination_variant_superset = null;
+			
+			// filter
+			if (count_g1 < min_count_g1 && count_g2 < min_count_g2)
+				this.seed_combination_variants.remove(tfc);
 		}
 
+//		// remove subsets if an exact set is also above threshold
+//		Set<HashSet<String>> to_remove = this.seed_combination_variants.keySet().stream().filter(rc -> this.seed_combination_variants.get(rc).stream().anyMatch(c -> !rc.equals(c) && this.seed_combination_variants.containsKey(c))).collect(Collectors.toSet());
+//		this.seed_combination_variants.keySet().removeAll(to_remove);
+		
 		// determine abundance values
 		this.group1_abundances = this.determineAbundanceOfSeedVariantsComplexes(group1);
 		this.group2_abundances = this.determineAbundanceOfSeedVariantsComplexes(group2);
@@ -169,7 +178,6 @@ public class DiffSeedVarDetector {
 		// empty results
 		this.significant_variants_qvalues = null;
 		this.seed_combination_variants = null;
-		this.seed_combination_variant_superset = null;
 		this.pool = null;
 		this.group1_abundances = null;
 		this.group2_abundances = null;
@@ -220,7 +228,7 @@ public class DiffSeedVarDetector {
 	private Map<HashSet<String>, LinkedList<Double>> determineAbundanceOfSeedVariantsComplexes(Map<String, QuantDACOResultSet> group) {
 		// init empty data structure for abundance data
 		Map<HashSet<String>, LinkedList<Double>> group_abundances = new HashMap<>();
-		for (HashSet<String> variant:this.seed_combination_variants) {
+		for (HashSet<String> variant:this.seed_combination_variants.keySet()) {
 			group_abundances.put(variant, new LinkedList<Double>());
 		}
 		
@@ -240,15 +248,10 @@ public class DiffSeedVarDetector {
 		
 		for (String sample:samples) {
 			Map<HashSet<String>, Double> sample_abundances = precomputed_sample_abundances.get(sample);
-			for (HashSet<String> variant:this.seed_combination_variants) {
-				double abundance_values = sample_abundances.getOrDefault(variant, 0.0);
-				
-				// if intended, also take supersets into account
-				if (this.incorporate_supersets && this.seed_combination_variant_superset.containsKey(variant)) {
-					for (HashSet<String> current_variant:this.seed_combination_variant_superset.get(variant)) { // sufficient to sum over sample as it is zero anyhow
-						abundance_values += sample_abundances.getOrDefault(current_variant, 0.0);
-					}
-				}
+			for (HashSet<String> variant:this.seed_combination_variants.keySet()) {
+				double abundance_values = 0.0;
+				for (HashSet<String> current_variant:this.seed_combination_variants.get(variant))
+					abundance_values += sample_abundances.getOrDefault(current_variant, 0.0);
 				
 				group_abundances.get(variant).add(abundance_values);
 			}
@@ -264,7 +267,7 @@ public class DiffSeedVarDetector {
 	private Map<HashSet<String>, Double> determineUnpairedPValuesParametric() {
 		TTest tt = new TTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
-		for (HashSet<String> variant:this.seed_combination_variants) {
+		for (HashSet<String> variant:this.seed_combination_variants.keySet()) {
 			// two-sample two-tailed Welch test, t-test with differing variances (heteroscedastic)
 			double pm = tt.tTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
 			test_results.put(variant, pm);
@@ -281,7 +284,7 @@ public class DiffSeedVarDetector {
 	private Map<HashSet<String>, Double> determineUnpairedPValuesNonParametric() {
 		MannWhitneyUTest mwu = new MannWhitneyUTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
-		for (HashSet<String> variant:this.seed_combination_variants) {
+		for (HashSet<String> variant:this.seed_combination_variants.keySet()) {
 			// MWU test
 			double pm = mwu.mannWhitneyUTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
 			test_results.put(variant, pm);
@@ -298,7 +301,7 @@ public class DiffSeedVarDetector {
 	private Map<HashSet<String>, Double> determinePairedPValuesParametric() {
 		TTest tt = new TTest();
 		Map<HashSet<String>, Double> test_results = new HashMap<>();
-		for (HashSet<String> variant:this.seed_combination_variants) {
+		for (HashSet<String> variant:this.seed_combination_variants.keySet()) {
 			// paired t-test
 			double pm = tt.pairedTTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)));
 			test_results.put(variant, pm);
@@ -321,7 +324,7 @@ public class DiffSeedVarDetector {
 		if (this.group1.size() > 20)
 			compute_exact_p = false;
 		
-		for (HashSet<String> variant:this.seed_combination_variants) {
+		for (HashSet<String> variant:this.seed_combination_variants.keySet()) {
 			// Wilcoxon signed-rank test
 			double pm = wsrt.wilcoxonSignedRankTest(Utilities.getDoubleArray(this.group1_abundances.get(variant)), Utilities.getDoubleArray(this.group2_abundances.get(variant)), compute_exact_p);
 			test_results.put(variant, pm);
@@ -610,7 +613,7 @@ public class DiffSeedVarDetector {
 	 * @return
 	 */
 	public Set<HashSet<String>> getSeedCombinationVariants() {
-		return seed_combination_variants;
+		return seed_combination_variants.keySet();
 	}
 
 	/**

@@ -96,14 +96,15 @@ public class DiffComplexDetector {
 						count_g1 += count_map_g1.getOrDefault(current_complex, 0);
 						count_g2 += count_map_g2.getOrDefault(current_complex, 0);
 					}
+			
 			// filter
 			if (count_g1 < min_count_g1 && count_g2 < min_count_g2)
 				this.relevant_complexes.remove(complex);
 		}
 		
-		// remove subsets if an exact set is also above threshold
-		Set<HashSet<String>> to_remove = this.relevant_complexes.keySet().stream().filter(rc -> this.relevant_complexes.get(rc).stream().anyMatch(c -> !rc.equals(c) && this.relevant_complexes.containsKey(c))).collect(Collectors.toSet());
-		this.relevant_complexes.keySet().removeAll(to_remove);
+//		// remove subsets if an exact set is also above threshold
+//		Set<HashSet<String>> to_remove = this.relevant_complexes.keySet().stream().filter(rc -> this.relevant_complexes.get(rc).stream().anyMatch(c -> !rc.equals(c) && this.relevant_complexes.containsKey(c))).collect(Collectors.toSet());
+//		this.relevant_complexes.keySet().removeAll(to_remove);
 		
 		// determine abundance values
 		this.group1_abundances = this.determineComplexesAbundances(group1);
@@ -192,14 +193,9 @@ public class DiffComplexDetector {
 		for (String sample:samples) {
 			Map<HashSet<String>, Double> sample_abundances = precomputed_sample_abundances.get(sample);
 			for (HashSet<String> complex:this.relevant_complexes.keySet()) {
-				double abundance_values = sample_abundances.getOrDefault(complex, 0.0);
-				
-				// if intended, also take supersets into account
-				if (this.incorporate_supersets) {
-					for (HashSet<String> current_complex:this.relevant_complexes.get(complex)) { // sufficient to sum over sample as it is zero anyhow
-						abundance_values += sample_abundances.getOrDefault(current_complex, 0.0);
-					}
-				}
+				double abundance_values = 0.0;
+				for (HashSet<String> current_complex:this.relevant_complexes.get(complex)) // sufficient to sum over sample as it is zero anyhow
+					abundance_values += sample_abundances.getOrDefault(current_complex, 0.0);
 				
 				group_abundances.get(complex).add(abundance_values);
 			}
