@@ -99,7 +99,7 @@ public class GOAnnotator {
 				continue; // shorten String if there's nothing to say
 			}
 			else {
-				out += "!(" + occ[0] + "," + occ[1] + "," + occ[2] + ")";
+				out += "!(" + occ[0] + "." + occ[1] + "." + occ[2] + ")"; // points as separator for simpler parsing
 			}
 			
 			attributes.add(out);
