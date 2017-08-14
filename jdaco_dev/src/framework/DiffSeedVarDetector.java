@@ -76,21 +76,21 @@ public class DiffSeedVarDetector {
 		Map<HashSet<String>, Integer> count_map_g2 = new HashMap<>();
 		group2.values().stream().forEach(sample -> sample.getSeedToComplexMap().keySet().stream().forEach(var -> count_map_g2.put(var, count_map_g2.getOrDefault(var, 0) + 1)));
 		
-		Set<HashSet<String>> unfiltered_complexes = new HashSet<>(count_map_g1.keySet());
-		unfiltered_complexes.addAll(count_map_g2.keySet());
+		Set<HashSet<String>> unfiltered_seed_comb_var = new HashSet<>(count_map_g1.keySet());
+		unfiltered_seed_comb_var.addAll(count_map_g2.keySet());
 
 		// check if above consideration threshold and determine subsets (if necessary)
 		this.seed_combination_variants = new HashMap<>();
 		double min_count_g1 = min_variant_fraction * group1.size();
 		double min_count_g2 = min_variant_fraction * group2.size();
-		for (HashSet<String> tfc:unfiltered_complexes) {
+		for (HashSet<String> tfc:unfiltered_seed_comb_var) {
 			this.seed_combination_variants.put(tfc, new LinkedList<HashSet<String>>());
 			this.seed_combination_variants.get(tfc).add(tfc);
 			int count_g1 = count_map_g1.getOrDefault(tfc, 0);
 			int count_g2 = count_map_g2.getOrDefault(tfc, 0);
 			
 			if (this.incorporate_supersets)
-				for (HashSet<String> current_tfc:unfiltered_complexes) 
+				for (HashSet<String> current_tfc:unfiltered_seed_comb_var) 
 					if (current_tfc.containsAll(tfc) && !current_tfc.equals(tfc)) {
 						this.seed_combination_variants.get(tfc).add(current_tfc);
 						count_g1 += count_map_g1.getOrDefault(current_tfc, 0);
@@ -413,12 +413,14 @@ public class DiffSeedVarDetector {
 			
 			// determine actual complexes
 			List<HashSet<String>> complexes = new LinkedList<>();
-			for (QuantDACOResultSet qdr:group1.values())
-				if (qdr.getSeedToComplexMap().containsKey(tfc))
-					complexes.addAll(qdr.getSeedToComplexMap().get(tfc));
-			for (QuantDACOResultSet qdr:group2.values())
-				if (qdr.getSeedToComplexMap().containsKey(tfc))
-					complexes.addAll(qdr.getSeedToComplexMap().get(tfc));
+			for (HashSet<String> actual_tfc:this.seed_combination_variants.get(tfc)) {
+				for (QuantDACOResultSet qdr:group1.values())
+					if (qdr.getSeedToComplexMap().containsKey(actual_tfc))
+						complexes.addAll(qdr.getSeedToComplexMap().get(actual_tfc));
+				for (QuantDACOResultSet qdr:group2.values())
+					if (qdr.getSeedToComplexMap().containsKey(actual_tfc))
+						complexes.addAll(qdr.getSeedToComplexMap().get(actual_tfc));
+			}
 			tfc_to_complexes.put(tfc, complexes);
 		}
 		
