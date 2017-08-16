@@ -10,9 +10,8 @@ import framework.Utilities;
 public class pluri_definitions {
 	static String daco_results_folder = "res_99_5/";
 	static String networks_folder = "ENCODE_networks/";
-	static String diff_complex_output_folder = "diffcompl_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
-	static String diff_tfc_output_folder = "difftfc_results_99_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
-	
+	static String output_folder_pre = "diffcompl_results_99_5_-25-25_"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
+
 	static double qvalue = 0.01;
 	static boolean parametric = false; // for 0s, Welch test not really helpful
 	static boolean paired = false;
@@ -39,8 +38,7 @@ public class pluri_definitions {
 	public static void printParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
 		System.out.println("networks folder : " + networks_folder);
-		System.out.println("diff compl output folder : " + diff_complex_output_folder);
-		System.out.println("diff TFC output folder : " + diff_tfc_output_folder);
+		System.out.println("diff compl output folder : " + output_folder_pre);
 		
 		System.out.println("q-value : " + qvalue);
 		System.out.println("parametric : " + parametric);
