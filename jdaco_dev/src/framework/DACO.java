@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
@@ -34,6 +35,8 @@ public class DACO {
 	private double prob_cutoff = this.pair_building_threshold;
 	private PrintStream verbose;
 	private int compute_timeout = 60; // in minutes
+	private boolean cached_execution = true;
+	// TODO: add manual non-cached option
 	
 	/**
 	 * Some convenient constructors
@@ -100,6 +103,26 @@ public class DACO {
 		this.compute_timeout = compute_timeout;
 	}
 	
+	private final class CachingThreadPoolExecutor extends ThreadPoolExecutor {
+
+		Set<Runnable> already_seen = Collections.newSetFromMap(new ConcurrentHashMap<>(Math.min(1024, 20), 0.75f, Math.max(number_of_threads / 4, 1)));
+		
+		public CachingThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
+				BlockingQueue<Runnable> workQueue) {
+			super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
+		}
+		
+		@Override
+		public void execute(Runnable r) {
+			int size = ((StepFunction) r).internal_proteins.size();
+			if (size < 5 && size > 2) {
+				if (already_seen.contains(r))
+					return;
+				already_seen.add(r);
+			}
+			super.execute(r);
+		}
+	}
 	/**
 	 * StepFunction implements the parallel-part of the algorithm
 	 */
@@ -407,9 +430,12 @@ public class DACO {
 		 else 
 			this.temp_results.clear();
 		
-		if (this.pool == null || this.pool.isShutdown())
-			this.pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-		
+		if (this.pool == null || this.pool.isShutdown()) {
+			if (this.cached_execution)
+				this.pool = new CachingThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+			else
+				this.pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+		}
 		// start computing and output
 		Timer timer = new Timer();
 		if (this.compute_timeout > 0)
@@ -559,10 +585,12 @@ public class DACO {
 		HashSet<HashSet<String>> sub = new HashSet<>();
 		for (HashSet<String> i : results)
 			for (HashSet<String> j : results) {
-				if (i.equals(j))
+				if (i.equals(j) || i.size() > j.size())
 					continue;
-				if (j.containsAll(i))
+				if (j.containsAll(i)) {
 					sub.add(i);
+					break; // being a subset once is sufficient for removal
+				}
 			}
 		results.removeAll(sub);
 	}

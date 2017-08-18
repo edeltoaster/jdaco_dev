@@ -218,8 +218,8 @@ public class JDACO {
 		DACO.writeAndFilterOutput(output_file, results, seed);
 		System.out.println(results.size() + " candidates written to output.");
 		
-		// below 2 min show results in seconds
-		if (duration < 120000)
+		// below 3min show results in seconds
+		if (duration < 180000)
 			System.out.println("Overall time: " + TimeUnit.MILLISECONDS.toSeconds(duration) + " sec");
 		else
 			System.out.println("Overall time: " + TimeUnit.MILLISECONDS.toMinutes(duration) + " min");
