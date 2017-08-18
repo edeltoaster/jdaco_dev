@@ -1,4 +1,4 @@
-package stem_cell_complexeomes_older;
+package stem_cell_complexomes_older;
 
 import java.io.File;
 
@@ -10,7 +10,7 @@ import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
 public class build_networks_preppi {
-	static String expr_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/expr_data/";
+	static String expr_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/expr_data/";
 	static String network_folder = "/Users/tho/Desktop/networks/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;

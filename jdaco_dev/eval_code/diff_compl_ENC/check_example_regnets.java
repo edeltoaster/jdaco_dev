@@ -10,9 +10,9 @@ import framework.RegulatoryNetwork;
 
 public class check_example_regnets {
 
-	public static String data_path = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/regnet_examples/input_data/";
+	public static String data_path = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/regnet_examples/input_data/";
 	public static String binding_data_path = "/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz";
-	public static String results_out = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/regnet_examples/regnets_5_-25-25/";
+	public static String results_out = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/regnet_examples/regnets_5_-25-25/";
 	
 	public static void main(String[] args) {
 		

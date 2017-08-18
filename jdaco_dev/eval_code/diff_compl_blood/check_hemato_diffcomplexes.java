@@ -21,9 +21,9 @@ import framework.Utilities;
 
 public class check_hemato_diffcomplexes {
 	
-	public static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/hemato_check/res_99_5/";
-	public static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/hemato_check/BP_networks/";
-	public static String diff_compl_output_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/hemato_check/diffnet_results/";
+	public static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/hemato_check/res_99_5/";
+	public static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/hemato_check/BP_networks/";
+	public static String diff_compl_output_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/hemato_check/diffnet_results/";
 	public static int no_threads = 4;
 
 	public static GOAnnotator goa = new GOAnnotator("9606", false, "mixed_data/stem_tags.txt");

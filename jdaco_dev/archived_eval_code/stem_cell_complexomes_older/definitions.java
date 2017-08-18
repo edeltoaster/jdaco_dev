@@ -1,4 +1,4 @@
-package stem_cell_complexeomes_older;
+package stem_cell_complexomes_older;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -8,7 +8,7 @@ import framework.GOAnnotator;
 import framework.Utilities;
 
 public class definitions {
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_PrePPIhc_TPMgene/res5/";
+	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/DACO_PrePPIhc_TPMgene/res5/";
 	static String networks_folder = "/Users/tho/Desktop/PrePPIhc_TPMgene_networks/";
 	
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");

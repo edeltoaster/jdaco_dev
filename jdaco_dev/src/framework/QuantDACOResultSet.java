@@ -61,12 +61,12 @@ public class QuantDACOResultSet extends DACOResultSet {
 	}
 	
 	/**
-	 * Rebuilds useful data-structures on the basis of relevant seed, removes other results and resets cached results
-	 * @param refined_seed
+	 * (Re-)Builds useful data-structures on the basis of relevant seed, removes other results and resets cached results
+	 * @param seed
 	 */
 	@Override
-	public void rebuildData(Set<String> refined_seed) {
-		super.rebuildData(refined_seed);
+	public void buildData(Set<String> seed) {
+		super.buildData(seed);
 		this.cached_abundance_of_complexes = null; // additionally reset the cache as results will differ if changed occurred
 	}
 	/*

@@ -1,4 +1,4 @@
-package stem_cell_complexeomes_older;
+package stem_cell_complexomes_older;
 
 
 import java.io.File;
@@ -15,7 +15,7 @@ import framework.DiffSeedVarDetector;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
-import stem_cell_complexeomes_older.definitions;
+import stem_cell_complexomes_older.definitions;
 
 
 public class check_complexes_quant_pluri {

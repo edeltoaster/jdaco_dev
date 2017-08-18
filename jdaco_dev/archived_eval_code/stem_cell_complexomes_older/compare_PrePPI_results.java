@@ -1,4 +1,4 @@
-package stem_cell_complexeomes_older;
+package stem_cell_complexomes_older;
 
 import java.io.File;
 import java.util.HashMap;
@@ -12,8 +12,8 @@ import framework.Utilities;
 
 public class compare_PrePPI_results {
 	
-	static String hc_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_PrePPIhc_TPMgene/res5/";
-	static String all_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexeome/DACO_PrePPI_TPMgene/res5/";
+	static String hc_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/DACO_PrePPIhc_TPMgene/res5/";
+	static String all_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/DACO_PrePPI_TPMgene/res5/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	
 	public static void main(String[] args) {

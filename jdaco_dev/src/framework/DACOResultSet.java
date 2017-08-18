@@ -87,41 +87,24 @@ public class DACOResultSet {
 	}
 	
 	/**
-	 * Buildup some data structures that may be useful
+	 * (Re-)Builds useful data-structures on the basis of relevant seed, removes other results
 	 * @param seed
 	 */
-	private void buildData(Set<String> seed) {
-		
-		// build seed-set to complex map and note seed proteins that are abundant in the result
-		for (HashSet<String> set:this.result) {
-			HashSet<String> from_seed = filterSeedProteins(set, seed);
-			if (from_seed.size() > 0) {
-				abundant_seed_poteins.addAll(from_seed);
-				if (!this.seed_to_complex_map.containsKey(from_seed))
-					this.seed_to_complex_map.put(from_seed, new LinkedList<>());
-				this.seed_to_complex_map.get(from_seed).add(set);
-			}
-		}
-		
-	}
-	
-	/**
-	 * Rebuilds useful data-structures on the basis of relevant seed, removes other results
-	 * @param seed
-	 */
-	public void rebuildData(Set<String> refined_seed) {
+	public void buildData(Set<String> seed) {
 		abundant_seed_poteins.clear();
 		this.seed_to_complex_map.clear();
 		
 		// build seed-set to complex map and note seed proteins that are abundant in the result
 		Set<HashSet<String>> to_remove = new HashSet<HashSet<String>>();
 		for (HashSet<String> set:this.result) {
-			HashSet<String> from_seed = filterSeedProteins(set, refined_seed);
+			HashSet<String> from_seed = filterSeedProteins(set, seed);
+			
 			if (from_seed.size() > 0) {
 				abundant_seed_poteins.addAll(from_seed);
 				if (!this.seed_to_complex_map.containsKey(from_seed))
 					this.seed_to_complex_map.put(from_seed, new LinkedList<HashSet<String>>());
 				this.seed_to_complex_map.get(from_seed).add(set);
+				
 			} else { // no seed protein included -> remove from result set
 				to_remove.add(set);
 			}
@@ -151,7 +134,7 @@ public class DACOResultSet {
 	 */
 	public void removeOpposinglyAnnotatedComplexes(GOAnnotator goa) {
 		this.result.removeIf(d -> goa.rateProteins(d).contains("!"));
-		this.rebuildData(new HashSet<>(this.abundant_seed_poteins));
+		this.buildData(new HashSet<>(this.abundant_seed_poteins));
 	}
 	
 	
