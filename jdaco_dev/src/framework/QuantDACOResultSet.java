@@ -69,6 +69,8 @@ public class QuantDACOResultSet extends DACOResultSet {
 		super.buildData(seed);
 		this.cached_abundance_of_complexes = null; // additionally reset the cache as results will differ if changed occurred
 	}
+	
+	
 	/*
 	 * quantification functions
 	 */

@@ -25,9 +25,9 @@ public class DACO {
 	private final PPIN ppi;
 	private final DDIN ddi;
 	
-	// collections for calculations need to be thread-safe
+	// collections for calculations need to be readable in a thread-safe manner
 	private int number_of_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1);
-	private Set<HashSet<String>> temp_results; // set in growPairs
+	private Set<HashSet<String>> temp_results; // set in growPairs -> ConcurrentHashMap as a set
 	private ThreadPoolExecutor pool; // set in growPairs
 	private int max_depth_of_search = 5;
 	private double pair_building_threshold = 0.95;
@@ -291,7 +291,6 @@ public class DACO {
 						} 
 						
 						
-						
 						// if no extension possible, return current
 						if (!any_addition)
 							temp_results.add(internal_proteins);
@@ -299,6 +298,7 @@ public class DACO {
 					}
 				}
 			} else {
+				
 				// remove case
 				final StrPair distinct_domain_edge = boundary.get(del_max_protein);
 				final double P_n = P / ppi.getWeights().get(new StrPair(ddi.getDomain_to_protein().get(distinct_domain_edge.getL()), ddi.getDomain_to_protein().get(distinct_domain_edge.getR())));
