@@ -333,7 +333,6 @@ public class RewiringDetector {
 		
 		List<String> reasons = new LinkedList<>();
 		
-		
 		// pre-check1: is a change found in the network-pair?
 		if (i1.contains(interaction) == i2.contains(interaction))
 			return "no_change";

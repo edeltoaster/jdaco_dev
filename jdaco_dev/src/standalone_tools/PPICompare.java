@@ -1,6 +1,7 @@
 package standalone_tools;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 
@@ -17,12 +18,15 @@ public class PPICompare {
 	
 	private static String path_group1 = "[GROUP1-FOLDER]";
 	private static String path_group2 = "[GROUP2-FOLDER]";
-	private static Map<String, RewiringDetectorSample> group1;
-	private static Map<String, RewiringDetectorSample> group2;
 	private static String output_folder;
 	private static double FDR = 0.05;
 	private static boolean output_protein_attributes = true;
 	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1);
+	private static PrintStream verbose = null;
+	
+	private static Map<String, RewiringDetectorSample> group1;
+	private static Map<String, RewiringDetectorSample> group2;
+
 	
 	public static void printHelp() {
 		System.out.println("usage: java -jar PPICompare.jar ([OPTIONS]) [GROUP1-FOLDER] [GROUP2-FOLDER] [OUTPUT-FOLDER]");
@@ -35,6 +39,7 @@ public class PPICompare {
 		System.out.println("	-r=[release] : try to use data from a certain Ensembl release, uses newest if specific release not found");		
 		System.out.println("	-s=[US, UK, AS, 'specific URL'] : change initial server, note that US and asian mirrors only store the last two releases (default: US)");
 		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
+		System.out.println("	-v : be more verbose");
 		
 		System.out.println();
 		
@@ -89,8 +94,11 @@ public class PPICompare {
 			}
 			
 			// parse #threads
-			else if (arg.startsWith("-t"))
+			else if (arg.startsWith("-t="))
 				no_threads = Math.max(Integer.parseInt(arg.split("=")[1]), 1);
+			
+			else if (arg.equals("-v"))
+				verbose = System.out;
 			
 			// read groupwise input
 			else if (group1 == null) {
@@ -151,9 +159,10 @@ public class PPICompare {
 		
 		// some preface
 		System.out.print("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") : ");
+		System.out.flush();
 		
 		// actual calculations
-		RewiringDetector rd = new RewiringDetector(group1, group2, FDR, no_threads, null);
+		RewiringDetector rd = new RewiringDetector(group1, group2, FDR, no_threads, verbose);
 		double P_rew_rounded = Math.round(rd.getP_rew() * 1000d) / 1000d;
 		List<String> minReasons = rd.getMinMostLikelyReasons();
 		
@@ -161,6 +170,7 @@ public class PPICompare {
 		System.out.println(rd.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getSignificantlyRewiredInteractions().size() + " significant rewiring events." );
 		System.out.println(minReasons.size() + " transcriptomic alterations can explain all significant changes.");
 		System.out.flush();
+		
 		
 		/*
 		 * write file-output
