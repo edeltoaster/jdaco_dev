@@ -24,7 +24,7 @@ import org.apache.commons.math3.stat.inference.BinomialTest;
  */
 public class RewiringDetector {
 
-	private final int max_in_thread_iterations = 500;
+	private final int max_in_thread_iterations = 1000;
 	private final int max_thread_cycles = 2;
 	private final BinomialTest binom_test = new BinomialTest();
 	private int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
@@ -886,7 +886,7 @@ public class RewiringDetector {
 
 			Map<StrPair, Integer> diff_temp = new HashMap<>(4096); // less number of size-change events
 			List<Double> P_rews_temp = new ArrayList<>(comparisons.size());
-
+			
 			for (String[] samples:comparisons) {
 				Set<StrPair> i1 = group1.get(samples[0]).getInteractions();
 				Set<StrPair> i2 = group2.get(samples[1]).getInteractions();

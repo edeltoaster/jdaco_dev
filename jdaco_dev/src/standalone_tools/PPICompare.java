@@ -153,21 +153,20 @@ public class PPICompare {
 		try {
 			parseInput(args);
 		} catch (Exception e){
-			e.printStackTrace();
 			printHelp();
 		}
 		
 		// some preface
-		System.out.print("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") : ");
+		System.out.println("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") : ");
 		System.out.flush();
 		
 		// actual calculations
 		RewiringDetector rd = new RewiringDetector(group1, group2, FDR, no_threads, verbose);
 		double P_rew_rounded = Math.round(rd.getP_rew() * 1000d) / 1000d;
-		List<String> minReasons = rd.getMinMostLikelyReasons();
 		
 		// stdout-output
 		System.out.println(rd.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getSignificantlyRewiredInteractions().size() + " significant rewiring events." );
+		List<String> minReasons = rd.getMinMostLikelyReasons();
 		System.out.println(minReasons.size() + " transcriptomic alterations can explain all significant changes.");
 		System.out.flush();
 		
