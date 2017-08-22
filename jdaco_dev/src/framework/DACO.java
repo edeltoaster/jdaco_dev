@@ -573,7 +573,7 @@ public class DACO {
 		// clean from subsets
 		DACO.filterOutput(results);
 		
-		new DACOResultSet(results, seed).writeCSV(out_file);
+		new DACOResultSet(results, seed).writeResult(out_file);
 	}
 	
 	/**

@@ -26,7 +26,7 @@ public class DACOResultSet {
 	public DACOResultSet(String daco_out_file, String seed_file) {
 		
 		this.result = new HashSet<>();
-		this.readResultCSV(daco_out_file);
+		this.readDACOResult(daco_out_file);
 		
 		this.buildData(Utilities.readEntryFile(seed_file));
 	}
@@ -34,7 +34,7 @@ public class DACOResultSet {
 	public DACOResultSet(String daco_out_file, Set<String> seed) {
 		
 		this.result = new HashSet<>();
-		this.readResultCSV(daco_out_file);
+		this.readDACOResult(daco_out_file);
 		
 		this.buildData(seed);
 	}
@@ -48,7 +48,7 @@ public class DACOResultSet {
 	 * Actually reads the file
 	 * @param daco_out_file
 	 */
-	private void readResultCSV(String daco_out_file) {
+	private void readDACOResult(String daco_out_file) {
 		
 		BufferedReader in = null;
 		try {
@@ -118,7 +118,7 @@ public class DACOResultSet {
 	 * Writes output to a csv-file
 	 * @param out_file
 	 */
-	public void writeCSV(String out_file) {
+	public void writeResult(String out_file) {
 		List<String> to_write = new LinkedList<>();
 		
 		for (HashSet<String> cluster : this.result)

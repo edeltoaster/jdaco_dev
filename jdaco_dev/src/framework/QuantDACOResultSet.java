@@ -320,8 +320,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 	 * prot_A,prot_B abundance.
 	 * @param out_file
 	 */
-	@Override
-	public void writeCSV(String out_file) {
+	public void writeQuantifiedResult(String out_file) {
 		Map<HashSet<String>, Double> abundances = getAbundanceOfComplexes();
 		List<String> to_write = new LinkedList<>();
 		
