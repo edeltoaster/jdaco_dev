@@ -312,6 +312,26 @@ public class QuantDACOResultSet extends DACOResultSet {
 	
 	
 	/*
+	 * Utilities
+	 */
+	
+	/**
+	 * Writes output to a file in the format:
+	 * prot_A,prot_B abundance.
+	 * @param out_file
+	 */
+	@Override
+	public void writeCSV(String out_file) {
+		Map<HashSet<String>, Double> abundances = getAbundanceOfComplexes();
+		List<String> to_write = new LinkedList<>();
+		
+		for (HashSet<String> cluster : abundances.keySet())
+			to_write.add( String.join(",", cluster) + " " + abundances.get(cluster));
+		
+		Utilities.writeEntries(to_write, out_file);
+	}
+	
+	/*
 	 * getters
 	 */
 	

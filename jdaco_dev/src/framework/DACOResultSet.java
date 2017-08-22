@@ -59,7 +59,7 @@ public class DACOResultSet {
 			
 			while (in.ready()) {
 				String line = in.readLine();
-				this.result.add(new HashSet<>(Arrays.asList(line.trim().split(","))));
+				this.result.add(new HashSet<>(Arrays.asList(line.trim().split("\\s+")[0].split(",")))); // additional split for compatibility with quantified files
 			}
 			in.close();
 		} catch (Exception e) {
@@ -117,7 +117,6 @@ public class DACOResultSet {
 	/**
 	 * Writes output to a csv-file
 	 * @param out_file
-	 * @param results
 	 */
 	public void writeCSV(String out_file) {
 		List<String> to_write = new LinkedList<>();
