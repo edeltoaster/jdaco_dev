@@ -12,7 +12,7 @@ import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
 public class build_networks_TCGA_preppi {
-	static String expr_folder = "expr_data/"; // intended to be run on server
+	static String expr_folder = "transcr_expr_data/"; // intended to be run on server
 	static String network_folder = "TCGA_networks/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
@@ -47,11 +47,8 @@ public class build_networks_TCGA_preppi {
 			String[] sample_annotations = file_name.split("_");
 			String cancer_type = sample_annotations[0];
 			String patient = sample_annotations[1];
-			String quant_granularity = sample_annotations[2];
+			//String quant_granularity = sample_annotations[2];
 			String condition = sample_annotations[3];
-			
-			if (!quant_granularity.equals("transcripts"))
-				continue;
 			
 			file_name = cancer_type + "_" + patient + "_" + condition;
 			System.out.println("Processing " + file_name);
