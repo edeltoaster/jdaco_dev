@@ -1,6 +1,8 @@
 package diff_compl_TCGA;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import framework.ConstructedNetworks;
 import framework.DataQuery;
@@ -32,10 +34,12 @@ public class build_networks_TCGA_preppi {
 		
 		System.out.println("Proteins mapped: " + builder.getMappingDomainPercentage());
 		System.out.println("PPIs mapped: " + builder.getMappingPercentage());
+		System.out.println();
 	}
 	
 	public static void process() {
 		
+		Map<String, Integer> matched_sample_count = new HashMap<>();
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(expr_folder, ".txt.gz")) {
 			String path = f.getAbsolutePath();
 			String[] path_split = path.split("/");
@@ -57,9 +61,20 @@ public class build_networks_TCGA_preppi {
 			cn.getDDIN().writeDDIN(network_folder + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(network_folder + file_name + "_major-transcripts.txt.gz");
 			System.out.println(cn.getPPIN().getSizesStr());
+			
+			if (condition.equals("normal"))
+				matched_sample_count.put(cancer_type, matched_sample_count.getOrDefault(cancer_type, 0) + 1);
 		}
 		
 		System.out.println();
+		
+		int n_total = 0;
+		for (String cancer_type:matched_sample_count.keySet()) {
+			System.out.println(cancer_type + " : " + matched_sample_count.get(cancer_type));
+			n_total += matched_sample_count.get(cancer_type);
+		}
+		
+		System.out.println("total : " + n_total + " matching samples, " + (2*n_total) + " total samples.");
 	}
 	
 	public static void main(String[] args) {
