@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -592,5 +593,17 @@ public class Utilities {
 			} while (!node.equals(node2));
 			SCCs.add(SCC);
 		}
+    }
+    
+    
+    /*
+     * other helpers
+     */
+    
+    public static String getDateString() {
+    	LocalDate ldate = LocalDate.now();
+    	String[] date_data = ldate.toString().split("-"); // ldate.toString of format "2017-08-23"
+    	
+    	return date_data[2] + "_" + date_data[1] + "_" + date_data[0].substring(2);
     }
 }
