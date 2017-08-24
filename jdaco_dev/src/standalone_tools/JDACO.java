@@ -195,7 +195,7 @@ public class JDACO {
 		System.out.println("Output file: " + output_file);
 
 		System.out.println("#threads: " + no_threads);
-		System.out.println("");
+		System.out.println();
 		System.out.flush();
 
 		// initialize calculation and set parameters
@@ -203,13 +203,14 @@ public class JDACO {
 		
 		
 		// carry out computation
-		long start = System.currentTimeMillis();
 		System.out.println("Computing ...");
 		HashSet<HashSet<String>> results = new HashSet<>();
 		int n = seed.size();
 		int i = 1;
+		long start = System.currentTimeMillis();
 		for (String tf : seed) {
 			if (out != null)
+				out.println("========================================================");
 				out.println(i + "/" + n + ": " + tf);
 			results.addAll(daco.growPairs(tf, seed));
 			++i;
@@ -222,6 +223,7 @@ public class JDACO {
 		
 		// filter and write output
 		DACO.writeAndFilterOutput(output_file, results, seed);
+		System.out.println();
 		System.out.println(results.size() + " candidates written to output.");
 		
 		// below 3min show results in seconds

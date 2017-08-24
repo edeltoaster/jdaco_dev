@@ -422,7 +422,7 @@ public class DACO {
 		}
 		
 		if (verbose != null)
-			verbose.println("Seeding from " + no_pair_proteins + " pairs with " + jobs.size() + " unique domain interactions.");
+			verbose.println("Seeding from " + no_pair_proteins + " pair(s) with " + jobs.size() + " unique domain interactions.");
 		
 		// re-init data structures if necessary
 		if (this.temp_results == null) 
