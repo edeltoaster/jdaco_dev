@@ -134,6 +134,16 @@ public class PPICompare {
 			System.exit(1);
 		}
 		
+		if (group1.size() < 2 || group2.size() < 2) {
+			
+			if (group1.size() < 2)
+				System.err.println(path_group1 + " does not contain enough data. At least two samples per group are needed for a statistical evaluation.");
+			if (group2.size() < 2)
+				System.err.println(path_group2 + " does not contain enough data. At least two samples per group are needed for a statistical evaluation.");
+			
+			System.exit(1);
+		}
+		
 		if (output_folder == null) {
 			System.err.println("Please add an output folder.");
 			
@@ -158,6 +168,11 @@ public class PPICompare {
 		
 		// some preface
 		System.out.println("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") : ");
+		
+		if (group1.size() < 3 || group2.size() < 3) {
+			System.out.println("PPICompare will run as intended, but be aware that at least three samples per group are recommended to gather meaningful results.");
+		}
+		
 		System.out.flush();
 		
 		// actual calculations
@@ -166,8 +181,13 @@ public class PPICompare {
 		
 		// stdout-output
 		System.out.println(rd.getNumberOfComparisons()  + " comparisons, " + "P_rew: " + P_rew_rounded + ", " + rd.getSignificantlyRewiredInteractions().size() + " significant rewiring events." );
-		List<String> minReasons = rd.getMinMostLikelyReasons();
-		System.out.println(minReasons.size() + " transcriptomic alterations can explain all significant changes.");
+		
+		List<String> minReasons = null;
+		if (rd.getSignificantlyRewiredInteractions().size() > 0) {
+			minReasons = rd.getMinMostLikelyReasons();
+			System.out.println(minReasons.size() + " transcriptomic alterations can explain all significant changes.");
+		}
+		
 		System.out.flush();
 		
 		
@@ -184,7 +204,8 @@ public class PPICompare {
 		rd.writeDiffnet(output_folder + "differential_network.txt");
 		
 		// write output of optimization approach
-		Utilities.writeEntries(minReasons, output_folder + "min_reasons.txt");
+		if (minReasons != null)
+			Utilities.writeEntries(minReasons, output_folder + "min_reasons.txt");
 		
 		// if necessary, write protein attribute table
 		if (output_protein_attributes) {

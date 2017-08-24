@@ -824,6 +824,10 @@ public class RewiringDetector {
 			}
 		}
 		
+		// if there is nothing to compute, the result should be empty
+		if (reason_count_map.size() == 0)
+			return new ArrayList<>(0);
+		
 		// convert maximum to minimum weight problem
 		int max = Collections.max(reason_count_map.values()) + 1;
 		for (String reason:reason_count_map.keySet())
