@@ -29,6 +29,7 @@ public class JDACO {
 	private static double prob_threshold = -1.0;
 	private static PrintStream out = System.out;
 	private static int compute_timeout = 60;
+	private static boolean benchmark_mode = false;
 	
 	public static void printHelp() {
 		System.out.println("usage: java -jar JDACO.jar ([OPTIONS]) [PPI-NETWORK] [DDI-NETWORK] [SEED-FILE] [MAX-DEPTH] [OUT-FILE]");
@@ -42,6 +43,7 @@ public class JDACO {
 		System.out.println("	-cp=[probability] : overwrite internal complex probability cutoff with [probability], set to zero to turn off (default: determined pair threshold**([MAX-DEPTH]-1))");
 		System.out.println("	-ct=[minutes] : limits compute time per seed-protein to [minutes] (default: 60min)");
 		System.out.println("	-s : silent mode, no output during actual computation");
+		System.out.println("	-b : benchmark mode, always output the runtime in seconds");
 		
 		System.out.println();
 		
@@ -105,6 +107,10 @@ public class JDACO {
 			// silent mode
 			else if (arg.equals("-s")) 
 				out = null;
+			
+			// benchmark mode
+			else if (arg.equals("-b")) 
+				benchmark_mode = true;
 			
 			// other parameters
 			else {
@@ -219,7 +225,7 @@ public class JDACO {
 		System.out.println(results.size() + " candidates written to output.");
 		
 		// below 3min show results in seconds
-		if (duration < 180000)
+		if (duration < 180000 || benchmark_mode)
 			System.out.println("Overall time: " + TimeUnit.MILLISECONDS.toSeconds(duration) + " sec");
 		else
 			System.out.println("Overall time: " + TimeUnit.MILLISECONDS.toMinutes(duration) + " min");
