@@ -20,23 +20,25 @@ public class check_complexes {
 		
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(definitions.daco_results_folder, ".csv.gz")) {
 			String sample = f.getName().split("\\.")[0];
+			String[] sample_spl = sample.split("_");
+			String sample_pre = sample_spl[0] + "_" + sample_spl[1];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), definitions.seed, definitions.networks_folder + sample + "_major-transcripts.txt.gz");
 			
-			if (!sample.startsWith(cancer_type))
+			if (!sample_spl[0].equals(cancer_type))
 				continue;
 			
 			if (sample.contains("normal"))
-				group1.put(sample, qdr);
+				group1.put(sample_pre, qdr);
 			else {
-				group2.put(sample, qdr);
+				group2.put(sample_pre, qdr);
 			}
 		}
 		
 		System.out.println(cancer_type + " normal samples : " + group1.size());
 		System.out.println(cancer_type + " tumor samples : " + group2.size());
 		
-		String tfc_out = definitions.diff_tfc_output_folder.substring(0, definitions.diff_tfc_output_folder.length()-1) + "_" + cancer_type + "/";
-		String compl_out = definitions.diff_complex_output_folder.substring(0, definitions.diff_complex_output_folder.length()-1) + "_" + cancer_type + "/";
+		String tfc_out = definitions.diff_tfc_output_folder + cancer_type + "_";
+		String compl_out = definitions.diff_complex_output_folder + cancer_type + "_";
 		
 		System.out.println();
 		
@@ -62,6 +64,12 @@ public class check_complexes {
 		DiffComplexDetector.SPEnrichment tf_enrich2 = dcd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
 		tf_enrich2.writeSignificantSeedProteins(compl_out + "enriched_pos_TFs.txt", compl_out + "enriched_neg_TFs.txt");
 	
+		// writing quantified results for later usage
+		for (String sample:group1.keySet())
+			group1.get(sample).writeQuantifiedResult(definitions.qr_output_folder + sample + "_normal_qr.txt.gz");
+		for (String sample:group2.keySet())
+			group2.get(sample).writeQuantifiedResult(definitions.qr_output_folder + sample + "_tumor_qr.txt.gz");
+		
 		System.out.println();
 		System.out.println();
 	}

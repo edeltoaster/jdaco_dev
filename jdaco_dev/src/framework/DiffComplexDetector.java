@@ -2,6 +2,7 @@ package framework;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -372,9 +373,23 @@ public class DiffComplexDetector {
 		System.out.println(res_pos_all.size() +"+, " + res_neg_all.size() + "- diff. complexes.");
 		System.out.println(tfc_to_complexes.size() + " TF combinations in diff. complexes.");
 		
-		// write results
-		if (!new File(output_folder).exists())
-			new File(output_folder).mkdir();
+		/*
+		 * write results 
+		 */
+		
+		// first ensure that folder exists while allowing to put prefixes in like output_folder/bla_ ...
+		File output_folder_obj = null;
+		if (!output_folder.endsWith("/")) {
+			String[] spl = output_folder.split("/");
+			String actual_folder = String.join("/", Arrays.asList(spl).subList(0, spl.length-1));
+			output_folder_obj = new File(actual_folder);
+		} else 
+			output_folder_obj = new File(output_folder);
+			
+		if (!output_folder_obj.exists())
+			output_folder_obj.mkdir();
+		
+		// actually writing something
 		Utilities.writeEntries(res_pos_all, output_folder + "res_pos_all.txt");
 		Utilities.writeEntries(res_neg_all, output_folder + "res_neg_all.txt");
 		

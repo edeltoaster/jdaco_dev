@@ -1,5 +1,7 @@
 package framework;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -329,6 +331,40 @@ public class QuantDACOResultSet extends DACOResultSet {
 		
 		Utilities.writeEntries(to_write, out_file);
 	}
+	
+	/**
+	 * Reads written quantified output from file
+	 * @param path
+	 * @return
+	 */
+	public static Map<HashSet<String>, Double> readQuantifiedResult(String path) {
+		Map<HashSet<String>, Double> abundances = new HashMap<>();
+		
+		for (String line:Utilities.readFile(path)) {
+			String[] line_spl = line.trim().split("\\s+");
+			abundances.put(new HashSet<String>(Arrays.asList(line_spl[0].split(","))), Double.parseDouble(line_spl[1]));
+		}
+		
+		return abundances;
+	}
+	
+	/**
+	 * Reads all files from a certain folder as quantified results: filename-prefix -> quantified results map.
+	 * Assumes the standard file ending is "_qr.txt(.gz).
+	 * @param folder
+	 * @return
+	 */
+	public static Map<String, Map<HashSet<String>, Double>> readQuantifiedResults(String folder) {
+		Map<String, Map<HashSet<String>, Double>> data = new HashMap<>();
+		
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(folder, "_qr.txt")) {
+			String sample = f.getName().split("_ppin")[0];
+			data.put(sample, readQuantifiedResult(f.getAbsolutePath()));
+		}
+
+		return data;
+	}
+	
 	
 	/*
 	 * getters
