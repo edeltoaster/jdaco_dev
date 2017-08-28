@@ -65,6 +65,9 @@ public class check_complexes {
 		tf_enrich2.writeSignificantSeedProteins(compl_out + "enriched_pos_TFs.txt", compl_out + "enriched_neg_TFs.txt");
 	
 		// writing quantified results for later usage
+		if (!new File(definitions.qr_output_folder).exists())
+			new File(definitions.qr_output_folder).mkdir();
+		
 		for (String sample:group1.keySet())
 			group1.get(sample).writeQuantifiedResult(definitions.qr_output_folder + sample + "_normal_qr.txt.gz");
 		for (String sample:group2.keySet())
