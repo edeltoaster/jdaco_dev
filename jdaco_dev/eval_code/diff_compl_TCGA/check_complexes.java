@@ -45,6 +45,7 @@ public class check_complexes {
 		System.out.println("Determining diff. TF combinations ...");
 		DiffSeedVarDetector dsvd = new DiffSeedVarDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 		dsvd.diffTFComplAnalysis(tfc_out, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, null, null);
+		dsvd.writeSignSortedVariants(tfc_out + "sign.txt", false);
 		
 		System.out.println("Determining enriched TFs ...");
 		DiffSeedVarDetector.SPEnrichment tf_enrich = dsvd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
@@ -55,6 +56,7 @@ public class check_complexes {
 		System.out.println("Determining diff. complexes ...");
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 		dcd.diffTFComplAnalysis(compl_out, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, null, null);
+		dcd.writeSignSortedComplexes(compl_out + "sign.txt", false);
 		
 		System.out.println("Determining enriched TF combinations ...");
 		DiffComplexDetector.SPCEnrichment tfc_enrich = dcd.calculateSPCEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);

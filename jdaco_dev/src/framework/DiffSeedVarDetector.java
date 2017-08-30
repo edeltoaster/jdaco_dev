@@ -21,7 +21,7 @@ import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 
 /**
- * Class for differential DACO complexes
+ * Class for differential seed combination variants in DACO complexes
  * @author Thorsten Will
  */
 public class DiffSeedVarDetector {
@@ -571,6 +571,49 @@ public class DiffSeedVarDetector {
 		}
 	}
 
+	public void writeSignSortedVariants(String out_file, boolean human_readable) {
+		List<String> to_write = new LinkedList<>();
+		to_write.add("(sub)seed_comb direction q-value fold-change member_complexes");
+		
+		if (human_readable)
+			this.getUniprotToGeneMap();
+		
+		for (HashSet<String> seed_comb:this.significance_sorted_variants) {
+			// TODO: extend and adjust by fact that those are actually TF variants, ot complexes etcpp
+			Set<String> seed_comb_temp = null;
+			if (human_readable)
+				seed_comb_temp = seed_comb.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet());
+			else 
+				seed_comb_temp = seed_comb;
+			String seed_comb_string = String.join("/", seed_comb_temp);
+			
+			double fold_change = this.group1_medians.getOrDefault(seed_comb, 0.0);
+			double group2_med = this.group2_medians.getOrDefault(seed_comb, 0.0);
+			
+			if (group2_med == 0.0)
+				fold_change = Double.POSITIVE_INFINITY;
+			else
+				fold_change /= group2_med;
+			
+			List<HashSet<String>> members = this.seed_combination_variants.get(seed_comb);
+			
+			if (human_readable) {
+				List<HashSet<String>> members_temp = new ArrayList<>(members.size());
+				members.stream().forEach(l -> members_temp.add(new HashSet<String>(l.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()))));
+				members = members_temp;
+			}
+			
+			String members_string = String.join(",", members.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
+			
+			//format: (sub)seed_comb direction q-value fold-change member_complexes
+			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), String.format(Locale.US, "%.3g", this.significant_variants_qvalues.get(seed_comb)), String.format(Locale.US, "%.2g", fold_change), members_string);
+			to_write.add(String.join(" ", line));
+		}
+		
+
+		Utilities.writeEntries(to_write, out_file);
+	}
+	
 	
 	/*
 	 * getters

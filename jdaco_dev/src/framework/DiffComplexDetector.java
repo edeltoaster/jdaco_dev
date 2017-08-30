@@ -528,6 +528,49 @@ public class DiffComplexDetector {
 		}
 	}
 
+	public void writeSignSortedComplexes(String out_file, boolean human_readable) {
+		List<String> to_write = new LinkedList<>();
+		to_write.add("(sub)complex direction q-value fold-change member_complexes");
+		
+		if (human_readable)
+			this.getUniprotToGeneMap();
+		
+		for (HashSet<String> sign_complex:this.significance_sorted_complexes) {
+			
+			Set<String> sign_compl_temp = null;
+			if (human_readable)
+				sign_compl_temp = sign_complex.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet());
+			else 
+				sign_compl_temp = sign_complex;
+			String compl_string = String.join("/", sign_compl_temp);
+			
+			double fold_change = this.group1_medians.getOrDefault(sign_complex, 0.0);
+			double group2_med = this.group2_medians.getOrDefault(sign_complex, 0.0);
+			
+			if (group2_med == 0.0)
+				fold_change = Double.POSITIVE_INFINITY;
+			else
+				fold_change /= group2_med;
+			
+			List<HashSet<String>> members = this.relevant_complexes.get(sign_complex);
+			
+			if (human_readable) {
+				List<HashSet<String>> members_temp = new ArrayList<>(members.size());
+				members.stream().forEach(l -> members_temp.add(new HashSet<String>(l.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()))));
+				members = members_temp;
+			}
+			
+			String members_string = String.join(",", members.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
+			
+			//format: (sub)complex direction q-value fold-change member_complexes
+			List<String> line = Arrays.asList(compl_string, this.directions.get(sign_complex), String.format(Locale.US, "%.3g", this.qvalues.get(sign_complex)), String.format(Locale.US, "%.2g", fold_change), members_string);
+			to_write.add(String.join(" ", line));
+		}
+		
+
+		Utilities.writeEntries(to_write, out_file);
+	}
+	
 	
 	/*
 	 * getters
