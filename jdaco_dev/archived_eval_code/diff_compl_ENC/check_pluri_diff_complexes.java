@@ -7,7 +7,7 @@ import java.util.Set;
 
 import framework.DataQuery;
 import framework.DiffComplexDetector;
-import framework.DiffSeedVarDetector;
+import framework.DiffSeedCombVarDetector;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
@@ -42,11 +42,11 @@ public class check_pluri_diff_complexes {
 		System.out.println();
 		
 		System.out.println("Determining diff. TF combinations ...");
-		DiffSeedVarDetector dsvd = new DiffSeedVarDetector(group1, group2, pluri_definitions.qvalue, pluri_definitions.parametric, pluri_definitions.paired, pluri_definitions.check_supersets, pluri_definitions.min_variant_fraction, pluri_definitions.no_threads);
+		DiffSeedCombVarDetector dsvd = new DiffSeedCombVarDetector(group1, group2, pluri_definitions.qvalue, pluri_definitions.parametric, pluri_definitions.paired, pluri_definitions.check_supersets, pluri_definitions.min_variant_fraction, pluri_definitions.no_threads);
 		dsvd.diffTFComplAnalysis(pluri_definitions.output_folder_pre + "tfc/", pluri_definitions.goa, pluri_definitions.binding_data, 0.0001, pluri_definitions.d_min, pluri_definitions.d_max, true, allosome_proteins, pluri_definitions.pluri_factors);
 		
 		System.out.println("Determining enriched TFs ...");
-		DiffSeedVarDetector.SPEnrichment tf_enrich = dsvd.calculateSPEnrichment(pluri_definitions.qvalue, pluri_definitions.SPEnrich_iterations, pluri_definitions.SPEnrich_compl_part_threshold);
+		DiffSeedCombVarDetector.SPEnrichment tf_enrich = dsvd.calculateSPEnrichment(pluri_definitions.qvalue, pluri_definitions.SPEnrich_iterations, pluri_definitions.SPEnrich_compl_part_threshold);
 		tf_enrich.writeSignificantSeedProteins(pluri_definitions.output_folder_pre + "tfc/" + "enriched_pos_TFs.txt", pluri_definitions.output_folder_pre + "tfc/" + "enriched_neg_TFs.txt");
 		
 		System.out.println();

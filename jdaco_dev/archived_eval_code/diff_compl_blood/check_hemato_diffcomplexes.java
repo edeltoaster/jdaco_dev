@@ -11,8 +11,8 @@ import java.util.Set;
 
 import framework.BindingDataHandler;
 import framework.DataQuery;
-import framework.DiffSeedVarDetector;
-import framework.DiffSeedVarDetector.SPEnrichment;
+import framework.DiffSeedCombVarDetector;
+import framework.DiffSeedCombVarDetector.SPEnrichment;
 import framework.GOAnnotator;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
@@ -44,7 +44,7 @@ public class check_hemato_diffcomplexes {
 		
 		System.out.println("Determine differential complexomes ...");
 		Set<String> involved_tfs = new HashSet<>();
-		DiffSeedVarDetector dcd = new DiffSeedVarDetector(group1, group2, definitions.qvalue, parametric, false, definitions.check_supersets, 0.0, no_threads);
+		DiffSeedCombVarDetector dcd = new DiffSeedCombVarDetector(group1, group2, definitions.qvalue, parametric, false, definitions.check_supersets, 0.0, no_threads);
 		
 		List<HashSet<String>> tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
@@ -83,7 +83,7 @@ public class check_hemato_diffcomplexes {
 			tf_variants.add(variant);
 			directions.put(variant.toString(), sign);
 			
-			String[] annotation_data = DiffSeedVarDetector.getSortedComplexesAnnotations(variant, sign, goa, group1, group2);
+			String[] annotation_data = DiffSeedCombVarDetector.getSortedComplexesAnnotations(variant, sign, goa, group1, group2);
 			effect.put(variant.toString(), annotation_data[1]);
 			summarized_effect.put(variant.toString(), annotation_data[2]);
 			actual_complexes.put(variant.toString(), annotation_data[0]);

@@ -24,7 +24,7 @@ import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
  * Class for differential seed combination variants in DACO complexes
  * @author Thorsten Will
  */
-public class DiffSeedVarDetector {
+public class DiffSeedCombVarDetector {
 	
 	// given data
 	private final Map<String, QuantDACOResultSet> group1;
@@ -52,7 +52,7 @@ public class DiffSeedVarDetector {
 	private final ForkJoinPool pool;
 	private Map<String, String> up_to_gene_map; // computed on demand, use getters
 	
-	public DiffSeedVarDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
+	public DiffSeedCombVarDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
@@ -155,7 +155,7 @@ public class DiffSeedVarDetector {
 	 * @param parametric
 	 * @param paired
 	 */
-	public DiffSeedVarDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired) {
+	public DiffSeedCombVarDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired) {
 		this(group1, group2, FDR, parametric, paired, false, 0.0, Runtime.getRuntime().availableProcessors());
 	} 
 	
@@ -165,7 +165,7 @@ public class DiffSeedVarDetector {
 	 * @param FDR
 	 * @param no_threads
 	 */
-	public DiffSeedVarDetector(String raw_pvalues_medians_file, double FDR, int no_threads) {
+	public DiffSeedCombVarDetector(String raw_pvalues_medians_file, double FDR, int no_threads) {
 		// empty parameters
 		this.group1 = null;
 		this.group2 = null;
@@ -573,13 +573,14 @@ public class DiffSeedVarDetector {
 
 	public void writeSignSortedVariants(String out_file, boolean human_readable) {
 		List<String> to_write = new LinkedList<>();
-		to_write.add("(sub)seed_comb direction q-value fold-change member_complexes");
+		to_write.add("(sub)seed_comb direction q-value fold-change member_seed_comb member_complexes");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
 		
 		for (HashSet<String> seed_comb:this.significance_sorted_variants) {
-			// TODO: extend and adjust by fact that those are actually TF variants, ot complexes etcpp
+			
+			// translate seed combination if necessary
 			Set<String> seed_comb_temp = null;
 			if (human_readable)
 				seed_comb_temp = seed_comb.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet());
@@ -587,6 +588,7 @@ public class DiffSeedVarDetector {
 				seed_comb_temp = seed_comb;
 			String seed_comb_string = String.join("/", seed_comb_temp);
 			
+			// determine fold-change
 			double fold_change = this.group1_medians.getOrDefault(seed_comb, 0.0);
 			double group2_med = this.group2_medians.getOrDefault(seed_comb, 0.0);
 			
@@ -595,18 +597,39 @@ public class DiffSeedVarDetector {
 			else
 				fold_change /= group2_med;
 			
-			List<HashSet<String>> members = this.seed_combination_variants.get(seed_comb);
+			// determine member seed combinations if subset was used
+			List<HashSet<String>> member_seed_comb = this.seed_combination_variants.get(seed_comb);
 			
 			if (human_readable) {
-				List<HashSet<String>> members_temp = new ArrayList<>(members.size());
-				members.stream().forEach(l -> members_temp.add(new HashSet<String>(l.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()))));
-				members = members_temp;
+				List<HashSet<String>> member_seed_comb_temp = new ArrayList<>(member_seed_comb.size());
+				member_seed_comb.stream().forEach(l -> member_seed_comb_temp.add(new HashSet<String>(l.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()))));
+				member_seed_comb = member_seed_comb_temp;
 			}
 			
-			String members_string = String.join(",", members.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
+			String member_seed_comb_string = String.join(",", member_seed_comb.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
 			
-			//format: (sub)seed_comb direction q-value fold-change member_complexes
-			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), String.format(Locale.US, "%.3g", this.significant_variants_qvalues.get(seed_comb)), String.format(Locale.US, "%.2g", fold_change), members_string);
+			
+			// determine actual complexes and translate if necessary
+			List<HashSet<String>> complexes = new LinkedList<>();
+			for (HashSet<String> actual_tfc:this.seed_combination_variants.get(seed_comb)) {
+				for (QuantDACOResultSet qdr:group1.values())
+					if (qdr.getSeedToComplexMap().containsKey(actual_tfc))
+						complexes.addAll(qdr.getSeedToComplexMap().get(actual_tfc));
+				for (QuantDACOResultSet qdr:group2.values())
+					if (qdr.getSeedToComplexMap().containsKey(actual_tfc))
+						complexes.addAll(qdr.getSeedToComplexMap().get(actual_tfc));
+			}
+			
+			if (human_readable) {
+				List<HashSet<String>> member_compl_temp = new ArrayList<>(complexes.size());
+				complexes.stream().forEach(l -> member_compl_temp.add(new HashSet<String>(l.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()))));
+				complexes = member_compl_temp;
+			}
+			
+			String member_complexes_string = String.join(",", complexes.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
+			
+			// write in format: (sub)seed_comb direction q-value fold-change member_seed_comb member_complexes
+			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), String.format(Locale.US, "%.3g", this.significant_variants_qvalues.get(seed_comb)), String.format(Locale.US, "%.2g", fold_change), member_seed_comb_string, member_complexes_string);
 			to_write.add(String.join(" ", line));
 		}
 		
