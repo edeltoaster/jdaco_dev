@@ -589,13 +589,13 @@ public class DiffSeedCombDetector {
 			String seed_comb_string = String.join("/", seed_comb_temp);
 			
 			// determine fold-change
-			double fold_change = this.group1_medians.getOrDefault(seed_comb, 0.0);
-			double group2_med = this.group2_medians.getOrDefault(seed_comb, 0.0);
+			double fold_change = this.group2_medians.getOrDefault(seed_comb, 0.0);
+			double group1_med = this.group1_medians.getOrDefault(seed_comb, 0.0);
 			
-			if (group2_med == 0.0)
-				fold_change = Double.POSITIVE_INFINITY;
+			if (group1_med == 0.0)
+				fold_change = Double.MAX_VALUE;
 			else
-				fold_change /= group2_med;
+				fold_change /= group1_med;
 			
 			// determine member seed combinations if subset was used
 			List<HashSet<String>> member_seed_comb = this.seed_combination_variants.get(seed_comb);

@@ -544,13 +544,13 @@ public class DiffComplexDetector {
 				sign_compl_temp = sign_complex;
 			String compl_string = String.join("/", sign_compl_temp);
 			
-			double fold_change = this.group1_medians.getOrDefault(sign_complex, 0.0);
-			double group2_med = this.group2_medians.getOrDefault(sign_complex, 0.0);
+			double fold_change = this.group2_medians.getOrDefault(sign_complex, 0.0);
+			double group1_med = this.group1_medians.getOrDefault(sign_complex, 0.0);
 			
-			if (group2_med == 0.0)
-				fold_change = Double.POSITIVE_INFINITY;
+			if (group1_med == 0.0)
+				fold_change = Double.MAX_VALUE;
 			else
-				fold_change /= group2_med;
+				fold_change /= group1_med;
 			
 			List<HashSet<String>> members = this.relevant_complexes.get(sign_complex);
 			
