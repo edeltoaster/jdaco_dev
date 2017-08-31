@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import framework.DiffComplexDetector;
-import framework.DiffSeedCombVarDetector;
+import framework.DiffSeedCombDetector;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
@@ -42,11 +42,11 @@ public class check_BRCA_complexes {
 		System.out.println();
 		
 		System.out.println("Determining diff. TF combinations ...");
-		DiffSeedCombVarDetector dsvd = new DiffSeedCombVarDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.check_supersets, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
+		DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, BRCA_definitions.qvalue, BRCA_definitions.parametric, BRCA_definitions.paired, BRCA_definitions.check_supersets, BRCA_definitions.min_variant_fraction, BRCA_definitions.no_threads);
 		dsvd.diffTFComplAnalysis(BRCA_definitions.diff_tfc_output_folder, BRCA_definitions.goa, BRCA_definitions.binding_data, 0.0001, BRCA_definitions.d_min, BRCA_definitions.d_max, true, null, null);
 		
 		System.out.println("Determining enriched TFs ...");
-		DiffSeedCombVarDetector.SPEnrichment tf_enrich = dsvd.calculateSPEnrichment(BRCA_definitions.qvalue, BRCA_definitions.SPEnrich_iterations, BRCA_definitions.SPEnrich_compl_part_threshold);
+		DiffSeedCombDetector.SPEnrichment tf_enrich = dsvd.calculateSPEnrichment(BRCA_definitions.qvalue, BRCA_definitions.SPEnrich_iterations, BRCA_definitions.SPEnrich_compl_part_threshold);
 		tf_enrich.writeSignificantSeedProteins(BRCA_definitions.diff_tfc_output_folder + "enriched_pos_TFs.txt", BRCA_definitions.diff_tfc_output_folder + "enriched_neg_TFs.txt");
 		
 		System.out.println();

@@ -24,7 +24,7 @@ import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
  * Class for differential seed combination variants in DACO complexes
  * @author Thorsten Will
  */
-public class DiffSeedCombVarDetector {
+public class DiffSeedCombDetector {
 	
 	// given data
 	private final Map<String, QuantDACOResultSet> group1;
@@ -52,7 +52,7 @@ public class DiffSeedCombVarDetector {
 	private final ForkJoinPool pool;
 	private Map<String, String> up_to_gene_map; // computed on demand, use getters
 	
-	public DiffSeedCombVarDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
+	public DiffSeedCombDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
@@ -155,7 +155,7 @@ public class DiffSeedCombVarDetector {
 	 * @param parametric
 	 * @param paired
 	 */
-	public DiffSeedCombVarDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired) {
+	public DiffSeedCombDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired) {
 		this(group1, group2, FDR, parametric, paired, false, 0.0, Runtime.getRuntime().availableProcessors());
 	} 
 	
@@ -165,7 +165,7 @@ public class DiffSeedCombVarDetector {
 	 * @param FDR
 	 * @param no_threads
 	 */
-	public DiffSeedCombVarDetector(String raw_pvalues_medians_file, double FDR, int no_threads) {
+	public DiffSeedCombDetector(String raw_pvalues_medians_file, double FDR, int no_threads) {
 		// empty parameters
 		this.group1 = null;
 		this.group2 = null;

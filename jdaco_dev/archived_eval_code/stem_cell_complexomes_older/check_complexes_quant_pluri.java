@@ -11,7 +11,7 @@ import java.util.Set;
 
 import framework.BindingDataHandler;
 import framework.DataQuery;
-import framework.DiffSeedCombVarDetector;
+import framework.DiffSeedCombDetector;
 import framework.QuantDACOResultSet;
 import framework.RegulatoryNetwork;
 import framework.Utilities;
@@ -44,7 +44,7 @@ public class check_complexes_quant_pluri {
 		}
 		
 		Set<String> involved_tfs = new HashSet<>();
-		DiffSeedCombVarDetector dcd = new DiffSeedCombVarDetector(group1, group2, 0.01, false, false, check_supersets, 0.0, 4);
+		DiffSeedCombDetector dcd = new DiffSeedCombDetector(group1, group2, 0.01, false, false, check_supersets, 0.0, 4);
 		List<HashSet<String>> pluri_tf_variants = new LinkedList<>();
 		Map<String, String> effect = new HashMap<>();
 		List<String> res_pos = new LinkedList<>();
