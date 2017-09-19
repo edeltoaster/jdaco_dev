@@ -387,7 +387,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 	}
 	
 	/**
-	 * Returns the expression value of the most abundant transcript associated with this protein and 0.0 if it cannot be found
+	 * Returns the expression value associated with this protein (most abundant transcript or sum of all transcripts) and 0.0 if it cannot be found
 	 * @param protein
 	 * @return
 	 */

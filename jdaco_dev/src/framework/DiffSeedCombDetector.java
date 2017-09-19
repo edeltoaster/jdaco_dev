@@ -52,6 +52,17 @@ public class DiffSeedCombDetector {
 	private final ForkJoinPool pool;
 	private Map<String, String> up_to_gene_map; // computed on demand, use getters
 	
+	/**
+	 * Constructor
+	 * @param group1
+	 * @param group2
+	 * @param FDR
+	 * @param parametric
+	 * @param paired
+	 * @param incorporate_supersets
+	 * @param min_variant_fraction
+	 * @param no_threads
+	 */
 	public DiffSeedCombDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
 		this.group1 = group1;
 		this.group2 = group2;

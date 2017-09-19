@@ -390,6 +390,22 @@ public class Utilities {
 		return sign_obj_to_adjusted_p;
 	}
 	
+	
+	/*
+	 * simple differential expression in the framework
+	 */
+	
+	
+	public static List<String> getDiffExpressedProteins(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, double min_variant_fraction) {
+		// TODO: implement diff prot expr
+		// determine proteins to test
+		// test each protein
+		// FDR correction
+		// compile output
+		return null;
+	}
+	
+	
 	/*
 	 * Permutation helpers
 	 */

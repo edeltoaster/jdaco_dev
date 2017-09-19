@@ -20,7 +20,6 @@ import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 
-
 /**
  * Class for differential DACO complexes
  * @author Thorsten Will
@@ -54,6 +53,17 @@ public class DiffComplexDetector {
 	private Map<String, String> up_to_gene_map; // computed on demand, use getters
 	private Set<String> seed_proteins; // computed on demand, use getters
 	
+	/**
+	 * Constructor
+	 * @param group1
+	 * @param group2
+	 * @param FDR
+	 * @param parametric
+	 * @param paired
+	 * @param incorporate_supersets
+	 * @param min_variant_fraction
+	 * @param no_threads
+	 */
 	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
 		this.group1 = group1;
 		this.group2 = group2;
