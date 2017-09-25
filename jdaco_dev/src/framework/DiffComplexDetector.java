@@ -538,9 +538,15 @@ public class DiffComplexDetector {
 		}
 	}
 
+	/**
+	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers):
+	 * (sub)complex direction q-value fold-change member_seed_comb member_complexes
+	 * @param out_file
+	 * @param human_readable
+	 */
 	public void writeSignSortedComplexes(String out_file, boolean human_readable) {
 		List<String> to_write = new LinkedList<>();
-		to_write.add("(sub)complex direction q-value fold-change member_complexes");
+		to_write.add("(sub)complex direction q-value fold-change member_seed_comb member_complexes");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -562,6 +568,22 @@ public class DiffComplexDetector {
 			else
 				fold_change /= group1_med;
 			
+			// determine member seed combinations (if subset was used)
+			Set<HashSet<String>> member_seed_comb = new HashSet<>();
+			for (HashSet<String> complex:this.relevant_complexes.get(sign_complex)) {
+				HashSet<String> seed_sub = new HashSet<>(complex);
+				seed_sub.retainAll(this.seed_proteins);
+				member_seed_comb.add(seed_sub);
+			}
+			
+			if (human_readable) {
+				Set<HashSet<String>> member_seed_comb_temp = new HashSet<>(member_seed_comb.size());
+				member_seed_comb.stream().forEach(l -> member_seed_comb_temp.add(new HashSet<String>(l.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()))));
+				member_seed_comb = member_seed_comb_temp;
+			}
+			
+			String member_seed_comb_string = String.join(",", member_seed_comb.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
+			
 			List<HashSet<String>> members = this.relevant_complexes.get(sign_complex);
 			
 			if (human_readable) {
@@ -572,8 +594,8 @@ public class DiffComplexDetector {
 			
 			String members_string = String.join(",", members.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
 			
-			//format: (sub)complex direction q-value fold-change member_complexes
-			List<String> line = Arrays.asList(compl_string, this.directions.get(sign_complex), String.format(Locale.US, "%.3g", this.qvalues.get(sign_complex)), String.format(Locale.US, "%.2g", fold_change), members_string);
+			//format: (sub)complex direction q-value fold-change member_seed_comb member_complexes
+			List<String> line = Arrays.asList(compl_string, this.directions.get(sign_complex), String.format(Locale.US, "%.3g", this.qvalues.get(sign_complex)), String.format(Locale.US, "%.2g", fold_change), member_seed_comb_string, members_string);
 			to_write.add(String.join(" ", line));
 		}
 		

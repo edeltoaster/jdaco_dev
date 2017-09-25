@@ -581,7 +581,13 @@ public class DiffSeedCombDetector {
 			regnet.writeNodeTable(output_folder + "nodetable_POI.txt", annotational_data);
 		}
 	}
-
+	
+	/**
+	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers):
+	 * (sub)complex direction q-value fold-change member_seed_comb member_complexes
+	 * @param out_file
+	 * @param human_readable
+	 */
 	public void writeSignSortedVariants(String out_file, boolean human_readable) {
 		List<String> to_write = new LinkedList<>();
 		to_write.add("(sub)seed_comb direction q-value fold-change member_seed_comb member_complexes");
