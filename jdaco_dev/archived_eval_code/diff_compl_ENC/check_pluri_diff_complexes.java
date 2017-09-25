@@ -56,6 +56,8 @@ public class check_pluri_diff_complexes {
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, pluri_definitions.qvalue, pluri_definitions.parametric, pluri_definitions.paired, pluri_definitions.check_supersets, pluri_definitions.min_variant_fraction, pluri_definitions.no_threads);
 		dcd.diffTFComplAnalysis(pluri_definitions.output_folder_pre + "compl/", pluri_definitions.goa, pluri_definitions.binding_data, 0.0001, pluri_definitions.d_min, pluri_definitions.d_max, true, allosome_proteins, pluri_definitions.pluri_factors);
 		dcd.writeSignSortedComplexes(pluri_definitions.output_folder_pre + "compl/pluri_sign.txt", true);
+		dcd.writeSignSortedVariants(pluri_definitions.output_folder_pre + "compl/pluri_vsign.txt", false);
+		dcd.writeSignSortedVariants(pluri_definitions.output_folder_pre + "compl/pluri_vhsign.txt", true);
 		
 		System.out.println("Determine enriched TF combinations ...");
 		DiffComplexDetector.SPCEnrichment tfc_enrich = dcd.calculateSPCEnrichment(pluri_definitions.qvalue, pluri_definitions.SPEnrich_iterations, pluri_definitions.SPEnrich_compl_part_threshold);

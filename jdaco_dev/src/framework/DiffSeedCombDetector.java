@@ -649,7 +649,6 @@ public class DiffSeedCombDetector {
 			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), String.format(Locale.US, "%.3g", this.significant_variants_qvalues.get(seed_comb)), String.format(Locale.US, "%.2g", fold_change), member_seed_comb_string, member_complexes_string);
 			to_write.add(String.join(" ", line));
 		}
-		
 
 		Utilities.writeEntries(to_write, out_file);
 	}

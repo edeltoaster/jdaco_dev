@@ -57,6 +57,8 @@ public class check_complexes {
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 		dcd.diffTFComplAnalysis(compl_out, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, null, null);
 		dcd.writeSignSortedComplexes(compl_out + "sign.txt", false);
+		dcd.writeSignSortedVariants(compl_out + "vsign.txt", false);
+		dcd.writeSignSortedVariants(compl_out + "vsignh.txt", true);
 		
 		System.out.println("Determining enriched TF combinations ...");
 		DiffComplexDetector.SPCEnrichment tfc_enrich = dcd.calculateSPCEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);

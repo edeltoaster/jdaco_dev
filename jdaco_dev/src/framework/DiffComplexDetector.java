@@ -539,7 +539,7 @@ public class DiffComplexDetector {
 	}
 
 	/**
-	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers):
+	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
 	 * (sub)complex direction q-value fold-change member_seed_comb member_complexes
 	 * @param out_file
 	 * @param human_readable
@@ -553,6 +553,7 @@ public class DiffComplexDetector {
 		
 		for (HashSet<String> sign_complex:this.significance_sorted_complexes) {
 			
+			// id conversion is necessary
 			Set<String> sign_compl_temp = null;
 			if (human_readable)
 				sign_compl_temp = sign_complex.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet());
@@ -560,6 +561,7 @@ public class DiffComplexDetector {
 				sign_compl_temp = sign_complex;
 			String compl_string = String.join("/", sign_compl_temp);
 			
+			// fold-change calculation
 			double fold_change = this.group2_medians.getOrDefault(sign_complex, 0.0);
 			double group1_med = this.group1_medians.getOrDefault(sign_complex, 0.0);
 			
@@ -568,39 +570,214 @@ public class DiffComplexDetector {
 			else
 				fold_change /= group1_med;
 			
-			// determine member seed combinations (if subset was used)
-			Set<HashSet<String>> member_seed_comb = new HashSet<>();
-			for (HashSet<String> complex:this.relevant_complexes.get(sign_complex)) {
-				HashSet<String> seed_sub = new HashSet<>(complex);
-				seed_sub.retainAll(this.seed_proteins);
-				member_seed_comb.add(seed_sub);
-			}
+			// determine member seed combination
+			HashSet<String> seed_sub = new HashSet<>(sign_complex);
+			seed_sub.retainAll(this.getSeedProteins());
 			
 			if (human_readable) {
-				Set<HashSet<String>> member_seed_comb_temp = new HashSet<>(member_seed_comb.size());
-				member_seed_comb.stream().forEach(l -> member_seed_comb_temp.add(new HashSet<String>(l.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()))));
-				member_seed_comb = member_seed_comb_temp;
+				seed_sub = new HashSet<String>(seed_sub.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()));
 			}
+			String member_seed_comb_string = String.join("/", seed_sub);
 			
-			String member_seed_comb_string = String.join(",", member_seed_comb.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
-			
+			// determine member complexes
 			List<HashSet<String>> members = this.relevant_complexes.get(sign_complex);
-			
 			if (human_readable) {
 				List<HashSet<String>> members_temp = new ArrayList<>(members.size());
 				members.stream().forEach(l -> members_temp.add(new HashSet<String>(l.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()))));
 				members = members_temp;
 			}
-			
 			String members_string = String.join(",", members.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
 			
+			// shortening numbers depending on human/machine-usage
+			String qval_string = null;
+			String foldc_string = null;
+			if (human_readable) {
+				qval_string = String.format(Locale.US, "%.3g", this.qvalues.get(sign_complex));
+				foldc_string = String.format(Locale.US, "%.2g", fold_change);
+			} else {
+				qval_string = Double.toString(this.qvalues.get(sign_complex));
+				foldc_string = Double.toString(fold_change);
+			}
+			
 			//format: (sub)complex direction q-value fold-change member_seed_comb member_complexes
-			List<String> line = Arrays.asList(compl_string, this.directions.get(sign_complex), String.format(Locale.US, "%.3g", this.qvalues.get(sign_complex)), String.format(Locale.US, "%.2g", fold_change), member_seed_comb_string, members_string);
+			List<String> line = Arrays.asList(compl_string, this.directions.get(sign_complex), qval_string, foldc_string, member_seed_comb_string, members_string);
 			to_write.add(String.join(" ", line));
 		}
 		
 
 		Utilities.writeEntries(to_write, out_file);
+	}
+	
+	/**
+	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
+	 * seed_comb direction avg_q-value med_fold-change member_complexes direction_details q-value_details fold-change_details
+	 * @param out_file
+	 * @param human_readable
+	 */
+	public void writeSignSortedVariants(String out_file, boolean human_readable) {
+		
+		HashMap<HashSet<String>, List<Double>> sign_comb_qs_map = new HashMap<>();
+		HashMap<HashSet<String>, List<Double>> sign_comb_fcs_map = new HashMap<>();
+		HashMap<HashSet<String>, List<HashSet<String>>> sign_comb_sign_compl_map = new HashMap<>();
+		HashMap<HashSet<String>, Double> sign_compl_foldc = new HashMap<>();
+		
+		// determine seed combination variants, collect p-values as well as note dereg. complexes, fold changes
+		for (HashSet<String> sign_complex:this.significance_sorted_complexes) {
+			double q_value = this.qvalues.get(sign_complex);
+			
+			// determine seed subset
+			HashSet<String> seed_sub = new HashSet<>(sign_complex);
+			seed_sub.retainAll(this.getSeedProteins());
+			
+			// store q-value(s)
+			if (!sign_comb_qs_map.containsKey(seed_sub)) {
+				sign_comb_qs_map.put(seed_sub, new LinkedList<Double>());
+				sign_comb_sign_compl_map.put(seed_sub, new LinkedList<HashSet<String>>());
+				sign_comb_fcs_map.put(seed_sub, new LinkedList<Double>());
+			}
+			sign_comb_qs_map.get(seed_sub).add(q_value);
+			sign_comb_sign_compl_map.get(seed_sub).add(sign_complex);
+			
+			// store fold change
+			double fold_change = this.group2_medians.getOrDefault(sign_complex, 0.0);
+			double group1_med = this.group1_medians.getOrDefault(sign_complex, 0.0);
+			
+			if (group1_med == 0.0)
+				fold_change = Double.MAX_VALUE;
+			else
+				fold_change /= group1_med;
+			
+			sign_compl_foldc.put(sign_complex, fold_change);
+			sign_comb_fcs_map.get(seed_sub).add(fold_change);
+		}
+		
+		// q-values
+		HashMap<HashSet<String>, Double> sign_comb_q_map = new HashMap<>();
+		sign_comb_qs_map.keySet().forEach(c -> sign_comb_q_map.put(c, Utilities.getMean(sign_comb_qs_map.get(c))));
+		
+		// fold-changes
+		HashMap<HashSet<String>, Double> sign_comb_fc_map = new HashMap<>();
+		sign_comb_fcs_map.keySet().forEach(c -> sign_comb_fc_map.put(c, Utilities.getMedian(sign_comb_fcs_map.get(c))));
+		
+		// sort by average q-value
+		List<HashSet<String>> sign_sorted_combs = new ArrayList<>(sign_comb_q_map.keySet());
+		sign_sorted_combs.sort( (c1, c2) -> diffCompareToVar(c1, c2, sign_comb_q_map, sign_comb_fc_map));
+		
+		// preface
+		List<String> to_write = new LinkedList<>();
+		to_write.add("seed_comb direction avg_q-value med_fold-change member_complexes direction_details q-value_details fold-change_details");
+		
+		if (human_readable)
+			this.getUniprotToGeneMap();
+		
+		for (HashSet<String> seed_comb:sign_sorted_combs) {
+			
+			// translate seed combination if necessary
+			Set<String> seed_comb_temp = null;
+			if (human_readable)
+				seed_comb_temp = seed_comb.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet());
+			else 
+				seed_comb_temp = seed_comb;
+			String seed_comb_string = String.join("/", seed_comb_temp);
+			
+			// determine direction and individual values for each complex
+			List<String> member_complexes = new LinkedList<>();
+			List<String> direction_details = new LinkedList<>();
+			List<String> qval_details = new LinkedList<>();
+			List<String> foldc_details = new LinkedList<>();
+			
+			Set<String> direction_set = new HashSet<>();
+			for (HashSet<String> complex:sign_comb_sign_compl_map.get(seed_comb)) {
+				
+				// member complexes identifier conversion (if wanted)
+				String compl_string = null;
+				String qval_string = null;
+				String foldc_string = null;
+				if (human_readable) {
+					compl_string = String.join("/", complex.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()));
+					qval_string = String.format(Locale.US, "%.3g", this.qvalues.get(complex));
+					foldc_string = String.format(Locale.US, "%.2g", sign_compl_foldc.get(complex));
+				} else {
+					compl_string = String.join("/", complex);
+					qval_string = Double.toString(this.qvalues.get(complex));
+					foldc_string = Double.toString(sign_compl_foldc.get(complex));
+				}
+				member_complexes.add(compl_string);
+				
+				// direction stuff
+				String direction = this.directions.get(complex);
+				direction_set.add(direction);
+				direction_details.add(compl_string + ":" + direction);
+				
+				// q-value details
+				qval_details.add(compl_string + ":" + qval_string); 
+				// fold-change details
+				foldc_details.add(compl_string + ":" + foldc_string);
+			}
+			
+			// determine overall direction
+			String direction_string = "+";
+			if (!direction_set.contains(direction_string))
+				direction_string = "-";
+			else if (direction_set.size() > 1)
+				direction_string = "+-";
+			
+			String direction_details_string = String.join(",", direction_details);
+			
+			// merge other strings
+			String member_complexes_string = String.join(",", member_complexes);
+			String qval_details_string = String.join(",", qval_details);
+			String foldc_details_string = String.join(",", foldc_details);
+			
+			// shortening numbers depending on human/machine-usage
+			String qval_string = null;
+			String foldc_string = null;
+			if (human_readable) {
+				qval_string = String.format(Locale.US, "%.3g", sign_comb_q_map.get(seed_comb));
+				foldc_string = String.format(Locale.US, "%.2g", sign_comb_fc_map.get(seed_comb));
+			} else {
+				qval_string = Double.toString(sign_comb_q_map.get(seed_comb));
+				foldc_string = Double.toString(sign_comb_fc_map.get(seed_comb));
+			}
+			
+			// write in format: seed_comb direction avg_q-value med_fold-change member_complexes direction_details q-value_details fold-change_details
+			List<String> line = Arrays.asList(seed_comb_string, direction_string, qval_string, foldc_string, member_complexes_string, direction_details_string, qval_details_string, foldc_details_string);
+			to_write.add(String.join(" ", line));
+		}
+		
+		Utilities.writeEntries(to_write, out_file);
+	}
+	
+	/**
+	 * Custom compareTo function that first sorts by the cumulative q-value and then by cumulative fold-change
+	 * @param v1
+	 * @param v2
+	 * @param sign_comb_q_map
+	 * @param sign_comb_fc_map
+	 * @return
+	 */
+	private int diffCompareToVar(HashSet<String> v1, HashSet<String> v2, HashMap<HashSet<String>, Double> sign_comb_q_map, HashMap<HashSet<String>, Double> sign_comb_fc_map) {
+		int sign_compareTo = sign_comb_q_map.get(v1).compareTo(sign_comb_q_map.get(v2));
+		
+		if (sign_compareTo == 0) {
+			double fc1 = sign_comb_fc_map.get(v1);
+			double fc2 = sign_comb_fc_map.get(v2);
+			if (fc1 < 1.0) {
+				if (fc1 == 0.0)
+					fc1 = Double.MAX_VALUE;
+				else
+					fc1 = 1 / fc1;
+			}
+			if (fc2 < 1.0) {
+				if (fc2 == 0.0)
+					fc2 = Double.MAX_VALUE;
+				else
+					fc2 = 1 / fc2;
+			}
+			
+			return Double.compare(fc2, fc1); // note that we want to have the bigger difference as the smaller entry
+		} else
+			return sign_compareTo;
 	}
 	
 	
