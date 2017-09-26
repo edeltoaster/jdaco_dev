@@ -1,12 +1,10 @@
 package diff_compl_TCGA;
 
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import framework.DiffComplexDetector;
-import framework.DiffSeedCombDetector;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
@@ -37,25 +35,12 @@ public class check_complexes {
 		System.out.println(cancer_type + " normal samples : " + group1.size());
 		System.out.println(cancer_type + " tumor samples : " + group2.size());
 		
-		String tfc_out = definitions.diff_tfc_output_folder + cancer_type + "_";
 		String compl_out = definitions.diff_complex_output_folder + cancer_type + "_";
-		
-		System.out.println();
-		
-		System.out.println("Determining diff. TF combinations ...");
-		DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-		dsvd.diffTFComplAnalysis(tfc_out, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, null, null);
-		dsvd.writeSignSortedVariants(tfc_out + "sign.txt", false);
-		
-		System.out.println("Determining enriched TFs ...");
-		DiffSeedCombDetector.SPEnrichment tf_enrich = dsvd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
-		tf_enrich.writeSignificantSeedProteins(tfc_out + "enriched_pos_TFs.txt", tfc_out + "enriched_neg_TFs.txt");
 		
 		System.out.println();
 		
 		System.out.println("Determining diff. complexes ...");
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-		dcd.diffTFComplAnalysis(compl_out, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, null, null);
 		dcd.writeSignSortedComplexes(compl_out + "sign.txt.gz", false);
 		dcd.writeSignSortedComplexes(compl_out + "signh.txt.gz", true);
 		dcd.writeSignSortedVariants(compl_out + "vsign.txt.gz", false);
