@@ -613,7 +613,7 @@ public class DiffComplexDetector {
 	
 	/**
 	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
-	 * seed_comb direction avg_q-value med_fold-change member_complexes direction_details q-value_details fold-change_details
+	 * seed_comb direction min_q-value max_fold-change member_complexes direction_details q-value_details fold-change_details; in the order of min_q-value (and max median change)
 	 * @param out_file
 	 * @param human_readable
 	 */
@@ -621,6 +621,7 @@ public class DiffComplexDetector {
 		
 		HashMap<HashSet<String>, List<Double>> sign_comb_qs_map = new HashMap<>();
 		HashMap<HashSet<String>, List<Double>> sign_comb_fcs_map = new HashMap<>();
+		HashMap<HashSet<String>, List<Double>> sign_comb_medc_map = new HashMap<>();
 		HashMap<HashSet<String>, List<HashSet<String>>> sign_comb_sign_compl_map = new HashMap<>();
 		HashMap<HashSet<String>, Double> sign_compl_foldc = new HashMap<>();
 		
@@ -637,9 +638,11 @@ public class DiffComplexDetector {
 				sign_comb_qs_map.put(seed_sub, new LinkedList<Double>());
 				sign_comb_sign_compl_map.put(seed_sub, new LinkedList<HashSet<String>>());
 				sign_comb_fcs_map.put(seed_sub, new LinkedList<Double>());
+				sign_comb_medc_map.put(seed_sub, new LinkedList<Double>());
 			}
 			sign_comb_qs_map.get(seed_sub).add(q_value);
 			sign_comb_sign_compl_map.get(seed_sub).add(sign_complex);
+			sign_comb_medc_map.get(seed_sub).add(Math.abs(this.group1_medians.get(sign_complex) - this.group2_medians.get(sign_complex)));
 			
 			// store fold change
 			double fold_change = this.group2_medians.getOrDefault(sign_complex, 0.0);
@@ -654,21 +657,25 @@ public class DiffComplexDetector {
 			sign_comb_fcs_map.get(seed_sub).add(fold_change);
 		}
 		
-		// q-values
+		// min q-value
 		HashMap<HashSet<String>, Double> sign_comb_q_map = new HashMap<>();
-		sign_comb_qs_map.keySet().forEach(c -> sign_comb_q_map.put(c, Utilities.getMean(sign_comb_qs_map.get(c))));
+		sign_comb_qs_map.keySet().forEach(c -> sign_comb_q_map.put(c, sign_comb_qs_map.get(c).stream().min(Double::compareTo).get()));
 		
-		// fold-changes
+		// max fold-change
 		HashMap<HashSet<String>, Double> sign_comb_fc_map = new HashMap<>();
-		sign_comb_fcs_map.keySet().forEach(c -> sign_comb_fc_map.put(c, Utilities.getMedian(sign_comb_fcs_map.get(c))));
+		sign_comb_fcs_map.keySet().forEach(c -> sign_comb_fc_map.put(c, sign_comb_fcs_map.get(c).stream().max(Double::compareTo).get()));
+		
+		// max median change
+		HashMap<HashSet<String>, Double> sign_comb_maxmed_map = new HashMap<>();
+		sign_comb_medc_map.keySet().forEach(c -> sign_comb_maxmed_map.put(c, sign_comb_medc_map.get(c).stream().max(Double::compareTo).get()));
 		
 		// sort by average q-value
 		List<HashSet<String>> sign_sorted_combs = new ArrayList<>(sign_comb_q_map.keySet());
-		sign_sorted_combs.sort( (c1, c2) -> diffCompareToVar(c1, c2, sign_comb_q_map, sign_comb_fc_map));
+		sign_sorted_combs.sort( (c1, c2) -> diffCompareToVar(c1, c2, sign_comb_q_map, sign_comb_maxmed_map));
 		
 		// preface
 		List<String> to_write = new LinkedList<>();
-		to_write.add("seed_comb direction avg_q-value med_fold-change member_complexes direction_details q-value_details fold-change_details");
+		to_write.add("seed_comb direction min_q-value max_fold-change member_complexes direction_details q-value_details fold-change_details");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -752,33 +759,18 @@ public class DiffComplexDetector {
 	}
 	
 	/**
-	 * Custom compareTo function that first sorts by the cumulative q-value and then by cumulative fold-change
+	 * Custom compareTo function that first sorts by the min q-value and then by max median change
 	 * @param v1
 	 * @param v2
 	 * @param sign_comb_q_map
-	 * @param sign_comb_fc_map
+	 * @param sign_comb_maxmed_map
 	 * @return
 	 */
-	private int diffCompareToVar(HashSet<String> v1, HashSet<String> v2, HashMap<HashSet<String>, Double> sign_comb_q_map, HashMap<HashSet<String>, Double> sign_comb_fc_map) {
+	private int diffCompareToVar(HashSet<String> v1, HashSet<String> v2, HashMap<HashSet<String>, Double> sign_comb_q_map, HashMap<HashSet<String>, Double> sign_comb_maxmed_map) {
 		int sign_compareTo = sign_comb_q_map.get(v1).compareTo(sign_comb_q_map.get(v2));
 		
 		if (sign_compareTo == 0) {
-			double fc1 = sign_comb_fc_map.get(v1);
-			double fc2 = sign_comb_fc_map.get(v2);
-			if (fc1 < 1.0) {
-				if (fc1 == 0.0)
-					fc1 = Double.MAX_VALUE;
-				else
-					fc1 = 1 / fc1;
-			}
-			if (fc2 < 1.0) {
-				if (fc2 == 0.0)
-					fc2 = Double.MAX_VALUE;
-				else
-					fc2 = 1 / fc2;
-			}
-			
-			return Double.compare(fc2, fc1); // note that we want to have the bigger difference as the smaller entry
+			return sign_comb_maxmed_map.get(v2).compareTo(sign_comb_maxmed_map.get(v1)); // note that we want to have the bigger difference as the smaller entry
 		} else
 			return sign_compareTo;
 	}
