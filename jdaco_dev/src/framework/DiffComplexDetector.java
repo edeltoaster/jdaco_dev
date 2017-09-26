@@ -484,6 +484,7 @@ public class DiffComplexDetector {
 		Map<String, String> med_abun_g1 = new HashMap<>();
 		Map<String, String> med_abun_g2 = new HashMap<>();
 		Map<String, String> directions = new HashMap<>();
+		Map<String, String> direction = new HashMap<>();
 		Map<String, String> GO_details = new HashMap<>();
 		Map<String, String> GO_overall = new HashMap<>();
 		for (HashSet<String> tf_comb:tfc_to_complexes.keySet()) {
@@ -492,8 +493,9 @@ public class DiffComplexDetector {
 			med_abun_g1.put(tfc, annotation_output[0]);
 			med_abun_g2.put(tfc, annotation_output[1]);
 			directions.put(tfc, annotation_output[2]);
-			GO_details.put(tfc, annotation_output[3]);
-			GO_overall.put(tfc, annotation_output[4]);
+			direction.put(tfc, annotation_output[3]);
+			GO_details.put(tfc, annotation_output[4]);
+			GO_overall.put(tfc, annotation_output[5]);
 		}
 		
 		// read binding data
@@ -510,7 +512,8 @@ public class DiffComplexDetector {
 		Map<String, Map<String,String>> annotational_data = new TreeMap<>();
 		annotational_data.put("Med_abundance_G1", med_abun_g1);
 		annotational_data.put("Med_abundance_G2", med_abun_g2);
-		annotational_data.put("Direction", directions);
+		annotational_data.put("Direction_details", directions);
+		annotational_data.put("Direction_overall", direction);
 		annotational_data.put("GO_details", GO_details);
 		annotational_data.put("GO_overall", GO_overall);
 		regnet.writeNodeTable(output_folder + "nodetable.txt", annotational_data);
@@ -946,7 +949,7 @@ public class DiffComplexDetector {
 	
 	/**
 	 * Given the seed protein combination occurring across samples, direction, sample data and a GOA definition, count and sort their appearances as well as their inferred GO annotations.
-	 * Returns [mean abundances group1 (rounded to 2 positions), mean abundances group2 (rounded to 2 positions), directions of change per complex, GO annotations details string, set of all GO annotations found]
+	 * Returns [mean abundances group1 (rounded to 2 positions), mean abundances group2 (rounded to 2 positions), directions of change per complex, overall direction change, GO annotations details string, set of all GO annotations found]
 	 * @param complexes
 	 * @param goa
 	 * @return
@@ -964,6 +967,16 @@ public class DiffComplexDetector {
 		
 		// get direction of change
 		String directions_string = String.join(",", complexes.stream().map(c -> names_map.get(c) + ":" + this.getSignificantVariantsDirections().get(c)).collect(Collectors.toList()));
+		Set<String> direction_set = new HashSet<>();
+		for (HashSet<String> complex:complexes)
+			direction_set.add(this.getSignificantVariantsDirections().get(complex));
+		
+		// determine overall direction
+		String direction_string = "+";
+		if (!direction_set.contains(direction_string))
+			direction_string = "-";
+		else if (direction_set.size() > 1)
+			direction_string = "+-";
 		
 		// annotate with GO annotations
 		Map<Set<String>, String> GOA_map = new HashMap<>();
@@ -980,12 +993,13 @@ public class DiffComplexDetector {
 		}
 		
 		// build output datastructure
-		String[] output = new String[5];
+		String[] output = new String[6];
 		output[0] = abun_g1_string;
 		output[1] = abun_g2_string;
 		output[2] = directions_string;
-		output[3] = GOAnnotation_string_details;
-		output[4] = GOAnnotation_string_overall;
+		output[3] = direction_string;
+		output[4] = GOAnnotation_string_details;
+		output[5] = GOAnnotation_string_overall;
 		
 		return output;
 	}
