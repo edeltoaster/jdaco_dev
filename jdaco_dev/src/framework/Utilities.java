@@ -329,6 +329,29 @@ public class Utilities {
 		rmsd /= data1_array.size();
 		return Math.sqrt(rmsd);
 	}
+	
+	public static double getMaxFoldChange(Collection<Double> data) {
+		double max_value = -1.0;
+		double max_factor= -1.0;
+		
+		for (double d:data) {
+			double factor = d;
+			if (d < 1) {
+				if (d == 0.0)
+					factor = Double.MAX_VALUE;
+				else
+					factor = 1.0 / d; 
+			}
+			
+			if (factor > max_factor) {
+				max_factor = factor;
+				max_value = d;
+			}
+		}
+		
+		return max_value;
+	}
+	
 	/**
 	 * Converts a list of Doubles to a double[]
 	 * @param list

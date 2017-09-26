@@ -56,17 +56,18 @@ public class check_complexes {
 		System.out.println("Determining diff. complexes ...");
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 		dcd.diffTFComplAnalysis(compl_out, definitions.goa, definitions.binding_data, 0.0001, definitions.d_min, definitions.d_max, true, null, null);
-		dcd.writeSignSortedComplexes(compl_out + "sign.txt", false);
-		dcd.writeSignSortedVariants(compl_out + "vsign.txt", false);
-		dcd.writeSignSortedVariants(compl_out + "vsignh.txt", true);
+		dcd.writeSignSortedComplexes(compl_out + "sign.txt.gz", false);
+		dcd.writeSignSortedComplexes(compl_out + "signh.txt.gz", true);
+		dcd.writeSignSortedVariants(compl_out + "vsign.txt.gz", false);
+		dcd.writeSignSortedVariants(compl_out + "vsignh.txt.gz", true);
 		
 		System.out.println("Determining enriched TF combinations ...");
 		DiffComplexDetector.SPCEnrichment tfc_enrich = dcd.calculateSPCEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
-		tfc_enrich.writeSignificantSeedProteinCombinations(compl_out + "enriched_pos_TFCs.txt", compl_out + "enriched_neg_TFCs.txt");
+		tfc_enrich.writeSignificantSeedProteinCombinations(compl_out + "enriched_pos_TFCs.txt.gz", compl_out + "enriched_neg_TFCs.txt.gz");
 		
 		System.out.println("Determining enriched TFs ...");
 		DiffComplexDetector.SPEnrichment tf_enrich2 = dcd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
-		tf_enrich2.writeSignificantSeedProteins(compl_out + "enriched_pos_TFs.txt", compl_out + "enriched_neg_TFs.txt");
+		tf_enrich2.writeSignificantSeedProteins(compl_out + "enriched_pos_TFs.txt.gz", compl_out + "enriched_neg_TFs.txt.gz");
 	
 		// writing quantified results for later usage
 		if (!new File(definitions.qr_output_folder).exists())

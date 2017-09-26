@@ -613,7 +613,7 @@ public class DiffComplexDetector {
 	
 	/**
 	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
-	 * seed_comb direction min_q-value max_fold-change member_complexes direction_details q-value_details fold-change_details; in the order of min_q-value (and max median change)
+	 * seed_comb direction min_q-value max_fold-change member_complexes direction_details q-value_details fold-change_details; in the order of min_q-value (and cumulative median change)
 	 * @param out_file
 	 * @param human_readable
 	 */
@@ -642,7 +642,7 @@ public class DiffComplexDetector {
 			}
 			sign_comb_qs_map.get(seed_sub).add(q_value);
 			sign_comb_sign_compl_map.get(seed_sub).add(sign_complex);
-			sign_comb_medc_map.get(seed_sub).add(Math.abs(this.group1_medians.get(sign_complex) - this.group2_medians.get(sign_complex)));
+			sign_comb_medc_map.get(seed_sub).add(this.group2_medians.get(sign_complex) - this.group1_medians.get(sign_complex));
 			
 			// store fold change
 			double fold_change = this.group2_medians.getOrDefault(sign_complex, 0.0);
@@ -663,15 +663,15 @@ public class DiffComplexDetector {
 		
 		// max fold-change
 		HashMap<HashSet<String>, Double> sign_comb_fc_map = new HashMap<>();
-		sign_comb_fcs_map.keySet().forEach(c -> sign_comb_fc_map.put(c, sign_comb_fcs_map.get(c).stream().max(Double::compareTo).get()));
+		sign_comb_fcs_map.keySet().forEach(c -> sign_comb_fc_map.put(c, Utilities.getMaxFoldChange(sign_comb_fcs_map.get(c))));
 		
-		// max median change
-		HashMap<HashSet<String>, Double> sign_comb_maxmed_map = new HashMap<>();
-		sign_comb_medc_map.keySet().forEach(c -> sign_comb_maxmed_map.put(c, sign_comb_medc_map.get(c).stream().max(Double::compareTo).get()));
+		// absolute summarized signed median-abundance change
+		HashMap<HashSet<String>, Double> sign_comb_sumabun_map = new HashMap<>();
+		sign_comb_medc_map.keySet().forEach(c -> sign_comb_sumabun_map.put(c, Math.abs(sign_comb_medc_map.get(c).stream().reduce(0.0, Double::sum))));
 		
 		// sort by average q-value
 		List<HashSet<String>> sign_sorted_combs = new ArrayList<>(sign_comb_q_map.keySet());
-		sign_sorted_combs.sort( (c1, c2) -> diffCompareToVar(c1, c2, sign_comb_q_map, sign_comb_maxmed_map));
+		sign_sorted_combs.sort( (c1, c2) -> diffCompareToVar(c1, c2, sign_comb_q_map, sign_comb_sumabun_map));
 		
 		// preface
 		List<String> to_write = new LinkedList<>();
@@ -759,18 +759,18 @@ public class DiffComplexDetector {
 	}
 	
 	/**
-	 * Custom compareTo function that first sorts by the min q-value and then by max median change
+	 * Custom compareTo function that first sorts by the min q-value and then by absolute summarized median abundance change between groups
 	 * @param v1
 	 * @param v2
 	 * @param sign_comb_q_map
-	 * @param sign_comb_maxmed_map
+	 * @param sign_comb_medsum_map
 	 * @return
 	 */
-	private int diffCompareToVar(HashSet<String> v1, HashSet<String> v2, HashMap<HashSet<String>, Double> sign_comb_q_map, HashMap<HashSet<String>, Double> sign_comb_maxmed_map) {
+	private int diffCompareToVar(HashSet<String> v1, HashSet<String> v2, HashMap<HashSet<String>, Double> sign_comb_q_map, HashMap<HashSet<String>, Double> sign_comb_abun_map) {
 		int sign_compareTo = sign_comb_q_map.get(v1).compareTo(sign_comb_q_map.get(v2));
 		
 		if (sign_compareTo == 0) {
-			return sign_comb_maxmed_map.get(v2).compareTo(sign_comb_maxmed_map.get(v1)); // note that we want to have the bigger difference as the smaller entry
+			return sign_comb_abun_map.get(v2).compareTo(sign_comb_abun_map.get(v1)); // note that we want to have the bigger difference as the smaller entry
 		} else
 			return sign_compareTo;
 	}
@@ -1211,6 +1211,7 @@ public class DiffComplexDetector {
 				else
 					neg_sp_enrich_out.add(out);
 			}
+			
 			Utilities.writeEntries(pos_sp_enrich_out, pos_out_path);
 			Utilities.writeEntries(neg_sp_enrich_out, neg_out_path);
 		}
@@ -1457,13 +1458,14 @@ public class DiffComplexDetector {
 			Map<String, String> up_to_gene_map = getUniprotToGeneMap();
 			for (HashSet<String> spc:this.getSignificanceSortedSeedProteinCombinations()) {
 				String dir = this.getSignificantSeedProteinCombDirections().get(spc);
-				String out = spc + " " + spc.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toList()).toString() + " " + this.getSignificantSeedProteinCombQvalues().get(spc);
+				String out = String.join("/", spc) + " " + String.join("/", spc.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toList())) + " " + this.getSignificantSeedProteinCombQvalues().get(spc);
 				
 				if (dir.equals("+"))
 					pos_spc_enrich_out.add(out);
 				else
 					neg_spc_enrich_out.add(out);
 			}
+			
 			Utilities.writeEntries(pos_spc_enrich_out, pos_out_path);
 			Utilities.writeEntries(neg_spc_enrich_out, neg_out_path);
 		}
