@@ -36,7 +36,6 @@ public class DACO {
 	private PrintStream verbose;
 	private int compute_timeout = 60; // in minutes
 	private boolean cached_execution = true;
-	// TODO: add manual non-cached option
 	
 	/**
 	 * Some convenient constructors
@@ -62,7 +61,7 @@ public class DACO {
 		this.verbose = verbose;
 	}
 	
-	public DACO(DDIN ddi, PPIN ppi, int number_of_threads, int max_depth_of_search, double pair_building_threshold, double probability_cutoff, PrintStream verbose, int compute_timeout) {
+	public DACO(DDIN ddi, PPIN ppi, int number_of_threads, int max_depth_of_search, double pair_building_threshold, double probability_cutoff, PrintStream verbose, int compute_timeout, boolean cached_execution) {
 		this.ddi = ddi;
 		this.ppi = ppi;
 		
@@ -72,6 +71,7 @@ public class DACO {
 		this.prob_cutoff = probability_cutoff;
 		this.verbose = verbose;
 		this.compute_timeout = compute_timeout;
+		this.cached_execution = cached_execution;
 	}
 	
 	public DACO(ConstructedNetworks constr, int number_of_threads, int max_depth_of_search, double pair_building_threshold, double probability_cutoff, PrintStream verbose) {
@@ -94,13 +94,14 @@ public class DACO {
 	 * @param verbose
 	 * @param compute_timeout
 	 */
-	public void setComputationParameters(int number_of_threads, int max_depth_of_search, double pair_building_threshold, double probability_cutoff, PrintStream verbose, int compute_timeout) {
+	public void setComputationParameters(int number_of_threads, int max_depth_of_search, double pair_building_threshold, double probability_cutoff, PrintStream verbose, int compute_timeout, boolean cached_execution) {
 		this.number_of_threads = number_of_threads;
 		this.max_depth_of_search = max_depth_of_search;
 		this.pair_building_threshold = pair_building_threshold;
 		this.prob_cutoff = probability_cutoff;
 		this.verbose = verbose;
 		this.compute_timeout = compute_timeout;
+		this.cached_execution = cached_execution;
 	}
 	
 	private final class CachingThreadPoolExecutor extends ThreadPoolExecutor {

@@ -29,6 +29,7 @@ public class JDACO {
 	private static double prob_threshold = -1.0;
 	private static PrintStream out = System.out;
 	private static int compute_timeout = 60;
+	private static boolean cached_execution = true;
 	private static boolean benchmark_mode = false;
 	
 	public static void printHelp() {
@@ -43,6 +44,7 @@ public class JDACO {
 		System.out.println("	-cp=[probability] : overwrite internal complex probability cutoff with [probability], set to zero to turn off (default: determined pair threshold**([MAX-DEPTH]-1))");
 		System.out.println("	-ct=[minutes] : limits compute time per seed-protein to [minutes] (default: 60min)");
 		System.out.println("	-s : silent mode, no output during actual computation");
+		System.out.println("	-c : non-cached execution, uses slightly less main memory but may take more time");
 		System.out.println("	-b : benchmark mode, always output the runtime in seconds");
 		
 		System.out.println();
@@ -108,6 +110,10 @@ public class JDACO {
 			else if (arg.equals("-s")) 
 				out = null;
 			
+			// non-cached execution
+			else if (arg.equals("-c")) 
+				cached_execution = false;
+			
 			// benchmark mode
 			else if (arg.equals("-b")) 
 				benchmark_mode = true;
@@ -161,7 +167,7 @@ public class JDACO {
 	
 	public static void main(String[] args) {
 
-		if (args.length < 5 || args.length > 10) {
+		if (args.length < 5) {
 			printHelp();
 		}
 		
@@ -199,7 +205,7 @@ public class JDACO {
 		System.out.flush();
 
 		// initialize calculation and set parameters
-		DACO daco = new DACO(ddin, ppin, no_threads, max_depth, pair_threshold, prob_threshold, out, compute_timeout);
+		DACO daco = new DACO(ddin, ppin, no_threads, max_depth, pair_threshold, prob_threshold, out, compute_timeout, cached_execution);
 		
 		
 		// carry out computation
