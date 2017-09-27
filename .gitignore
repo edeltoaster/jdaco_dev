@@ -1,1 +1,12 @@
 .DS_Store
+*.log
+*.class
+hs_err_pid*
+target/
+build/
+bin/
+tmp/
+*.tmp
+*.swp
+.metadata
+
