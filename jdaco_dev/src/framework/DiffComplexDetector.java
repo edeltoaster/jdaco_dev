@@ -113,10 +113,6 @@ public class DiffComplexDetector {
 				this.relevant_complexes.remove(complex);
 		}
 		
-//		// remove subsets if an exact set is also above threshold
-//		Set<HashSet<String>> to_remove = this.relevant_complexes.keySet().stream().filter(rc -> this.relevant_complexes.get(rc).stream().anyMatch(c -> !rc.equals(c) && this.relevant_complexes.containsKey(c))).collect(Collectors.toSet());
-//		this.relevant_complexes.keySet().removeAll(to_remove);
-		
 		// determine abundance values
 		this.group1_abundances = this.determineComplexesAbundances(group1);
 		this.group2_abundances = this.determineComplexesAbundances(group2);

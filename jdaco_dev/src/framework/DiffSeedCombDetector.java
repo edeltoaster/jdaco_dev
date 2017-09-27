@@ -112,10 +112,6 @@ public class DiffSeedCombDetector {
 			if (count_g1 < min_count_g1 && count_g2 < min_count_g2)
 				this.seed_combination_variants.remove(tfc);
 		}
-
-//		// remove subsets if an exact set is also above threshold
-//		Set<HashSet<String>> to_remove = this.seed_combination_variants.keySet().stream().filter(rc -> this.seed_combination_variants.get(rc).stream().anyMatch(c -> !rc.equals(c) && this.seed_combination_variants.containsKey(c))).collect(Collectors.toSet());
-//		this.seed_combination_variants.keySet().removeAll(to_remove);
 		
 		// determine abundance values
 		this.group1_abundances = this.determineAbundanceOfSeedVariantsComplexes(group1);
@@ -645,8 +641,19 @@ public class DiffSeedCombDetector {
 			
 			String member_complexes_string = String.join(",", complexes.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
 			
+			// shortening numbers depending on human/machine-usage
+			String qval_string = null;
+			String foldc_string = null;
+			if (human_readable) {
+				qval_string = String.format(Locale.US, "%.3g", this.significant_variants_qvalues.get(seed_comb));
+				foldc_string = String.format(Locale.US, "%.2g", fold_change);
+			} else {
+				qval_string = Double.toString(this.significant_variants_qvalues.get(seed_comb));
+				foldc_string = Double.toString(fold_change);
+			}
+			
 			// write in format: (sub)seed_comb direction q-value fold-change member_seed_comb member_complexes
-			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), String.format(Locale.US, "%.3g", this.significant_variants_qvalues.get(seed_comb)), String.format(Locale.US, "%.2g", fold_change), member_seed_comb_string, member_complexes_string);
+			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), qval_string, foldc_string, member_seed_comb_string, member_complexes_string);
 			to_write.add(String.join(" ", line));
 		}
 

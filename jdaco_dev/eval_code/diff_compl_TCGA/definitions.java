@@ -2,7 +2,6 @@ package diff_compl_TCGA;
 
 import java.util.Set;
 
-import framework.GOAnnotator;
 import framework.Utilities;
 
 public class definitions {
@@ -23,13 +22,8 @@ public class definitions {
 	static String seed_file = "mixed_data/hocomoco_human_TFs_v10.txt.gz";
 	static Set<String> seed = Utilities.readEntryFile(seed_file);
 	
-	static String binding_data = "mixed_data/hocomoco_v10_EPD_v5_2k.txt.gz";
-	static int d_min = -25;
-	static int d_max = 25;
-	
-	static String GOA_def_file = "mixed_data/stem_tags_retrieved.txt.gz";
-	static GOAnnotator goa = new GOAnnotator(GOA_def_file);
-	
+	static int SPCEnrich_iterations = 10000;
+	static int SPCEnrich_compl_part_threshold = 5;
 	static int SPEnrich_iterations = 10000;
 	static int SPEnrich_compl_part_threshold = 10;
 	
@@ -50,18 +44,9 @@ public class definitions {
 		
 		System.out.println("seed file : " + seed_file);
 		
-		System.out.println("binding data file : " + binding_data);
-		System.out.println("d_min : " + d_min);
-		System.out.println("d_max : " + d_max);
-		
+		System.out.println("SPC iterations : " + SPCEnrich_iterations);
+		System.out.println("SPC compl. part. threshold : " + SPCEnrich_compl_part_threshold);
 		System.out.println("SPE iterations : " + SPEnrich_iterations);
 		System.out.println("SPE compl. part. threshold : " + SPEnrich_compl_part_threshold);
-	}
-	
-	public static void main(String[] args) {
-		// running updates the GO annotations
-		GOAnnotator goa = new GOAnnotator("9606", false, "/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/stem_tags.txt");
-		goa.writeRetrievedData("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/stem_tags_retrieved.txt.gz");
-		goa.printTagInformation();
 	}
 }
