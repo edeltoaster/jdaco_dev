@@ -40,7 +40,7 @@ public class JDACO {
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
 		System.out.println("	-p=[percentile] : percentile of distribution used to automatically construct start pairs and complex probability cutoff (default: 5 as 5th highest percentile)");
-		System.out.println("	-pb=[threshold] : overwrite pair-building cutoff with [threshold] (default: based on distribution)");
+		System.out.println("	-pb=[threshold] : overwrite pair-building cutoff with [threshold] (default: based on distribution and percentile)");
 		System.out.println("	-cp=[probability] : overwrite internal complex probability cutoff with [probability], set to zero to turn off (default: determined pair threshold**([MAX-DEPTH]-1))");
 		System.out.println("	-ct=[minutes] : limits compute time per seed-protein to [minutes] (default: 60min)");
 		System.out.println("	-s : silent mode, no output during actual computation");
@@ -67,7 +67,7 @@ public class JDACO {
 		System.out.println();
 		
 		System.out.println("[OUT-FILE] :");
-		System.out.println("	The outcome is written as a csv.");
+		System.out.println("	The outcome is written as a csv. Adding .gz will generate a compressed output file.");
 		
 		System.out.println();
 		
