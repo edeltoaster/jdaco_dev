@@ -155,7 +155,7 @@ public class DiffComplexDetector {
 	}
 	
 	/**
-	 * Custom compareTo function that first sorts by the adjusted p-value/q-value and breaks ties using the absolute differences of the median between groups
+	 * Custom compareTo function that first sorts by the adjusted p-value/q-value and breaks ties using the amount of fold-change and absolute differences of the median between groups
 	 * @param v1
 	 * @param v2
 	 * @return
@@ -164,9 +164,25 @@ public class DiffComplexDetector {
 		int sign_compareTo = this.qvalues.get(v1).compareTo(this.qvalues.get(v2));
 		
 		if (sign_compareTo == 0) {
-			double v1_med_diff = Math.abs(this.group1_medians.get(v1) - this.group2_medians.get(v1));
-			double v2_med_diff = Math.abs(this.group1_medians.get(v2) - this.group2_medians.get(v2));
-			return Double.compare(v2_med_diff, v1_med_diff); // note that we want to have the bigger difference as the smaller entry
+			// determining fold-chance for v1
+			double fold_change1 = Utilities.calcFoldChange(this.group1_medians.get(v1), this.group2_medians.get(v1));
+			// ... and its extend
+			fold_change1 = Utilities.amountFoldChange(fold_change1);
+			
+			// determining fold-chance for v2
+			double fold_change2 = Utilities.calcFoldChange(this.group1_medians.get(v2), this.group2_medians.get(v2));
+			// ... and its extend
+			fold_change2 = Utilities.amountFoldChange(fold_change2);
+			
+			int sign_compareTo2 = Double.compare(fold_change2, fold_change1);
+			
+			if (sign_compareTo2 == 0) {
+				double v1_med_diff = Math.abs(this.group1_medians.get(v1) - this.group2_medians.get(v1));
+				double v2_med_diff = Math.abs(this.group1_medians.get(v2) - this.group2_medians.get(v2));
+				return Double.compare(v2_med_diff, v1_med_diff); // note that we want to have the bigger difference as the smaller entry
+			} else
+				return sign_compareTo2;
+			
 		} else
 			return sign_compareTo;
 	}
@@ -561,16 +577,10 @@ public class DiffComplexDetector {
 			String compl_string = String.join("/", sign_compl_temp);
 			
 			// fold-change calculation
-			double fold_change = this.group2_medians.getOrDefault(sign_complex, 0.0);
-			double group1_med = this.group1_medians.getOrDefault(sign_complex, 0.0);
-			
-			if (group1_med == 0.0)
-				fold_change = Double.MAX_VALUE;
-			else
-				fold_change /= group1_med;
+			double fold_change = Utilities.calcFoldChange(this.group1_medians.get(sign_complex), this.group2_medians.get(sign_complex));
 			
 			// median change calculation
-			double median_change = this.group2_medians.getOrDefault(sign_complex, 0.0) - this.group1_medians.getOrDefault(sign_complex, 0.0);
+			double median_change = this.group2_medians.get(sign_complex) - this.group1_medians.get(sign_complex);
 			
 			// determine member seed combination
 			HashSet<String> seed_sub = new HashSet<>(sign_complex);
@@ -615,17 +625,19 @@ public class DiffComplexDetector {
 	
 	/**
 	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
-	 * seed_comb direction min_q-value max_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details; in the order of min_q-value (and cumulative median change)
+	 * seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details; in the order of avg_q-value, amount of fold-change and abs. sum. median change
 	 * @param out_file
 	 * @param human_readable
 	 */
 	public void writeSignSortedVariants(String out_file, boolean human_readable) {
 		
 		HashMap<HashSet<String>, List<Double>> sign_comb_qs_map = new HashMap<>();
-		HashMap<HashSet<String>, List<Double>> sign_comb_fcs_map = new HashMap<>();
 		HashMap<HashSet<String>, List<Double>> sign_comb_medc_map = new HashMap<>();
 		HashMap<HashSet<String>, List<HashSet<String>>> sign_comb_sign_compl_map = new HashMap<>();
 		HashMap<HashSet<String>, Double> sign_compl_foldc = new HashMap<>();
+		HashMap<HashSet<String>, Double> sign_compl_medc = new HashMap<>();
+		HashMap<HashSet<String>, Double> sign_comb_g1_medsum = new HashMap<>();
+		HashMap<HashSet<String>, Double> sign_comb_g2_medsum = new HashMap<>();
 		
 		// determine seed combination variants, collect p-values as well as note dereg. complexes, fold changes
 		for (HashSet<String> sign_complex:this.significance_sorted_complexes) {
@@ -639,45 +651,48 @@ public class DiffComplexDetector {
 			if (!sign_comb_qs_map.containsKey(seed_sub)) {
 				sign_comb_qs_map.put(seed_sub, new LinkedList<Double>());
 				sign_comb_sign_compl_map.put(seed_sub, new LinkedList<HashSet<String>>());
-				sign_comb_fcs_map.put(seed_sub, new LinkedList<Double>());
 				sign_comb_medc_map.put(seed_sub, new LinkedList<Double>());
 			}
 			sign_comb_qs_map.get(seed_sub).add(q_value);
 			sign_comb_sign_compl_map.get(seed_sub).add(sign_complex);
-			sign_comb_medc_map.get(seed_sub).add(this.group2_medians.get(sign_complex) - this.group1_medians.get(sign_complex));
 			
 			// store fold change
-			double fold_change = this.group2_medians.getOrDefault(sign_complex, 0.0);
-			double group1_med = this.group1_medians.getOrDefault(sign_complex, 0.0);
-			
-			if (group1_med == 0.0)
-				fold_change = Double.MAX_VALUE;
-			else
-				fold_change /= group1_med;
+			double fold_change = Utilities.calcFoldChange(this.group1_medians.get(sign_complex), this.group2_medians.get(sign_complex));
 			
 			sign_compl_foldc.put(sign_complex, fold_change);
-			sign_comb_fcs_map.get(seed_sub).add(fold_change);
+			double medc = this.group2_medians.get(sign_complex) - this.group1_medians.get(sign_complex);
+			sign_compl_medc.put(sign_complex, medc);
+			
+			// store median change
+			sign_comb_medc_map.get(seed_sub).add(medc);
+			
+			// store medians of groups
+			sign_comb_g1_medsum.put(seed_sub, this.group1_medians.get(sign_complex) + sign_comb_g1_medsum.getOrDefault(seed_sub, 0.0));
+			sign_comb_g2_medsum.put(seed_sub, this.group2_medians.get(sign_complex) + sign_comb_g2_medsum.getOrDefault(seed_sub, 0.0));
 		}
 		
-		// min q-value
+		// avg q-value
 		HashMap<HashSet<String>, Double> sign_comb_q_map = new HashMap<>();
-		sign_comb_qs_map.keySet().forEach(c -> sign_comb_q_map.put(c, sign_comb_qs_map.get(c).stream().min(Double::compareTo).get()));
+		sign_comb_qs_map.keySet().forEach(c -> sign_comb_q_map.put(c, Utilities.getMean(sign_comb_qs_map.get(c))));
 		
-		// max fold-change
+		// get fold-change of summarized group medians
 		HashMap<HashSet<String>, Double> sign_comb_fc_map = new HashMap<>();
-		sign_comb_fcs_map.keySet().forEach(c -> sign_comb_fc_map.put(c, Utilities.getMaxFoldChange(sign_comb_fcs_map.get(c))));
+		for (HashSet<String> seed_sub:sign_comb_g1_medsum.keySet()) {
+			double sum_fold_change = Utilities.calcFoldChange(sign_comb_g1_medsum.get(seed_sub), sign_comb_g2_medsum.get(seed_sub));
+			sign_comb_fc_map.put(seed_sub, sum_fold_change);
+		}
 		
 		// summarized signed median-abundance change
 		HashMap<HashSet<String>, Double> sign_comb_sumabun_map = new HashMap<>();
 		sign_comb_medc_map.keySet().forEach(c -> sign_comb_sumabun_map.put(c, sign_comb_medc_map.get(c).stream().reduce(0.0, Double::sum)));
 		
-		// sort by average q-value
+		// sort by min q-value, then by amount of fold change and median change
 		List<HashSet<String>> sign_sorted_combs = new ArrayList<>(sign_comb_q_map.keySet());
-		sign_sorted_combs.sort( (c1, c2) -> diffCompareToVar(c1, c2, sign_comb_q_map, sign_comb_sumabun_map));
+		sign_sorted_combs.sort( (c1, c2) -> diffCompareToVar(c1, c2, sign_comb_q_map, sign_comb_fc_map, sign_comb_sumabun_map));
 		
 		// preface
 		List<String> to_write = new LinkedList<>();
-		to_write.add("seed_comb direction min_q-value max_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details");
+		to_write.add("seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -697,6 +712,7 @@ public class DiffComplexDetector {
 			List<String> direction_details = new LinkedList<>();
 			List<String> qval_details = new LinkedList<>();
 			List<String> foldc_details = new LinkedList<>();
+			List<String> medc_details = new LinkedList<>();
 			
 			Set<String> direction_set = new HashSet<>();
 			for (HashSet<String> complex:sign_comb_sign_compl_map.get(seed_comb)) {
@@ -705,14 +721,17 @@ public class DiffComplexDetector {
 				String compl_string = null;
 				String qval_string = null;
 				String foldc_string = null;
+				String medc_string = null;
 				if (human_readable) {
 					compl_string = String.join("/", complex.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()));
 					qval_string = String.format(Locale.US, "%.3g", this.qvalues.get(complex));
 					foldc_string = String.format(Locale.US, "%.3g", sign_compl_foldc.get(complex));
+					medc_string = String.format(Locale.US, "%.3g", sign_compl_medc.get(complex));
 				} else {
 					compl_string = String.join("/", complex);
 					qval_string = Double.toString(this.qvalues.get(complex));
 					foldc_string = Double.toString(sign_compl_foldc.get(complex));
+					medc_string = Double.toString(sign_compl_medc.get(complex));
 				}
 				member_complexes.add(compl_string);
 				
@@ -725,6 +744,8 @@ public class DiffComplexDetector {
 				qval_details.add(compl_string + ":" + qval_string); 
 				// fold-change details
 				foldc_details.add(compl_string + ":" + foldc_string);
+				// median-change details
+				medc_details.add(compl_string + ":" + medc_string);
 			}
 			
 			// determine overall direction
@@ -734,12 +755,24 @@ public class DiffComplexDetector {
 			else if (direction_set.size() > 1)
 				direction_string = "+-";
 			
+			String direction_coarse_string = null;
+			if (direction_string.equals("+-")) {
+				double foldc = sign_comb_fc_map.get(seed_comb);
+				if (foldc > 2.0)
+					direction_coarse_string = "+";
+				else if (foldc < 0.5)
+					direction_coarse_string = "-";
+				else 
+					direction_coarse_string = direction_string;
+			} else {
+				direction_coarse_string = direction_string;
+			}
+			// merge details strings
 			String direction_details_string = String.join(",", direction_details);
-			
-			// merge other strings
 			String member_complexes_string = String.join(",", member_complexes);
 			String qval_details_string = String.join(",", qval_details);
 			String foldc_details_string = String.join(",", foldc_details);
+			String medc_details_string = String.join(",", medc_details);
 			
 			// shortening numbers depending on human/machine-usage
 			String qval_string = null;
@@ -755,27 +788,40 @@ public class DiffComplexDetector {
 				sum_med_change_string = Double.toString(sign_comb_sumabun_map.get(seed_comb));
 			}
 			
-			// write in format: seed_comb direction avg_q-value med_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details
-			List<String> line = Arrays.asList(seed_comb_string, direction_string, qval_string, foldc_string, sum_med_change_string, member_complexes_string, direction_details_string, qval_details_string, foldc_details_string);
+			// write in format: seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details median-change_details
+			List<String> line = Arrays.asList(seed_comb_string, direction_string, direction_coarse_string, qval_string, foldc_string, sum_med_change_string, member_complexes_string, direction_details_string, qval_details_string, foldc_details_string, medc_details_string);
 			to_write.add(String.join(" ", line));
 		}
 		
 		Utilities.writeEntries(to_write, out_file);
 	}
-	
+		
 	/**
-	 * Custom compareTo function that first sorts by the min q-value and then by absolute summarized median abundance change between groups
+	 * Custom compareTo function that first sorts by the avg. q-value, then by the extend of fold-change between groups and then by the absolute median change
 	 * @param v1
 	 * @param v2
 	 * @param sign_comb_q_map
-	 * @param sign_comb_medsum_map
+	 * @param sign_comb_foldc_map
+	 * @param sign_comb_medc_map
 	 * @return
 	 */
-	private int diffCompareToVar(HashSet<String> v1, HashSet<String> v2, HashMap<HashSet<String>, Double> sign_comb_q_map, HashMap<HashSet<String>, Double> sign_comb_abun_map) {
+	private int diffCompareToVar(HashSet<String> v1, HashSet<String> v2, HashMap<HashSet<String>, Double> sign_comb_q_map, HashMap<HashSet<String>, Double> sign_comb_foldc_map, HashMap<HashSet<String>, Double> sign_comb_medc_map) {
 		int sign_compareTo = sign_comb_q_map.get(v1).compareTo(sign_comb_q_map.get(v2));
 		
 		if (sign_compareTo == 0) {
-			return Double.compare(Math.abs(sign_comb_abun_map.get(v2)), Math.abs(sign_comb_abun_map.get(v1))); // note that we want to have the bigger difference as the smaller entry
+			double f1 = sign_comb_foldc_map.get(v1);
+			f1 = Utilities.amountFoldChange(f1);
+			
+			double f2 = sign_comb_foldc_map.get(v2);
+			f2 = Utilities.amountFoldChange(f2);
+			
+			int sign_compareTo2 = Double.compare(f2, f1); // note that we want to have the bigger difference as the smaller entry
+			
+			if (sign_compareTo2 == 0) {
+				return Double.compare(Math.abs(sign_comb_medc_map.get(v2)), Math.abs(sign_comb_medc_map.get(v1))); // note that we want to have the bigger difference as the smaller entry
+			} else
+				return sign_compareTo2;
+			
 		} else
 			return sign_compareTo;
 	}

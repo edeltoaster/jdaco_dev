@@ -415,9 +415,47 @@ public class Utilities {
 	
 	
 	/*
-	 * simple differential expression in the framework
+	 * fold-change helpers
 	 */
 	
+	/**
+	 * Calculates the fold-change between values of two groups as g2/g1 and the extreme values Double.max and 0
+	 * @param g1
+	 * @param g2
+	 * @return
+	 */
+	public static double calcFoldChange(double g1, double g2) {
+		double fold_change = g2;
+		
+		if (g1 == 0.0)
+			fold_change = Double.MAX_VALUE;
+		else
+			fold_change /= g1;
+		
+		return fold_change;
+	}
+	
+	/**
+	 * Calculates the amount of or absolute fold-change as fold-change or 1/fold-change
+	 * @param fold_change
+	 * @return
+	 */
+	public static double amountFoldChange(double fold_change) {
+		double amount_fc = fold_change;
+		
+		if (amount_fc < 1)
+			if (amount_fc == 0)
+				amount_fc = Double.MAX_VALUE;
+			else
+				amount_fc = 1 / amount_fc;
+		
+		return amount_fc;
+	}
+	
+	
+	/*
+	 * simple differential expression in the framework
+	 */
 	
 	public static List<String> getDiffExpressedProteins(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, double min_variant_fraction) {
 		// TODO: implement diff prot expr

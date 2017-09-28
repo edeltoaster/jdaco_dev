@@ -210,7 +210,7 @@ public class DiffSeedCombDetector {
 	}
 	
 	/**
-	 * Custom compareTo function that first sorts by the adjusted p-value/q-value and breaks ties using the absolute differences of the median between groups
+	 * Custom compareTo function that first sorts by the adjusted p-value/q-value and breaks ties using the amount of fold-change and absolute differences of the median between groups
 	 * @param v1
 	 * @param v2
 	 * @return
@@ -219,9 +219,25 @@ public class DiffSeedCombDetector {
 		int sign_compareTo = this.significant_variants_qvalues.get(v1).compareTo(this.significant_variants_qvalues.get(v2));
 		
 		if (sign_compareTo == 0) {
-			double v1_med_diff = Math.abs(this.group1_medians.get(v1) - this.group2_medians.get(v1));
-			double v2_med_diff = Math.abs(this.group1_medians.get(v2) - this.group2_medians.get(v2));
-			return Double.compare(v2_med_diff, v1_med_diff); // note that we want to have the bigger difference as the smaller entry
+			// determining fold-chance for v1
+			double fold_change1 = Utilities.calcFoldChange(this.group1_medians.get(v1), this.group2_medians.get(v1));
+			// ... and its extend
+			fold_change1 = Utilities.amountFoldChange(fold_change1);
+			
+			// determining fold-chance for v2
+			double fold_change2 = Utilities.calcFoldChange(this.group1_medians.get(v2), this.group2_medians.get(v2));
+			// ... and its extend
+			fold_change2 = Utilities.amountFoldChange(fold_change2);
+			
+			int sign_compareTo2 = Double.compare(fold_change2, fold_change1);
+			
+			if (sign_compareTo2 == 0) {
+				double v1_med_diff = Math.abs(this.group1_medians.get(v1) - this.group2_medians.get(v1));
+				double v2_med_diff = Math.abs(this.group1_medians.get(v2) - this.group2_medians.get(v2));
+				return Double.compare(v2_med_diff, v1_med_diff); // note that we want to have the bigger difference as the smaller entry
+			} else
+				return sign_compareTo2;
+			
 		} else
 			return sign_compareTo;
 	}
@@ -602,16 +618,10 @@ public class DiffSeedCombDetector {
 			String seed_comb_string = String.join("/", seed_comb_temp);
 			
 			// determine fold-change
-			double fold_change = this.group2_medians.getOrDefault(seed_comb, 0.0);
-			double group1_med = this.group1_medians.getOrDefault(seed_comb, 0.0);
-			
-			if (group1_med == 0.0)
-				fold_change = Double.MAX_VALUE;
-			else
-				fold_change /= group1_med;
+			double fold_change = Utilities.calcFoldChange(this.group1_medians.get(seed_comb), this.group2_medians.get(seed_comb));
 			
 			// median change calculation
-			double median_change = this.group2_medians.getOrDefault(seed_comb, 0.0) - this.group1_medians.getOrDefault(seed_comb, 0.0);
+			double median_change = this.group2_medians.get(seed_comb) - this.group1_medians.get(seed_comb);
 			
 			// determine member seed combinations if subset was used
 			List<HashSet<String>> member_seed_comb = this.seed_combination_variants.get(seed_comb);
