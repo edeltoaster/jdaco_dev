@@ -580,13 +580,13 @@ public class DiffSeedCombDetector {
 	
 	/**
 	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers):
-	 * (sub)complex direction q-value fold-change member_seed_comb member_complexes
+	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
 	 * @param out_file
 	 * @param human_readable
 	 */
 	public void writeSignSortedVariants(String out_file, boolean human_readable) {
 		List<String> to_write = new LinkedList<>();
-		to_write.add("(sub)seed_comb direction q-value fold-change member_seed_comb member_complexes");
+		to_write.add("(sub)seed_comb direction q-value fold-change median-change member_seed_comb member_complexes");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -609,6 +609,9 @@ public class DiffSeedCombDetector {
 				fold_change = Double.MAX_VALUE;
 			else
 				fold_change /= group1_med;
+			
+			// median change calculation
+			double median_change = this.group2_medians.getOrDefault(seed_comb, 0.0) - this.group1_medians.getOrDefault(seed_comb, 0.0);
 			
 			// determine member seed combinations if subset was used
 			List<HashSet<String>> member_seed_comb = this.seed_combination_variants.get(seed_comb);
@@ -644,16 +647,19 @@ public class DiffSeedCombDetector {
 			// shortening numbers depending on human/machine-usage
 			String qval_string = null;
 			String foldc_string = null;
+			String med_change_string = null;
 			if (human_readable) {
 				qval_string = String.format(Locale.US, "%.3g", this.significant_variants_qvalues.get(seed_comb));
-				foldc_string = String.format(Locale.US, "%.2g", fold_change);
+				foldc_string = String.format(Locale.US, "%.3g", fold_change);
+				med_change_string = String.format(Locale.US, "%.3g", median_change);
 			} else {
 				qval_string = Double.toString(this.significant_variants_qvalues.get(seed_comb));
 				foldc_string = Double.toString(fold_change);
+				med_change_string = Double.toString(median_change);
 			}
 			
-			// write in format: (sub)seed_comb direction q-value fold-change member_seed_comb member_complexes
-			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), qval_string, foldc_string, member_seed_comb_string, member_complexes_string);
+			// write in format: (sub)seed_comb direction q-value fold-change median-change member_seed_comb member_complexes
+			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), qval_string, foldc_string, med_change_string, member_seed_comb_string, member_complexes_string);
 			to_write.add(String.join(" ", line));
 		}
 

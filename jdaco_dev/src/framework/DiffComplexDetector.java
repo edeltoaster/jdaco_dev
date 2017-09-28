@@ -539,13 +539,13 @@ public class DiffComplexDetector {
 
 	/**
 	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
-	 * (sub)complex direction q-value fold-change member_seed_comb member_complexes
+	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
 	 * @param out_file
 	 * @param human_readable
 	 */
 	public void writeSignSortedComplexes(String out_file, boolean human_readable) {
 		List<String> to_write = new LinkedList<>();
-		to_write.add("(sub)complex direction q-value fold-change member_seed_comb member_complexes");
+		to_write.add("(sub)complex direction q-value fold-change median-change member_seed_comb member_complexes");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -569,6 +569,9 @@ public class DiffComplexDetector {
 			else
 				fold_change /= group1_med;
 			
+			// median change calculation
+			double median_change = this.group2_medians.getOrDefault(sign_complex, 0.0) - this.group1_medians.getOrDefault(sign_complex, 0.0);
+			
 			// determine member seed combination
 			HashSet<String> seed_sub = new HashSet<>(sign_complex);
 			seed_sub.retainAll(this.getSeedProteins());
@@ -590,16 +593,19 @@ public class DiffComplexDetector {
 			// shortening numbers depending on human/machine-usage
 			String qval_string = null;
 			String foldc_string = null;
+			String med_change_string = null;
 			if (human_readable) {
 				qval_string = String.format(Locale.US, "%.3g", this.qvalues.get(sign_complex));
-				foldc_string = String.format(Locale.US, "%.2g", fold_change);
+				foldc_string = String.format(Locale.US, "%.3g", fold_change);
+				med_change_string = String.format(Locale.US, "%.3g", median_change);
 			} else {
 				qval_string = Double.toString(this.qvalues.get(sign_complex));
 				foldc_string = Double.toString(fold_change);
+				med_change_string = Double.toString(median_change);
 			}
 			
-			//format: (sub)complex direction q-value fold-change member_seed_comb member_complexes
-			List<String> line = Arrays.asList(compl_string, this.directions.get(sign_complex), qval_string, foldc_string, member_seed_comb_string, members_string);
+			//format: (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
+			List<String> line = Arrays.asList(compl_string, this.directions.get(sign_complex), qval_string, foldc_string, med_change_string, member_seed_comb_string, members_string);
 			to_write.add(String.join(" ", line));
 		}
 		
@@ -609,7 +615,7 @@ public class DiffComplexDetector {
 	
 	/**
 	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
-	 * seed_comb direction min_q-value max_fold-change member_complexes direction_details q-value_details fold-change_details; in the order of min_q-value (and cumulative median change)
+	 * seed_comb direction min_q-value max_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details; in the order of min_q-value (and cumulative median change)
 	 * @param out_file
 	 * @param human_readable
 	 */
@@ -661,9 +667,9 @@ public class DiffComplexDetector {
 		HashMap<HashSet<String>, Double> sign_comb_fc_map = new HashMap<>();
 		sign_comb_fcs_map.keySet().forEach(c -> sign_comb_fc_map.put(c, Utilities.getMaxFoldChange(sign_comb_fcs_map.get(c))));
 		
-		// absolute summarized signed median-abundance change
+		// summarized signed median-abundance change
 		HashMap<HashSet<String>, Double> sign_comb_sumabun_map = new HashMap<>();
-		sign_comb_medc_map.keySet().forEach(c -> sign_comb_sumabun_map.put(c, Math.abs(sign_comb_medc_map.get(c).stream().reduce(0.0, Double::sum))));
+		sign_comb_medc_map.keySet().forEach(c -> sign_comb_sumabun_map.put(c, sign_comb_medc_map.get(c).stream().reduce(0.0, Double::sum)));
 		
 		// sort by average q-value
 		List<HashSet<String>> sign_sorted_combs = new ArrayList<>(sign_comb_q_map.keySet());
@@ -671,7 +677,7 @@ public class DiffComplexDetector {
 		
 		// preface
 		List<String> to_write = new LinkedList<>();
-		to_write.add("seed_comb direction min_q-value max_fold-change member_complexes direction_details q-value_details fold-change_details");
+		to_write.add("seed_comb direction min_q-value max_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -702,7 +708,7 @@ public class DiffComplexDetector {
 				if (human_readable) {
 					compl_string = String.join("/", complex.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()));
 					qval_string = String.format(Locale.US, "%.3g", this.qvalues.get(complex));
-					foldc_string = String.format(Locale.US, "%.2g", sign_compl_foldc.get(complex));
+					foldc_string = String.format(Locale.US, "%.3g", sign_compl_foldc.get(complex));
 				} else {
 					compl_string = String.join("/", complex);
 					qval_string = Double.toString(this.qvalues.get(complex));
@@ -738,16 +744,19 @@ public class DiffComplexDetector {
 			// shortening numbers depending on human/machine-usage
 			String qval_string = null;
 			String foldc_string = null;
+			String sum_med_change_string = null;
 			if (human_readable) {
 				qval_string = String.format(Locale.US, "%.3g", sign_comb_q_map.get(seed_comb));
-				foldc_string = String.format(Locale.US, "%.2g", sign_comb_fc_map.get(seed_comb));
+				foldc_string = String.format(Locale.US, "%.3g", sign_comb_fc_map.get(seed_comb));
+				sum_med_change_string = String.format(Locale.US, "%.3g", sign_comb_sumabun_map.get(seed_comb));
 			} else {
 				qval_string = Double.toString(sign_comb_q_map.get(seed_comb));
 				foldc_string = Double.toString(sign_comb_fc_map.get(seed_comb));
+				sum_med_change_string = Double.toString(sign_comb_sumabun_map.get(seed_comb));
 			}
 			
-			// write in format: seed_comb direction avg_q-value med_fold-change member_complexes direction_details q-value_details fold-change_details
-			List<String> line = Arrays.asList(seed_comb_string, direction_string, qval_string, foldc_string, member_complexes_string, direction_details_string, qval_details_string, foldc_details_string);
+			// write in format: seed_comb direction avg_q-value med_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details
+			List<String> line = Arrays.asList(seed_comb_string, direction_string, qval_string, foldc_string, sum_med_change_string, member_complexes_string, direction_details_string, qval_details_string, foldc_details_string);
 			to_write.add(String.join(" ", line));
 		}
 		
@@ -766,7 +775,7 @@ public class DiffComplexDetector {
 		int sign_compareTo = sign_comb_q_map.get(v1).compareTo(sign_comb_q_map.get(v2));
 		
 		if (sign_compareTo == 0) {
-			return sign_comb_abun_map.get(v2).compareTo(sign_comb_abun_map.get(v1)); // note that we want to have the bigger difference as the smaller entry
+			return Double.compare(Math.abs(sign_comb_abun_map.get(v2)), Math.abs(sign_comb_abun_map.get(v1))); // note that we want to have the bigger difference as the smaller entry
 		} else
 			return sign_compareTo;
 	}
