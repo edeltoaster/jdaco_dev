@@ -2221,7 +2221,7 @@ public class DataQuery {
 		Date date = null;
 		
 		try {
-			URL server = new URL("http://3did.irbbarcelona.org/download/" + DataQuery.specific_3did_release + "/3did_flat.gz");
+			URL server = new URL("https://3did.irbbarcelona.org/download/" + DataQuery.specific_3did_release + "/3did_flat.gz");
 			URLConnection connection = server.openConnection();
 			date = new Date(connection.getLastModified());
 		} catch (Exception e) {
@@ -2256,7 +2256,7 @@ public class DataQuery {
 		
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("http://3did.irbbarcelona.org/download/" + DataQuery.specific_3did_release + "/3did_flat.gz");
+			URL server = new URL("https://3did.irbbarcelona.org/download/" + DataQuery.specific_3did_release + "/3did_flat.gz");
 			URLConnection connection = server.openConnection();
 			
 			// read
