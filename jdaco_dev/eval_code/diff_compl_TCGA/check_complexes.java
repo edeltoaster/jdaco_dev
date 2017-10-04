@@ -104,7 +104,7 @@ public class check_complexes {
 	}
 	
 	public static void main(String[] args) {
-		definitions.printParameters();
+		definitions.printInitParameters();
 
 		System.out.println();
 

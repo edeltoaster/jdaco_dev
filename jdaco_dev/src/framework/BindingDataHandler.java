@@ -23,7 +23,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class BindingDataHandler {
 	private final HashMap<String, HashMap<String, LinkedList<BindingSite>>> TF_to_targets = new HashMap<>(1024);
-	private final Map<String, Set<String>> target_to_TFs = new HashMap<>(1024);
+	private final Map<String, Set<String>> target_to_TFs = new HashMap<>(8096);
 	
 	/**
 	 * Unrestricted constructor:

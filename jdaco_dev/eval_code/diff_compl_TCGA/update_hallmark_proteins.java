@@ -9,8 +9,10 @@ import java.util.Set;
 import framework.DataQuery;
 import framework.Utilities;
 
-public class hallmark_proteins {
+public class update_hallmark_proteins {
 
+	static String out_file = "/Users/tho/Desktop/hallmark_proteins_" + Utilities.getDateString() + ".tsv.gz";
+	
 	public static void writeOut(String file, Map<String, Set<String>> data) {
 		List<String> lines = new LinkedList<String>();
 		for (String term:data.keySet()) {
@@ -25,7 +27,6 @@ public class hallmark_proteins {
 		Map<String, Set<String>> hallmark_prot_map = new HashMap<String, Set<String>>();
 		String human = "9606";
 		Set<String> temp;
-		String out_file = "/Users/tho/Desktop/hallmark_proteins_" + Utilities.getDateString() + ".tsv.gz";
 		
 		// Inducing Angiogenesis	 GO:0001525	 angiogenesis
 		System.out.println("Inducing Angiogenesis");

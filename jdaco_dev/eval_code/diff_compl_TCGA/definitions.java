@@ -27,7 +27,11 @@ public class definitions {
 	static int SPEnrich_iterations = 10000;
 	static int SPEnrich_compl_part_threshold = 10;
 	
-	public static void printParameters() {
+	static String binding_data = "/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10_EPD_v5_2k.txt.gz";
+	static int d_min = -25;
+	static int d_max = 25;
+	
+	public static void printInitParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
 		System.out.println("networks folder : " + networks_folder);
 		System.out.println("diff compl results output folder : " + diff_complex_output_folder);
@@ -48,5 +52,10 @@ public class definitions {
 		System.out.println("SPC compl. part. threshold : " + SPCEnrich_compl_part_threshold);
 		System.out.println("SPE iterations : " + SPEnrich_iterations);
 		System.out.println("SPE compl. part. threshold : " + SPEnrich_compl_part_threshold);
+	}
+	
+	public static void printBindingDataParameters() {
+		System.out.println("Binding data : " + binding_data);
+		System.out.println("d_min/d_max : " + d_min + "-" + d_max);
 	}
 }
