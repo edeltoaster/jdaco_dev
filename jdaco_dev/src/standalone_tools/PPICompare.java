@@ -15,12 +15,14 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class PPICompare {
+	static String version_string = "PPICompare 1.02";
 	
 	private static String path_group1 = "[GROUP1-FOLDER]";
 	private static String path_group2 = "[GROUP2-FOLDER]";
 	private static String output_folder;
 	private static double FDR = 0.05;
 	private static boolean output_protein_attributes = true;
+	
 	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1);
 	private static PrintStream verbose = null;
 	
@@ -28,6 +30,9 @@ public class PPICompare {
 	private static Map<String, RewiringDetectorSample> group2;
 
 	
+	/**
+	 * Prints the help message
+	 */
 	public static void printHelp() {
 		System.out.println("usage: java -jar PPICompare.jar ([OPTIONS]) [GROUP1-FOLDER] [GROUP2-FOLDER] [OUTPUT-FOLDER]");
 		
@@ -56,6 +61,16 @@ public class PPICompare {
 		System.exit(0);
 	}
 	
+	
+	/**
+	 * Prints the version of the program
+	 */
+	public static void printVersion() {
+		System.out.println(version_string);
+		System.exit(0);
+	}
+	
+	
 	/**
 	 * Parse arguments
 	 * @param args
@@ -67,6 +82,10 @@ public class PPICompare {
 			// help needed?
 			if (arg.equals("-h") || arg.equals("-help"))
 				printHelp();
+			
+			// output version
+			else if (arg.equals("-version"))
+				printVersion();
 			
 			// parse FDR
 			else if (arg.startsWith("-fdr"))
@@ -152,6 +171,7 @@ public class PPICompare {
 		
 			
 	}
+	
 	
 	public static void main(String[] args) {
 		

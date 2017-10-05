@@ -45,6 +45,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
 public class PPIXpress_GUI {
+	static String version_string = "PPIXpress 1.16";
+	
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
 	private static boolean output_major_transcripts = false;
@@ -127,7 +129,7 @@ public class PPIXpress_GUI {
 	 */
 	private void initialize() {
 		frmPpixpress = new JFrame();
-		frmPpixpress.setTitle("PPIXpress");
+		frmPpixpress.setTitle(version_string);
 		frmPpixpress.setResizable(false);
 		frmPpixpress.setBounds(100, 100, 900, 870);
 		frmPpixpress.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

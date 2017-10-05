@@ -15,23 +15,31 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class JDACO {
+	static String version_string = "JDACO 1.0";
+	
 	private static String ppin_file;
 	private static String ddin_file;
-	private static String seed_file;
-	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1);
-	private static String output_file;
-	private static int max_depth = 0;
-	private static double percentile = 5;
 	private static PPIN ppin;
 	private static DDIN ddin;
+	private static String seed_file;
+	private static String output_file;
 	private static Set<String> seed;
+	
+	private static int max_depth = 0;
+	private static double percentile = 5;
 	private static double pair_threshold = -1.0;
 	private static double prob_threshold = -1.0;
+	
+	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1);
 	private static PrintStream out = System.out;
 	private static int compute_timeout = 60;
 	private static boolean cached_execution = true;
 	private static boolean benchmark_mode = false;
 	
+	
+	/**
+	 * Prints the help message
+	 */
 	public static void printHelp() {
 		System.out.println("usage: java -jar JDACO.jar ([OPTIONS]) [PPI-NETWORK] [DDI-NETWORK] [SEED-FILE] [MAX-DEPTH] [OUT-FILE]");
 		
@@ -74,6 +82,16 @@ public class JDACO {
 		System.exit(0);
 	}
 	
+	
+	/**
+	 * Prints the version of the program
+	 */
+	public static void printVersion() {
+		System.out.println(version_string);
+		System.exit(0);
+	}
+	
+	
 	/**
 	 * Parse arguments
 	 * @param args
@@ -85,6 +103,10 @@ public class JDACO {
 			// help needed?
 			if (arg.equals("-h") || arg.equals("-help"))
 				printHelp();
+			
+			// output version
+			else if (arg.equals("-version"))
+				printVersion();
 			
 			// threads
 			else if (arg.startsWith("-t")) 
@@ -164,6 +186,7 @@ public class JDACO {
 			System.exit(1);
 		}
 	}
+	
 	
 	public static void main(String[] args) {
 

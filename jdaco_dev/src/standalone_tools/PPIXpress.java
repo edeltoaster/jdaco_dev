@@ -18,6 +18,8 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class PPIXpress {
+	static String version_string = "PPIXpress 1.16";
+	
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
 	private static boolean output_major_transcripts = false;
@@ -40,6 +42,10 @@ public class PPIXpress {
 	private static boolean STRING_weights = false;
 	private static List<String> matching_files_output = new LinkedList<>();
 	
+	
+	/**
+	 * Prints the help message
+	 */
 	public static void printHelp() {
 		System.out.println("usage: java -jar PPIXpress.jar ([OPTIONS]) [INPUT-NETWORK] [OUTPUT-FOLDER] [EXPR-INPUT1] ([EXPR-INPUT2] ...)");
 		
@@ -98,6 +104,16 @@ public class PPIXpress {
 		System.exit(0);
 	}
 	
+	
+	/**
+	 * Prints the version of the program
+	 */
+	public static void printVersion() {
+		System.out.println(version_string);
+		System.exit(0);
+	}
+	
+	
 	/**
 	 * Parse arguments
 	 * @param args
@@ -109,6 +125,10 @@ public class PPIXpress {
 			// help needed?
 			if (arg.equals("-h") || arg.equals("-help"))
 				printHelp();
+			
+			// output version
+			else if (arg.equals("-version"))
+				printVersion();
 			
 			// gene level only
 			else if (arg.equals("-g"))
@@ -238,6 +258,7 @@ public class PPIXpress {
 		
 		
 	}
+	
 	
 	public static void main(String[] args) {
 		

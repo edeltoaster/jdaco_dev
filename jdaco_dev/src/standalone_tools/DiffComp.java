@@ -5,7 +5,12 @@ package standalone_tools;
  * @author Thorsten Will
  */
 public class DiffComp {
+	static String version_string = "DiffComp dev version";
 	
+	
+	/**
+	 * Prints the help message
+	 */
 	public static void printHelp() {
 		System.out.println("usage: java -jar CompAre.jar ([OPTIONS]) [GROUP1-FOLDER] [GROUP2-FOLDER] [OUTPUT-FOLDER]");
 		
@@ -31,6 +36,16 @@ public class DiffComp {
 		System.exit(0);
 	}
 	
+	
+	/**
+	 * Prints the version of the program
+	 */
+	public static void printVersion() {
+		System.out.println(version_string);
+		System.exit(0);
+	}
+	
+	
 	/**
 	 * Parse arguments
 	 * @param args
@@ -43,8 +58,13 @@ public class DiffComp {
 			if (arg.equals("-h") || arg.equals("-help"))
 				printHelp();
 			
+			// output version
+			else if (arg.equals("-version"))
+				printVersion();
+			
 		}
 	}
+	
 	
 	public static void main(String[] args) {
 		
