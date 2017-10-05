@@ -65,6 +65,7 @@ public class DataQuery {
 	private static Map<String, String> cache_db = new HashMap<>();
 	private static Map<String, PPIN> cache_STRING = new HashMap<>();
 	private static Map<String, Map<String, String>> cache_ucsc = new HashMap<>();
+	private static Map<String, Map<String, String>> cache_refseq = new HashMap<>();
 	private static Map<String, Map<String, Integer>> cache_transcript_length = new HashMap<>();
 	private static Map<String, String> cache_ensembl_db = new HashMap<>();
 	private static Map<String, Map<String, String>> cache_uniprot_gene_map = new HashMap<>();
@@ -602,6 +603,56 @@ public class DataQuery {
 	}
 	
 	/**
+	 * Queries Ensembl for transcripts with RefSeq mRNA id
+	 * @param organism_core_database
+	 * @returm ENST->RefSeq
+	 */
+	public static Map<String, String> getTranscriptsWithRefSeq(String organism_core_database) {
+		Map<String, String> refseq_annotated_transcripts = new HashMap<>();
+		
+		// get cached result
+		if (DataQuery.cache_refseq.containsKey(organism_core_database))
+			return DataQuery.cache_refseq.get(organism_core_database);
+		
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			// query using database name from https://www.biostars.org/p/106470/
+			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, xref.display_label FROM transcript, object_xref, xref,external_db WHERE transcript.transcript_id = object_xref.ensembl_id AND object_xref.ensembl_object_type = 'Transcript' AND object_xref.xref_id = xref.xref_id AND xref.external_db_id = external_db.external_db_id AND external_db.db_name = 'RefSeq_mRNA'");
+			while (rs.next()) {
+				refseq_annotated_transcripts.put(rs.getString(1), rs.getString(2));
+			}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ENSEMBL");
+			//e.printStackTrace();
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get RefSeq-annotated transcript data from ENSEMBL in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			DataQuery.switchServer();
+			
+			return getTranscriptsWithRefSeq(organism_core_database);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
+		}
+
+		// store in cache
+		DataQuery.cache_refseq.put(organism_core_database, refseq_annotated_transcripts);
+		
+		return refseq_annotated_transcripts;
+	}
+	
+	/**
 	 * Queries HGNC gene symbols to UniProt/Ensembl gene, may have ""
 	 * @param organism_core_database
 	 * @return
@@ -863,7 +914,7 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Queries Ensembl for association of UCSC ids to Ensembl transcripts (only the ones with associated UniProt protein)
+	 * Queries Ensembl for association of UCSC ids to Ensembl transcripts (only the ones with associated UniProt protein and that also have an RefSeq id)
 	 * @return map USCS_id -> ENST
 	 */
 	public static Map<String, String> getUSCStoTranscriptMap(String organism_core_database) {
@@ -874,9 +925,14 @@ public class DataQuery {
 		Map<String, String> ucsc_to_ensembl = new HashMap<>();
 		Set<String> allowed_transcript = new HashSet<>();
 		
-		// to filter for known protein coding
+		// filter for known protein coding
 		for (String data[]:getGenesTranscriptsProteins(organism_core_database)) 
 			allowed_transcript.add(data[1]);
+		
+		// filter for transcripts with associated RefSeq mRNA ids
+		Map<String, String> refseq_map = DataQuery.getTranscriptsWithRefSeq(organism_core_database);
+		
+		allowed_transcript.retainAll(refseq_map.keySet());
 		
 		Connection connection = null;
 		try {
@@ -891,10 +947,15 @@ public class DataQuery {
 			while (rs.next()) {
 				String ucsc = rs.getString(2).split("\\.")[0]; // shear off version number
 				String transcript = rs.getString(1);
+				
 				if (!allowed_transcript.contains(transcript))
 					continue;
 				
-				ucsc_to_ensembl.put(ucsc, transcript);
+				if (ucsc_to_ensembl.containsKey(ucsc)) {
+					if (refseq_map.get(transcript).length() < refseq_map.get(ucsc_to_ensembl.get(ucsc)).length())
+						ucsc_to_ensembl.put(ucsc, transcript);
+				} else
+					ucsc_to_ensembl.put(ucsc, transcript);
 			}
 			
 		} catch (Exception e) {

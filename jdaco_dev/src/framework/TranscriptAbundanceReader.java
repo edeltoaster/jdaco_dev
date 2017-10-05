@@ -593,11 +593,11 @@ public class TranscriptAbundanceReader {
 				// UCSC -> Ensembl
 				transcript = ucsc_to_ensembl.get(transcript);
 				
-				// may map several times, generally max is taken as the annotations are equivalent
+				// may map several times, sum is taken
 				if (!abundance.containsKey(transcript))
 					abundance.put(transcript, 0f);
 				
-				abundance.put(transcript, Math.max(abundance.get(transcript), rsem) );
+				abundance.put(transcript, abundance.get(transcript) + rsem );
 				
 			}
 
