@@ -45,7 +45,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
 public class PPIXpress_GUI {
-	static String version_string = "PPIXpress 1.17";
+	static String version_string = "PPIXpress 1.18";
 	
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
@@ -782,6 +782,18 @@ public class PPIXpress_GUI {
 		// processing
 		setActivity(false);
 		
+		// gathering even more data if necessary
+		if (load_UCSC) {
+			if (!computing) {
+				progressBar.setValue(0);
+				return;
+			}
+			
+			DataQuery.switchServerGRCh37();
+			stream_output.println("Retrieving UCSC mapping-data ...");
+			DataQuery.getUCSChg19toTranscriptMap();
+		}
+		
 		if (update_UniProt) {
 
 			stream_output.println("Retrieving data from UniProt to update protein accessions in network ...");
@@ -846,16 +858,6 @@ public class PPIXpress_GUI {
 		
 		stream_output.println("100%.");
 		progressBar.setValue(45);
-		
-		// gathering even more data if necessary
-		if (load_UCSC) {
-			if (!computing) {
-				progressBar.setValue(0);
-				return;
-			}
-			stream_output.println("Retrieving UCSC mapping-data ...");
-			DataQuery.getUSCStoTranscriptMap(DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
-		}
 		
 		if (load_HGNC) {
 			if (!computing) {

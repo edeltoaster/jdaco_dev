@@ -560,7 +560,7 @@ public class TranscriptAbundanceReader {
 	
 	/**
 	 * Reads TCGA quantile-normalized isoform RSEM files of UCSC transcripts (gzipped also fine, ending .gz assumed there)
-	 * and returns either transcripts or genes and their expression level
+	 * and returns either transcripts or genes and their expression level; uses version of UCSC id.
 	 * @param file
 	 * @param transcript_threshold
 	 * @param boolean return_gene_level
@@ -569,7 +569,7 @@ public class TranscriptAbundanceReader {
 	public static Map<String, Float> readTCGAIsoformRSEMFile(String file, double transcript_threshold, boolean return_gene_level, boolean length_normalization) {
 		Map<String, Float> abundance = new HashMap<>(1024);
 		String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
-		Map<String, String> ucsc_to_ensembl = DataQuery.getUSCStoTranscriptMap(db);
+		Map<String, String> ucsc_to_ensembl = DataQuery.getUCSChg19toTranscriptMap();
 		
 		BufferedReader in = null;
 		try {
@@ -583,7 +583,7 @@ public class TranscriptAbundanceReader {
 				if (line.startsWith("isoform_id"))
 					continue;
 				String[] split = line.split("\\s+");
-				String transcript = split[0].split("\\.")[0]; // shear off version
+				String transcript = split[0];
 				float rsem = Float.parseFloat(split[1]);
 				
 				// ensures consistency across transcr./genes.

@@ -18,7 +18,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class PPIXpress {
-	static String version_string = "PPIXpress 1.17";
+	static String version_string = "PPIXpress 1.18";
 	
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
@@ -276,6 +276,13 @@ public class PPIXpress {
 		if (!f.exists())
 			f.mkdir();
 		
+		// gathering even more data if necessary
+		if (load_UCSC) {
+			DataQuery.switchServerGRCh37();
+			System.out.println("Retrieving UCSC mapping-data ...");
+			DataQuery.getUCSChg19toTranscriptMap();
+		}
+		
 		PPIN original_network = null;
 		if (original_network_path.startsWith("taxon:")) {
 			String taxon_id = original_network_path.split(":")[1];
@@ -324,12 +331,6 @@ public class PPIXpress {
 		DataQuery.getIsoformProteinDomainMap(organism_database);
 		System.out.println("100%.");
 		System.out.flush();
-		
-		// gathering even more data if necessary
-		if (load_UCSC) {
-			System.out.println("Retrieving UCSC mapping-data ...");
-			DataQuery.getUSCStoTranscriptMap(DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
-		}
 		
 		if (load_HGNC) {
 			System.out.println("Retrieving HGNC mapping-data ...");
