@@ -26,6 +26,7 @@ public class PPIXpress {
 	private static String original_network_path;
 	private static List<String> input_files = new LinkedList<>();
 	private static double threshold = 1.0;
+	private static boolean norm_transcripts = false;
 	private static double percentile = -1;
 	private static String output_folder;
 	private static String organism_database;
@@ -55,6 +56,7 @@ public class PPIXpress {
 		System.out.println("	-g : only use gene abundances (default: transcript abundance)");
 		System.out.println("	-t=[threshold] : only take transcripts/genes with an expression above [threshold] into account (default: 1.0)");
 		System.out.println("	-tp=[percentile] : only take transcripts/genes with an expression above the [percentile]-th percentile into account (default: overrides option above)");
+		System.out.println("	-n : normalize counts of transcripts by the length of the transcript (only for major_transcript file, applied after threshold)");
 		System.out.println("	-x : do not remove proteins from the network if their coding transcript is subject to degradation (default: remove if tagged as 'nonsense-mediated decay' or 'non-stop decay')");
 		System.out.println("	-d : also output underlying domain-domain interaction network(s) (default: no)");
 		System.out.println("	-m : also output major transcript per protein (default: no)");
@@ -149,6 +151,10 @@ public class PPIXpress {
 			// output major transcript per protein
 			else if (arg.equals("-m"))
 				output_major_transcripts = true;
+			
+			// normalize transcripts
+			else if (arg.equals("-n"))
+				norm_transcripts = true;
 			
 			// output major transcript per protein with each ones abundance as the sum of all its expressed coding transcripts
 			else if (arg.equals("-mg")) {
@@ -405,6 +411,13 @@ public class PPIXpress {
 				threshold = TranscriptAbundanceReader.getExprThresholdFromPercentile(path, percentile, gene_level_only, organism_database);
 			
 			Map<String, Float> abundance = TranscriptAbundanceReader.readSample(path, threshold, gene_level_only, organism_database);
+			
+			if (norm_transcripts) {
+				if (gene_level_only || !type.endsWith("T"))
+					System.out.println("Data normalization skipped, currently only applicable to transcript expression data.");
+				else
+					abundance = TranscriptAbundanceReader.normalizeByTranscriptLength(abundance, organism_database);
+			}
 			
 			// build
 			ConstructedNetworks constr;

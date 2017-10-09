@@ -1836,6 +1836,11 @@ public class DataQuery {
 		
 		DataQuery.last_server_change = now;
 		
+		if (DataQuery.ensembl_mysql.equals("ensembldb.ensembl.org:3337")) {
+			err_out.println("Special GRCh37 ENSEMBL server is used and cannot be switched.");
+			return;
+		}
+		
 		String server1 = "ensembldb.ensembl.org:3306";
 		String server2 = "useastdb.ensembl.org:3306";
 		String server3 = "asiadb.ensembl.org:3306";

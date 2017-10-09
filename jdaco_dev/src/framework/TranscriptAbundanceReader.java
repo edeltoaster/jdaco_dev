@@ -566,9 +566,9 @@ public class TranscriptAbundanceReader {
 	 * @param boolean return_gene_level
 	 * @return map Ensembl transcript or gene -> RSEM (if transcript > threshold)
 	 */
-	public static Map<String, Float> readTCGAIsoformRSEMFile(String file, double transcript_threshold, boolean return_gene_level, boolean length_normalization) {
+	public static Map<String, Float> readTCGAIsoformRSEMFile(String file, double transcript_threshold, boolean return_gene_level) {
 		Map<String, Float> abundance = new HashMap<>(1024);
-		String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
+		
 		Map<String, String> ucsc_to_ensembl = DataQuery.getUCSChg19toTranscriptMap();
 		
 		BufferedReader in = null;
@@ -610,16 +610,12 @@ public class TranscriptAbundanceReader {
 			}
 		}
 		
-		// normalizes counts by the length of the mapped transcripts to increase comparability between transcripts
-		if (length_normalization) {
-			abundance = TranscriptAbundanceReader.normalizeByTranscriptLength(abundance, db);
-		}
-		
 		// check for threshold
 		abundance.entrySet().removeIf(e -> e.getValue().floatValue() <= transcript_threshold);
 		
 		// if gene-level wanted: convert
 		if (return_gene_level) {
+			String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
 			// get association by query
 			Map<String, String> transcript_to_gene = new HashMap<>(1024);
 			for (String[] data:DataQuery.getGenesTranscriptsProteins(db)) {
@@ -652,7 +648,7 @@ public class TranscriptAbundanceReader {
 	 * @return map Ensembl transcript -> RSEM (if > threshold)
 	 */
 	public static Map<String, Float> readTCGAIsoformRSEM(String file, double threshold) {
-		return readTCGAIsoformRSEMFile(file, threshold, false, false);
+		return readTCGAIsoformRSEMFile(file, threshold, false);
 	}
 	
 	/**
@@ -662,7 +658,7 @@ public class TranscriptAbundanceReader {
 	 * @return map Ensembl gene -> RSEM (if any of its transcripts above threshold)
 	 */
 	public static Map<String, Float> readTCGAIsoformRSEMAsGenes(String file, double transcript_threshold) {
-		return readTCGAIsoformRSEMFile(file, transcript_threshold, true, false);
+		return readTCGAIsoformRSEMFile(file, transcript_threshold, true);
 	}
 	
 	/**
@@ -732,7 +728,7 @@ public class TranscriptAbundanceReader {
 	 * @return set of transcribed Ensembl genes with transcripts above threshold
 	 */
 	public static Set<String> getGeneAbundanceFromTCGAIsoformRSEM(String file, double threshold) {
-		return readTCGAIsoformRSEMFile(file, threshold, true, false).keySet();
+		return readTCGAIsoformRSEMFile(file, threshold, true).keySet();
 	}
 	
 	/**

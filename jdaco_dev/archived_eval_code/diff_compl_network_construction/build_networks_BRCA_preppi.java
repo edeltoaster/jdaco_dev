@@ -15,10 +15,13 @@ public class build_networks_BRCA_preppi {
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
 	static double transcr_threshold = 0.0;
+	static String organism_database;
 	
 	public static void preprocess() {
+		DataQuery.switchServerGRCh37();
+		organism_database = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
 		System.out.println("Original PPIN: " + "mixed_data/human_PrePPI_17_01_17_hc.txt.gz"); // PrePPI, jan 2017
-		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
+		System.out.println("Ensembl version: " + organism_database);
 		System.out.println("3did: " + DataQuery.get3didVersion());
 		System.out.println("iPfam: " + DataQuery.getIPfamVersion());
 		
@@ -55,7 +58,8 @@ public class build_networks_BRCA_preppi {
 			file_name = patient + "_" + condition;
 			System.out.println("Processing " + file_name);
 			
-			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.readTCGAIsoformRSEMFile(path, transcr_threshold, false, true), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
+			// normalized counts, sum of all transcripts etc
+			ConstructedNetworks cn = builder.constructAssociatedNetworksFromTranscriptAbundance(TranscriptAbundanceReader.normalizeByTranscriptLength(TranscriptAbundanceReader.readTCGAIsoformRSEMFile(path, transcr_threshold, false), organism_database), true, true); //returns abundance as gene abundance (sum of expressed transcripts of gene)
 			cn.getPPIN().writePPIN(network_folder + file_name + "_ppin.txt.gz");
 			cn.getDDIN().writeDDIN(network_folder + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(network_folder + file_name + "_major-transcripts.txt.gz");
