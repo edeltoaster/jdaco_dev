@@ -237,6 +237,45 @@ public class TranscriptAbundanceReader {
 	}
 	
 	/**
+	 * Reads Kallisto h5 output files. Creates temporary results that are cleaned afterwards.
+	 * A UNIX-system and a working installation of kallisto in /usr/local/bin/kallisto are assumed.
+	 * @param h5_file
+	 * @param threshold
+	 * @param get_counts
+	 * @return
+	 */
+	public static Map<String, Float> readKallistoH5(String h5_file, double threshold, boolean get_counts) {
+		String temp_folder = h5_file+"_temp";
+		String[] call1 = {"/usr/local/bin/kallisto", "h5dump", "-o", temp_folder, h5_file};
+		String[] call2 = {"rm", "-rf", temp_folder};
+		Map<String, Float> expr_data = null;
+		try {
+			Process prc1 = Runtime.getRuntime().exec(call1);
+			BufferedReader br = new BufferedReader(new InputStreamReader(prc1.getErrorStream()));
+			String line = "";
+			String abundance_file = "";
+			while ((line = br.readLine()) != null) {
+				if (line.startsWith("[h5dump] writing abundance file:")) {
+					abundance_file = line.split("\\s+")[4];
+				}
+			}
+			prc1.waitFor();
+			
+			// read data
+			expr_data = TranscriptAbundanceReader.readKallistoFile(abundance_file, threshold, get_counts);
+			
+			// remove generated data
+			Process prc2 = Runtime.getRuntime().exec(call2);
+			prc2.waitFor();
+		} catch (Exception e) {
+			System.err.println("Problem while trying to convert Kallisto h5 file. "
+					+ "Be aware that this method only works on UNIX systems for which 'kallisto' can be called in de terminal without further specification.");
+		}
+		
+		return expr_data;
+	}
+	
+	/**
 	 * Reads GTF files of genes or transcripts (gzipped also fine, ending .gz assumed there) as from Cufflinks/ENCODE
 	 * and allow all only transcripts/genes with transcripts above threshold or if a gene file is parsed genes above threshold.
 	 * @param file

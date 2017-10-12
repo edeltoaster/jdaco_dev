@@ -1,10 +1,11 @@
 package mixed;
 
-import framework.DataQuery;
+import framework.TranscriptAbundanceReader;
 
 public class fast_tests {
 	
 	public static void main(String[] args) {
-		System.out.println(DataQuery.getProteinsWithGO("GO:0016573", "9606").size());
+		String file = "/Users/tho/Downloads/results/SRR493366/kallisto/abundance.h5";
+		System.out.println(TranscriptAbundanceReader.readKallistoH5(file, 0.0, false));
 	}
 }
