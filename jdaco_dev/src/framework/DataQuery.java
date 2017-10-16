@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -1248,8 +1249,8 @@ public class DataQuery {
 		Set<String> entries = new HashSet<>();
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("http://www.ebi.ac.uk/QuickGO-Old/GAnnotation?format=tsv&gz=true&limit=-1&db=UniProtKB&tax="+ taxon +"&goid=" + GO_id);
-			URLConnection connection = server.openConnection();
+			URL server = new URL("https://www.ebi.ac.uk/QuickGO-Old/GAnnotation?format=tsv&gz=true&limit=-1&db=UniProtKB&tax="+ taxon +"&goid=" + GO_id);
+			HttpURLConnection connection = (HttpURLConnection) server.openConnection();
 			
 			// read
 			datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())));
@@ -1260,9 +1261,11 @@ public class DataQuery {
 					continue;
 				String[] temp = line.trim().split("\t");
 				String inf = temp[9];
+				
 				// not IEA
 				if (!include_IEA && inf.equals("IEA"))
 					continue;
+				
 				// manual experimental: IMP,IGI,IPI,IDA,IEP,EXP
 				if (only_experimental && !inf.equals("IMP") && !inf.equals("IGI") && !inf.equals("IPI") && !inf.equals("IDA") && !inf.equals("IEP") && !inf.equals("EXP"))
 					continue;
@@ -1270,6 +1273,8 @@ public class DataQuery {
 			}
 			
 		} catch (Exception e) {
+			//e.printStackTrace();
+			
 			if (DataQuery.retries == 10)
 				terminateRetrieval("QuickGO");
 			
