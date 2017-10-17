@@ -109,9 +109,14 @@ public class BindingDataHandler {
 				in = new BufferedReader(new FileReader(fimo_outputfile));
 			while (in.ready()) {
 				String line = in.readLine();
+				
+				if (line == null)
+					break;
+				
 				// skip comments
 				if (line.startsWith("#"))
 					continue;
+				
 				// parse
 				String[] data = line.split("\\s+");
 				String tf = data[0];

@@ -1,9 +1,5 @@
 package framework;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.GZIPInputStream;
 
 /**
  * Stores DACO results
@@ -50,28 +45,8 @@ public class DACOResultSet {
 	 */
 	private void readDACOResult(String daco_out_file) {
 		
-		BufferedReader in = null;
-		try {
-			if (daco_out_file.endsWith(".gz") || daco_out_file.endsWith(".gzip"))
-				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(daco_out_file))));
-			else
-				in = new BufferedReader(new FileReader(daco_out_file));
-			
-			while (in.ready()) {
-				String line = in.readLine();
-				this.result.add(new HashSet<>(Arrays.asList(line.trim().split("\\s+")[0].split(",")))); // additional split for compatibility with quantified files
-			}
-			in.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-			
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-			}
-		}
+		for (String line:Utilities.readFile(daco_out_file)) 
+			this.result.add(new HashSet<>(Arrays.asList(line.split("\\s+")[0].split(",")))); // additional split for compatibility with quantified files
 	}
 	
 	/**

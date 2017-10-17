@@ -15,7 +15,7 @@ public class definitions {
 	static boolean parametric = false;
 	static boolean paired = true;
 	static boolean check_supersets = false;
-	static double min_variant_fraction = 0.7;
+	static double min_variant_fraction = 0.75;
 	
 	static int no_threads = 48;
 	

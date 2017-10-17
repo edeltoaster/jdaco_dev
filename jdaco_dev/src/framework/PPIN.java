@@ -91,8 +91,11 @@ public class PPIN {
 			while (in.ready()) {
 				String line = in.readLine();
 				
+				if (line == null)
+					break;
+				
 				// skip first line
-				if (line == null || line.startsWith("Protein1") || line.isEmpty() || line.startsWith("#"))
+				if (line.startsWith("Protein1") || line.isEmpty() || line.startsWith("#"))
 					continue;
 				String[] split = line.split("\\s+");
 				String p1 = split[0];

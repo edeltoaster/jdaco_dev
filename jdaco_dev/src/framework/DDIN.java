@@ -60,6 +60,10 @@ public class DDIN {
 			
 			while (in.ready()) {
 				String line = in.readLine();
+				
+				if (line == null)
+					break;
+				
 				String[] split = line.split("\\s+");
 				String partner1 = split[0];
 				String partner2 = split[1];

@@ -51,11 +51,11 @@ public class Utilities {
 			else
 				in = new BufferedReader(new FileReader(in_file));
 			
-			while (in.ready()) {
-				String line = in.readLine();
+			String line;
+			while ( (line = in.readLine()) != null) { // readLine strips line-endings (no trim needed) and returns null when finished
 				if (line.startsWith("#"))
 					continue;
-				input.add(line.trim());
+				input.add(line);
 			}
 			
 		} catch (Exception e) {
@@ -89,11 +89,11 @@ public class Utilities {
 			else
 				in = new BufferedReader(new FileReader(in_file));
 			
-			while (in.ready()) {
-				String line = in.readLine();
+			String line;
+			while ( (line = in.readLine()) != null) { // readLine strips line-endings (no trim needed) and returns null when finished
 				if (line.startsWith("#"))
 					continue;
-				input.add(line.trim());
+				input.add(line);
 			}
 			
 		} catch (Exception e) {

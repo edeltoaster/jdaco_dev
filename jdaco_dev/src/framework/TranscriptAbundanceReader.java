@@ -32,42 +32,27 @@ public class TranscriptAbundanceReader {
 		Map<String, Float> transcript_abundance = new HashMap<>(1024);
 		Map<String, Float> gene_abundance = new HashMap<>(1024);
 		
-		BufferedReader in = null;
-		try {
-			if (file.endsWith(".gz"))
-				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-			else
-				in = new BufferedReader(new FileReader(file));
+		for (String line:Utilities.readFile(file)) {
 			
-			while (in.ready()) {
-				// parse
-				String line = in.readLine();
-				if (line.startsWith("tracking_id"))
-					continue;
-				String[] split = line.split("\\s+");
-				String transcript = split[0].split("\\.")[0];
-				String gene = split[3].split("\\.")[0];
-				float fpkm = Float.parseFloat(split[9]);
-				if (fpkm <= threshold) // common threshold = 1
-					continue;
-				
-				transcript_abundance.put(transcript, fpkm);
-				
-				// gene abundance is the sum of transcript abundances
-				if (!gene_abundance.containsKey(gene))
-					gene_abundance.put(gene, 0f);
-				gene_abundance.put(gene, gene_abundance.get(gene) + fpkm);
-			}
+			if (line.startsWith("tracking_id"))
+				continue;
 			
-		} catch (Exception e) {
-			System.err.println("Problem while trying to parse Cufflinks FPKM file.");
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-			}
+			String[] split = line.split("\\s+");
+			String transcript = split[0].split("\\.")[0];
+			String gene = split[3].split("\\.")[0];
+			
+			float fpkm = Float.parseFloat(split[9]);
+			if (fpkm <= threshold) // common threshold = 1
+				continue;
+			
+			transcript_abundance.put(transcript, fpkm);
+			
+			// gene abundance is the sum of transcript abundances
+			if (!gene_abundance.containsKey(gene))
+				gene_abundance.put(gene, 0f);
+			gene_abundance.put(gene, gene_abundance.get(gene) + fpkm);
 		}
-		
+
 		if (return_gene_level)
 			return gene_abundance;
 		
@@ -88,49 +73,32 @@ public class TranscriptAbundanceReader {
 		int transcript_index = 0;
 		int gene_index = 1;
 		
-		BufferedReader in = null;
-		try {
-			if (file.endsWith(".gz"))
-				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-			else
-				in = new BufferedReader(new FileReader(file));
+		for (String line:Utilities.readFile(file)) {
 			
-			while (in.ready()) {
-				// parse
-				String line = in.readLine();
-				
-				// check actual type of file
-				if (line.startsWith("transcript_id")) // leave indices as already set
-					continue;
-				if (line.startsWith("gene_id")) { // change indices
-					transcript_index = 1;
-					gene_index = 0;
-					continue;
-				}
-				
-				String[] split = line.split("\\s+");
-				String transcript = split[transcript_index].split("\\.")[0]; // shear off version
-				String gene = split[gene_index].split("\\.")[0];
-				
-				float tpm = Float.parseFloat(split[5]);
-				if (tpm <= threshold) // common threshold = 1
-					continue;
-				
-				transcript_abundance.put(transcript, tpm);
-				
-				// gene abundance is the sum of transcript abundances
-				if (!gene_abundance.containsKey(gene))
-					gene_abundance.put(gene, 0f);
-				gene_abundance.put(gene, gene_abundance.get(gene) + tpm);
+			// check actual type of file
+			if (line.startsWith("transcript_id")) // leave indices as already set
+				continue;
+			
+			if (line.startsWith("gene_id")) { // change indices
+				transcript_index = 1;
+				gene_index = 0;
+				continue;
 			}
 			
-		} catch (Exception e) {
-			System.err.println("Problem while trying to parse RSEM file.");
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-			}
+			String[] split = line.split("\\s+");
+			String transcript = split[transcript_index].split("\\.")[0]; // shear off version
+			String gene = split[gene_index].split("\\.")[0];
+			
+			float tpm = Float.parseFloat(split[5]);
+			if (tpm <= threshold) // common threshold = 1
+				continue;
+			
+			transcript_abundance.put(transcript, tpm);
+			
+			// gene abundance is the sum of transcript abundances
+			if (!gene_abundance.containsKey(gene))
+				gene_abundance.put(gene, 0f);
+			gene_abundance.put(gene, gene_abundance.get(gene) + tpm);
 		}
 		
 		if (return_gene_level)
@@ -161,41 +129,23 @@ public class TranscriptAbundanceReader {
 	public static Map<String, Float> readKallistoFile(String file, double threshold, boolean get_counts) {
 		Map<String, Float> transcript_abundance = new HashMap<>(1024);
 		
-		BufferedReader in = null;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".gzip"))
-				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-			else
-				in = new BufferedReader(new FileReader(file));
+		for (String line:Utilities.readFile(file)) {
 			
-			while (in.ready()) {
-				// parse
-				String line = in.readLine();
-				
-				if (line.startsWith("target_id")) //
-					continue;
-				
-				String[] split = line.split("\\s+");
-				String transcript = split[0].split("\\.")[0]; // shear off version
-				float tpm = Float.parseFloat(split[4]);
-				
-				// tpm stores estinated counts instead
-				if (get_counts)
-					tpm = Float.parseFloat(split[3]);
-				
-				if (tpm <= threshold)
-					continue;
-				
-				transcript_abundance.put(transcript, tpm);
-			}
-
-		} catch (Exception e) {
-			System.err.println("Problem while trying to parse Kallisto file.");
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-			}
+			if (line.startsWith("target_id")) //
+				continue;
+			
+			String[] split = line.split("\\s+");
+			String transcript = split[0].split("\\.")[0]; // shear off version
+			float tpm = Float.parseFloat(split[4]);
+			
+			// tpm stores estinated counts instead
+			if (get_counts)
+				tpm = Float.parseFloat(split[3]);
+			
+			if (tpm <= threshold)
+				continue;
+			
+			transcript_abundance.put(transcript, tpm);
 		}
 		
 		return transcript_abundance;
@@ -287,73 +237,56 @@ public class TranscriptAbundanceReader {
 		Map<String, Float> transcript_abundance = new HashMap<>(1024);
 		Map<String, Float> gene_abundance = new HashMap<>(1024);
 		
-		BufferedReader in = null;
-		try {
-			if (file.endsWith(".gz"))
-				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-			else
-				in = new BufferedReader(new FileReader(file));
+		for (String line:Utilities.readFile(file)) {
 			
-			while (in.ready()) {
-				// parse
-				String line = in.readLine();
-				String[] split = line.split("\\t");
+			String[] split = line.split("\\t");
+			
+			String type = split[2];
+			
+			if (!type.equals("transcript") && !type.equals("gene"))
+				continue;
+			
+			// parse attributes
+			String transcript = "";
+			String gene = "";
+			float fpkm = 0;
+			float sample_count = 1;
+			for (String s:split[8].split(";")) {
+				String[] temp = s.trim().split("\\s+");
 				
-				String type = split[2];
-				
-				if (!type.equals("transcript") && !type.equals("gene"))
+				// special case: FPKM "       nan"
+				if (temp.length > 2)
 					continue;
 				
-				// parse attributes
-				String transcript = "";
-				String gene = "";
-				float fpkm = 0;
-				float sample_count = 1;
-				for (String s:split[8].split(";")) {
-					String[] temp = s.trim().split("\\s+");
-					
-					// special case: FPKM "       nan"
-					if (temp.length > 2)
-						continue;
-					
-					// cut out "" if there are any
-					if (temp[1].startsWith("\""))
-						temp[1] = temp[1].substring(1, temp[1].length()-1);
-					
-					if (temp[0].equals("gene_id"))
-						gene = temp[1].split("\\.")[0];
-					else if (temp[0].equals("transcript_id"))
-						transcript = temp[1].split("\\.")[0];
-					else if (temp[0].equals("FPKM") || temp[0].equals("RPKM") || temp[0].equals("TPM")) { // if there is one specifically elaborated datapoint -> take it and don't think about further ones
-						fpkm = Float.parseFloat(temp[1]);
-						break;
-					}
-					else if (temp[0].startsWith("FPKM") || temp[0].startsWith("RPKM") || temp[0].startsWith("TPM")) { // startswith but NOT equals
-						fpkm += Float.parseFloat(temp[1]);
-						sample_count++;
-					}
+				// cut out "" if there are any
+				if (temp[1].startsWith("\""))
+					temp[1] = temp[1].substring(1, temp[1].length()-1);
+				
+				if (temp[0].equals("gene_id"))
+					gene = temp[1].split("\\.")[0];
+				else if (temp[0].equals("transcript_id"))
+					transcript = temp[1].split("\\.")[0];
+				else if (temp[0].equals("FPKM") || temp[0].equals("RPKM") || temp[0].equals("TPM")) { // if there is one specifically elaborated datapoint -> take it and don't think about further ones
+					fpkm = Float.parseFloat(temp[1]);
+					break;
 				}
-				// average if there are several in the same file (the case for some ENCODE data)
-				fpkm /= sample_count;
-				
-				if (fpkm <= threshold) // common threshold = 1
-					continue;
-				
-				transcript_abundance.put(transcript, fpkm);
-				
-				// gene abundance is the sum of transcript abundances
-				if (!gene_abundance.containsKey(gene))
-					gene_abundance.put(gene, 0f);
-				gene_abundance.put(gene, gene_abundance.get(gene) + fpkm);
+				else if (temp[0].startsWith("FPKM") || temp[0].startsWith("RPKM") || temp[0].startsWith("TPM")) { // startswith but NOT equals
+					fpkm += Float.parseFloat(temp[1]);
+					sample_count++;
+				}
 			}
-
-		} catch (Exception e) {
-			System.err.println("Problem while trying to parse Gencode GTF file.");
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-			}
+			// average if there are several in the same file (the case for some ENCODE data)
+			fpkm /= sample_count;
+			
+			if (fpkm <= threshold) // common threshold = 1
+				continue;
+			
+			transcript_abundance.put(transcript, fpkm);
+			
+			// gene abundance is the sum of transcript abundances
+			if (!gene_abundance.containsKey(gene))
+				gene_abundance.put(gene, 0f);
+			gene_abundance.put(gene, gene_abundance.get(gene) + fpkm);
 		}
 		
 		if (return_gene_level)
@@ -374,77 +307,59 @@ public class TranscriptAbundanceReader {
 		Map<String, Float> transcript_abundance = new HashMap<>(1024);
 		int max_sample_count = 1;
 		
-		BufferedReader in = null;
-		try {
-			if (file.endsWith(".gz"))
-				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-			else
-				in = new BufferedReader(new FileReader(file));
+		for (String line:Utilities.readFile(file)) {
 			
-			while (in.ready()) {
-				// parse
-				String line = in.readLine();
-				String[] split = line.split("\\t");
+			String[] split = line.split("\\t");
+			
+			String type = split[2];
+			
+			if (!type.equals("transcript") && !type.equals("gene"))
+				continue;
+			
+			// parse attributes
+			String transcript = "";
+			float fpkm = 0;
+			int sample_count = 0;
+			for (String s:split[8].split(";")) {
+				String[] temp = s.trim().split("\\s+");
 				
-				String type = split[2];
-				
-				if (!type.equals("transcript") && !type.equals("gene"))
+				// special case: FPKM "       nan"
+				if (temp.length > 2 || !temp[1].startsWith("\""))
 					continue;
 				
-				// parse attributes
-				String transcript = "";
-				float fpkm = 0;
-				int sample_count = 0;
-				for (String s:split[8].split(";")) {
-					String[] temp = s.trim().split("\\s+");
-					
-					// special case: FPKM "       nan"
-					if (temp.length > 2 || !temp[1].startsWith("\""))
-						continue;
-					
-					temp[1] = temp[1].substring(1, temp[1].length()-1);
-					
-					if (temp[0].equals("transcript_id"))
-						transcript = temp[1].split("\\.")[0];
-					else if (temp[0].equals("gene_id"))
-						transcript = temp[1].split("\\.")[0];
-					else if (temp[0].equals("FPKM") || temp[0].equals("RPKM")) { // if there is one specifically elaborated datapoint -> take it and don't think about further ones
-						fpkm = Float.parseFloat(temp[1]);
-						sample_count = 1;
-						break;
-					}
-					else if (temp[0].startsWith("FPKM") || temp[0].startsWith("RPKM")) { // startswith but NOT equals
-						if (Float.parseFloat(temp[1]) == 0) {
-							fpkm = 0;
-							break;
-						}
-						fpkm += Float.parseFloat(temp[1]);
-						sample_count++;
-					}
-					else if (temp[0].equals("iIDR")) {
-						if (temp[1].equals("NA") || Float.parseFloat(temp[1]) >= 0.1)
-							fpkm = 0;
-						break;
-					}
+				temp[1] = temp[1].substring(1, temp[1].length()-1);
+				
+				if (temp[0].equals("transcript_id"))
+					transcript = temp[1].split("\\.")[0];
+				else if (temp[0].equals("gene_id"))
+					transcript = temp[1].split("\\.")[0];
+				else if (temp[0].equals("FPKM") || temp[0].equals("RPKM")) { // if there is one specifically elaborated datapoint -> take it and don't think about further ones
+					fpkm = Float.parseFloat(temp[1]);
+					sample_count = 1;
+					break;
 				}
-				max_sample_count = Math.max(max_sample_count, sample_count);
-				
-				if (fpkm == 0)
-					continue;
-				
-				fpkm /= sample_count;
-				
-				transcript_abundance.put(transcript, fpkm);
+				else if (temp[0].startsWith("FPKM") || temp[0].startsWith("RPKM")) { // startswith but NOT equals
+					if (Float.parseFloat(temp[1]) == 0) {
+						fpkm = 0;
+						break;
+					}
+					fpkm += Float.parseFloat(temp[1]);
+					sample_count++;
+				}
+				else if (temp[0].equals("iIDR")) {
+					if (temp[1].equals("NA") || Float.parseFloat(temp[1]) >= 0.1)
+						fpkm = 0;
+					break;
+				}
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-			}
+			max_sample_count = Math.max(max_sample_count, sample_count);
+			
+			if (fpkm == 0)
+				continue;
+			
+			fpkm /= sample_count;
+			
+			transcript_abundance.put(transcript, fpkm);
 		}
 		
 		transcript_abundance.put("no_samples", (float) max_sample_count);
@@ -474,39 +389,21 @@ public class TranscriptAbundanceReader {
 	public static Map<String, Float> readExpressionFile(String file, double threshold, String organism_database, boolean header) {
 		Map<String, Float> abundance = new HashMap<>(1024);
 		
-		BufferedReader in = null;
-		try {
-			if (file.endsWith(".gz"))
-				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-			else
-				in = new BufferedReader(new FileReader(file));
+		for (String line:Utilities.readFile(file)) {
 			
-			while (in.ready()) {
-				// parse
-				String line = in.readLine();
-				
-				if (line.startsWith("#"))
-					continue;
-				if (header) {
-					header = false;
-					continue;
-				}
-				String[] split = line.split("\\s+");
-				String transcript = split[0].split("\\.")[0];
-				float expr = Float.parseFloat(split[1]);
-				if (expr <= threshold) // common threshold = 1
-					continue;
-				
-				abundance.put(transcript, expr);
+			if (line.startsWith("#"))
+				continue;
+			if (header) {
+				header = false;
+				continue;
 			}
-
-		} catch (Exception e) {
-			System.err.println("Problem while trying to parse expression file.");
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-			}
+			String[] split = line.split("\\s+");
+			String transcript = split[0].split("\\.")[0];
+			float expr = Float.parseFloat(split[1]);
+			if (expr <= threshold) // common threshold = 1
+				continue;
+			
+			abundance.put(transcript, expr);
 		}
 		
 		if (organism_database != null) {
@@ -610,43 +507,26 @@ public class TranscriptAbundanceReader {
 		
 		Map<String, String> ucsc_to_ensembl = DataQuery.getUCSChg19toTranscriptMap();
 		
-		BufferedReader in = null;
-		try {
-			if (file.endsWith(".gz"))
-				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-			else
-				in = new BufferedReader(new FileReader(file));
+		for (String line:Utilities.readFile(file)) {
 			
-			while (in.ready()) {
-				String line = in.readLine();
-				if (line.startsWith("isoform_id"))
-					continue;
-				String[] split = line.split("\\s+");
-				String transcript = split[0];
-				float rsem = Float.parseFloat(split[1]);
-				
-				// ensures consistency across transcr./genes.
-				if (!ucsc_to_ensembl.containsKey(transcript))
-					continue;
-				
-				// UCSC -> Ensembl
-				transcript = ucsc_to_ensembl.get(transcript);
-				
-				// may map several times, sum is taken
-				if (!abundance.containsKey(transcript))
-					abundance.put(transcript, 0f);
-				
-				abundance.put(transcript, abundance.get(transcript) + rsem );
-				
-			}
-
-		} catch (Exception e) {
-			System.err.println("Problem while trying to parse TCGA file.");
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-			}
+			if (line.startsWith("isoform_id"))
+				continue;
+			String[] split = line.split("\\s+");
+			String transcript = split[0];
+			float rsem = Float.parseFloat(split[1]);
+			
+			// ensures consistency across transcr./genes.
+			if (!ucsc_to_ensembl.containsKey(transcript))
+				continue;
+			
+			// UCSC -> Ensembl
+			transcript = ucsc_to_ensembl.get(transcript);
+			
+			// may map several times, sum is taken
+			if (!abundance.containsKey(transcript))
+				abundance.put(transcript, 0f);
+			
+			abundance.put(transcript, abundance.get(transcript) + rsem );
 		}
 		
 		// check for threshold
@@ -714,37 +594,21 @@ public class TranscriptAbundanceReader {
 			HGCN_to_ensembl.put(entry[0], entry[2]);
 		}
 		
-		BufferedReader in = null;
-		try {
-			if (file.endsWith(".gz"))
-				in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-			else
-				in = new BufferedReader(new FileReader(file));
+		for (String line:Utilities.readFile(file)) {
 			
-			while (in.ready()) {
-				String line = in.readLine();
-				if (line.startsWith("gene_id"))
-					continue;
-				String[] split = line.split("\\s+");
-				String HGCN = split[0].split("\\|")[0];
-				if (HGCN.equals("?"))
-					continue;
-				Float rsem = Float.parseFloat(split[1]);
-				
-				if (rsem <= threshold) // common cutoff
-					continue;
-				
-				if (HGCN_to_ensembl.containsKey(HGCN))
-					gene_abundance.put(HGCN_to_ensembl.get(HGCN), rsem);
-			}
-
-		} catch (Exception e) {
-			System.err.println("Problem while trying to parse TCGA file.");
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-			}
+			if (line.startsWith("gene_id"))
+				continue;
+			String[] split = line.split("\\s+");
+			String HGCN = split[0].split("\\|")[0];
+			if (HGCN.equals("?"))
+				continue;
+			Float rsem = Float.parseFloat(split[1]);
+			
+			if (rsem <= threshold) // common cutoff
+				continue;
+			
+			if (HGCN_to_ensembl.containsKey(HGCN))
+				gene_abundance.put(HGCN_to_ensembl.get(HGCN), rsem);
 		}
 		
 		return gene_abundance;
@@ -868,6 +732,10 @@ public class TranscriptAbundanceReader {
 			while (in.ready()) {
 				// parse
 				String line = in.readLine();
+				
+				if (line == null)
+					break;
+				
 				if (line.startsWith("#"))
 					continue;
 				String[] split = line.split("\\t");
