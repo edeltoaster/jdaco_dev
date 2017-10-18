@@ -632,7 +632,7 @@ public class DiffSeedCombDetector {
 				member_seed_comb = member_seed_comb_temp;
 			}
 			
-			String member_seed_comb_string = String.join(",", member_seed_comb.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
+			String member_seed_comb_string = String.join(",", member_seed_comb.stream().map(l -> String.join("/", l)).collect(Collectors.toSet()));
 			
 			
 			// determine actual complexes and translate if necessary
@@ -652,7 +652,7 @@ public class DiffSeedCombDetector {
 				complexes = member_compl_temp;
 			}
 			
-			String member_complexes_string = String.join(",", complexes.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
+			String member_complexes_string = String.join(",", complexes.stream().map(l -> String.join("/", l)).collect(Collectors.toSet()));
 			
 			// shortening numbers depending on human/machine-usage
 			String qval_string = null;
