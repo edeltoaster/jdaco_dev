@@ -62,6 +62,9 @@ public class check_complexes {
 		 * paired check
 		 */
 		
+		Map<String, QuantDACOResultSet> pcm_data = new HashMap<>();
+		Map<String, QuantDACOResultSet> pncm_data = new HashMap<>();
+		
 		System.out.println();
 		
 		// filter for paired analysis
@@ -71,6 +74,7 @@ public class check_complexes {
 		for (String sample:cm_data.keySet()) {
 			String suffix = sample.substring(sample.length()-2);
 			not_in_both.add(suffix);
+			pcm_data.put(suffix, cm_data.get(sample));
 		}
 		
 		// after this loop, not_in_both stores all numbered suffices that are either in cm or in cnm
@@ -81,16 +85,17 @@ public class check_complexes {
 				not_in_both.remove(suffix);
 			else
 				not_in_both.add(suffix);
+			pncm_data.put(suffix, ncm_data.get(sample));
 		}
 		
 		System.out.println("Leaving out unmatched samples " + not_in_both);
 		
-		cm_data.keySet().removeIf(s -> not_in_both.stream().anyMatch(b -> s.endsWith(b)));
-		ncm_data.keySet().removeIf(s -> not_in_both.stream().anyMatch(b -> s.endsWith(b)));
+		pcm_data.keySet().removeIf(s -> not_in_both.stream().anyMatch(b -> s.equals(b)));
+		pncm_data.keySet().removeIf(s -> not_in_both.stream().anyMatch(b -> s.equals(b)));
 		
-		System.out.println("Monocyte comparison cm->ncm (paired): " + cm_data.size() + " vs " + ncm_data.size());
+		System.out.println("Monocyte comparison cm->ncm (paired): " + pcm_data.size() + " vs " + pncm_data.size());
 		
-		mono_dcd = new DiffComplexDetector(cm_data, ncm_data, definitions.qvalue, definitions.parametric, true, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+		mono_dcd = new DiffComplexDetector(pcm_data, pncm_data, definitions.qvalue, definitions.parametric, true, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 		mono_dcd.writeSignSortedComplexes(definitions.diff_out_folder + "mono_dcdp_complh.txt", true);
 		mono_dcd.writeSignSortedVariants(definitions.diff_out_folder + "mono_dcdp_tfcsh.txt", true);
 		mono_dcd.writeSignSortedComplexes(definitions.diff_out_folder + "mono_dcdp_compl.txt", false);
@@ -100,7 +105,7 @@ public class check_complexes {
 		spc = mono_dcd.calculateSPCEnrichment(definitions.qvalue, definitions.SPCEnrich_iterations, definitions.SPCEnrich_compl_part_threshold);
 		spc.writeSignificantSeedProteinCombinations(definitions.diff_out_folder + "mono_dcdp_SPCenr.txt");
 		
-		mono_dsvd = new DiffSeedCombDetector(cm_data, ncm_data, definitions.qvalue, definitions.parametric, true, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+		mono_dsvd = new DiffSeedCombDetector(pcm_data, pncm_data, definitions.qvalue, definitions.parametric, true, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 		mono_dsvd.writeSignSortedVariants(definitions.diff_out_folder + "mono_dsvcdp_tfcsh.txt", true);
 		mono_dsvd.writeSignSortedVariants(definitions.diff_out_folder + "mono_dsvcdp_tfcs.txt", false);
 		spe2 = mono_dsvd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
