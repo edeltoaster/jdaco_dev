@@ -7,8 +7,7 @@ import framework.Utilities;
 public class definitions {
 	static String daco_results_folder = "res_95_5/";
 	static String networks_folder = "networks/";
-	static String diff_complex_output_folder = "diffcompl_results_95_5_-25-25/";
-	static String diff_tfc_output_folder = "difftfc_results_95_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
+	static String diff_out_folder = "diff_results_95_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
 	static String qr_output_folder = "q_results_95_5/";
 	
 	static double qvalue = 0.05;
@@ -34,8 +33,7 @@ public class definitions {
 	public static void printInitParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
 		System.out.println("networks folder : " + networks_folder);
-		System.out.println("diff compl results output folder : " + diff_complex_output_folder);
-		System.out.println("diff tfc results output folder : " + diff_tfc_output_folder);
+		System.out.println("diff results output folder : " + diff_out_folder);
 		System.out.println("quantified results output folder : " + qr_output_folder);
 		
 		System.out.println("q-value : " + qvalue);

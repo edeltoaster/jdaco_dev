@@ -1293,6 +1293,25 @@ public class DiffComplexDetector {
 		}
 		
 		/**
+		 * Writes result into a specified text file.
+		 * @param out_path
+		 */
+		public void writeSignificantSeedProteins(String out_path) {
+			
+			List<String> sp_enrich_out = new LinkedList<>();
+			Map<String, String> up_to_gene_map = getUniprotToGeneMap();
+			
+			for (String sp:this.getSignificanceSortedSeedProteins()) {
+				String dir = this.getSignificantSeedProteinDirections().get(sp);
+				String out = dir + " " + sp + " " + up_to_gene_map.getOrDefault(sp, sp) + " " + this.getSignificantSeedProteinQvalues().get(sp);
+				
+				sp_enrich_out.add(out);
+			}
+			
+			Utilities.writeEntries(sp_enrich_out, out_path);
+		}
+		
+		/**
 		 * Returns sign. seed variants sorted by q-value
 		 * @return
 		 */
@@ -1544,6 +1563,24 @@ public class DiffComplexDetector {
 			
 			Utilities.writeEntries(pos_spc_enrich_out, pos_out_path);
 			Utilities.writeEntries(neg_spc_enrich_out, neg_out_path);
+		}
+		
+		/**
+		 * Writes result into a specified text file.
+		 * @param out_path
+		 */
+		public void writeSignificantSeedProteinCombinations(String out_path) {
+			
+			List<String> spc_enrich_out = new LinkedList<>();
+			Map<String, String> up_to_gene_map = getUniprotToGeneMap();
+			for (HashSet<String> spc:this.getSignificanceSortedSeedProteinCombinations()) {
+				String dir = this.getSignificantSeedProteinCombDirections().get(spc);
+				String out = dir + " " + String.join("/", spc) + " " + String.join("/", spc.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toList())) + " " + this.getSignificantSeedProteinCombQvalues().get(spc);
+				
+				spc_enrich_out.add(out);
+			}
+			
+			Utilities.writeEntries(spc_enrich_out, out_path);
 		}
 		
 		/**

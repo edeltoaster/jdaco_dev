@@ -1174,6 +1174,24 @@ public class DiffSeedCombDetector {
 		}
 		
 		/**
+		 * Writes result into a specified text file.
+		 * @param out_path
+		 */
+		public void writeSignificantSeedProteins(String out_path) {
+			
+			List<String> sp_enrich_out = new LinkedList<>();
+			Map<String, String> up_to_gene_map = getUniprotToGeneMap();
+			
+			for (String sp:this.getSignificanceSortedSeedProteins()) {
+				String dir = this.getSignificantSeedProteinDirections().get(sp);
+				String out = dir + " " + sp + " " + up_to_gene_map.getOrDefault(sp, sp) + " " + this.getSignificantSeedProteinQvalues().get(sp);
+				sp_enrich_out.add(out);
+			}
+			
+			Utilities.writeEntries(sp_enrich_out, out_path);
+		}
+		
+		/**
 		 * Returns sign. seed variants sorted by q-value
 		 * @return
 		 */
