@@ -13,7 +13,7 @@ public class definitions {
 	
 	static double qvalue = 0.05;
 	static boolean parametric = false;
-	static boolean paired = true;
+	static boolean paired = false;
 	static boolean check_supersets = false;
 	static double min_variant_fraction = 0.75;
 	

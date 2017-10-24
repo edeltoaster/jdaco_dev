@@ -595,14 +595,16 @@ public class DiffSeedCombDetector {
 	}
 	
 	/**
-	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers):
+	 * Returns parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers):
 	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
-	 * @param out_file
+	 * @param include_header
 	 * @param human_readable
 	 */
-	public void writeSignSortedVariants(String out_file, boolean human_readable) {
+	public List<String> getSignSortedVariants(boolean include_header, boolean human_readable) {
 		List<String> to_write = new LinkedList<>();
-		to_write.add("(sub)seed_comb direction q-value fold-change median-change member_seed_comb member_complexes");
+		
+		if (include_header)
+			to_write.add("(sub)seed_comb direction q-value fold-change median-change member_seed_comb member_complexes");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -673,7 +675,18 @@ public class DiffSeedCombDetector {
 			to_write.add(String.join(" ", line));
 		}
 
-		Utilities.writeEntries(to_write, out_file);
+		return to_write;
+	}
+	
+	/**
+	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers):
+	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
+	 * @param out_file
+	 * @param human_readable
+	 */
+	public void writeSignSortedVariants(String out_file, boolean human_readable) {
+		
+		Utilities.writeEntries(this.getSignSortedVariants(true, human_readable), out_file);
 	}
 	
 	

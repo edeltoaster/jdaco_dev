@@ -554,14 +554,16 @@ public class DiffComplexDetector {
 	}
 
 	/**
-	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
+	 * Returns parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
 	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
-	 * @param out_file
+	 * @param include_header
 	 * @param human_readable
 	 */
-	public void writeSignSortedComplexes(String out_file, boolean human_readable) {
+	public List<String> getSignSortedComplexes(boolean include_header, boolean human_readable) {
 		List<String> to_write = new LinkedList<>();
-		to_write.add("(sub)complex direction q-value fold-change median-change member_seed_comb member_complexes");
+		
+		if (include_header)
+			to_write.add("(sub)complex direction q-value fold-change median-change member_seed_comb member_complexes");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -619,17 +621,27 @@ public class DiffComplexDetector {
 			to_write.add(String.join(" ", line));
 		}
 		
-
-		Utilities.writeEntries(to_write, out_file);
+		return to_write;
 	}
 	
 	/**
 	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
-	 * seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details; in the order of avg_q-value, amount of fold-change and abs. sum. median change
+	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
 	 * @param out_file
 	 * @param human_readable
 	 */
-	public void writeSignSortedVariants(String out_file, boolean human_readable) {
+	public void writeSignSortedComplexes(String out_file, boolean human_readable) {
+		
+		Utilities.writeEntries(this.getSignSortedComplexes(true, human_readable), out_file);
+	}
+	
+	/**
+	 * Returns parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
+	 * seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details; in the order of avg_q-value, amount of fold-change and abs. sum. median change
+	 * @param include_header
+	 * @param human_readable
+	 */
+	public List<String> getSignSortedVariants(boolean include_header, boolean human_readable) {
 		
 		HashMap<HashSet<String>, List<Double>> sign_comb_qs_map = new HashMap<>();
 		HashMap<HashSet<String>, List<Double>> sign_comb_medc_map = new HashMap<>();
@@ -692,7 +704,9 @@ public class DiffComplexDetector {
 		
 		// preface
 		List<String> to_write = new LinkedList<>();
-		to_write.add("seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details");
+		
+		if (include_header)
+			to_write.add("seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -793,9 +807,20 @@ public class DiffComplexDetector {
 			to_write.add(String.join(" ", line));
 		}
 		
-		Utilities.writeEntries(to_write, out_file);
+		return to_write;
 	}
 		
+	/**
+	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
+	 * seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details; in the order of avg_q-value, amount of fold-change and abs. sum. median change
+	 * @param out_file
+	 * @param human_readable
+	 */
+	public void writeSignSortedVariants(String out_file, boolean human_readable) {
+		
+		Utilities.writeEntries(this.getSignSortedVariants(true, human_readable), out_file);
+	}
+	
 	/**
 	 * Custom compareTo function that first sorts by the avg. q-value, then by the extend of fold-change between groups and then by the absolute median change
 	 * @param v1
