@@ -38,8 +38,22 @@ public class check_mono_complexes {
 				cm_data.put(sample, qdr);
 		}
 		
-		new File(definitions.diff_out_folder).mkdir();
 		
+		/**
+		 * Precompute quantified complexes
+		 */
+		
+		System.out.println("Precompute quantified complexes ...");
+		new File(definitions.qr_output_folder).mkdir();
+		cm_data.keySet().parallelStream().forEach(s -> cm_data.get(s).writeQuantifiedResult(definitions.qr_output_folder + s + ".txt.gz"));
+		ncm_data.keySet().parallelStream().forEach(s -> ncm_data.get(s).writeQuantifiedResult(definitions.qr_output_folder + s + ".txt.gz"));
+		
+		
+		/**
+		 * Diff. complexes (unpaired)
+		 */
+		
+		new File(definitions.diff_out_folder).mkdir();
 		System.out.println("Monocyte comparison cm->ncm (unpaired): " + cm_data.size() + " vs " + ncm_data.size());
 		
 		System.out.println("Diff. compl.");
@@ -62,7 +76,7 @@ public class check_mono_complexes {
 		
 		
 		/**
-		 * paired check
+		 * Diff. complexes (paired)
 		 */
 		
 		Map<String, QuantDACOResultSet> pcm_data = new HashMap<>();
