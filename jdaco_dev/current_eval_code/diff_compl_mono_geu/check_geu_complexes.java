@@ -5,9 +5,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import framework.DiffComplexDetector;
 import framework.DiffSeedCombDetector;
@@ -17,8 +19,8 @@ import framework.Utilities;
 
 public class check_geu_complexes {
 
-	public static int iterations = 10;
-	public static int[] equal_samples_per_group = {29, 20, 10}; // 58 total samples
+	public static int iterations = 100;
+	public static int[] equal_samples_per_group = {29, 20, 10, 5}; // 58 total samples
 	public static int[] unequal_samples_per_group = {20, 10, 5};
 	
 	public static void main(String[] args) {
@@ -41,23 +43,40 @@ public class check_geu_complexes {
 		List<String> to_write = new LinkedList<String>();
 		to_write.add("test samples_group1 samples_group2 iteration no_complexes no_compl_tfcs no_tfcs");
 		List<String> samples = new ArrayList<>(geu_data.keySet());
+		
+		Set<String> permutations_used = new HashSet<>();
+		String permutation;
+		boolean permutate = true;
+		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
+		Map<String, QuantDACOResultSet> group2 = new HashMap<>();
+		
 		for (int samples_per_group:equal_samples_per_group) {
 			for (int i = 0; i < iterations; i++) {
-				Collections.shuffle(samples);
-				Map<String, QuantDACOResultSet> group1 = new HashMap<>();
-				Map<String, QuantDACOResultSet> group2 = new HashMap<>();
 				
-				int j = 0;
-				while (j < samples_per_group) {
-					String sample = samples.get(j);
-					group1.put(sample, geu_data.get(sample));
-					j++;
-				}
-				
-				while (j < samples_per_group*2) {
-					String sample = samples.get(j);
-					group2.put(sample, geu_data.get(sample));
-					j++;
+				if (permutate) {
+					group1.clear();
+					group2.clear();
+					Collections.shuffle(samples);
+					
+					int j = 0;
+					while (j < samples_per_group) {
+						String sample = samples.get(j);
+						group1.put(sample, geu_data.get(sample));
+						j++;
+					}
+					
+					while (j < samples_per_group*2) {
+						String sample = samples.get(j);
+						group2.put(sample, geu_data.get(sample));
+						j++;
+					}
+					
+					permutation = String.join("/", group1.keySet()) + "," + String.join("/", group2.keySet());
+					
+					if (!permutations_used.contains(permutation)) {
+						permutate = false;
+						permutations_used.add(permutation);
+					}
 				}
 				
 				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
@@ -68,27 +87,40 @@ public class check_geu_complexes {
 				
 				to_write.add("equal_nonparametric " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				Utilities.writeEntries(to_write, "geu_rand_out.txt");
+				
+				permutate = true;
 			}
 		}
 		
 		// unequal sample size
+		permutations_used.clear();
 		for (int samples_first_group:unequal_samples_per_group) {
 			for (int i = 0; i < iterations; i++) {
-				Collections.shuffle(samples);
-				Map<String, QuantDACOResultSet> group1 = new HashMap<>();
-				Map<String, QuantDACOResultSet> group2 = new HashMap<>();
 				
-				int j = 0;
-				while (j < samples_first_group) {
-					String sample = samples.get(j);
-					group1.put(sample, geu_data.get(sample));
-					j++;
-				}
-				
-				while (j < geu_data.size()) {
-					String sample = samples.get(j);
-					group2.put(sample, geu_data.get(sample));
-					j++;
+				if (permutate) {
+					group1.clear();
+					group2.clear();
+					Collections.shuffle(samples);
+					
+					int j = 0;
+					while (j < samples_first_group) {
+						String sample = samples.get(j);
+						group1.put(sample, geu_data.get(sample));
+						j++;
+					}
+					
+					while (j < geu_data.size()) {
+						String sample = samples.get(j);
+						group2.put(sample, geu_data.get(sample));
+						j++;
+					}
+					
+					permutation = String.join("/", group1.keySet()) + "," + String.join("/", group2.keySet());
+					
+					if (!permutations_used.contains(permutation)) {
+						permutate = false;
+						permutations_used.add(permutation);
+					}
 				}
 				
 				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
@@ -99,6 +131,8 @@ public class check_geu_complexes {
 				
 				to_write.add("unequal_nonparametric " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				Utilities.writeEntries(to_write, "geu_rand_out.txt");
+				
+				permutate = true;
 			}
 		}
 		
@@ -107,23 +141,34 @@ public class check_geu_complexes {
 		 */
 		
 		// equal sample size
+		permutations_used.clear();
 		for (int samples_per_group:equal_samples_per_group) {
 			for (int i = 0; i < iterations; i++) {
-				Collections.shuffle(samples);
-				Map<String, QuantDACOResultSet> group1 = new HashMap<>();
-				Map<String, QuantDACOResultSet> group2 = new HashMap<>();
 				
-				int j = 0;
-				while (j < samples_per_group) {
-					String sample = samples.get(j);
-					group1.put(sample, geu_data.get(sample));
-					j++;
-				}
-				
-				while (j < samples_per_group*2) {
-					String sample = samples.get(j);
-					group2.put(sample, geu_data.get(sample));
-					j++;
+				if (permutate) {
+					group1.clear();
+					group2.clear();
+					Collections.shuffle(samples);
+					
+					int j = 0;
+					while (j < samples_per_group) {
+						String sample = samples.get(j);
+						group1.put(sample, geu_data.get(sample));
+						j++;
+					}
+					
+					while (j < samples_per_group*2) {
+						String sample = samples.get(j);
+						group2.put(sample, geu_data.get(sample));
+						j++;
+					}
+					
+					permutation = String.join("/", group1.keySet()) + "," + String.join("/", group2.keySet());
+					
+					if (!permutations_used.contains(permutation)) {
+						permutate = false;
+						permutations_used.add(permutation);
+					}
 				}
 				
 				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
@@ -134,27 +179,40 @@ public class check_geu_complexes {
 				
 				to_write.add("equal_parametric " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				Utilities.writeEntries(to_write, "geu_rand_out.txt");
+				
+				permutate = true;
 			}
 		}
 		
 		// unequal sample size
+		permutations_used.clear();
 		for (int samples_first_group:unequal_samples_per_group) {
 			for (int i = 0; i < iterations; i++) {
-				Collections.shuffle(samples);
-				Map<String, QuantDACOResultSet> group1 = new HashMap<>();
-				Map<String, QuantDACOResultSet> group2 = new HashMap<>();
 				
-				int j = 0;
-				while (j < samples_first_group) {
-					String sample = samples.get(j);
-					group1.put(sample, geu_data.get(sample));
-					j++;
-				}
-				
-				while (j < geu_data.size()) {
-					String sample = samples.get(j);
-					group2.put(sample, geu_data.get(sample));
-					j++;
+				if (permutate) {
+					group1.clear();
+					group2.clear();
+					Collections.shuffle(samples);
+					
+					int j = 0;
+					while (j < samples_first_group) {
+						String sample = samples.get(j);
+						group1.put(sample, geu_data.get(sample));
+						j++;
+					}
+					
+					while (j < geu_data.size()) {
+						String sample = samples.get(j);
+						group2.put(sample, geu_data.get(sample));
+						j++;
+					}
+					
+					permutation = String.join("/", group1.keySet()) + "," + String.join("/", group2.keySet());
+					
+					if (!permutations_used.contains(permutation)) {
+						permutate = false;
+						permutations_used.add(permutation);
+					}
 				}
 				
 				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
@@ -165,6 +223,8 @@ public class check_geu_complexes {
 				
 				to_write.add("unequal_parametric " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				Utilities.writeEntries(to_write, "geu_rand_out.txt");
+				
+				permutate = true;
 			}
 		}
 	}
