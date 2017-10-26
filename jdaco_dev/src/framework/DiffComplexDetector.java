@@ -346,10 +346,10 @@ public class DiffComplexDetector {
 
 		// some first output
 		System.out.println(this.getNumberOfTests() + " complexes tested.");
-		System.out.println(this.getSignificanceSortedVariants().size() + " diff. complexes overall.");
+		System.out.println(this.getSignificanceSortedComplexes().size() + " diff. complexes overall.");
 		
 		// no need to look further if there is nothing to tell about
-		if (this.getSignificanceSortedVariants().size() == 0) {
+		if (this.getSignificanceSortedComplexes().size() == 0) {
 			System.out.println();
 			return;
 		}
@@ -367,9 +367,9 @@ public class DiffComplexDetector {
 		List<String> res_pos_all = new LinkedList<>();
 		List<String> res_neg_all = new LinkedList<>();
 		Map<HashSet<String>, List<HashSet<String>>> tfc_to_complexes = new HashMap<>();
-		for (HashSet<String> complex:this.getSignificanceSortedVariants()) {
+		for (HashSet<String> complex:this.getSignificanceSortedComplexes()) {
 			
-			String sign = this.getSignificantVariantsDirections().get(complex);
+			String sign = this.getSignificantComplexesDirections().get(complex);
 			
 			// determine TFs that are involved and note in relevant data structures
 			HashSet<String> tfs = new HashSet<>(complex);
@@ -381,7 +381,7 @@ public class DiffComplexDetector {
 			
 			String compl_string = complex.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
 			String tfs_string = tfs.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
-			double pval = this.getSignificantVariantsQValues().get(complex);
+			double pval = this.getSignificantComplexesQValues().get(complex);
 			String out_string = sign + " " + tfs_string + " : " + compl_string + " -> " + String.format(Locale.US, "%.4g", pval);
 			
 			// distinguish between increased/positive abundance and diminishing/negative abundance
@@ -419,13 +419,13 @@ public class DiffComplexDetector {
 		if (proteins_to_remove != null) {
 			res_pos_all.clear();
 			res_neg_all.clear();
-			for (HashSet<String> complex:this.getSignificanceSortedVariants()) {
+			for (HashSet<String> complex:this.getSignificanceSortedComplexes()) {
 				
 				// skip complexes that involve a protein that should be removed/not be considered
 				if (complex.stream().anyMatch(p -> proteins_to_remove.contains(p)))
 					continue;
 				
-				String sign = this.getSignificantVariantsDirections().get(complex);
+				String sign = this.getSignificantComplexesDirections().get(complex);
 				
 				// determine TFs that are involved
 				HashSet<String> tfs = new HashSet<>(complex);
@@ -433,7 +433,7 @@ public class DiffComplexDetector {
 				
 				String compl_string = complex.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
 				String tfs_string = tfs.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
-				double pval = this.getSignificantVariantsQValues().get(complex);
+				double pval = this.getSignificantComplexesQValues().get(complex);
 				String out_string = sign + " " + tfs_string + " : " + compl_string + " -> " + String.format(Locale.US, "%.4g", pval);
 				
 				// distinguish between increased/positive abundance and diminishing/negative abundance
@@ -455,13 +455,13 @@ public class DiffComplexDetector {
 		if (proteins_of_interest != null) {
 			res_pos_all.clear();
 			res_neg_all.clear();
-			for (HashSet<String> complex:this.getSignificanceSortedVariants()) {
+			for (HashSet<String> complex:this.getSignificanceSortedComplexes()) {
 				
 				// skip complexes that involve a protein that should be removed/not be considered
 				if (!complex.stream().anyMatch(p -> proteins_of_interest.contains(p)))
 					continue;
 				
-				String sign = this.getSignificantVariantsDirections().get(complex);
+				String sign = this.getSignificantComplexesDirections().get(complex);
 				
 				// determine TFs that are involved
 				HashSet<String> tfs = new HashSet<>(complex);
@@ -470,7 +470,7 @@ public class DiffComplexDetector {
 				
 				String compl_string = complex.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
 				String tfs_string = tfs.stream().map(p -> up_name_map.getOrDefault(p, p)).collect(Collectors.toList()).toString();
-				double pval = this.getSignificantVariantsQValues().get(complex);
+				double pval = this.getSignificantComplexesQValues().get(complex);
 				String out_string = sign + " " + tfs_string + " : " + compl_string + " -> " + String.format(Locale.US, "%.4g", pval);
 				
 				// distinguish between increased/positive abundance and diminishing/negative abundance
@@ -940,7 +940,7 @@ public class DiffComplexDetector {
 	 * Returns map of significant complexes and associated adjusted p-values / q-values
 	 * @return
 	 */
-	public Map<HashSet<String>, Double> getSignificantVariantsQValues() {
+	public Map<HashSet<String>, Double> getSignificantComplexesQValues() {
 		return qvalues;
 	}
 
@@ -964,7 +964,7 @@ public class DiffComplexDetector {
 	 * Returns a list of significantly deregulated complexes in their order of significance
 	 * @return
 	 */
-	public List<HashSet<String>> getSignificanceSortedVariants() {
+	public List<HashSet<String>> getSignificanceSortedComplexes() {
 		return significance_sorted_complexes;
 	}
 	
@@ -972,7 +972,7 @@ public class DiffComplexDetector {
 	 * Returns a map of sign. complexes to their direction of change as + / -
 	 * @return
 	 */
-	public Map<HashSet<String>, String> getSignificantVariantsDirections() {
+	public Map<HashSet<String>, String> getSignificantComplexesDirections() {
 		return this.directions;
 	}
 	
@@ -1034,10 +1034,10 @@ public class DiffComplexDetector {
 		String abun_g2_string = String.join(",", complexes.stream().map(c -> names_map.get(c) + ":" + String.format(Locale.US, "%.2g", this.group2_medians.getOrDefault(c, 0.0)) ).collect(Collectors.toList()));
 		
 		// get direction of change
-		String directions_string = String.join(",", complexes.stream().map(c -> names_map.get(c) + ":" + this.getSignificantVariantsDirections().get(c)).collect(Collectors.toList()));
+		String directions_string = String.join(",", complexes.stream().map(c -> names_map.get(c) + ":" + this.getSignificantComplexesDirections().get(c)).collect(Collectors.toList()));
 		Set<String> direction_set = new HashSet<>();
 		for (HashSet<String> complex:complexes)
-			direction_set.add(this.getSignificantVariantsDirections().get(complex));
+			direction_set.add(this.getSignificantComplexesDirections().get(complex));
 		
 		// determine overall direction
 		String direction_string = "+";
