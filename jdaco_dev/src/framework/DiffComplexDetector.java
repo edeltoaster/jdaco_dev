@@ -969,6 +969,24 @@ public class DiffComplexDetector {
 	}
 	
 	/**
+	 * Returns a set of seed protein combination variants that are part of significantly deregulated complexes
+	 * @return
+	 */
+	public Set<HashSet<String>> getSignificantSeedCombVariants() {
+		
+		Set<HashSet<String>> sign_seed_combs = new HashSet<>();
+		for (HashSet<String> sign_complex:this.significance_sorted_complexes) {
+			// determine seed subset
+			HashSet<String> seed_sub = new HashSet<>(sign_complex);
+			seed_sub.retainAll(this.getSeedProteins());
+			
+			sign_seed_combs.add(seed_sub);
+		}
+		
+		return sign_seed_combs;
+	}
+	
+	/**
 	 * Returns a map of sign. complexes to their direction of change as + / -
 	 * @return
 	 */

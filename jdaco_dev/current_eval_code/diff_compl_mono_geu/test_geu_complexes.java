@@ -17,7 +17,7 @@ import framework.QuantDACOResultSet;
 import framework.Utilities;
 
 
-public class check_geu_complexes {
+public class test_geu_complexes {
 
 	public static int iterations = 100;
 	public static int[] equal_samples_per_group = {29, 20, 10, 5}; // 58 total samples
@@ -81,7 +81,7 @@ public class check_geu_complexes {
 				
 				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_complexes = dcd.getSignificanceSortedComplexes().size();
-				int no_compl_tfcs = dcd.getSignSortedVariants(false, false).size();
+				int no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
 				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
@@ -126,7 +126,7 @@ public class check_geu_complexes {
 				
 				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_complexes = dcd.getSignificanceSortedComplexes().size();
-				int no_compl_tfcs = dcd.getSignSortedVariants(false, false).size();
+				int no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
 				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
@@ -175,7 +175,7 @@ public class check_geu_complexes {
 				
 				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_complexes = dcd.getSignificanceSortedComplexes().size();
-				int no_compl_tfcs = dcd.getSignSortedVariants(false, false).size();
+				int no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
 				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
@@ -220,7 +220,7 @@ public class check_geu_complexes {
 				
 				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_complexes = dcd.getSignificanceSortedComplexes().size();
-				int no_compl_tfcs = dcd.getSignSortedVariants(false, false).size();
+				int no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
 				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
