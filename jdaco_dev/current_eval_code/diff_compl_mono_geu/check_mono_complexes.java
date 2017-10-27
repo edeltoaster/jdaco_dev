@@ -74,6 +74,26 @@ public class check_mono_complexes {
 		framework.DiffSeedCombDetector.SPEnrichment spe2 = mono_dsvd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
 		spe2.writeSignificantSeedProteins(definitions.diff_out_folder + "mono_dsvcd_SPenr.txt");
 		
+		System.out.println("Monocyte comparison cm->ncm (unpaired, parametric): " + cm_data.size() + " vs " + ncm_data.size());
+		
+		System.out.println("Diff. compl.");
+		mono_dcd = new DiffComplexDetector(cm_data, ncm_data, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+		mono_dcd.writeSignSortedComplexes(definitions.diff_out_folder + "mono_pdcd_complh.txt", true);
+		mono_dcd.writeSignSortedVariants(definitions.diff_out_folder + "mono_pdcd_tfcsh.txt", true);
+		mono_dcd.writeSignSortedComplexes(definitions.diff_out_folder + "mono_pdcd_compl.txt", false);
+		mono_dcd.writeSignSortedVariants(definitions.diff_out_folder + "mono_pdcd_tfcs.txt", false);
+		spe = mono_dcd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
+		spe.writeSignificantSeedProteins(definitions.diff_out_folder + "mono_pdcd_SPenr.txt");
+		spc = mono_dcd.calculateSPCEnrichment(definitions.qvalue, definitions.SPCEnrich_iterations, definitions.SPCEnrich_compl_part_threshold);
+		spc.writeSignificantSeedProteinCombinations(definitions.diff_out_folder + "mono_pdcd_SPCenr.txt");
+		
+		System.out.println("Diff. seed comb.");
+		mono_dsvd = new DiffSeedCombDetector(cm_data, ncm_data, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+		mono_dsvd.writeSignSortedVariants(definitions.diff_out_folder + "mono_pdsvcd_tfcsh.txt", true);
+		mono_dsvd.writeSignSortedVariants(definitions.diff_out_folder + "mono_pdsvcd_tfcs.txt", false);
+		spe2 = mono_dsvd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
+		spe2.writeSignificantSeedProteins(definitions.diff_out_folder + "mono_pdsvcd_SPenr.txt");
+		
 		
 		/**
 		 * Diff. complexes (paired)
@@ -129,5 +149,25 @@ public class check_mono_complexes {
 		mono_dsvdp.writeSignSortedVariants(definitions.diff_out_folder + "mono_dsvcdp_tfcs.txt", false);
 		framework.DiffSeedCombDetector.SPEnrichment spep2 = mono_dsvdp.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
 		spep2.writeSignificantSeedProteins(definitions.diff_out_folder + "mono_dsvcdp_SPenr.txt");
+		
+		System.out.println("Monocyte comparison cm->ncm (paired, parametric): " + pcm_data.size() + " vs " + pncm_data.size());
+		
+		System.out.println("Diff. compl.");
+		mono_dcdp = new DiffComplexDetector(pcm_data, pncm_data, definitions.qvalue, true, true, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+		mono_dcdp.writeSignSortedComplexes(definitions.diff_out_folder + "mono_pdcdp_complh.txt", true);
+		mono_dcdp.writeSignSortedVariants(definitions.diff_out_folder + "mono_pdcdp_tfcsh.txt", true);
+		mono_dcdp.writeSignSortedComplexes(definitions.diff_out_folder + "mono_pdcdp_compl.txt", false);
+		mono_dcdp.writeSignSortedVariants(definitions.diff_out_folder + "mono_pdcdp_tfcs.txt", false);
+		spep = mono_dcdp.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
+		spep.writeSignificantSeedProteins(definitions.diff_out_folder + "mono_pdcdp_SPenr.txt");
+		spcp = mono_dcdp.calculateSPCEnrichment(definitions.qvalue, definitions.SPCEnrich_iterations, definitions.SPCEnrich_compl_part_threshold);
+		spcp.writeSignificantSeedProteinCombinations(definitions.diff_out_folder + "mono_pdcdp_SPCenr.txt");
+		
+		System.out.println("Diff. seed comb.");
+		mono_dsvdp = new DiffSeedCombDetector(pcm_data, pncm_data, definitions.qvalue, true, true, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+		mono_dsvdp.writeSignSortedVariants(definitions.diff_out_folder + "mono_pdsvcdp_tfcsh.txt", true);
+		mono_dsvdp.writeSignSortedVariants(definitions.diff_out_folder + "mono_pdsvcdp_tfcs.txt", false);
+		spep2 = mono_dsvdp.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
+		spep2.writeSignificantSeedProteins(definitions.diff_out_folder + "mono_pdsvcdp_SPenr.txt");
 	}
 }
