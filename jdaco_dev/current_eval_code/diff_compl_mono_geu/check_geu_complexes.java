@@ -41,7 +41,7 @@ public class check_geu_complexes {
 		
 		// equal sample size
 		List<String> to_write = new LinkedList<String>();
-		to_write.add("test samples_group1 samples_group2 iteration no_complexes no_compl_tfcs no_tfcs");
+		to_write.add("test samples_total samples_group1 samples_group2 iteration no_complexes no_compl_tfcs no_tfcs");
 		List<String> samples = new ArrayList<>(geu_data.keySet());
 		
 		Set<String> permutations_used = new HashSet<>();
@@ -85,11 +85,12 @@ public class check_geu_complexes {
 				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
-				to_write.add("equal_nonparametric " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
-				Utilities.writeEntries(to_write, "geu_rand_out.txt");
-				
+				int total = group1.size() + group2.size();
+				to_write.add("equal_nonparametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				permutate = true;
 			}
+			
+			Utilities.writeEntries(to_write, "geu_rand_out.txt");
 		}
 		
 		// unequal sample size
@@ -129,11 +130,12 @@ public class check_geu_complexes {
 				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
-				to_write.add("unequal_nonparametric " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
-				Utilities.writeEntries(to_write, "geu_rand_out.txt");
-				
+				int total = group1.size() + group2.size();
+				to_write.add("unequal_nonparametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				permutate = true;
 			}
+			
+			Utilities.writeEntries(to_write, "geu_rand_out.txt");
 		}
 		
 		/**
@@ -177,11 +179,12 @@ public class check_geu_complexes {
 				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
-				to_write.add("equal_parametric " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
-				Utilities.writeEntries(to_write, "geu_rand_out.txt");
-				
+				int total = group1.size() + group2.size();
+				to_write.add("equal_parametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				permutate = true;
 			}
+			
+			Utilities.writeEntries(to_write, "geu_rand_out.txt");
 		}
 		
 		// unequal sample size
@@ -221,11 +224,12 @@ public class check_geu_complexes {
 				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
-				to_write.add("unequal_parametric " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
-				Utilities.writeEntries(to_write, "geu_rand_out.txt");
-				
+				int total = group1.size() + group2.size();
+				to_write.add("unequal_parametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				permutate = true;
 			}
+			
+			Utilities.writeEntries(to_write, "geu_rand_out.txt");
 		}
 	}
 }
