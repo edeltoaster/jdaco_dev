@@ -19,9 +19,9 @@ import framework.Utilities;
 
 public class test_geu_complexes {
 
-	public static int iterations = 100;
-	public static int[] equal_samples_per_group = {29, 20, 10, 5}; // 58 total samples
-	public static int[] unequal_samples_per_group = {20, 10, 5};
+	public static int iterations = 200;
+	public static int[] equal_samples_per_group = {29, 25, 20, 15, 10, 5}; // 58 total samples
+	public static int[] unequal_samples_per_group = {25, 20, 15, 10, 5};
 	
 	public static void main(String[] args) {
 		definitions.printInitParameters();
@@ -41,7 +41,7 @@ public class test_geu_complexes {
 		
 		// equal sample size
 		List<String> to_write = new LinkedList<String>();
-		to_write.add("test samples_total samples_group1 samples_group2 iteration no_complexes no_compl_tfcs no_tfcs");
+		to_write.add("groupsize parametric samples_total samples_group1 samples_group2 iteration no_complexes no_compl_tfcs no_tfcs");
 		List<String> samples = new ArrayList<>(geu_data.keySet());
 		
 		Set<String> permutations_used = new HashSet<>();
@@ -86,11 +86,11 @@ public class test_geu_complexes {
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
 				int total = group1.size() + group2.size();
-				to_write.add("equal_nonparametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
+				to_write.add("equal nonparametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				permutate = true;
 			}
 			
-			Utilities.writeEntries(to_write, "geu_rand_out.txt");
+			Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
 		}
 		
 		// unequal sample size
@@ -131,11 +131,11 @@ public class test_geu_complexes {
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
 				int total = group1.size() + group2.size();
-				to_write.add("unequal_nonparametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
+				to_write.add("unequal nonparametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				permutate = true;
 			}
 			
-			Utilities.writeEntries(to_write, "geu_rand_out.txt");
+			Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
 		}
 		
 		/**
@@ -180,11 +180,11 @@ public class test_geu_complexes {
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
 				int total = group1.size() + group2.size();
-				to_write.add("equal_parametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
+				to_write.add("equal parametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				permutate = true;
 			}
 			
-			Utilities.writeEntries(to_write, "geu_rand_out.txt");
+			Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
 		}
 		
 		// unequal sample size
@@ -225,11 +225,11 @@ public class test_geu_complexes {
 				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 				
 				int total = group1.size() + group2.size();
-				to_write.add("unequal_parametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
+				to_write.add("unequal parametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 				permutate = true;
 			}
 			
-			Utilities.writeEntries(to_write, "geu_rand_out.txt");
+			Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
 		}
 	}
 }

@@ -16,7 +16,7 @@ public class definitions {
 	static boolean check_supersets = false;
 	static double min_variant_fraction = 0.75;
 	
-	static int no_threads = 48;
+	static int no_threads = 32;
 	
 	static String seed_file = "mixed_data/hocomoco_human_TFs_v10.txt.gz";
 	static Set<String> seed = Utilities.readEntryFile(seed_file);
