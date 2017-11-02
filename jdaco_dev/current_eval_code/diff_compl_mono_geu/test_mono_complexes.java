@@ -20,10 +20,10 @@ import framework.Utilities;
 
 public class test_mono_complexes {
 	
-	public static int iterations = 100;
+	public static int iterations = 1000;
 	public static int[] samples_per_group = {15, 10, 7, 5, 4, 3}; // 17 samples in both groups
 	
-	public static int paired_iterations = 100;
+	public static int paired_iterations = 200;
 	public static int[] paired_samples_per_group = {13, 10, 7, 5, 4, 3}; // 16 paired samples in both groups
 	
 	// current reference to compare with
@@ -83,7 +83,7 @@ public class test_mono_complexes {
 	
 	public static void main(String[] args) {
 		definitions.printInitParameters();
-	
+
 		System.out.println();
 		
 		Map<String, QuantDACOResultSet> cm_data = new HashMap<>();
@@ -116,13 +116,14 @@ public class test_mono_complexes {
 		
 		List<String> to_write = new LinkedList<String>();
 		
-		to_write.add("paired parametric samples_total samples_group1 samples_group2 iteration "
+		to_write.add("paired parametric samples_total smaller_group samples_group1 samples_group2 iteration "
 				+ "dcd_complexes_events dcd_complexes_prec dcd_complexes_rec dcd_complexes_F dcd_tfcs_events dcd_tfcs_prec dcd_tfcs_rec dcd_tfcs_F dsvd_tfcs_events dsvd_tfcs_prec dsvd_tfcs_rec dsvd_tfcs_F");
 		
 		boolean[] parametric = {false, true};
 		
+		System.out.println("Starting unpaired analysis ...");
 		for (boolean assume_parametric:parametric) {
-			
+			System.out.println("Assume paramtric: " + assume_parametric);
 			// compute reference
 			Map<String, QuantDACOResultSet> group1 = new HashMap<>();
 			Map<String, QuantDACOResultSet> group2 = new HashMap<>();
@@ -144,6 +145,8 @@ public class test_mono_complexes {
 			for (int no_samples_cm:samples_per_group) {
 				for (int no_samples_ncm:samples_per_group) {
 					
+					System.out.println("Doing " + no_samples_cm + " vs " + no_samples_ncm);
+					int smaller_group = Math.min(no_samples_cm, no_samples_ncm);
 					Set<String> permutations_used = new HashSet<>();
 					String permutation;
 					boolean permutate = true;
@@ -178,7 +181,7 @@ public class test_mono_complexes {
 						dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, assume_parametric, false, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 						metrics = computeMetrics(dcd.getSignificanceSortedComplexes(), dcd.getSignificantSeedCombVariants(), dsvd.getSignificanceSortedVariants());
 						
-						to_write.add(false + " " + assume_parametric + " " + (group1.size() + group2.size()) + " " + group1.size() + " " + group2.size() + " " + i + " " + String.join(" ", metrics));
+						to_write.add(false + " " + assume_parametric + " " + (group1.size() + group2.size()) + " " + smaller_group + " " + group1.size() + " " + group2.size() + " " + i + " " + String.join(" ", metrics));
 						
 						permutate = true;
 					}
@@ -226,9 +229,9 @@ public class test_mono_complexes {
 		
 		List<String> paired_samples = new ArrayList<>(pcm_data.keySet());
 		
-		
+		System.out.println("Starting paired analysis ...");
 		for (boolean assume_parametric:parametric) {
-			
+			System.out.println("Assume paramtric: " + assume_parametric);
 			// compute reference
 			Map<String, QuantDACOResultSet> group1 = new HashMap<>();
 			Map<String, QuantDACOResultSet> group2 = new HashMap<>();
@@ -248,14 +251,14 @@ public class test_mono_complexes {
 			to_write.add(true + " " + assume_parametric + " " + (group1.size() + group2.size()) + " " + group1.size() + " " + group2.size() + " 0 " + String.join(" ", metrics));
 			
 			for (int no_samples:paired_samples_per_group) {
-					
+				System.out.println("Doing " + no_samples);
 				Set<String> permutations_used = new HashSet<>();
 				String permutation;
 				boolean permutate = true;
-
+				int smaller_group = no_samples; // for completeness, not really needed here
 				for (int i = 0; i < paired_iterations; i++) {
 					
-					if (permutate) {
+					while (permutate) {
 						group1.clear();
 						group2.clear();
 						Collections.shuffle(paired_samples);
@@ -278,7 +281,7 @@ public class test_mono_complexes {
 					dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, assume_parametric, true, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 					metrics = computeMetrics(dcd.getSignificanceSortedComplexes(), dcd.getSignificantSeedCombVariants(), dsvd.getSignificanceSortedVariants());
 					
-					to_write.add(true + " " + assume_parametric + " " + (group1.size() + group2.size()) + " " + group1.size() + " " + group2.size() + " " + i + " " + String.join(" ", metrics));
+					to_write.add(true + " " + assume_parametric + " " + (group1.size() + group2.size()) + " " + smaller_group + " " + group1.size() + " " + group2.size() + " " + i + " " + String.join(" ", metrics));
 					
 					permutate = true;
 				}
