@@ -150,7 +150,7 @@ public class test_mono_complexes {
 
 					for (int i = 0; i < iterations; i++) {
 						
-						if (permutate) {
+						while (permutate) {
 							group1.clear();
 							group2.clear();
 							Collections.shuffle(cm_samples);

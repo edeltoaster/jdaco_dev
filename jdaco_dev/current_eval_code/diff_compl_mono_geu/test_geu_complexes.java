@@ -19,9 +19,8 @@ import framework.Utilities;
 
 public class test_geu_complexes {
 
-	public static int iterations = 200;
-	public static int[] equal_samples_per_group = {29, 25, 20, 15, 10, 5}; // 58 total samples
-	public static int[] unequal_samples_per_group = {25, 20, 15, 10, 5};
+	public static int iterations = 1000;
+	public static int[] samples_per_group = {50, 40, 30, 20, 10, 5}; // 58 total samples
 	
 	public static void main(String[] args) {
 		definitions.printInitParameters();
@@ -39,9 +38,8 @@ public class test_geu_complexes {
 				geu_data.put(sample, qdr);
 		}
 		
-		// equal sample size
 		List<String> to_write = new LinkedList<String>();
-		to_write.add("groupsize parametric samples_total samples_group1 samples_group2 iteration no_complexes no_compl_tfcs no_tfcs");
+		to_write.add("parametric samples_total smaller_group samples_group1 samples_group2 iteration no_complexes no_compl_tfcs no_tfcs");
 		List<String> samples = new ArrayList<>(geu_data.keySet());
 		
 		Set<String> permutations_used = new HashSet<>();
@@ -50,186 +48,68 @@ public class test_geu_complexes {
 		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
 		Map<String, QuantDACOResultSet> group2 = new HashMap<>();
 		
-		for (int samples_per_group:equal_samples_per_group) {
-			for (int i = 0; i < iterations; i++) {
+		for (int samples_per_group1:samples_per_group) {
+			for (int samples_per_group2:samples_per_group) {
 				
-				if (permutate) {
-					group1.clear();
-					group2.clear();
-					Collections.shuffle(samples);
+				// only do 50/5 not also 5/50, count in limited amount of data
+				if (samples_per_group1 < samples_per_group2 || samples_per_group1 + samples_per_group2 > geu_data.size())
+					continue;
+				
+				int total = samples_per_group1 + samples_per_group2;
+				int min_size = Math.min(samples_per_group1, samples_per_group2);
+				
+				permutations_used.clear();
+				for (int i = 0; i < iterations; i++) {
 					
-					int j = 0;
-					while (j < samples_per_group) {
-						String sample = samples.get(j);
-						group1.put(sample, geu_data.get(sample));
-						j++;
+					while (permutate) {
+						group1.clear();
+						group2.clear();
+						Collections.shuffle(samples);
+						
+						int j = 0;
+						while (j < samples_per_group1) {
+							String sample = samples.get(j);
+							group1.put(sample, geu_data.get(sample));
+							j++;
+						}
+						
+						while (j < samples_per_group1 + samples_per_group2) {
+							String sample = samples.get(j);
+							group2.put(sample, geu_data.get(sample));
+							j++;
+						}
+						
+						permutation = String.join("/", group1.keySet()) + "," + String.join("/", group2.keySet());
+						
+						if (!permutations_used.contains(permutation)) {
+							permutate = false;
+							permutations_used.add(permutation);
+						}
 					}
 					
-					while (j < samples_per_group*2) {
-						String sample = samples.get(j);
-						group2.put(sample, geu_data.get(sample));
-						j++;
-					}
+					// non-parametric
+					DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, false, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+					int no_complexes = dcd.getSignificanceSortedComplexes().size();
+					int no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
+					DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, false, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+					int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 					
-					permutation = String.join("/", group1.keySet()) + "," + String.join("/", group2.keySet());
+					to_write.add(Boolean.toString(false) + total + " " + min_size + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 					
-					if (!permutations_used.contains(permutation)) {
-						permutate = false;
-						permutations_used.add(permutation);
-					}
+					// parametric
+					dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+					no_complexes = dcd.getSignificanceSortedComplexes().size();
+					no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
+					dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
+					no_tfcs = dsvd.getSignificanceSortedVariants().size();
+	
+					to_write.add(Boolean.toString(true) + total + " " + min_size + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
+					
+					permutate = true;
 				}
 				
-				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-				int no_complexes = dcd.getSignificanceSortedComplexes().size();
-				int no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
-				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
-				
-				int total = group1.size() + group2.size();
-				to_write.add("equal nonparametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
-				permutate = true;
+				Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
 			}
-			
-			Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
-		}
-		
-		// unequal sample size
-		permutations_used.clear();
-		for (int samples_first_group:unequal_samples_per_group) {
-			for (int i = 0; i < iterations; i++) {
-				
-				if (permutate) {
-					group1.clear();
-					group2.clear();
-					Collections.shuffle(samples);
-					
-					int j = 0;
-					while (j < samples_first_group) {
-						String sample = samples.get(j);
-						group1.put(sample, geu_data.get(sample));
-						j++;
-					}
-					
-					while (j < geu_data.size()) {
-						String sample = samples.get(j);
-						group2.put(sample, geu_data.get(sample));
-						j++;
-					}
-					
-					permutation = String.join("/", group1.keySet()) + "," + String.join("/", group2.keySet());
-					
-					if (!permutations_used.contains(permutation)) {
-						permutate = false;
-						permutations_used.add(permutation);
-					}
-				}
-				
-				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-				int no_complexes = dcd.getSignificanceSortedComplexes().size();
-				int no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
-				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
-				
-				int total = group1.size() + group2.size();
-				to_write.add("unequal nonparametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
-				permutate = true;
-			}
-			
-			Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
-		}
-		
-		/**
-		 * parametric testing
-		 */
-		
-		// equal sample size
-		permutations_used.clear();
-		for (int samples_per_group:equal_samples_per_group) {
-			for (int i = 0; i < iterations; i++) {
-				
-				if (permutate) {
-					group1.clear();
-					group2.clear();
-					Collections.shuffle(samples);
-					
-					int j = 0;
-					while (j < samples_per_group) {
-						String sample = samples.get(j);
-						group1.put(sample, geu_data.get(sample));
-						j++;
-					}
-					
-					while (j < samples_per_group*2) {
-						String sample = samples.get(j);
-						group2.put(sample, geu_data.get(sample));
-						j++;
-					}
-					
-					permutation = String.join("/", group1.keySet()) + "," + String.join("/", group2.keySet());
-					
-					if (!permutations_used.contains(permutation)) {
-						permutate = false;
-						permutations_used.add(permutation);
-					}
-				}
-				
-				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-				int no_complexes = dcd.getSignificanceSortedComplexes().size();
-				int no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
-				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
-				
-				int total = group1.size() + group2.size();
-				to_write.add("equal parametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
-				permutate = true;
-			}
-			
-			Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
-		}
-		
-		// unequal sample size
-		permutations_used.clear();
-		for (int samples_first_group:unequal_samples_per_group) {
-			for (int i = 0; i < iterations; i++) {
-				
-				if (permutate) {
-					group1.clear();
-					group2.clear();
-					Collections.shuffle(samples);
-					
-					int j = 0;
-					while (j < samples_first_group) {
-						String sample = samples.get(j);
-						group1.put(sample, geu_data.get(sample));
-						j++;
-					}
-					
-					while (j < geu_data.size()) {
-						String sample = samples.get(j);
-						group2.put(sample, geu_data.get(sample));
-						j++;
-					}
-					
-					permutation = String.join("/", group1.keySet()) + "," + String.join("/", group2.keySet());
-					
-					if (!permutations_used.contains(permutation)) {
-						permutate = false;
-						permutations_used.add(permutation);
-					}
-				}
-				
-				DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-				int no_complexes = dcd.getSignificanceSortedComplexes().size();
-				int no_compl_tfcs = dcd.getSignificantSeedCombVariants().size();
-				DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
-				int no_tfcs = dsvd.getSignificanceSortedVariants().size();
-				
-				int total = group1.size() + group2.size();
-				to_write.add("unequal parametric " + total + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
-				permutate = true;
-			}
-			
-			Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
 		}
 	}
 }
