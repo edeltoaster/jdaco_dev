@@ -38,6 +38,16 @@ public class test_geu_complexes {
 				geu_data.put(sample, qdr);
 		}
 		
+		/**
+		 * Precompute abundances
+		 */
+		System.out.println("Precompute abundances ...");
+		geu_data.values().parallelStream().forEach(qdr -> qdr.getAbundanceOfComplexes());
+		
+		/**
+		 * Randomized analysis
+		 */
+		
 		List<String> to_write = new LinkedList<String>();
 		to_write.add("parametric samples_total smaller_group samples_group1 samples_group2 iteration no_complexes no_compl_tfcs no_tfcs");
 		List<String> samples = new ArrayList<>(geu_data.keySet());
@@ -57,6 +67,8 @@ public class test_geu_complexes {
 				
 				int total = samples_per_group1 + samples_per_group2;
 				int min_size = Math.min(samples_per_group1, samples_per_group2);
+				
+				System.out.println("Evaluating " + samples_per_group1 + " vs " + samples_per_group2);
 				
 				permutations_used.clear();
 				for (int i = 0; i < iterations; i++) {
@@ -108,7 +120,7 @@ public class test_geu_complexes {
 					permutate = true;
 				}
 				
-				Utilities.writeEntries(to_write, "geu_rand_out.txt.gz");
+				Utilities.writeEntries(to_write, "geu_rand_test.txt.gz");
 			}
 		}
 	}
