@@ -140,7 +140,7 @@ public class test_mono_complexes {
 			
 			String[] metrics = computeMetrics(ref_dcd_complexes, ref_dcd_tfcs, ref_dsvd_tfcs);
 			
-			to_write.add(false + " " + assume_parametric + " " + (group1.size() + group2.size()) + " " + group1.size() + " " + group2.size() + " 0 " + String.join(" ", metrics));
+			to_write.add(false + " " + assume_parametric + " " + (group1.size() + group2.size()) + " 17 " + group1.size() + " " + group2.size() + " 0 " + String.join(" ", metrics));
 			
 			for (int no_samples_cm:samples_per_group) {
 				for (int no_samples_ncm:samples_per_group) {
@@ -248,7 +248,7 @@ public class test_mono_complexes {
 			
 			String[] metrics = computeMetrics(ref_dcd_complexes, ref_dcd_tfcs, ref_dsvd_tfcs);
 			
-			to_write.add(true + " " + assume_parametric + " " + (group1.size() + group2.size()) + " " + group1.size() + " " + group2.size() + " 0 " + String.join(" ", metrics));
+			to_write.add(true + " " + assume_parametric + " " + (group1.size() + group2.size()) + " 16 " + group1.size() + " " + group2.size() + " 0 " + String.join(" ", metrics));
 			
 			for (int no_samples:paired_samples_per_group) {
 				System.out.println("Doing " + no_samples);
