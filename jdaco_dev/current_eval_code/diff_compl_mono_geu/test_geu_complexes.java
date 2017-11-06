@@ -106,7 +106,7 @@ public class test_geu_complexes {
 					DiffSeedCombDetector dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, false, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 					int no_tfcs = dsvd.getSignificanceSortedVariants().size();
 					
-					to_write.add(Boolean.toString(false) + total + " " + min_size + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
+					to_write.add(Boolean.toString(false) + " " + total + " " + min_size + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 					
 					// parametric
 					dcd = new DiffComplexDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
@@ -115,7 +115,7 @@ public class test_geu_complexes {
 					dsvd = new DiffSeedCombDetector(group1, group2, definitions.qvalue, true, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 					no_tfcs = dsvd.getSignificanceSortedVariants().size();
 	
-					to_write.add(Boolean.toString(true) + total + " " + min_size + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
+					to_write.add(Boolean.toString(true) + " " + total + " " + min_size + " " + group1.size() + " " + group2.size() + " " + i + " " + no_complexes + " " + no_compl_tfcs + " " + no_tfcs);
 					
 					permutate = true;
 				}
