@@ -19,8 +19,8 @@ import framework.Utilities;
 
 public class test_geu_complexes {
 
-	public static int iterations = 1000;
-	public static int[] samples_per_group = {50, 40, 30, 20, 10, 5}; // 58 total samples
+	public static int iterations = 5000;
+	public static int[] samples_per_group = {40, 30, 20, 10, 5}; // 58 total samples
 	
 	public static void main(String[] args) {
 		definitions.printInitParameters();
