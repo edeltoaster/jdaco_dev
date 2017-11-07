@@ -636,6 +636,15 @@ public class DiffComplexDetector {
 	}
 	
 	/**
+	 * Reads written output of writeSignSortedComplexes into a convenient data structure.
+	 * @param output_file
+	 * @return
+	 */
+	public static SignSortedComplexesResult readSignSortedComplexResult(String output_file) {
+		return new SignSortedComplexesResult(output_file);
+	}
+	
+	/**
 	 * Returns parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
 	 * seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details; in the order of avg_q-value, amount of fold-change and abs. sum. median change
 	 * @param include_header
@@ -1623,6 +1632,67 @@ public class DiffComplexDetector {
 		 */
 		public Map<HashSet<String>, String> getSignificantSeedProteinCombDirections() {
 			return sign_spc_direction;
+		}
+	}
+	
+	
+	/*
+	 * Convenient helper data structure to transfer results
+	 */
+	
+	public static final class SignSortedComplexesResult {
+		
+		private final List<HashSet<String>> significance_sorted_complexes = new LinkedList<>();
+		private final Map<HashSet<String>, String> directions = new HashMap<>();
+		private final Map<HashSet<String>, Double> qvalues = new HashMap<>();
+		private final Map<HashSet<String>, Double> fold_change = new HashMap<>();
+		private final Map<HashSet<String>, Double> median_change = new HashMap<>();
+		private final Map<HashSet<String>, HashSet<String>> member_seed_comb = new HashMap<>();
+		private final Map<HashSet<String>, List<HashSet<String>>> member_seed_complexes = new HashMap<>();
+
+		//format: 0 (sub)complex 1 direction 2 q-value 3 fold-change 4 median-change 5 member_seed_comb 6 member_complexes
+		public SignSortedComplexesResult(String in_file) {
+			for (String line:Utilities.readFile(in_file)) {
+				if (line.startsWith("("))
+					continue;
+				String[] spl = line.split("\\s+");
+				HashSet<String> complex = new HashSet<String>(Arrays.asList(spl[0].split("/")));
+				this.significance_sorted_complexes.add(complex);
+				this.directions.put(complex, spl[1]);
+				this.qvalues.put(complex, Double.parseDouble(spl[2]));
+				this.fold_change.put(complex, Double.parseDouble(spl[3]));
+				this.median_change.put(complex, Double.parseDouble(spl[4]));
+				this.member_seed_comb.put(complex, new HashSet<String>(Arrays.asList(spl[5].split("/"))));
+				this.member_seed_complexes.put(complex, Arrays.stream(spl[6].split(",")).map(s -> new HashSet<String>(Arrays.asList(s.split("/")))).collect(Collectors.toList()));
+			}
+		}
+		
+		public List<HashSet<String>> getSignificanceSortedComplexes() {
+			return significance_sorted_complexes;
+		}
+
+		public Map<HashSet<String>, String> getDirections() {
+			return directions;
+		}
+
+		public Map<HashSet<String>, Double> getQValues() {
+			return qvalues;
+		}
+
+		public Map<HashSet<String>, Double> getFoldChange() {
+			return fold_change;
+		}
+
+		public Map<HashSet<String>, Double> getMedianChange() {
+			return median_change;
+		}
+
+		public Map<HashSet<String>, HashSet<String>> getMemberSeedComb() {
+			return member_seed_comb;
+		}
+
+		public Map<HashSet<String>, List<HashSet<String>>> getMemberSeedComplexes() {
+			return member_seed_complexes;
 		}
 	}
 }
