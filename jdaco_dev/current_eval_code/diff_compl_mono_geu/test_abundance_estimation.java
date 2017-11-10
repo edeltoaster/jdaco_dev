@@ -1,12 +1,17 @@
 package diff_compl_mono_geu;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,78 +19,11 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
-import framework.DACOResultSet;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
 public class test_abundance_estimation {
 	public static Random rnd = new Random(System.currentTimeMillis());
-	
-	public static Map<HashSet<String>, Double> bio_example() {
-		QuantDACOResultSet qdr = new QuantDACOResultSet("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", "mixed_data/hocomoco_human_TFs_v10.txt.gz", "mixed_data/A172_1_1_ENCSR580GSX_major-transcripts.txt.gz");
-		return qdr.getAbundanceOfComplexes();
-	}
-	
-	/**
-	 * Given a DACO result and some parameters, returns [QuantDACOResultSet qdr, Map<HashSet<String>, Double> artificial_complex_abundance] as an Object[]
-	 * @param daco_outfile
-	 * @param min_abundance
-	 * @param max_abundance
-	 * @return
-	 */
-	public static Object[] simulate_sample(String daco_outfile, double min_abundance, double max_abundance, double remaining_prefactor) {
-		// load real complex result
-		DACOResultSet dr = new DACOResultSet(daco_outfile, "mixed_data/hocomoco_human_TFs_v10.txt.gz");
-		
-		// construct appropriate protein->transcript data structure
-		Map<String, String> protein_to_assumed_transcript = new HashMap<>();
-		for (HashSet<String> complex:dr.getResult())
-			for (String protein:complex)
-				if (!protein_to_assumed_transcript.containsKey(protein))
-					protein_to_assumed_transcript.put(protein, "T" + protein);
-		
-		// assign random abundance values to complexes
-		final double scaled_max_abundance = max_abundance - min_abundance;
-		Map<HashSet<String>, Double> artificial_complex_abundance = dr.getResult().stream().collect(Collectors.toMap(e -> e, e -> (rnd.nextDouble() * scaled_max_abundance) + min_abundance));
-		
-		// summarize transcript abundances
-		Map<String, Float> transcript_abundance = new HashMap<>();
-		for (HashSet<String> complex:artificial_complex_abundance.keySet()) {
-			float compl_abundance = (float) ((double) artificial_complex_abundance.get(complex));
-			for (String protein:complex) {
-				String transcript_string = "T" + protein;
-				transcript_abundance.put(transcript_string, transcript_abundance.getOrDefault(transcript_string, 0f) + compl_abundance);
-			}
-		}
-		
-		// select limiting proteins
-		Set<String> limiting_proteins = new HashSet<>();
-		for (HashSet<String> complex:artificial_complex_abundance.keySet()) {
-			Set<String> temp_set = new HashSet<>(limiting_proteins);
-			temp_set.retainAll(complex);
-			if (temp_set.size() == 0) { // if there is no limiting protein yet, choose one
-				int chosen_index = rnd.nextInt(complex.size());
-				String chosen = (String) complex.toArray()[chosen_index];
-				limiting_proteins.add(chosen);
-			}
-		}
-		
-		// factor in remaining abundances
-		for (String protein:protein_to_assumed_transcript.keySet()) {
-			// limiting proteins do not have remaining abundance
-			if (limiting_proteins.contains(protein))
-				continue;
-			String transcript_string = "T" + protein;
-			float compl_abundance = rnd.nextFloat() * ((float) remaining_prefactor) * transcript_abundance.getOrDefault(transcript_string, 0f);
-			transcript_abundance.put(transcript_string, transcript_abundance.getOrDefault(transcript_string, 0f) + compl_abundance);
-		}
-		
-		QuantDACOResultSet qdr = new QuantDACOResultSet(new HashSet<HashSet<String>>(dr.getResult()), Utilities.readEntryFile("mixed_data/hocomoco_human_TFs_v10.txt.gz"), protein_to_assumed_transcript, transcript_abundance);
-		Object[] output = new Object[2];
-		output[0] = qdr;
-		output[1] = artificial_complex_abundance;
-		return output;
-	}
 	
 	/**
 	 * Realistic simulation of the "equal distribution"-model on the basis of real data and noise regarding the equality of the distribution of abundance values and 
@@ -214,15 +152,15 @@ public class test_abundance_estimation {
 	}
 	
 	/**
-	 * Helper function to run analyses on sample A172_1_1_ENCSR580GSX (simply the very first one) in a batch fashion.
+	 * Helper function to run analyses on on a given sample in a batch fashion.
 	 * @param std_factor
 	 * @param remaining_prefactor
 	 * @return
 	 */
-	public static double[] simulate_sample_model_run(double std_factor, double remaining_prefactor, int iteration, String[] sample_construction_outputs) {
+	public static double[] simulate_sample_model_run(String daco_result_file, String major_transcripts_file, double std_factor, double remaining_prefactor, int iteration, String[] sample_construction_outputs) {
 		
 		// get results of simulation
-		Object[] simulation = simulate_sample_model("mixed_data/A172_1_1_ENCSR580GSX.csv.gz", "mixed_data/A172_1_1_ENCSR580GSX_major-transcripts.txt.gz", std_factor, remaining_prefactor);
+		Object[] simulation = simulate_sample_model(daco_result_file, major_transcripts_file, std_factor, remaining_prefactor);
 		QuantDACOResultSet qdr = (QuantDACOResultSet) simulation[0];
 		@SuppressWarnings("unchecked")
 		Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) simulation[1];
@@ -276,7 +214,7 @@ public class test_abundance_estimation {
 		results[3] = Utilities.getRMSD(rem_artificial, rem_evaluated);
 		
 		if (sample_construction_outputs != null) {
-			String out = std_factor + " " + remaining_prefactor + " " + (iteration+1) + " " + complex_abundance_min + " " + complex_abundance_mean + " " + complex_abundance_std + " " + complex_abundance_max + " " + lim_distr_min + " " + lim_distr_mean + " " + lim_distr_std + " " + lim_distr_max + " " + rem_abundance_min + " " + rem_abundance_mean + " " +rem_abundance_std + " " + rem_abundance_max;
+			String out = daco_result_file + " " + std_factor + " " + remaining_prefactor + " " + (iteration+1) + " " + complex_abundance_min + " " + complex_abundance_mean + " " + complex_abundance_std + " " + complex_abundance_max + " " + lim_distr_min + " " + lim_distr_mean + " " + lim_distr_std + " " + lim_distr_max + " " + rem_abundance_min + " " + rem_abundance_mean + " " +rem_abundance_std + " " + rem_abundance_max;
 			sample_construction_outputs[iteration] = out;
 		}
 		
@@ -284,45 +222,64 @@ public class test_abundance_estimation {
 	}
 	
 	/**
-	 * Tests prediction to simulated data
+	 * Tests prediction on real data
 	 */
 	public static void benchmark() {
 		
-		List<String> all_iterations = new LinkedList<>();
-		List<String> averaged = new LinkedList<>();
-		List<String> sample_construction = new LinkedList<>();
-		averaged.add("std prefactor corr_compl rmsd_compl corr_rem rmsd_rem");
-		all_iterations.add("std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
-		sample_construction.add("std prefactor iter complex_abundance_min complex_abundance_mean complex_abundance_std complex_abundance_max lim_distr_min lim_distr_mean lim_distr_std lim_distr_max rem_abundance_min rem_abundance_mean rem_abundance_std rem_abundance_max");
+		// read all data
+		Map<String, String> data = new HashMap<>();
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(definitions.daco_results_folder, ".csv.gz")) {
+			String sample = f.getName().split("\\.")[0];
+			String daco_result = f.getAbsolutePath();
+			String major_transcript_file = definitions.networks_folder + sample + "_major-transcripts.txt.gz";
+			data.put(daco_result, major_transcript_file);
+		}
 		
-		int no_iterations = 100;
+		List<String> all_iterations = new LinkedList<>();
+		List<String> sample_construction = new LinkedList<>();
+		all_iterations.add("sample std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
+		sample_construction.add("sample std prefactor iter complex_abundance_min complex_abundance_mean complex_abundance_std complex_abundance_max lim_distr_min lim_distr_mean lim_distr_std lim_distr_max rem_abundance_min rem_abundance_mean rem_abundance_std rem_abundance_max");
+		
+		int no_iterations = 50;
 		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
 		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5};
 		
-		for (double std:stds) 
+		System.out.println("Running benchmark on M/GEU");
+		System.out.println("50 iterations for each sample (" + data.size() + " samples)");
+		System.out.println("STDevs: " + Arrays.asList(stds));
+		System.out.println("Prefactors: " + Arrays.asList(prefactors));
+		
+		ForkJoinPool pool = new ForkJoinPool(definitions.no_threads);
+		
+		for (double std:stds)
 			for (double prefactor:prefactors) {
+				System.out.println("Running " + std + "/" + prefactor);
+				System.out.flush();
 				String[] sample_construction_outputs = new String[no_iterations];
-				List<double[]> results = IntStream.range(0, no_iterations).boxed().parallel().map(d->simulate_sample_model_run(std, prefactor, d, sample_construction_outputs)).collect(Collectors.toList());
-				List<Double> corrs = new LinkedList<>();
-				List<Double> rmsds = new LinkedList<>();
-				List<Double> rem_corrs = new LinkedList<>();
-				List<Double> rem_rmsds = new LinkedList<>();
-				int n = 1;
-				for (double[] result:results) {
-					all_iterations.add(std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
-					sample_construction.add(sample_construction_outputs[n-1]);
-					corrs.add(result[0]);
-					rmsds.add(result[1]);
-					rem_corrs.add(result[2]);
-					rem_rmsds.add(result[3]);
-					++n;
+				
+				for (Entry<String, String> sample : data.entrySet()) {
+					ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run(sample.getKey(), sample.getValue(), std, prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
+					List<double[]> results = null;
+					try {
+						results = task.get();
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.exit(1);
+					}
+					int n = 1;
+					for (double[] result:results) {
+						all_iterations.add(sample.getKey() + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+						sample_construction.add(sample_construction_outputs[n-1]);
+						++n;
+					}
 				}
-				averaged.add(std + " " + prefactor + " " + Utilities.getMean(corrs) + "+-" + Utilities.getStd(corrs) + " " + Utilities.getMean(rmsds) + "+-" + Utilities.getStd(rmsds)+ " " + Utilities.getMedian(rem_corrs) + "+-" + Utilities.getStd(rem_corrs) + " " + Utilities.getMedian(rem_rmsds) + "+-" + Utilities.getStd(rem_rmsds));
+				
+				// already write something
+				Utilities.writeEntries(all_iterations, "perf_all_iterations.txt.gz");
+				Utilities.writeEntries(sample_construction, "sample_construction.txt.gz");
 			}
 		
-		Utilities.writeEntries(all_iterations, "perf_all_iterations.txt");
-		Utilities.writeEntries(averaged, "perf_averaged.txt");
-		Utilities.writeEntries(sample_construction, "sample_construction.txt");
+		System.out.println("Finished!");
 	}
 	
 	public static void main(String[] args) {
