@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,9 +60,16 @@ public class check_mono_complexes_GRN {
 		// store fold-change
 		Map<HashSet<String>, String> complex_fc_map = new HashMap<>();
 		Map<String, String> fc_map = new HashMap<>();
-		res.getSignificanceSortedComplexes().forEach(c -> complex_fc_map.put(c, complex_genes_map.get(c) + ":" + res.getFoldChange().get(c)));
+		res.getSignificanceSortedComplexes().forEach(c -> complex_fc_map.put(c, complex_genes_map.get(c) + ":" + String.format(Locale.US, "%.3g", res.getFoldChange().get(c))));
 		tfc_complex_map.keySet().forEach(tfc -> fc_map.put(tfc.toString(), String.join(",", tfc_complex_map.get(tfc).stream().map(c -> complex_fc_map.get(c)).collect(Collectors.toList()))));
 		
+		// store median-change
+		Map<HashSet<String>, String> complex_med_map = new HashMap<>();
+		Map<String, String> med_map = new HashMap<>();
+		res.getSignificanceSortedComplexes().forEach(c -> complex_med_map.put(c, complex_genes_map.get(c) + ":" + String.format(Locale.US, "%.3g", res.getMedianChange().get(c))));
+		tfc_complex_map.keySet().forEach(tfc -> med_map.put(tfc.toString(), String.join(",", tfc_complex_map.get(tfc).stream().map(c -> complex_med_map.get(c)).collect(Collectors.toList()))));
+				
+
 		// store GOA tags
 		Map<HashSet<String>, String> complex_GOA_map = new HashMap<>();
 		Map<String, String> goa_map = new HashMap<>();
@@ -70,6 +78,7 @@ public class check_mono_complexes_GRN {
 		
 		annotational_data.put("Directions", dir_map);
 		annotational_data.put("Fold-Changes", fc_map);
+		annotational_data.put("Median-Changes", med_map);
 		annotational_data.put("GOA", goa_map);
 		
 		System.out.println(regnet.getSizesStr());
