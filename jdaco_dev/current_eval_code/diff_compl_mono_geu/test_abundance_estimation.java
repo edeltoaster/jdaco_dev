@@ -240,14 +240,14 @@ public class test_abundance_estimation {
 		all_iterations.add("sample std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
 		sample_construction.add("sample std prefactor iter complex_abundance_min complex_abundance_mean complex_abundance_std complex_abundance_max lim_distr_min lim_distr_mean lim_distr_std lim_distr_max rem_abundance_min rem_abundance_mean rem_abundance_std rem_abundance_max");
 		
-		int no_iterations = 50;
+		int no_iterations = 20;
 		double[] stds = new double[]{0.1, 0.25, 0.5, 0.75, 1.0};
 		double[] prefactors = new double[]{0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5};
 		
 		System.out.println("Running benchmark on M/GEU");
-		System.out.println("50 iterations for each sample (" + data.size() + " samples)");
-		System.out.println("STDevs: " + Arrays.asList(stds));
-		System.out.println("Prefactors: " + Arrays.asList(prefactors));
+		System.out.println(no_iterations + " iterations for each sample (" + data.size() + " samples)");
+		System.out.println("STDevs: " + Arrays.toString(stds));
+		System.out.println("Prefactors: " + Arrays.toString(prefactors));
 		
 		ForkJoinPool pool = new ForkJoinPool(definitions.no_threads);
 		
