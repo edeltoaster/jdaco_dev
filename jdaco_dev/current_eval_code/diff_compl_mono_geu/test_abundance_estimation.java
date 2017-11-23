@@ -257,8 +257,15 @@ public class test_abundance_estimation {
 				System.out.flush();
 				String[] sample_construction_outputs = new String[no_iterations];
 				
+				Map<String, ForkJoinTask<List<double[]>>> tasks = new HashMap<>();
+				
 				for (Entry<String, String> sample : data.entrySet()) {
 					ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run(sample.getKey(), sample.getValue(), std, prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
+					tasks.put(sample.getKey(), task);
+				}
+				
+				for (String sample : tasks.keySet()) {
+					ForkJoinTask<List<double[]>> task = tasks.get(sample);
 					List<double[]> results = null;
 					try {
 						results = task.get();
@@ -268,7 +275,7 @@ public class test_abundance_estimation {
 					}
 					int n = 1;
 					for (double[] result:results) {
-						all_iterations.add(sample.getKey() + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+						all_iterations.add(sample + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
 						sample_construction.add(sample_construction_outputs[n-1]);
 						++n;
 					}
