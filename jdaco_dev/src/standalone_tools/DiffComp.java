@@ -61,7 +61,9 @@ public class DiffComp {
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-fdr=[FDR] : false discovery rate (default: 0.05)");
 		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
-// TODO: option for paired, parametric, subsets/supersets
+		System.out.println("	-nd : assume normal distribution when testing (default: nonparametric)");
+		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent)");
+		System.out.println("	-s : also associate supersets (default: no supersets)");
 		
 		System.out.println();
 		
@@ -111,6 +113,18 @@ public class DiffComp {
 			// parse #threads
 			else if (arg.startsWith("-t="))
 				no_threads = Math.max(Integer.parseInt(arg.split("=")[1]), 1);
+			
+			// parametric?
+			else if (arg.equals("-nd"))
+				parametric = true;
+			
+			// paired?
+			else if (arg.equals("-p"))
+				paired = true;
+			
+			// supersets?
+			else if (arg.equals("-s"))
+				incorporate_supersets = true;
 			
 			// read groupwise input
 			else if (group1 == null) {
