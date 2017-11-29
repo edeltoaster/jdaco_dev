@@ -241,7 +241,7 @@ public class test_abundance_estimation {
 		sample_construction.add("sample std prefactor iter complex_abundance_min complex_abundance_mean complex_abundance_std complex_abundance_max lim_distr_min lim_distr_mean lim_distr_std lim_distr_max rem_abundance_min rem_abundance_mean rem_abundance_std rem_abundance_max");
 		
 		int no_iterations = 20;
-		double[] stds = new double[]{0.25, 0.5, 0.75, 1.0, 1.25};
+		double[] stds = new double[]{0.25, 0.5, 0.75, 1.0};
 		double[] prefactors = new double[]{0.25, 0.5, 1.0, 2.0, 3.0};
 		
 		System.out.println("Running benchmark on M/GEU");
