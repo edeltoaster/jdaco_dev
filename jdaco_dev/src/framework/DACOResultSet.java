@@ -22,8 +22,12 @@ public class DACOResultSet {
 		
 		this.result = new HashSet<>();
 		this.readDACOResult(daco_out_file);
+		Set<String> seed = null;
 		
-		this.buildData(Utilities.readEntryFile(seed_file));
+		if (seed_file != null && !seed_file.equals(""))
+			seed = Utilities.readEntryFile(seed_file);
+		
+		this.buildData(seed);
 	}
 	
 	public DACOResultSet(String daco_out_file, Set<String> seed) {
@@ -50,14 +54,18 @@ public class DACOResultSet {
 	}
 	
 	/**
-	 * Filters to the subset of seed proteins
+	 * Filters to the subset of seed proteins. 
+	 * If seed == null, all proteins are considered to be seed proteins. 
 	 * @param to_test
 	 * @param seed
 	 * @return
 	 */
 	private static HashSet<String> filterSeedProteins(Set<String> to_test, Set<String> seed) {
 		HashSet<String> from_seed = new HashSet<>(to_test);
-		from_seed.retainAll(seed);
+		
+		if (seed != null)
+			from_seed.retainAll(seed);
+		
 		return from_seed;
 	}
 	
@@ -86,7 +94,6 @@ public class DACOResultSet {
 		}
 		
 		this.result.removeAll(to_remove);
-		
 	}
 	
 	/**

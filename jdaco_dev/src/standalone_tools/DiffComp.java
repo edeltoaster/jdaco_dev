@@ -24,6 +24,7 @@ public class DiffComp {
 	private static boolean paired = false;
 	private static boolean incorporate_supersets = false;
 	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
+	// TODO: think about seed
 	
 	// TODO: edit doc
 	/**
