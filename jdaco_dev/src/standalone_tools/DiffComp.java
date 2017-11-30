@@ -3,6 +3,7 @@ package standalone_tools;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import framework.QuantDACOResultSet;
 import framework.Utilities;
@@ -18,19 +19,19 @@ public class DiffComp {
 	private static String path_group2 = "[GROUP2-FOLDER]";
 	private static Map<String, QuantDACOResultSet> group1;
 	private static Map<String, QuantDACOResultSet> group2;
+	private static String path_seed = null;
+	private static Set<String> seed = null;
 	private static String output_folder;
+	
 	private static double FDR = 0.05;
 	private static boolean parametric = false;
 	private static boolean paired = false;
 	private static boolean incorporate_supersets = false;
 	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
-	// TODO: think about seed
 	
-	// TODO: edit doc
 	/**
-	 * Reads all matching PPIXpress output pairs of PPINs/major transcripts from a certain folder: 
-	 * [folder]/[sample-string]_ppin.txt(.gz), [folder]/[sample-string]_ddin.txt(.gz) and [folder]/[sample-string]_major-transcripts.txt(.gz)
-	 * Assumes the standard file endings "_ppin.txt(.gz), "_ddin.txt(.gz) and _major-transcripts.txt(.gz)".
+	 * Reads all matching output pairs of JDACO results/major transcripts from a certain folder: 
+	 * [folder]/[sample-string]_complexes.txt(.gz) and [folder]/[sample-string]_major-transcripts.txt(.gz)
 	 * @param folder
 	 * @return
 	 */
@@ -42,9 +43,8 @@ public class DiffComp {
 				gz = ".gz";
 			String pre = f.getAbsolutePath().split("_ppin")[0];
 			String sample = f.getName().split("_ppin")[0];
-			//TODO: fill (pre + "_ppin.txt" + gz, pre + "_ddin.txt" + gz, pre + "_major-transcripts.txt" + gz);
-			
-			//data.put(sample, rds);
+			QuantDACOResultSet qdr = new QuantDACOResultSet(pre + "_complexes.txt" + gz, seed, pre + "_major-transcripts.txt" + gz);
+			data.put(sample, qdr);
 		}
 
 		return data;
@@ -60,15 +60,16 @@ public class DiffComp {
 		
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-fdr=[FDR] : false discovery rate (default: 0.05)");
+		System.out.println("	-s=[SEED-FILE] : seed file used for (J)DACO complex predictions (default: none)");
 		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
 		System.out.println("	-nd : assume normal distribution when testing (default: nonparametric)");
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent)");
-		System.out.println("	-s : also associate supersets (default: no supersets)");
+		System.out.println("	-ss : also associate supersets (default: no supersets)");
 		
 		System.out.println();
 		
 		System.out.println("[GROUPx-FOLDER] :");
-		System.out.println("	Standard PPIXpress/JDACO-output is read from those folders. PPIN, major transcript and JDACO results are needed.");
+		System.out.println("	Standard PPIXpress/JDACO-output is read from those folders. JDACO results and major transcripts are needed.");
 		
 		System.out.println();
 		
@@ -110,6 +111,20 @@ public class DiffComp {
 			else if (arg.startsWith("-fdr"))
 				FDR = Double.parseDouble(arg.split("=")[1]);
 			
+			// add seed file
+			else if (arg.startsWith("-s")) {
+				path_seed = arg.split("=")[1];
+				seed = Utilities.readEntryFile(path_seed);
+				
+				if (seed == null)
+					System.exit(1); // error will be thrown by the utility-function
+				
+				if (seed.isEmpty()) {
+					System.err.println("Seed file " + path_seed + " is empty.");
+					System.exit(1);
+				}
+			}
+			
 			// parse #threads
 			else if (arg.startsWith("-t="))
 				no_threads = Math.max(Integer.parseInt(arg.split("=")[1]), 1);
@@ -123,7 +138,7 @@ public class DiffComp {
 				paired = true;
 			
 			// supersets?
-			else if (arg.equals("-s"))
+			else if (arg.equals("-ss"))
 				incorporate_supersets = true;
 			
 			// read groupwise input
@@ -131,13 +146,13 @@ public class DiffComp {
 				path_group1 = arg;
 				if (!path_group1.endsWith("/"))
 					path_group1 += "/";
-				group1 = null;	// TODO: write method, see also below
+				group1 = readQuantDACOComplexes(path_group1);
 			}
 			else if (group2 == null) {
 				path_group2 = arg;
 				if (!path_group2.endsWith("/"))
 					path_group2 += "/";
-				group2 = null;// TODO: write method, see also above
+				group2 = readQuantDACOComplexes(path_group2);
 			}
 			
 			// set output-folder
@@ -191,6 +206,7 @@ public class DiffComp {
 			printHelp();
 		}
 		
-		// TODO: implement cmd-tool stub for DiffComp
+		// TODO: output parameters
+		// TODO: computations
 	}
 }
