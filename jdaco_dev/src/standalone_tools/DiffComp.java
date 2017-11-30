@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import framework.DiffComplexDetector;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
@@ -19,7 +20,7 @@ public class DiffComp {
 	private static String path_group2 = "[GROUP2-FOLDER]";
 	private static Map<String, QuantDACOResultSet> group1;
 	private static Map<String, QuantDACOResultSet> group2;
-	private static String path_seed = null;
+	private static String path_seed = "no seed file defined";
 	private static Set<String> seed = null;
 	private static String output_folder;
 	
@@ -27,6 +28,8 @@ public class DiffComp {
 	private static boolean parametric = false;
 	private static boolean paired = false;
 	private static boolean incorporate_supersets = false;
+	private static double min_variant_fraction = 0.75;
+	private static boolean human_readable = false;
 	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	
 	/**
@@ -60,11 +63,13 @@ public class DiffComp {
 		
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-fdr=[FDR] : false discovery rate (default: 0.05)");
+		System.out.println("	-mf=[MIN_VAR_FRACTION] : fraction of group a complex must be part of to be considered in the analysis (default: 0.75)");
 		System.out.println("	-s=[SEED-FILE] : seed file used for (J)DACO complex predictions (default: none)");
 		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
 		System.out.println("	-nd : assume normal distribution when testing (default: nonparametric)");
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent)");
 		System.out.println("	-ss : also associate supersets (default: no supersets)");
+		System.out.println("	-h : additionally output human readable files with gene names and rounded numbers (default: no output)");
 		
 		System.out.println();
 		
@@ -111,6 +116,10 @@ public class DiffComp {
 			else if (arg.startsWith("-fdr"))
 				FDR = Double.parseDouble(arg.split("=")[1]);
 			
+			// parse min_variant_fraction
+			else if (arg.startsWith("-mf"))
+				min_variant_fraction = Double.parseDouble(arg.split("=")[1]);
+			
 			// add seed file
 			else if (arg.startsWith("-s")) {
 				path_seed = arg.split("=")[1];
@@ -140,6 +149,10 @@ public class DiffComp {
 			// supersets?
 			else if (arg.equals("-ss"))
 				incorporate_supersets = true;
+			
+			// output human readable files?
+			else if (arg.equals("-h"))
+				human_readable = true;
 			
 			// read groupwise input
 			else if (group1 == null) {
@@ -175,12 +188,12 @@ public class DiffComp {
 			System.exit(1);
 		}
 		
-		if (group1.size() < 3 || group2.size() < 3) {
+		if (group1.size() < 2 || group2.size() < 2) {
 			
-			if (group1.size() < 3)
-				System.err.println(path_group1 + " does not contain enough data. At least three samples per group are needed for a statistical evaluation.");
-			if (group2.size() < 3)
-				System.err.println(path_group2 + " does not contain enough data. At least three samples per group are needed for a statistical evaluation.");
+			if (group1.size() < 2)
+				System.err.println(path_group1 + " does not contain enough data. At least two samples per group are needed for a statistical evaluation.");
+			if (group2.size() < 2)
+				System.err.println(path_group2 + " does not contain enough data. At least two samples per group are needed for a statistical evaluation.");
 			
 			System.exit(1);
 		}
@@ -195,7 +208,7 @@ public class DiffComp {
 	
 	public static void main(String[] args) {
 		
-		if (args.length < 3) { // TODO: check length when all parameters are added
+		if (args.length < 3) {
 			printHelp();
 		}
 		
@@ -206,7 +219,41 @@ public class DiffComp {
 			printHelp();
 		}
 		
-		// TODO: output parameters
-		// TODO: computations
+		// preface
+		System.out.println("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") : ");
+		
+		if (group1.size() < 5 || group2.size() < 5) {
+			System.out.println("Computations will run as intended, but be aware that at least five samples per group are recommended to gather meaningful results.");
+		}
+		
+		System.out.println("Seed: " + path_seed);
+		System.out.println("FDR: " + FDR);
+		String test = "Wilcoxon rank sum test (unpaired, nonparametric)";
+		if (paired && parametric)
+			test = "paired t-test (paired, parametric)";
+		else if (paired)
+			test = "Wilcoxon signed-rank test (paired, nonparametric)";
+		else if (parametric)
+			test = "Welch's unequal variances t-test (unpaired, parametric)";
+		System.out.println("Statistical test: " + test);
+		System.out.println("Min. fraction: " + min_variant_fraction);
+		System.out.println("Incorporate supersets: " + (incorporate_supersets ? "yes" : "no"));
+		System.out.flush();
+		
+		// computations
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads);
+		System.out.println("Output results ...");
+		dcd.writeSignSortedComplexes(output_folder + "diff_complexes.txt", false);
+		if (seed != null)
+			dcd.writeSignSortedVariants(output_folder + "diff_seed_variants.txt", false);
+		
+		if (human_readable) {
+			System.out.println("Retrieving data on gene names ...");
+			System.out.flush();
+			System.out.println("Output human readable results ...");
+			dcd.writeSignSortedComplexes(output_folder + "diff_complexes_hr.txt", true);
+			if (seed != null)
+				dcd.writeSignSortedVariants(output_folder + "diff_seed_variants_hr.txt", true);
+		}
 	}
 }
