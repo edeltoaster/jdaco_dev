@@ -272,7 +272,7 @@ public class DiffComp {
 		// write output files
 		System.out.println("Writing results ...");
 		dcd.writeSignSortedComplexes(output_folder + "diff_complexes.txt", false);
-		// TODO: outputs
+		
 		if (seed != null)
 			dcd.writeSignSortedVariants(output_folder + "diff_seed_variants.txt", false);
 		
