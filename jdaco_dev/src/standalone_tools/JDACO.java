@@ -197,8 +197,14 @@ public class JDACO {
 			printHelp();
 		}
 		
-		// parse parameters
-		parseInput(args);
+		// parse cmd-line and set all parameters
+		try {
+			parseInput(args);
+		} catch (Exception e) {
+			System.out.println("Something went wrong while reading the command-line, please check your input!");
+			System.out.println();
+			printHelp();
+		}
 		
 		// output parameters
 		System.out.println("Running JDACO using:");

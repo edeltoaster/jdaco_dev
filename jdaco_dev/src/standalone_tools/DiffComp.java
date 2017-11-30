@@ -14,7 +14,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class DiffComp {
-	static String version_string = "DiffComp dev version";
+	static String version_string = "DiffComp 1.0pre";
 	
 	private static String path_group1 = "[GROUP1-FOLDER]";
 	private static String path_group2 = "[GROUP2-FOLDER]";
@@ -40,12 +40,12 @@ public class DiffComp {
 	 */
 	public static Map<String, QuantDACOResultSet> readQuantDACOComplexes(String folder) {
 		Map<String, QuantDACOResultSet> data = new HashMap<>();
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(folder, "_ppin.txt")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(folder, "_major-transcripts.txt")) {
 			String gz = "";
 			if (f.getName().endsWith(".gz"))
 				gz = ".gz";
-			String pre = f.getAbsolutePath().split("_ppin")[0];
-			String sample = f.getName().split("_ppin")[0];
+			String pre = f.getAbsolutePath().split("_major-transcripts")[0];
+			String sample = f.getName().split("_major-transcripts")[0];
 			QuantDACOResultSet qdr = new QuantDACOResultSet(pre + "_complexes.txt" + gz, seed, pre + "_major-transcripts.txt" + gz);
 			data.put(sample, qdr);
 		}
@@ -69,7 +69,7 @@ public class DiffComp {
 		System.out.println("	-nd : assume normal distribution when testing (default: nonparametric)");
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent)");
 		System.out.println("	-ss : also associate supersets (default: no supersets)");
-		System.out.println("	-h : additionally output human readable files with gene names and rounded numbers (default: no output)");
+		System.out.println("	-hr : additionally output human readable files with gene names and rounded numbers (default: no output)");
 		
 		System.out.println();
 		
@@ -113,15 +113,15 @@ public class DiffComp {
 				printVersion();
 			
 			// parse FDR
-			else if (arg.startsWith("-fdr"))
+			else if (arg.startsWith("-fdr="))
 				FDR = Double.parseDouble(arg.split("=")[1]);
 			
 			// parse min_variant_fraction
-			else if (arg.startsWith("-mf"))
+			else if (arg.startsWith("-mf="))
 				min_variant_fraction = Double.parseDouble(arg.split("=")[1]);
 			
 			// add seed file
-			else if (arg.startsWith("-s")) {
+			else if (arg.startsWith("-s=")) {
 				path_seed = arg.split("=")[1];
 				seed = Utilities.readEntryFile(path_seed);
 				
@@ -151,7 +151,7 @@ public class DiffComp {
 				incorporate_supersets = true;
 			
 			// output human readable files?
-			else if (arg.equals("-h"))
+			else if (arg.equals("-hr"))
 				human_readable = true;
 			
 			// read groupwise input
@@ -200,7 +200,6 @@ public class DiffComp {
 		
 		if (output_folder == null) {
 			System.err.println("Please add an output folder.");
-			
 			System.exit(1);
 		}
 	}
@@ -218,13 +217,13 @@ public class DiffComp {
 		// parse cmd-line and set all parameters
 		try {
 			parseInput(args);
-		} catch (Exception e){
+		} catch (Exception e) {
+			System.out.println("Something went wrong while reading the command-line, please check your input!");
+			System.out.println();
 			printHelp();
 		}
 		
 		// preface
-		System.out.println("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") : ");
-		
 		if (group1.size() < 5 || group2.size() < 5) {
 			System.out.println("Computations will run as intended, but be aware that at least five samples per group are recommended to gather meaningful results.");
 		}
@@ -243,14 +242,37 @@ public class DiffComp {
 		System.out.println("Statistical test: " + test);
 		System.out.println("Min. fraction: " + min_variant_fraction);
 		System.out.println("Incorporate supersets: " + (incorporate_supersets ? "yes" : "no"));
-		System.out.flush();
+		System.out.println();
 		
 		// computations
+		System.out.println("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") ...");
+		System.out.flush();
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads);
 		
-		// write output
-		System.out.println("Output results ...");
+		if (seed != null)
+			System.out.println(dcd.getRawPValues().size() + " complexes tested, " + dcd.getSignificanceSortedComplexes().size() +" (" + dcd.getSignSortedVariants(false, false).size() + " seed combination variants) significant.");
+		else
+			System.out.println(dcd.getRawPValues().size() + " complexes tested, " + dcd.getSignificanceSortedComplexes().size() + " significant.");
+		System.out.flush();
+		
+		/*
+		 * write file-output
+		 */
+		
+		if (dcd.getSignificanceSortedComplexes().size() == 0) {
+			System.out.println("Since there is nothing to report, no output is written.");
+			System.exit(0);
+		}
+		
+		// check if output-folder exists, otherwise create it
+		File f = new File(output_folder);
+		if (!f.exists())
+			f.mkdir();
+		
+		// write output files
+		System.out.println("Writing results ...");
 		dcd.writeSignSortedComplexes(output_folder + "diff_complexes.txt", false);
+		// TODO: outputs
 		if (seed != null)
 			dcd.writeSignSortedVariants(output_folder + "diff_seed_variants.txt", false);
 		

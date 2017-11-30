@@ -276,7 +276,13 @@ public class PPIXpress {
 		}
 		
 		// parse cmd-line and set all parameters
-		parseInput(args);
+		try {
+			parseInput(args);
+		} catch (Exception e) {
+			System.out.println("Something went wrong while reading the command-line, please check your input!");
+			System.out.println();
+			printHelp();
+		}
 		
 		// check if output-folder exists, otherwise create it
 		if (!output_folder.endsWith("/"))
