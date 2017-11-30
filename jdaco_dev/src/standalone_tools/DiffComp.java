@@ -57,7 +57,7 @@ public class DiffComp {
 	 * Prints the help message
 	 */
 	public static void printHelp() {
-		System.out.println("usage: java -jar CompAre.jar ([OPTIONS]) [GROUP1-FOLDER] [GROUP2-FOLDER] [OUTPUT-FOLDER]");
+		System.out.println("usage: java -jar DiffComp.jar ([OPTIONS]) [GROUP1-FOLDER] [GROUP2-FOLDER] [OUTPUT-FOLDER]");
 		
 		System.out.println();
 		
@@ -208,6 +208,9 @@ public class DiffComp {
 	
 	public static void main(String[] args) {
 		
+		if (args.length == 1 && args[0].equals("-version"))
+			printVersion();
+		
 		if (args.length < 3) {
 			printHelp();
 		}
@@ -228,6 +231,7 @@ public class DiffComp {
 		
 		System.out.println("Seed: " + path_seed);
 		System.out.println("FDR: " + FDR);
+		
 		String test = "Wilcoxon rank sum test (unpaired, nonparametric)";
 		if (paired && parametric)
 			test = "paired t-test (paired, parametric)";
@@ -235,6 +239,7 @@ public class DiffComp {
 			test = "Wilcoxon signed-rank test (paired, nonparametric)";
 		else if (parametric)
 			test = "Welch's unequal variances t-test (unpaired, parametric)";
+		
 		System.out.println("Statistical test: " + test);
 		System.out.println("Min. fraction: " + min_variant_fraction);
 		System.out.println("Incorporate supersets: " + (incorporate_supersets ? "yes" : "no"));
@@ -242,6 +247,8 @@ public class DiffComp {
 		
 		// computations
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads);
+		
+		// write output
 		System.out.println("Output results ...");
 		dcd.writeSignSortedComplexes(output_folder + "diff_complexes.txt", false);
 		if (seed != null)
