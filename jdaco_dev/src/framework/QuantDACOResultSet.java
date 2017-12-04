@@ -110,7 +110,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 		double convergence_limit = 1.0E-7 * this.protein_to_assumed_transcript.size();
 		
 		// cache results
-		this.cached_abundance_of_complexes = getAbundanceOfComplexes(convergence_limit, 10000);
+		this.cached_abundance_of_complexes = getAbundanceOfComplexes(convergence_limit, 10000, false);
 		
 		return this.cached_abundance_of_complexes;
 	}
@@ -119,7 +119,7 @@ public class QuantDACOResultSet extends DACOResultSet {
 	 * Quantify each complex with the abundance of its least abundant member, but take overall amount of into account (detailed)
 	 * @return
 	 */
-	public Map<HashSet<String>, Double> getAbundanceOfComplexes(final double convergence_limit, final int max_iterations) {
+	public Map<HashSet<String>, Double> getAbundanceOfComplexes(final double convergence_limit, final int max_iterations, boolean verbose) {
 
 		// count occurrence of each protein in complexes
 		Map<String, Integer> protein_in_complexes_count = new HashMap<>();
@@ -199,6 +199,13 @@ public class QuantDACOResultSet extends DACOResultSet {
 						protein_in_complexes.get(protein).remove(complex);
 					}
 				}
+			}
+			
+			// some output for testing
+			if (verbose) {
+				System.out.println("#iteration: " + iteration_no);
+				System.out.println("    Current remaining amount: " + remaining_amount);
+				System.out.println("    Current complex: " + quantification_result);
 			}
 			
 			// remove saturated complexes that cannot be changed anyhow
