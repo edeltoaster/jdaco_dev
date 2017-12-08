@@ -6,15 +6,16 @@ import java.util.Map;
 import java.util.Set;
 
 import framework.DiffComplexDetector;
+import framework.DiffSeedCombDetector;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
 /**
- * DiffComp cmd-tool
+ * CompleXChange cmd-tool
  * @author Thorsten Will
  */
-public class DiffComp {
-	static String version_string = "DiffComp 1.0pre";
+public class CompleXChange {
+	static String version_string = "CompleXChange 1.0pre";
 	
 	private static String path_group1 = "[GROUP1-FOLDER]";
 	private static String path_group2 = "[GROUP2-FOLDER]";
@@ -30,6 +31,7 @@ public class DiffComp {
 	private static boolean incorporate_supersets = false;
 	private static double min_variant_fraction = 0.75;
 	private static boolean human_readable = false;
+	private static boolean also_seedcomb_calcs = false;
 	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	
 	/**
@@ -69,6 +71,7 @@ public class DiffComp {
 		System.out.println("	-nd : assume normal distribution when testing (default: nonparametric)");
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent)");
 		System.out.println("	-ss : also associate supersets (default: no supersets)");
+		System.out.println("	-sc : additional analysis based on seed combinations");
 		System.out.println("	-hr : additionally output human readable files with gene names and rounded numbers (default: no output)");
 		
 		System.out.println();
@@ -150,6 +153,10 @@ public class DiffComp {
 			else if (arg.equals("-ss"))
 				incorporate_supersets = true;
 			
+			// seed combinations?
+			else if (arg.equals("-sc"))
+				also_seedcomb_calcs = true;
+			
 			// output human readable files?
 			else if (arg.equals("-hr"))
 				human_readable = true;
@@ -202,6 +209,12 @@ public class DiffComp {
 			System.err.println("Please add an output folder.");
 			System.exit(1);
 		}
+		
+		// check for invalid usage of seedcomb mode
+		if (also_seedcomb_calcs && seed == null) {
+			also_seedcomb_calcs = false;
+			System.out.println("Analysis of seed combination variants in complexes requires a seed file.");
+		}
 	}
 	
 	
@@ -245,6 +258,7 @@ public class DiffComp {
 		System.out.println();
 		
 		// computations
+		boolean output_to_write = false;
 		System.out.println("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") ...");
 		System.out.flush();
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads);
@@ -255,11 +269,24 @@ public class DiffComp {
 			System.out.println(dcd.getRawPValues().size() + " complexes tested, " + dcd.getSignificanceSortedComplexes().size() + " significant.");
 		System.out.flush();
 		
+		output_to_write = dcd.getSignificanceSortedComplexes().isEmpty();
+		
+		DiffSeedCombDetector dscd = null;
+		if (also_seedcomb_calcs) {
+			dscd = new DiffSeedCombDetector(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads);
+			System.out.println(dscd.getVariantsRawPValues().size() + " seed combinations tested, " + dscd.getSignificanceSortedVariants().size() + " significant.");
+			
+			if (!dscd.getSignificanceSortedVariants().isEmpty())
+				output_to_write = true;
+			
+			System.out.flush();
+		}
+		
 		/*
 		 * write file-output
 		 */
 		
-		if (dcd.getSignificanceSortedComplexes().size() == 0) {
+		if (!output_to_write) {
 			System.out.println("Since there is nothing to report, no output is written.");
 			System.exit(0);
 		}
@@ -273,16 +300,24 @@ public class DiffComp {
 		System.out.println("Writing results ...");
 		dcd.writeSignSortedComplexes(output_folder + "diff_complexes.txt", false);
 		
-		if (seed != null)
+		if (seed != null) {
 			dcd.writeSignSortedVariants(output_folder + "diff_seed_variants.txt", false);
+			
+			if (also_seedcomb_calcs)
+				dscd.writeSignSortedVariants(output_folder + "diff_seed_combination_variants.txt", false);
+		}
 		
 		if (human_readable) {
 			System.out.println("Retrieving data on gene names ...");
 			System.out.flush();
 			System.out.println("Output human readable results ...");
 			dcd.writeSignSortedComplexes(output_folder + "diff_complexes_hr.txt", true);
-			if (seed != null)
+			if (seed != null) {
 				dcd.writeSignSortedVariants(output_folder + "diff_seed_variants_hr.txt", true);
+				
+				if (also_seedcomb_calcs)
+					dscd.writeSignSortedVariants(output_folder + "diff_seed_combination_variants_hr.txt", true);
+			}
 		}
 	}
 }
