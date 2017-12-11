@@ -59,18 +59,18 @@ public class CompleXChange {
 	 * Prints the help message
 	 */
 	public static void printHelp() {
-		System.out.println("usage: java -jar DiffComp.jar ([OPTIONS]) [GROUP1-FOLDER] [GROUP2-FOLDER] [OUTPUT-FOLDER]");
+		System.out.println("usage: java -jar CompleXChange.jar ([OPTIONS]) [GROUP1-FOLDER] [GROUP2-FOLDER] [OUTPUT-FOLDER]");
 		
 		System.out.println();
 		
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-fdr=[FDR] : false discovery rate (default: 0.05)");
-		System.out.println("	-mf=[MIN_VAR_FRACTION] : fraction of group a complex must be part of to be considered in the analysis (default: 0.75)");
-		System.out.println("	-s=[SEED-FILE] : seed file used for (J)DACO complex predictions (default: none)");
-		System.out.println("	-t=[#threads] : number of threads to use (default: #cores/2)");
-		System.out.println("	-nd : assume normal distribution when testing (default: nonparametric)");
-		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent)");
-		System.out.println("	-ss : also associate supersets (default: no supersets)");
+		System.out.println("	-mf=[MIN_VAR_FRACTION] : fraction of either group a complex must be part of to be considered in the analysis (default: 0.75)");
+		System.out.println("	-s=[SEED-FILE] : file listing proteins around which the complexes are centered, e.g. seed file used for (J)DACO complex predictions (default: none)");
+		System.out.println("	-t=[#threads] : number of threads to be used (default: #cores/2)");
+		System.out.println("	-nd : assume normal distribution when testing (default: no assumption, nonparametric tests applied)");
+		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent tests applied)");
+		System.out.println("	-ss : also associate supersets in the analyses (default: no supersets)");
 		System.out.println("	-sc : additional analysis based on seed combinations rather than sole complexes");
 		System.out.println("	-hr : additionally output human readable files with gene names and rounded numbers (default: no output)");
 		
