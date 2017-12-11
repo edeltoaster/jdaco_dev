@@ -15,7 +15,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class CompleXChange {
-	static String version_string = "CompleXChange 1.0pre";
+	static String version_string = "CompleXChange 1.0";
 	
 	private static String path_group1 = "[GROUP1-FOLDER]";
 	private static String path_group2 = "[GROUP2-FOLDER]";
@@ -71,7 +71,7 @@ public class CompleXChange {
 		System.out.println("	-nd : assume normal distribution when testing (default: nonparametric)");
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent)");
 		System.out.println("	-ss : also associate supersets (default: no supersets)");
-		System.out.println("	-sc : additional analysis based on seed combinations");
+		System.out.println("	-sc : additional analysis based on seed combinations rather than sole complexes");
 		System.out.println("	-hr : additionally output human readable files with gene names and rounded numbers (default: no output)");
 		
 		System.out.println();
@@ -213,7 +213,7 @@ public class CompleXChange {
 		// check for invalid usage of seedcomb mode
 		if (also_seedcomb_calcs && seed == null) {
 			also_seedcomb_calcs = false;
-			System.out.println("Analysis of seed combination variants in complexes requires a seed file.");
+			System.out.println("Analysis of seed combination variants in complexes requires a seed file, this additional analysis is skipped.");
 		}
 	}
 	
@@ -269,7 +269,7 @@ public class CompleXChange {
 			System.out.println(dcd.getRawPValues().size() + " complexes tested, " + dcd.getSignificanceSortedComplexes().size() + " significant.");
 		System.out.flush();
 		
-		output_to_write = dcd.getSignificanceSortedComplexes().isEmpty();
+		output_to_write = !dcd.getSignificanceSortedComplexes().isEmpty();
 		
 		DiffSeedCombDetector dscd = null;
 		if (also_seedcomb_calcs) {

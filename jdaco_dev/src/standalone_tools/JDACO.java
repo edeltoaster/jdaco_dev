@@ -15,7 +15,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class JDACO {
-	static String version_string = "JDACO 1.0";
+	static String version_string = "JDACO 1.01";
 	
 	private static String ppin_file;
 	private static String ddin_file;
@@ -75,7 +75,7 @@ public class JDACO {
 		System.out.println();
 		
 		System.out.println("[OUT-FILE] :");
-		System.out.println("	The outcome is written as a csv. Adding .gz will generate a compressed output file.");
+		System.out.println("	The outcome is written as a txt. Adding .gz will generate a compressed output file.");
 		
 		System.out.println();
 		
