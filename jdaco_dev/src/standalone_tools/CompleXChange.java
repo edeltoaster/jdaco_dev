@@ -301,10 +301,10 @@ public class CompleXChange {
 		dcd.writeSignSortedComplexes(output_folder + "diff_complexes.txt", false);
 		
 		if (seed != null) {
-			dcd.writeSignSortedVariants(output_folder + "diff_seed_variants.txt", false);
+			dcd.writeSignSortedVariants(output_folder + "diff_seedcomb_in_complexes.txt", false);
 			
 			if (also_seedcomb_calcs)
-				dscd.writeSignSortedVariants(output_folder + "diff_seed_combination_variants.txt", false);
+				dscd.writeSignSortedVariants(output_folder + "diff_seed_combinations.txt", false);
 		}
 		
 		if (human_readable) {
@@ -313,10 +313,10 @@ public class CompleXChange {
 			System.out.println("Output human readable results ...");
 			dcd.writeSignSortedComplexes(output_folder + "diff_complexes_hr.txt", true);
 			if (seed != null) {
-				dcd.writeSignSortedVariants(output_folder + "diff_seed_variants_hr.txt", true);
+				dcd.writeSignSortedVariants(output_folder + "diff_seedcomb_in_complexes_hr.txt", true);
 				
 				if (also_seedcomb_calcs)
-					dscd.writeSignSortedVariants(output_folder + "diff_seed_combination_variants_hr.txt", true);
+					dscd.writeSignSortedVariants(output_folder + "diff_seed_combinations_hr.txt", true);
 			}
 		}
 	}
