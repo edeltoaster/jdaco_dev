@@ -125,7 +125,7 @@ public class randTCGAdiff {
 		List<String> normal_data = new ArrayList<String>();
 		
 		
-		for (File file:Utilities.getAllPrefixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/tissue_spec/cancer_nets/TCGA/", TCGA_prefix)) {
+		for (File file:Utilities.getAllPrefixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/tissue_spec/cancer_nets/TCGA/", TCGA_prefix)) {
 			String file_name = file.getAbsolutePath();
 			if (file_name.endsWith("tumor.txt.gz"))
 				tumor_data.add(file_name);
@@ -219,7 +219,7 @@ public class randTCGAdiff {
 		
 		// get all prefixes
 		Set<String> cancers = new HashSet<String>();
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/tissue_spec/cancer_nets/TCGA/", ".txt.gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/tissue_spec/cancer_nets/TCGA/", ".txt.gz")) {
 			cancers.add(f.getName().split("_")[0]);
 		}
 		

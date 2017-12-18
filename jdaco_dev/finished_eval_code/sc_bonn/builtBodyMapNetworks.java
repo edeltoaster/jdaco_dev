@@ -26,7 +26,7 @@ public class builtBodyMapNetworks {
 		
 		NetworkBuilder builder = new NetworkBuilder(ppi);
 		
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/tissue_spec/bodymap/", ".gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/tissue_spec/bodymap/", ".gz")) {
 			String sample = f.getName().split(".fpkm")[0];
 			System.out.println("Processing " + sample);
 			

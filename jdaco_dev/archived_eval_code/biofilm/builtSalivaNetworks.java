@@ -13,7 +13,7 @@ import framework.PPIN;
 import framework.Utilities;
 
 public class builtSalivaNetworks {
-	static String project_folder = "/Users/tho/Dropbox/Work/biofilm/";
+	static String project_folder = "/Users/tho/GDrive/Work/biofilm/";
 	
 	public static void main(String[] args) {
 		System.out.println("run at 03.07.15, PrePPI");

@@ -15,8 +15,8 @@ import framework.Utilities;
 
 public class check_specific_interactions {
 	
-	static String CD8_networks_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.13/";//"/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.0/"; // 0.13
-	static String hemato_networks_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/0.31/";//"/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/quant_hemo_networks_0.0/";
+	static String CD8_networks_folder = "/Users/tho/GDrive/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.13/";//"/Users/tho/GDrive/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.0/"; // 0.13
+	static String hemato_networks_folder = "/Users/tho/GDrive/Work/projects/hemato_rewiring/BLUEPRINT_networks/0.31/";//"/Users/tho/GDrive/Work/projects/CD8_subtypes_public_and_SFB/quant_hemo_networks_0.0/";
 	
 	public static boolean containsIA(String ppin_path, StrPair IA) {
 		PPIN ppin = new PPIN(ppin_path);

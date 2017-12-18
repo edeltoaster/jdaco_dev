@@ -21,9 +21,9 @@ import framework.Utilities;
 
 public class check_hemato_diffcomplexes {
 	
-	public static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/hemato_check/res_99_5/";
-	public static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/hemato_check/BP_networks/";
-	public static String diff_compl_output_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/hemato_check/diffnet_results/";
+	public static String daco_results_folder = "/Users/tho/GDrive/Work/projects/stem_cell_complexome/hemato_check/res_99_5/";
+	public static String networks_folder = "/Users/tho/GDrive/Work/projects/stem_cell_complexome/hemato_check/BP_networks/";
+	public static String diff_compl_output_folder = "/Users/tho/GDrive/Work/projects/stem_cell_complexome/hemato_check/diffnet_results/";
 	public static int no_threads = 4;
 
 	public static GOAnnotator goa = new GOAnnotator("9606", false, "mixed_data/stem_tags.txt");
@@ -100,7 +100,7 @@ public class check_hemato_diffcomplexes {
 		
 		interesting_targets.addAll(involved_tfs);
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz", involved_tfs, 0.0001, interesting_targets);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz", involved_tfs, 0.0001, interesting_targets);
 		
 		/**
 		 *  writing network data

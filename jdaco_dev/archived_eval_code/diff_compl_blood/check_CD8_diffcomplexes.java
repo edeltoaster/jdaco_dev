@@ -22,9 +22,9 @@ import framework.Utilities;
 
 public class check_CD8_diffcomplexes {
 	
-	public static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/CD8_subtypes/res_99_5/";
-	public static String networks_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/CD8_subtypes/CD8_networks/";
-	public static String diff_compl_output_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/CD8_subtypes/diffnet_results/";
+	public static String daco_results_folder = "/Users/tho/GDrive/Work/projects/stem_cell_complexome/CD8_subtypes/res_99_5/";
+	public static String networks_folder = "/Users/tho/GDrive/Work/projects/stem_cell_complexome/CD8_subtypes/CD8_networks/";
+	public static String diff_compl_output_folder = "/Users/tho/GDrive/Work/projects/stem_cell_complexome/CD8_subtypes/diffnet_results/";
 	public static int no_threads = 4;
 	
 	//increased: Plaur, Ilirn, Anpep, Ccl3, Mmp19, Serpb2, Cxcl3, Il1b and Sppi -> Q03405, P18510, P15144, P10147, Q99542, P05120, P19876, P01584, P10451
@@ -109,7 +109,7 @@ public class check_CD8_diffcomplexes {
 		
 		interesting_targets.addAll(involved_tfs);
 		System.out.println("Reading binding data for " + involved_tfs.size() + " TFs.");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz", involved_tfs, 0.0001, interesting_targets);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz", involved_tfs, 0.0001, interesting_targets);
 		
 		/**
 		 *  writing network data

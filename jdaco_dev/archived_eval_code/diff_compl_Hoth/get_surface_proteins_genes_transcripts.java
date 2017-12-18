@@ -28,6 +28,6 @@ public class get_surface_proteins_genes_transcripts {
 			}
 		}
 		
-		Utilities.writeEntries(surface_genes_transcripts, "/Users/tho/Dropbox/Work/projects/capello/diff-expr/surface_23_11_17.txt.gz");
+		Utilities.writeEntries(surface_genes_transcripts, "/Users/tho/GDrive/Work/projects/capello/diff-expr/surface_23_11_17.txt.gz");
 	}
 }

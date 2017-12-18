@@ -22,8 +22,8 @@ import framework.Utilities;
 
 public class check_hemato_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/hemato_DACO_0.0/res7/";
-	static String networks_folder_pre = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/quant_hemo_networks_0.0/";
+	static String daco_results_folder = "/Users/tho/GDrive/Work/projects/CD8_subtypes_public_and_SFB/hemato_DACO_0.0/res7/";
+	static String networks_folder_pre = "/Users/tho/GDrive/Work/projects/CD8_subtypes_public_and_SFB/quant_hemo_networks_0.0/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	static GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
 	
@@ -118,7 +118,7 @@ public class check_hemato_complexes_quant {
 		
 		// only among TFs
 		System.out.println("reading binding data ...");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", TFC_left, TFC_left);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", TFC_left, TFC_left);
 		System.out.println("done.");
 		
 		for (String test_cell_type:cell_types) {

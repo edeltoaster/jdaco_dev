@@ -23,8 +23,8 @@ import framework.Utilities;
 
 public class check_complexes_quant {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_DACO_0.0/res7/";
-	static String networks_folder_pre = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.0/";
+	static String daco_results_folder = "/Users/tho/GDrive/Work/projects/CD8_subtypes_public_and_SFB/CD8_DACO_0.0/res7/";
+	static String networks_folder_pre = "/Users/tho/GDrive/Work/projects/CD8_subtypes_public_and_SFB/CD8_networks_0.0/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	static GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
 	
@@ -229,7 +229,7 @@ public class check_complexes_quant {
 		// binding data and regnet
 		
 		System.out.println("reading binding data ...");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", allow_in_binding_data, allow_in_binding_data);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", allow_in_binding_data, allow_in_binding_data);
 		System.out.println("done.");
 		
 		RegulatoryNetwork regnet = new RegulatoryNetwork(signTFvariants, bdh);

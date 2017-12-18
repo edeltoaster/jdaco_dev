@@ -88,7 +88,7 @@ public class transcr_per_prot {
 		List<String> tumor_data = new ArrayList<String>();
 		List<String> normal_data = new ArrayList<String>();
 		
-		for (File file:Utilities.getAllPrefixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/tissue_spec/cancer_nets/TCGA/", "BRCA")) {
+		for (File file:Utilities.getAllPrefixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/tissue_spec/cancer_nets/TCGA/", "BRCA")) {
 			String file_name = file.getAbsolutePath();
 			if (file_name.endsWith("tumor.txt.gz"))
 				tumor_data.add(file_name);
@@ -147,7 +147,7 @@ public class transcr_per_prot {
 		
 		// get all prefixes
 		Set<String> cancers = new HashSet<String>();
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/tissue_spec/cancer_nets/TCGA/", ".txt.gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/tissue_spec/cancer_nets/TCGA/", ".txt.gz")) {
 			cancers.add(f.getName().split("_")[0]);
 		}
 		
@@ -158,7 +158,7 @@ public class transcr_per_prot {
 		
 		
 		process(biogrid.getProteins(), "BioGRID");
-		Map<String,Set<String>> hm_map = getHMSet("/Users/tho/Dropbox/manuscripts/PPIXpress/eval/hallmarks/hallmarks_biogrid_05_May_15_no_IEA.tsv");
+		Map<String,Set<String>> hm_map = getHMSet("/Users/tho/GDrive/manuscripts/PPIXpress/eval/hallmarks/hallmarks_biogrid_05_May_15_no_IEA.tsv");
 		Set<String> all_hm = new HashSet<String>();
 		for (String term:hm_map.keySet()) {
 			process(hm_map.get(term), "BioGRID ("+term+")");
@@ -172,7 +172,7 @@ public class transcr_per_prot {
 		System.out.println("");
 		
 		process(intact.getProteins(), "IntAct");
-		hm_map = getHMSet("/Users/tho/Dropbox/manuscripts/PPIXpress/eval/hallmarks/hallmarks_intact_05_May_15_no_IEA.tsv");
+		hm_map = getHMSet("/Users/tho/GDrive/manuscripts/PPIXpress/eval/hallmarks/hallmarks_intact_05_May_15_no_IEA.tsv");
 		all_hm.clear();
 		for (String term:hm_map.keySet()) {
 			process(hm_map.get(term), "IntAct ("+term+")");

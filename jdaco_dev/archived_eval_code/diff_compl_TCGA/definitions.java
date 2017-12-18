@@ -27,7 +27,7 @@ public class definitions {
 	static int SPEnrich_iterations = 10000;
 	static int SPEnrich_compl_part_threshold = 10;
 	
-	static String binding_data = "/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10_EPD_v5_2k.txt.gz";
+	static String binding_data = "/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10_EPD_v5_2k.txt.gz";
 	static int d_min = -25;
 	static int d_max = 25;
 	

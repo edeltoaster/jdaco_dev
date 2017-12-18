@@ -47,7 +47,7 @@ public class eval_hm_coverage {
 		
 		
 		process(biogrid.getProteins(), "BioGRID", nb_bg);
-		Map<String,Set<String>> hm_map = getHMSet("/Users/tho/Dropbox/manuscripts/PPIXpress/eval/hallmarks/hallmarks_biogrid_05_May_15_no_IEA.tsv");
+		Map<String,Set<String>> hm_map = getHMSet("/Users/tho/GDrive/manuscripts/PPIXpress/eval/hallmarks/hallmarks_biogrid_05_May_15_no_IEA.tsv");
 		Set<String> all_hm = new HashSet<String>();
 		for (String term:hm_map.keySet()) {
 			process(hm_map.get(term), "BioGRID ("+term+")", nb_bg);
@@ -61,7 +61,7 @@ public class eval_hm_coverage {
 		System.out.println("");
 		
 		process(intact.getProteins(), "IntAct", nb_intact);
-		hm_map = getHMSet("/Users/tho/Dropbox/manuscripts/PPIXpress/eval/hallmarks/hallmarks_intact_05_May_15_no_IEA.tsv");
+		hm_map = getHMSet("/Users/tho/GDrive/manuscripts/PPIXpress/eval/hallmarks/hallmarks_intact_05_May_15_no_IEA.tsv");
 		all_hm.clear();
 		for (String term:hm_map.keySet()) {
 			process(hm_map.get(term), "IntAct ("+term+")", nb_intact);

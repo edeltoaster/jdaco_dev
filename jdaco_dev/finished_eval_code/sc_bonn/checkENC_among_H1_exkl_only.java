@@ -55,7 +55,7 @@ public class checkENC_among_H1_exkl_only {
 		
 		//System.out.println("sample #complexes #variants");
 		Map<String, DACOResultSet> data_map = new HashMap<String, DACOResultSet>();
-		for (File file:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/ENCODE/DACO/ana_10/results10/", ".csv")) {
+		for (File file:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/ENCODE/DACO/ana_10/results10/", ".csv")) {
 			String sample = file.getName().split("\\.")[0];
 			DACOResultSet res = new DACOResultSet(file.getAbsolutePath(), seed);
 			data_map.put(sample, res);
@@ -181,7 +181,7 @@ public class checkENC_among_H1_exkl_only {
 		System.out.println("bdh reading");
 		involved_tfs.retainAll(relevant_targets);
 		//BindingDataHandler bdh = new BindingDataHandler("mixed_data/human_fimo_2k.txt.gz", seed, 00001, seed);
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/binding_sites/human_fimo_2k.txt.gz", involved_tfs, 0.0001, involved_tfs);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/binding_sites/human_fimo_2k.txt.gz", involved_tfs, 0.0001, involved_tfs);
 		
 		RegulatoryNetwork regnet = new RegulatoryNetwork(ESC_tfc, bdh, -50, 50, 3, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");

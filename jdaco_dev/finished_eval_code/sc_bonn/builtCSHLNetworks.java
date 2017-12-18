@@ -27,7 +27,7 @@ public class builtCSHLNetworks {
 		
 		NetworkBuilder builder = new NetworkBuilder(ppi);
 		
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/ENCODE/CSHL/", "gtf.gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/ENCODE/CSHL/", "gtf.gz")) {
 			String sample = f.getName().split("RnaSeq")[1].split("Cell")[0].toUpperCase();
 			System.out.println("Processing " + sample);
 			

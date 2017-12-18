@@ -128,7 +128,7 @@ public class BRCAdiff {
 		Map<StrPair, Integer> overall_added = new HashMap<StrPair, Integer>();
 		Map<StrPair, Integer> overall_lost = new HashMap<StrPair, Integer>();
 		
-		for (File file:Utilities.getAllPrefixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/tissue_spec/cancer_nets/TCGA/", TCGA_prefix)) {
+		for (File file:Utilities.getAllPrefixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/tissue_spec/cancer_nets/TCGA/", TCGA_prefix)) {
 			String file_name = file.getAbsolutePath();
 			if (file_name.endsWith("tumor.txt.gz"))
 				tumor_data.add(file_name);

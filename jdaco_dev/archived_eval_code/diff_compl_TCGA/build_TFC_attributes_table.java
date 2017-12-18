@@ -12,7 +12,7 @@ import framework.Utilities;
 
 public class build_TFC_attributes_table {
 
-	static String local_results = "/Users/tho/Dropbox/Work/projects/cancer_complexome/data/diffcompl_results_95_5_-25-25/";
+	static String local_results = "/Users/tho/GDrive/Work/projects/cancer_complexome/data/diffcompl_results_95_5_-25-25/";
 	static String local_output_folder = "/Users/tho/Desktop/";
 	
 	public static Set<HashSet<String>> readVariants(String results_path) {

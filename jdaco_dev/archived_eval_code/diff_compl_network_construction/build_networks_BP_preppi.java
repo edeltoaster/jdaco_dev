@@ -10,7 +10,7 @@ import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
 public class build_networks_BP_preppi {
-	static String expr_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_expr/";
+	static String expr_folder = "/Users/tho/GDrive/Work/projects/hemato_rewiring/BLUEPRINT_expr/";
 	static String network_folder = "/Users/tho/Desktop/BP_networks/";
 	static PPIN original_ppin;
 	static NetworkBuilder builder;

@@ -18,7 +18,7 @@ import framework.Utilities;
 
 public class check_complexes {
 	
-	static String results_folder = "/Users/tho/Dropbox/Work/projects/CD8_subtypes_public_and_SFB/CD8_DACO_0.0/res7/";
+	static String results_folder = "/Users/tho/GDrive/Work/projects/CD8_subtypes_public_and_SFB/CD8_DACO_0.0/res7/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	
 	public static void all_TFcombinations() {
@@ -66,7 +66,7 @@ public class check_complexes {
 		
 		// check exclusive complexes
 		GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", 1.0, TFC_left);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", 1.0, TFC_left);
 		for (String cell_type:exclusive_TFComb.keySet()) {
 			System.out.println(cell_type + " " + exclusive_TFComb.get(cell_type).size());
 			
@@ -135,7 +135,7 @@ public class check_complexes {
 		
 		// check exclusive complexes
 		GOAnnotator goa = new GOAnnotator("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/simple_tags_retrieved.txt.gz");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", 1.0, TFC_left);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10/hocomoco_v10_EPD_2.5k.txt.gz", 1.0, TFC_left);
 		for (String cell_type:exclusive_TFComb.keySet()) {
 			System.out.println(cell_type + " " + exclusive_TFComb.get(cell_type).size());
 			

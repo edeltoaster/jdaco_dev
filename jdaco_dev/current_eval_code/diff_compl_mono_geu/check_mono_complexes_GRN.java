@@ -17,7 +17,7 @@ import framework.GOAnnotator;
 import framework.RegulatoryNetwork;
 
 public class check_mono_complexes_GRN {
-	static String compl_results = "/Users/tho/Dropbox/Work/projects/diff_complexome/results/diff_results_95_5_-25-25/unpaired_nonparametric/mono_dcd_compl.txt";
+	static String compl_results = "/Users/tho/GDrive/Work/projects/diff_complexome/results/diff_results_95_5_-25-25/unpaired_nonparametric/mono_dcd_compl.txt";
 	static int no_threads = 4;
 	static List<String> markers = Arrays.asList("P08637", "O75015", "P08571", "P01375", "P01584");
 	static String out_folder = "/Users/tho/Desktop/";

@@ -25,7 +25,7 @@ public class builtIndCalTechNetworks {
 		
 		NetworkBuilder builder = new NetworkBuilder(ppi);
 		
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/ENCODE/CalTech/", "gtf.gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/ENCODE/CalTech/", "gtf.gz")) {
 			String sample = f.getName().split("RnaSeq")[1].split("R2x75")[0].toUpperCase();
 			int replicate = Integer.parseInt(f.getName().split("Rep")[1].split("V3")[0]);
 			System.out.println("Processing " + sample + " (" + replicate +")");

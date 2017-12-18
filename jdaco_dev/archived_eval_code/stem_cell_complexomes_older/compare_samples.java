@@ -12,7 +12,7 @@ import framework.Utilities;
 
 public class compare_samples {
 	
-	static String daco_results_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/DACO_PrePPIhc_TPMgene/res5/";
+	static String daco_results_folder = "/Users/tho/GDrive/Work/projects/stem_cell_complexome/DACO_PrePPIhc_TPMgene/res5/";
 	static Set<String> seed = Utilities.readEntryFile("/Users/tho/git/jdaco_dev/jdaco_dev/mixed_data/hocomoco_human_TFs_v10.txt.gz");
 	
 	public static void main(String[] args) {

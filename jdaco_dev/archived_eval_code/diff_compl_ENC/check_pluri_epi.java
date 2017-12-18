@@ -17,8 +17,8 @@ import framework.DataQuery;
 import framework.Utilities;
 
 public class check_pluri_epi {
-	public static String pluri_epi_folder = "/Users/tho/Dropbox/Work/projects/stem_cell_complexome/pluri_epi_check/";
-	public static String binding_data = "/Users/tho/Dropbox/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz";
+	public static String pluri_epi_folder = "/Users/tho/GDrive/Work/projects/stem_cell_complexome/pluri_epi_check/";
+	public static String binding_data = "/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10_EPD_v4_5k.txt.gz";
 	public static String nodetable_file = "/Users/tho/Desktop/pluri/diffcompl_results_99_5_-25-25/nodetable_pruned.txt";
 	
 	public static void main(String[] args) {

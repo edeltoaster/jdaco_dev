@@ -55,7 +55,7 @@ public class checkENC_TFs_only {
 		
 		//System.out.println("sample #complexes #variants");
 		Map<String, DACOResultSet> data_map = new HashMap<String, DACOResultSet>();
-		for (File file:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/ENCODE/DACO/ana_10/results10/", ".csv")) {
+		for (File file:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/ENCODE/DACO/ana_10/results10/", ".csv")) {
 			String sample = file.getName().split("\\.")[0];
 			DACOResultSet res = new DACOResultSet(file.getAbsolutePath(), seed);
 			data_map.put(sample, res);
@@ -172,7 +172,7 @@ public class checkENC_TFs_only {
 		// read binding data and restrict to reachable ones in DNAse data
 		System.out.println("bdh reading");
 		seed.retainAll(relevant_targets);
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/binding_sites/human_fimo_2k.txt.gz", seed, 0.0001, seed);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/binding_sites/human_fimo_2k.txt.gz", seed, 0.0001, seed);
 		System.out.println(bdh.getTFsWithBindingData().size());
 		System.out.println(bdh.getTargetsToTFsMap().keySet().size());
 		

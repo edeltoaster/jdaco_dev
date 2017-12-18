@@ -49,6 +49,6 @@ public class parse_TOP2A_expression {
 			to_write.add(cell_type + "\t" + transcr_expr.get(top2a_tr));
 		}
 		
-		Utilities.writeEntries(to_write, "/Users/tho/Dropbox/Work/projects/hemato_rewiring/diffnet_analysis/scripts/consequence/TOP2A_expr.txt.gz");
+		Utilities.writeEntries(to_write, "/Users/tho/GDrive/Work/projects/hemato_rewiring/diffnet_analysis/scripts/consequence/TOP2A_expr.txt.gz");
 	}
 }

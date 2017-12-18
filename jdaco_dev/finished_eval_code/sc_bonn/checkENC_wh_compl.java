@@ -19,7 +19,7 @@ public class checkENC_wh_compl {
 		
 		//System.out.println("sample #complexes #variants");
 		Map<String, DACOResultSet> data_map = new HashMap<String, DACOResultSet>();
-		for (File file:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/ENCODE/DACO/ana_10/results10/", ".csv")) {
+		for (File file:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/ENCODE/DACO/ana_10/results10/", ".csv")) {
 			String sample = file.getName().split("\\.")[0];
 			DACOResultSet res = new DACOResultSet(file.getAbsolutePath(), seed);
 			data_map.put(sample, res);

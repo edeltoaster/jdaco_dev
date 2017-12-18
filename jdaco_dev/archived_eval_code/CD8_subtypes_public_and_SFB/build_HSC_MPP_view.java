@@ -9,7 +9,7 @@ import framework.StrPair;
 import framework.Utilities;
 
 public class build_HSC_MPP_view {
-	static String network_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_networks/0.31/";
+	static String network_folder = "/Users/tho/GDrive/Work/projects/hemato_rewiring/BLUEPRINT_networks/0.31/";
 	
 	public static List<PPIN> loadNetworks(String path) {
 		List<PPIN> ppins = new LinkedList<>();

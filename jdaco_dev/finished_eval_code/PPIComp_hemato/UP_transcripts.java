@@ -19,6 +19,6 @@ public class UP_transcripts {
 		Set<String> protein_transcripts = new HashSet<>(DataQuery.getGenesTranscriptsProteins(db).stream().map(s->s[1]).collect(Collectors.toList()));
 		System.out.println(protein_transcripts.size());
 		
-		Utilities.writeEntries(protein_transcripts, "/Users/tho/Dropbox/Work/projects/hemato_rewiring/diffnet_analysis/scripts/quantitative/protein_transcripts.txt.gz");
+		Utilities.writeEntries(protein_transcripts, "/Users/tho/GDrive/Work/projects/hemato_rewiring/diffnet_analysis/scripts/quantitative/protein_transcripts.txt.gz");
 	}
 }

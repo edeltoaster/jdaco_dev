@@ -29,7 +29,7 @@ public class builtMCalTechNetworks {
 		NetworkBuilder builder = new NetworkBuilder(ppi);
 		Map<String, LinkedList<Map<String, Float>>> replications = new HashMap<String, LinkedList<Map<String,Float>>>();
 		
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/ENCODE/CalTech/", "gtf.gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/ENCODE/CalTech/", "gtf.gz")) {
 			String sample = f.getName().split("RnaSeq")[1].split("R2x75")[0].toUpperCase();
 			if (!replications.containsKey(sample))
 				replications.put(sample, new LinkedList<Map<String,Float>>());

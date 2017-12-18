@@ -51,7 +51,7 @@ public class checkENC_all {
 		Set<String> seed = Utilities.readEntryFile("mixed_data/hocomoco_tfs.txt.gz");
 		
 		Map<String, DACOResultSet> data_map = new HashMap<String, DACOResultSet>();
-		for (File file:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/ENCODE/DACO/ana_10/results10/", ".csv")) {
+		for (File file:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/ENCODE/DACO/ana_10/results10/", ".csv")) {
 			String sample = file.getName().split("\\.")[0];
 			DACOResultSet res = new DACOResultSet(file.getAbsolutePath(), seed);
 			data_map.put(sample, res);
@@ -69,7 +69,7 @@ public class checkENC_all {
 		
 		// read binding data and restrict to reachable ones in DNAse data
 		System.out.println("bdh reading");
-		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/Dropbox/Work/binding_sites/human_fimo_2k.txt.gz", seed, 0.00001, relevant_targets);
+		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/binding_sites/human_fimo_2k.txt.gz", seed, 0.00001, relevant_targets);
 		System.out.println("TFs: " + bdh.getTFsWithBindingData().size());
 		System.out.println("Possible targets: " + bdh.getTargetsToTFsMap().keySet().size());
 		

@@ -13,7 +13,7 @@ public class TFmir_adds {
 	public static void main(String[] args) {
 		
 		List<String> output = new LinkedList<>();
-		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/Dropbox/Work/projects/TFmir_adds/", "gtf.gz")) {
+		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders("/Users/tho/GDrive/Work/projects/TFmir_adds/", "gtf.gz")) {
 			String sample = f.getName().split("RnaSeq")[1].split("Cell")[0].split("GeneEns")[0];
 			System.out.println("Processing " + sample);
 			
@@ -28,6 +28,6 @@ public class TFmir_adds {
 			output.add(sample + ":" + String.join(",", abundances.keySet()));
 		}
 		
-		Utilities.writeEntries(output, "/Users/tho/Dropbox/Work/projects/TFmir_adds/mouse_tissues_ENS.txt.gz");
+		Utilities.writeEntries(output, "/Users/tho/GDrive/Work/projects/TFmir_adds/mouse_tissues_ENS.txt.gz");
 	}
 }

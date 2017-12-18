@@ -12,7 +12,7 @@ import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
 public class build_networks2 {
-	static String BLUEPRINT_expr_folder = "/Users/tho/Dropbox/Work/projects/hemato_rewiring/BLUEPRINT_expr/";
+	static String BLUEPRINT_expr_folder = "/Users/tho/GDrive/Work/projects/hemato_rewiring/BLUEPRINT_expr/";
 	static String network_folder_pre = "/Users/tho/Desktop/BLUEPRINT_networks/";
 	static Map<String, String> folder_type_map = new HashMap<>();
 	static PPIN original_ppin;
