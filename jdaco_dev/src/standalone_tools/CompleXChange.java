@@ -34,7 +34,7 @@ public class CompleXChange {
 	private static boolean also_seedcomb_calcs = false;
 	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	
-	// TODO: add termination criterion parameters?
+	// TODO: add termination criterion parameters, add seed protein enrichment?
 	
 	/**
 	 * Reads all matching output pairs of JDACO results/major transcripts from a certain folder: 
