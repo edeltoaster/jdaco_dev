@@ -129,6 +129,7 @@ public class test_abundance_estimation {
 		
 		// add to non-limiting proteins
 		Map<String, Double> remaining_protein_abundance = new HashMap<>();
+		Map<String, Double> rel_remaining_protein_abundance = new HashMap<>();
 		for (String transcript:transcript_abundance.keySet()) {
 			String prot = transcript.substring(1);
 			if (limiting_protein_to_complex.containsKey(prot)) {
@@ -137,16 +138,18 @@ public class test_abundance_estimation {
 			}
 			float compl_abundance = rnd.nextFloat() * ((float) remaining_prefactor) * transcript_abundance.get(transcript);
 			remaining_protein_abundance.put(prot, (double) compl_abundance);
+			rel_remaining_protein_abundance.put(prot, (double) compl_abundance / transcript_abundance.get(transcript));
 			transcript_abundance.put(transcript, transcript_abundance.getOrDefault(transcript, 0f) + compl_abundance);
 		}
 		
 		QuantDACOResultSet qdr = new QuantDACOResultSet(new HashSet<HashSet<String>>(dr.getResult()), Utilities.readEntryFile("mixed_data/hocomoco_human_TFs_v10.txt.gz"), protein_to_assumed_transcript, transcript_abundance);
 		
-		Object[] output = new Object[4];
+		Object[] output = new Object[5];
 		output[0] = qdr;
 		output[1] = artificial_complex_abundance;
 		output[2] = remaining_protein_abundance; // only remaining abundance of all proteins that are in complexes, limiting proteins have rem_abundance 0.0
 		output[3] = limiting_protein_distribution; // for statistics on the model
+		output[4] = rel_remaining_protein_abundance; // for statistics on the model
 		
 		return output;
 	}
@@ -168,25 +171,16 @@ public class test_abundance_estimation {
 		Map<String, Double> art_remaining_protein_abundance = (Map<String, Double>) simulation[2];
 		@SuppressWarnings("unchecked")
 		Map<String, List<Double>> limiting_protein_distribution = (Map<String, List<Double>>) simulation[3];
+		@SuppressWarnings("unchecked")
+		Map<String, Double> rel_remaining_protein_abundance = (Map<String, Double>) simulation[4];
 		
 		// get some sample construction values
-		double complex_abundance_min = artificial_complex_abundance.values().stream().min(Double::compareTo).get();
-		double complex_abundance_mean = Utilities.getMean(artificial_complex_abundance.values());
-		double complex_abundance_std = Utilities.getStd(artificial_complex_abundance.values());
-		double complex_abundance_max = artificial_complex_abundance.values().stream().max(Double::compareTo).get();
-		
 		List<Double> means = limiting_protein_distribution.values().stream().map(l->Utilities.getMean(l)).collect(Collectors.toList());
-		List<Double> mins = limiting_protein_distribution.values().stream().map(l->l.stream().min(Double::compareTo).get()).collect(Collectors.toList());
-		List<Double> maxs = limiting_protein_distribution.values().stream().map(l->l.stream().max(Double::compareTo).get()).collect(Collectors.toList());
-		double lim_distr_min = Utilities.getMean(mins);
+		List<Double> stds = limiting_protein_distribution.values().stream().map(l->Utilities.getStd(l)).collect(Collectors.toList());
 		double lim_distr_mean = Utilities.getMean(means);
-		double lim_distr_std = Utilities.getStd(means);
-		double lim_distr_max = Utilities.getMean(maxs);
-		
-		double rem_abundance_min = art_remaining_protein_abundance.values().stream().min(Double::compareTo).get();
-		double rem_abundance_mean = Utilities.getMean(art_remaining_protein_abundance.values());
-		double rem_abundance_std = Utilities.getStd(art_remaining_protein_abundance.values());
-		double rem_abundance_max = art_remaining_protein_abundance.values().stream().max(Double::compareTo).get();
+		double lim_distr_std = Utilities.getMean(stds);
+		double rem_abundance_mean = Utilities.getMean(rel_remaining_protein_abundance.values());
+		double rem_abundance_std = Utilities.getStd(rel_remaining_protein_abundance.values());
 		
 		// prepare evaluation
 		Map<HashSet<String>, Double> eval_complex_abundance = qdr.getAbundanceOfComplexes();
@@ -214,7 +208,7 @@ public class test_abundance_estimation {
 		results[3] = Utilities.getRMSD(rem_artificial, rem_evaluated);
 		
 		if (sample_construction_outputs != null) {
-			String out = daco_result_file + " " + std_factor + " " + remaining_prefactor + " " + (iteration+1) + " " + complex_abundance_min + " " + complex_abundance_mean + " " + complex_abundance_std + " " + complex_abundance_max + " " + lim_distr_min + " " + lim_distr_mean + " " + lim_distr_std + " " + lim_distr_max + " " + rem_abundance_min + " " + rem_abundance_mean + " " +rem_abundance_std + " " + rem_abundance_max;
+			String out = daco_result_file + " " + std_factor + " " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_mean + " " + lim_distr_std + " " + rem_abundance_mean + " " +rem_abundance_std;
 			sample_construction_outputs[iteration] = out;
 		}
 		
@@ -238,11 +232,11 @@ public class test_abundance_estimation {
 		List<String> all_iterations = new LinkedList<>();
 		List<String> sample_construction = new LinkedList<>();
 		all_iterations.add("sample std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
-		sample_construction.add("sample std prefactor iter complex_abundance_min complex_abundance_mean complex_abundance_std complex_abundance_max lim_distr_min lim_distr_mean lim_distr_std lim_distr_max rem_abundance_min rem_abundance_mean rem_abundance_std rem_abundance_max");
+		sample_construction.add("sample std prefactor iter lim_distr_mean lim_distr_std rem_abundance_mean rem_abundance_std");
 		
 		int no_iterations = 20;
-		double[] stds = new double[]{0.25, 0.5, 0.75, 1.0};
-		double[] prefactors = new double[]{0.25, 0.5, 1.0, 2.0, 3.0};
+		double[] stds = new double[]{0.01, 0.25, 0.5, 0.75, 1.0, 1.25};
+		double[] prefactors = new double[]{0.01, 0.25, 0.5, 1.0, 2.0, 3.0};
 		
 		System.out.println("Running benchmark on M/GEU");
 		System.out.println(no_iterations + " iterations for each sample (" + data.size() + " samples)");
