@@ -137,13 +137,13 @@ public class test_abundance_estimation2 {
 				continue;
 			}
 			
+			// sample from real data
 			float compl_abundance = 0f;
 			while (compl_abundance <= 0f) {
 				int chosen_index = rnd.nextInt(tr_abundance_values.size());
 				double prot_abundance = tr_abundance_values.get(chosen_index);
 				compl_abundance = (float) (prot_abundance - transcript_abundance.get(transcript));
 			}
-			// sample from real data
 			remaining_protein_abundance.put(prot, (double) compl_abundance);
 			transcript_abundance.put(transcript, transcript_abundance.getOrDefault(transcript, 0f) + compl_abundance);
 		}
@@ -276,6 +276,7 @@ public class test_abundance_estimation2 {
 			// already write something
 			Utilities.writeEntries(all_iterations, "perf_all_iterations2.txt.gz");
 			Utilities.writeEntries(sample_construction, "sample_construction2.txt.gz");
+			
 			System.out.println("Written " + std);
 			System.out.flush();
 		}
