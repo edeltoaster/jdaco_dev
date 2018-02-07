@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import framework.DiffComplexDetector;
+import framework.DiffComplexDetector.SPEnrichment;
 import framework.DiffSeedCombDetector;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
@@ -32,9 +33,8 @@ public class CompleXChange {
 	private static double min_variant_fraction = 0.75;
 	private static boolean human_readable = false;
 	private static boolean also_seedcomb_calcs = false;
+	private static boolean also_seed_enrich = false;
 	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
-	
-	// TODO: add termination criterion parameters, add seed protein enrichment?
 	
 	/**
 	 * Reads all matching output pairs of JDACO results/major transcripts from a certain folder: 
@@ -73,6 +73,7 @@ public class CompleXChange {
 		System.out.println("	-nd : assume normal distribution when testing (default: no assumption, nonparametric tests applied)");
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent tests applied)");
 		System.out.println("	-ss : also associate supersets in the analyses (default: no supersets)");
+		System.out.println("	-e : determine seed proteins enriched in up/down-regulated complexes (as in GSEA)");
 		System.out.println("	-sc : additional analysis based on seed combinations rather than sole complexes");
 		System.out.println("	-hr : additionally output human readable files with gene names and rounded numbers (default: no output)");
 		
@@ -158,6 +159,10 @@ public class CompleXChange {
 			// seed combinations?
 			else if (arg.equals("-sc"))
 				also_seedcomb_calcs = true;
+			
+			// seed enrichment?
+			else if (arg.equals("-e"))
+				also_seed_enrich = true;
 			
 			// output human readable files?
 			else if (arg.equals("-hr"))
@@ -284,6 +289,16 @@ public class CompleXChange {
 			System.out.flush();
 		}
 		
+		SPEnrichment spe = null;
+		if (seed != null && also_seed_enrich) {
+			System.out.println("Calculating seed protein enrichment with 10000 permutations and only considering seed proteins participating in at least 10 complexes.");
+			System.out.flush();
+			spe = dcd.calculateSPEnrichment(FDR, 10000, 10);
+			
+			if (!spe.getSignificanceSortedSeedProteins().isEmpty())
+				output_to_write = true;
+		}
+		
 		/*
 		 * write file-output
 		 */
@@ -307,6 +322,9 @@ public class CompleXChange {
 			
 			if (also_seedcomb_calcs)
 				dscd.writeSignSortedVariants(output_folder + "diff_seed_combinations.txt", false);
+			
+			if (also_seed_enrich)
+				spe.writeSignificantSeedProteins(output_folder + "enriched_seed_proteins.txt");
 		}
 		
 		if (human_readable) {
