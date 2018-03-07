@@ -177,9 +177,9 @@ public class test_abundance_estimation {
 		// get some sample construction values
 		List<Double> means = limiting_protein_distribution.values().stream().map(l->Utilities.getMean(l)).collect(Collectors.toList());
 		List<Double> stds = limiting_protein_distribution.values().stream().map(l->Utilities.getStd(l)).collect(Collectors.toList());
-		double lim_distr_mean = Utilities.getMean(means);
-		double lim_distr_std = Utilities.getMean(stds);
-		double rem_abundance_mean = Utilities.getMean(rel_remaining_protein_abundance.values());
+		double lim_distr_medians = Utilities.getMedian(means);
+		double lim_distr_std = Utilities.getMedian(stds);
+		double rem_abundance_medians = Utilities.getMedian(rel_remaining_protein_abundance.values());
 		double rem_abundance_std = Utilities.getStd(rel_remaining_protein_abundance.values());
 		
 		// prepare evaluation
@@ -208,7 +208,7 @@ public class test_abundance_estimation {
 		results[3] = Utilities.getRMSD(rem_artificial, rem_evaluated);
 		
 		if (sample_construction_outputs != null) {
-			String out = daco_result_file + " " + std_factor + " " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_mean + " " + lim_distr_std + " " + rem_abundance_mean + " " +rem_abundance_std;
+			String out = daco_result_file + " " + std_factor + " " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_medians + " " + lim_distr_std + " " + rem_abundance_medians + " " +rem_abundance_std;
 			sample_construction_outputs[iteration] = out;
 		}
 		
@@ -232,7 +232,7 @@ public class test_abundance_estimation {
 		List<String> all_iterations = new LinkedList<>();
 		List<String> sample_construction = new LinkedList<>();
 		all_iterations.add("sample std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
-		sample_construction.add("sample std prefactor iter lim_distr_mean lim_distr_std rem_abundance_mean rem_abundance_std");
+		sample_construction.add("sample std prefactor iter lim_distr_medians lim_distr_std rem_abundance_medians rem_abundance_std");
 		
 		int no_iterations = 20;
 		//double[] stds = new double[]{0.01, 0.25, 0.5, 0.75, 1.0};
