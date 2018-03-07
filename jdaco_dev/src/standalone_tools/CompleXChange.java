@@ -73,7 +73,7 @@ public class CompleXChange {
 		System.out.println("	-nd : assume normal distribution when testing (default: no assumption, nonparametric tests applied)");
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent tests applied)");
 		System.out.println("	-ss : also associate supersets in the analyses (default: no supersets)");
-		System.out.println("	-e : determine seed proteins enriched in up/down-regulated complexes (as in GSEA)");
+		System.out.println("	-enr : determine seed proteins enriched in up/down-regulated complexes (as in GSEA)");
 		System.out.println("	-sc : additional analysis based on seed combinations rather than sole complexes");
 		System.out.println("	-hr : additionally output human readable files with gene names and rounded numbers (default: no output)");
 		
@@ -161,7 +161,7 @@ public class CompleXChange {
 				also_seedcomb_calcs = true;
 			
 			// seed enrichment?
-			else if (arg.equals("-e"))
+			else if (arg.equals("-enr"))
 				also_seed_enrich = true;
 			
 			// output human readable files?
