@@ -222,6 +222,11 @@ public class CompleXChange {
 			also_seedcomb_calcs = false;
 			System.out.println("Analysis of seed combination variants in complexes requires a seed file, this additional analysis is skipped.");
 		}
+		
+		if (also_seed_enrich && seed == null) {
+			also_seed_enrich = false;
+			System.out.println("Analysis of seed protein enrichment in complexes requires a seed file, this additional analysis is skipped.");
+		}
 	}
 	
 	
