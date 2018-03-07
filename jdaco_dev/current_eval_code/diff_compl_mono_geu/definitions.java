@@ -7,7 +7,7 @@ import framework.Utilities;
 public class definitions {
 	static String daco_results_folder = "res_95_5/";
 	static String networks_folder = "networks/";
-	static String diff_out_folder = "diff_results_95_5_-25-25/"; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
+	static String diff_out_folder = "diff_results_95_5/";
 	static String qr_output_folder = "q_results_95_5/";
 	
 	static double qvalue = 0.05;
@@ -27,8 +27,8 @@ public class definitions {
 	static int SPEnrich_compl_part_threshold = 10;
 	
 	static String binding_data = "/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10_EPD_v5_2k.txt.gz";
-	static int d_min = -25;
-	static int d_max = 25;
+	static int d_min = -5; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
+	static int d_max = 10;
 	
 	public static void printInitParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
