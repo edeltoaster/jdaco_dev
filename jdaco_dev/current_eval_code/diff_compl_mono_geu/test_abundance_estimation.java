@@ -238,8 +238,8 @@ public class test_abundance_estimation {
 		//double[] stds = new double[]{0.01, 0.25, 0.5, 0.75, 1.0};
 		//double[] prefactors = new double[]{0.01, 0.25, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0};
 		
-		double[] stds = new double[]{0.5, 1.0};
-		double[] prefactors = new double[]{1.0, 5.0, 10.0, 20.0, 30.0};
+		double[] stds = new double[]{0.5, 0.7, 1.0};
+		double[] prefactors = new double[]{20, 30, 50};
 		
 		System.out.println("Running benchmark on M/GEU");
 		System.out.println(no_iterations + " iterations for each sample (" + data.size() + " samples)");

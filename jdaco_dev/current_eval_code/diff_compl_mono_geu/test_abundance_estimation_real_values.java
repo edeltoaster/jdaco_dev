@@ -13,8 +13,9 @@ import java.util.stream.Collectors;
 
 import framework.Utilities;
 
-public class test_abundance_estimation2 {
+public class test_abundance_estimation_real_values {
 
+	static double limiting_prot_threshold = 1.0E-7;
 	static List<Double> rem_data_total = new LinkedList<>();
 	static List<Double> distr_data_total = new LinkedList<>();
 	
@@ -63,12 +64,14 @@ public class test_abundance_estimation2 {
 			// determine remaining prefactor
 			double remaining = prot_abun.get(prot) - sum_in_compl;
 			double factor = remaining / sum_in_compl;
-			rem_data.add(factor);
+			
+			if (remaining >= limiting_prot_threshold)
+				rem_data.add(factor);
 			
 			// determine avg distr
 			final double equal = sum_in_compl / compl_distr.size();
 			
-			if (remaining < 0.01)
+			if (remaining < limiting_prot_threshold)
 				distr_data.add(Utilities.getMean(compl_distr.stream().map(c -> (Math.abs(c-equal) / equal) ).collect(Collectors.toList())));
 		}
 		
@@ -88,7 +91,9 @@ public class test_abundance_estimation2 {
 			checkSample(sample, qdr, major_transcript_file);
 		}
 		
-		System.out.println("mean remaining of medians:" + Utilities.getMean(rem_data_total));
-		System.out.println("mean distr of medians (of means):" + Utilities.getMean(distr_data_total));
+		System.out.println();
+		System.out.println("mean remaining of medians: " + Utilities.getMean(rem_data_total));
+		System.out.println("mean distr of medians (of means): " + Utilities.getMean(distr_data_total));
+		System.out.println("limiting threshold: " + limiting_prot_threshold);
 	}
 }
