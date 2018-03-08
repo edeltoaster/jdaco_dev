@@ -107,7 +107,7 @@ public class check_hemato_diffcomplexes {
 		 */
 		
 		System.out.println("Building ...");
-		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(tf_variants, bdh, definitions.d_min, definitions.d_max, no_threads, 1);
+		RegulatoryNetwork pluri_regnet = new RegulatoryNetwork(tf_variants, involved_tfs, bdh, definitions.d_min, definitions.d_max, no_threads, 1);
 		System.out.println(pluri_regnet.getSizesStr());
 		pluri_regnet.writeRegulatoryNetwork(output_folder + "regnet.txt");
 		Map<String, Map<String,String>> annotational_data = new HashMap<>();

@@ -96,7 +96,7 @@ public class check_complexes_quant_pluri {
 		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, involved_tfs, 0.0001, involved_tfs);
 		
 		System.out.println("Building regnet ...");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tf_variants, bdh, -30, 30, 4, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(pluri_tf_variants, involved_tfs, bdh, -30, 30, 4, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only_min2.txt", 2);
 		

@@ -75,7 +75,7 @@ public class checkENC_all {
 		
 		// first build for all
 		System.out.println("regnet building (all hESC)");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(ESC_tfc, bdh, -50, 50, 3, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(ESC_tfc, seed, bdh, -50, 50, 3, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_all.txt");
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_all_min2.txt", 2);
 		regnet.writeNodeTable("/Users/tho/Desktop/node_table_all.txt");
@@ -92,7 +92,7 @@ public class checkENC_all {
 		}
 		
 		System.out.println("regnet building (only hESC)");
-		regnet = new RegulatoryNetwork(ESC_tfc, bdh, -50, 50, 3, 1);
+		regnet = new RegulatoryNetwork(ESC_tfc, seed, bdh, -50, 50, 3, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only_min2.txt", 2);
 		regnet.writeNodeTable("/Users/tho/Desktop/node_table_only.txt");

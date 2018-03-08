@@ -183,7 +183,7 @@ public class checkENC_among_H1_exkl_only {
 		//BindingDataHandler bdh = new BindingDataHandler("mixed_data/human_fimo_2k.txt.gz", seed, 00001, seed);
 		BindingDataHandler bdh = new BindingDataHandler("/Users/tho/GDrive/Work/binding_sites/human_fimo_2k.txt.gz", involved_tfs, 0.0001, involved_tfs);
 		
-		RegulatoryNetwork regnet = new RegulatoryNetwork(ESC_tfc, bdh, -50, 50, 3, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(ESC_tfc, involved_tfs, bdh, -50, 50, 3, 1);
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only.txt");
 		regnet.writeRegulatoryNetwork("/Users/tho/Desktop/regnet_only_min2.txt", 2);
 		regnet.writeNodeTable("/Users/tho/Desktop/node_table_only.txt");

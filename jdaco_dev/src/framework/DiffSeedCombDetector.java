@@ -558,7 +558,7 @@ public class DiffSeedCombDetector {
 		
 		// build regulatory network
 		System.out.println("Building regulatory network ...");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(tfc_to_complexes.keySet(), bdh, binding_d_min, binding_d_max, no_threads, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(tfc_to_complexes.keySet(), involved_tfs, bdh, binding_d_min, binding_d_max, no_threads, 1);
 		System.out.println(regnet.getSizesStr());
 		regnet.writeRegulatoryNetwork(output_folder + "regnet.txt");
 		
@@ -587,7 +587,7 @@ public class DiffSeedCombDetector {
 		}
 		
 		if (proteins_of_interest != null && POI_sign_tfcs.size() > 0) {
-			regnet = new RegulatoryNetwork(POI_sign_tfcs, bdh, binding_d_min, binding_d_max, no_threads, 1);
+			regnet = new RegulatoryNetwork(POI_sign_tfcs, involved_tfs, bdh, binding_d_min, binding_d_max, no_threads, 1);
 			System.out.println("POI: " + regnet.getSizesStr());
 			regnet.writeRegulatoryNetwork(output_folder + "regnet_POI.txt");
 			regnet.writeNodeTable(output_folder + "nodetable_POI.txt", annotational_data);

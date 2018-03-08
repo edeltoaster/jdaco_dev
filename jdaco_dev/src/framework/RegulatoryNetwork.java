@@ -31,15 +31,15 @@ public class RegulatoryNetwork {
 	private final Map<HashSet<String>, Set<String>> complex_to_targets = new HashMap<>();
 	private final Map<String, List<HashSet<String>>> tf_to_complex = new HashMap<>();
 	
-	public RegulatoryNetwork(HashSet<HashSet<String>> TF_complexes, BindingDataHandler bdh, int min_TFs) {
-		this.TF_complexes = new DACOResultSet(TF_complexes, bdh.getTFsWithBindingData());
+	public RegulatoryNetwork(HashSet<HashSet<String>> TF_complexes, Set<String> seed, BindingDataHandler bdh, int min_TFs) {
+		this.TF_complexes = new DACOResultSet(TF_complexes, seed);
 		this.bdh = bdh;
 		this.min_TFs = min_TFs;
 		this.constructNetwork();
 	}
 	
-	public RegulatoryNetwork(Set<HashSet<String>> TF_complexes, BindingDataHandler bdh, int d_min, int d_max, int no_threads, int min_TFs) {
-		this.TF_complexes = new DACOResultSet(TF_complexes, bdh.getTFsWithBindingData());
+	public RegulatoryNetwork(Set<HashSet<String>> TF_complexes,  Set<String> seed, BindingDataHandler bdh, int d_min, int d_max, int no_threads, int min_TFs) {
+		this.TF_complexes = new DACOResultSet(TF_complexes, seed);
 		this.bdh = bdh;
 		this.d_min = d_min;
 		this.d_max = d_max;
@@ -48,8 +48,8 @@ public class RegulatoryNetwork {
 		this.constructNetwork();
 	}
 	
-	public RegulatoryNetwork(List<HashSet<String>> TF_complexes, BindingDataHandler bdh, int d_min, int d_max, int no_threads, int min_TFs) {
-		this.TF_complexes = new DACOResultSet(new HashSet<HashSet<String>>(TF_complexes), bdh.getTFsWithBindingData());
+	public RegulatoryNetwork(List<HashSet<String>> TF_complexes,  Set<String> seed, BindingDataHandler bdh, int d_min, int d_max, int no_threads, int min_TFs) {
+		this.TF_complexes = new DACOResultSet(new HashSet<HashSet<String>>(TF_complexes), seed);
 		this.bdh = bdh;
 		this.d_min = d_min;
 		this.d_max = d_max;

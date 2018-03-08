@@ -19,7 +19,7 @@ import framework.RegulatoryNetwork;
 public class check_mono_complexes_GRN {
 	static String compl_results = "/Users/tho/GDrive/Work/projects/CompleXChange/results/diff_results_95_5/unpaired_nonparametric/mono_dcd_compl.txt";
 	static int no_threads = 4;
-	static List<String> markers = Arrays.asList("P08637", "O75015", "P08571", "P01375", "P01584");
+	static List<String> markers = Arrays.asList("P08637", "O75015", "P08571"); //, "P01375", "P01584"); CD16 and CD 14 interesting, TNF IL1B not so much
 	static String out_folder = "/Users/tho/Desktop/";
 	static Map<String, String> up_name = DataQuery.getUniprotToGeneNameMap("homo_sapiens_core_90_38");
 	static GOAnnotator goa = new GOAnnotator("mixed_data/stem_tags_retrieved.txt.gz");
@@ -27,14 +27,15 @@ public class check_mono_complexes_GRN {
 	public static void main(String[] args) {
 		
 		DiffComplexDetector.SignSortedComplexesResult res = DiffComplexDetector.readSignSortedComplexResult(compl_results);
-		Set<String> relevant_proteins = new HashSet<>(markers);
-		res.getMemberSeedComb().values().forEach(c -> relevant_proteins.addAll(c));
+		Set<String> relevant_targets = new HashSet<>(markers);
+		Set<String> relevant_TFs = new HashSet<>();
+		res.getMemberSeedComb().values().forEach(c -> relevant_TFs.addAll(c));
 		
 		System.out.println("Read binding data ...");
-		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, relevant_proteins, relevant_proteins);
+		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, relevant_TFs, relevant_targets);
 		
 		System.out.println("Building RegNet ...");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(res.getSignificanceSortedComplexes(), bdh, definitions.d_min, definitions.d_max, no_threads, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(res.getSignificanceSortedComplexes(), relevant_TFs, bdh, definitions.d_min, definitions.d_max, no_threads, 1);
 		
 		Map<String, Map<String,String>> annotational_data = new HashMap<String, Map<String,String>>();
 		
@@ -83,6 +84,7 @@ public class check_mono_complexes_GRN {
 		
 		System.out.println(regnet.getSizesStr());
 		regnet.writeRegulatoryNetwork(out_folder + "regnet.txt", 2);
+		regnet.writeRegulatoryNetwork(out_folder + "regnet_all.txt", 1);
 		regnet.writeNodeTable(out_folder + "regnet_nodes.txt", annotational_data);
 	}
 }
