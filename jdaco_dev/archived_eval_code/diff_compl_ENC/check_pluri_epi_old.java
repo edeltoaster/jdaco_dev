@@ -22,8 +22,7 @@ public class check_pluri_epi_old {
 	public static String nodetable_file = "/Users/tho/GDrive/Work/projects/stem_cell_complexome/diff_results_99_5_-25-25/pluri_nodetable_pruned.txt";
 	
 	public static void main(String[] args) {
-		
-		// TODO: determine abundances, quantiles ...
+	
 		// load ENCODE ChIP-seq data on histone marks in H1
 		Map<String, Set<String>> covered_promoters = new HashMap<>();
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(pluri_epi_folder + "covered_promoters/", ".bed.gz")) {
