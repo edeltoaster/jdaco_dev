@@ -24,6 +24,7 @@ import framework.Utilities;
 
 public class test_abundance_estimation2 {
 	public static Random rnd = new Random(System.currentTimeMillis());
+	public static Map<Integer, ArrayList<Double[]>> real_distr = new HashMap<>();
 	
 	/**
 	 * Realistic simulation of the "equal distribution"-model on the basis of real data and noise regarding the equality of the distribution of abundance values and 
@@ -87,25 +88,13 @@ public class test_abundance_estimation2 {
 			double prot_abundance = tr_abundance_values.get(chosen_index); // will be fast as it is an array list
 			double complex_abundance_mean = prot_abundance / size;
 			
-			List<Double> abundances = new ArrayList<>();
-
-			// initialize as equal distribution
+			// determine distribution from real values
+			List<Double> abundances = new ArrayList<>(size);
+			Double[] distr = real_distr.get(size).get(rnd.nextInt(real_distr.get(size).size()));
 			for (int i = 0; i < size; i++) {
-				abundances.add(complex_abundance_mean);
+				abundances.add(prot_abundance * distr[i]);
 			}
 			
-			if (size != 1) 
-				for (int i = 0; i < size; i++) {
-					double a_i = abundances.get(i);
-					int j = rnd.nextInt(size);
-					while (j == i)
-						j = rnd.nextInt(size);
-					double a_j = abundances.get(j);
-					
-					double diff_i_j = rnd.nextDouble() * std_factor * a_i;
-					abundances.set(i, a_i - diff_i_j);
-					abundances.set(j, a_j + diff_i_j);
-				}
 			// collect for statistics
 			List<Double> relative_deviation_distribution = abundances.stream().map(a -> Math.abs(a-complex_abundance_mean)/complex_abundance_mean).collect(Collectors.toList());
 			limiting_protein_distribution.put(limiting_protein, relative_deviation_distribution);
@@ -236,11 +225,11 @@ public class test_abundance_estimation2 {
 		all_iterations.add("sample std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
 		sample_construction.add("sample std prefactor iter lim_distr_medians lim_distr_std rem_abundance_medians rem_abundance_std");
 		
-		int no_iterations = 10;
-		double[] stds = new double[]{0.5, 0.75, 1.0};
-		double[] prefactors = new double[]{20, 30, 40};
+		int no_iterations = 20;
+		double[] stds = new double[]{1.0};
+		double[] prefactors = new double[]{5, 10, 20, 30, 40, 50, 60};
 		
-		System.out.println("Running benchmark on M/GEU");
+		System.out.println("Running benchmark on M/GEU using real distributions");
 		System.out.println(no_iterations + " iterations for each sample (" + data.size() + " samples)");
 		System.out.println("STDevs: " + Arrays.toString(stds));
 		System.out.println("Prefactors: " + Arrays.toString(prefactors));
@@ -286,6 +275,18 @@ public class test_abundance_estimation2 {
 	}
 	
 	public static void main(String[] args) {
+		// read realistic data
+		for (String s:Utilities.readFile("real_distr_data.csv.gz")) {
+			String[] spl = s.trim().split(",");
+			int len = spl.length;
+			Double[] dspl = new Double[len];
+			for (int i = 0; i < len; i++)
+				dspl[i] = Double.parseDouble(spl[i]);
+			if (!real_distr.containsKey(len))
+				real_distr.put(len, new ArrayList<Double[]>());
+			real_distr.get(len).add(dspl);
+		}
+		
 		benchmark();
 	}
 }

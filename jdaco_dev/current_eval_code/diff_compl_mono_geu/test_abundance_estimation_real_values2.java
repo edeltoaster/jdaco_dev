@@ -16,7 +16,8 @@ import framework.Utilities;
 public class test_abundance_estimation_real_values2 {
 
 	static List<Double> rem_data_total = new LinkedList<>();
-	static List<Double> distr_data_total = new LinkedList<>();
+	static List<Double> rel_distr_data_total = new LinkedList<>();
+	static List<String> distr_data_total = new LinkedList<>();
 	
 	public static Map<Set<String>, Double> readQDR(String path) {
 		Map<Set<String>, Double> qdr = new HashMap<>();
@@ -85,13 +86,17 @@ public class test_abundance_estimation_real_values2 {
 			
 			if (limiting_proteins.contains(prot)) {
 				
-				List<Double> compl_distr = new ArrayList<>(prots_in_compl.size());
-				for (Set<String> compl:prot_compl_map.get(prot))
-						compl_distr.add(qdr.get(compl));
+				List<Double> rel_compl_distr = new LinkedList<>();
+				List<String> compl_distr = new LinkedList<>();
+				for (Set<String> compl:prot_compl_map.get(prot)) {
+						rel_compl_distr.add(qdr.get(compl));
+						compl_distr.add(Double.toString(qdr.get(compl) / sum_in_complexes.get(prot)));
+				}
 				
 				// determine avg distr of limiting proteins
 				final double equal = sum_in_complexes.get(prot) / compl_distr.size();
-				distr_data.add(Utilities.getMean(compl_distr.stream().map(c -> (Math.abs(c-equal) / equal) ).collect(Collectors.toList())));
+				distr_data.add(Utilities.getMean(rel_compl_distr.stream().map(c -> (Math.abs(c-equal) / equal) ).collect(Collectors.toList())));
+				distr_data_total.add(String.join(",", compl_distr));
 				
 			} else { // if not limiting
 				// determine remaining prefactor
@@ -104,7 +109,7 @@ public class test_abundance_estimation_real_values2 {
 		System.out.println(sample + " " + Utilities.getMedian(rem_data) + " " + Utilities.getMedian(distr_data));
 		
 		rem_data_total.add(Utilities.getMedian(rem_data));
-		distr_data_total.add(Utilities.getMedian(distr_data));
+		rel_distr_data_total.add(Utilities.getMedian(distr_data));
 		
 	}
 	
@@ -119,7 +124,8 @@ public class test_abundance_estimation_real_values2 {
 		
 		System.out.println();
 		System.out.println("mean remaining of medians: " + Utilities.getMean(rem_data_total));
-		System.out.println("mean distr of medians (of means): " + Utilities.getMean(distr_data_total));
+		System.out.println("mean distr of medians (of means): " + Utilities.getMean(rel_distr_data_total));
 		System.out.println("limiting proteins determined as lowest remaining abundance in complex");
+		Utilities.writeEntries(distr_data_total, "real_distr_data.csv.gz");
 	}
 }

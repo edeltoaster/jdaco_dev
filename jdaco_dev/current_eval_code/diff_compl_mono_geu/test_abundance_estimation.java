@@ -235,8 +235,6 @@ public class test_abundance_estimation {
 		sample_construction.add("sample std prefactor iter lim_distr_medians lim_distr_std rem_abundance_medians rem_abundance_std");
 		
 		int no_iterations = 20;
-		//double[] stds = new double[]{0.01, 0.25, 0.5, 0.75, 1.0};
-		//double[] prefactors = new double[]{0.01, 0.25, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0};
 		
 		double[] stds = new double[]{0.2, 0.5, 0.75, 1.0, 1.2};
 		double[] prefactors = new double[]{5, 10, 20, 30, 40, 50, 60};
@@ -279,8 +277,6 @@ public class test_abundance_estimation {
 				}
 				
 				// already write something
-				//Utilities.writeEntries(all_iterations, "perf_all_iterations.txt.gz");
-				//Utilities.writeEntries(sample_construction, "sample_construction.txt.gz");
 				Utilities.writeEntries(all_iterations, "perf_all_iterations_approx.txt.gz");
 				Utilities.writeEntries(sample_construction, "sample_construction_approx.txt.gz");
 			}
