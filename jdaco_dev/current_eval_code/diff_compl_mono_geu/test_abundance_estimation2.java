@@ -22,7 +22,7 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
-public class test_abundance_estimation {
+public class test_abundance_estimation2 {
 	public static Random rnd = new Random(System.currentTimeMillis());
 	
 	/**
@@ -78,32 +78,34 @@ public class test_abundance_estimation {
 		}
 		limiting_protein_to_complex.keySet().removeIf(e->limiting_protein_to_complex.get(e).size() == 0);
 		
-		// distribute limiting proteins roughly equally using uniform distribution
+		
 		Map<HashSet<String>, Double> artificial_complex_abundance = new HashMap<>();
 		Map<String, List<Double>> limiting_protein_distribution = new HashMap<>();
 		for (String limiting_protein:limiting_protein_to_complex.keySet()) {
 			int chosen_index = rnd.nextInt(tr_abundance_values.size());
+			int size = limiting_protein_to_all_complexes.get(limiting_protein).size();
 			double prot_abundance = tr_abundance_values.get(chosen_index); // will be fast as it is an array list
-			double complex_abundance_mean = prot_abundance / limiting_protein_to_all_complexes.get(limiting_protein).size();
-			List<Double> abundances = new ArrayList<>(limiting_protein_to_all_complexes.get(limiting_protein).size());
+			double complex_abundance_mean = prot_abundance / size;
 			
-			// introduce the noise as a factor of the mean, correct the sum afterwards and ensure that there are only abundances > 0
-			do {
-				abundances.clear();
-				double sum = 0;
-				for (int i = 0; i < limiting_protein_to_all_complexes.get(limiting_protein).size(); i++) {
-					double alteration_amount = rnd.nextDouble() * std_factor * complex_abundance_mean;
-					if (rnd.nextBoolean())
-						alteration_amount *= -1;
-					abundances.add(complex_abundance_mean + alteration_amount);
-					sum += alteration_amount;
+			List<Double> abundances = new ArrayList<>();
+
+			// initialize as equal distribution
+			for (int i = 0; i < size; i++) {
+				abundances.add(complex_abundance_mean);
+			}
+			
+			if (size != 1) 
+				for (int i = 0; i < size; i++) {
+					double a_i = abundances.get(i);
+					int j = rnd.nextInt(size);
+					while (j == i)
+						j = rnd.nextInt(size);
+					double a_j = abundances.get(j);
+					
+					double diff_i_j = rnd.nextDouble() * std_factor * a_i;
+					abundances.set(i, a_i - diff_i_j);
+					abundances.set(j, a_j + diff_i_j);
 				}
-				sum /= limiting_protein_to_all_complexes.get(limiting_protein).size();
-				sum *= -1;
-				final double fsum = sum;
-				abundances = abundances.stream().map(d->d + fsum).collect(Collectors.toList());
-			} while (abundances.stream().anyMatch( d -> d <= 0));
-			
 			// collect for statistics
 			List<Double> relative_deviation_distribution = abundances.stream().map(a -> Math.abs(a-complex_abundance_mean)/complex_abundance_mean).collect(Collectors.toList());
 			limiting_protein_distribution.put(limiting_protein, relative_deviation_distribution);
@@ -234,12 +236,9 @@ public class test_abundance_estimation {
 		all_iterations.add("sample std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
 		sample_construction.add("sample std prefactor iter lim_distr_medians lim_distr_std rem_abundance_medians rem_abundance_std");
 		
-		int no_iterations = 20;
-		//double[] stds = new double[]{0.01, 0.25, 0.5, 0.75, 1.0};
-		//double[] prefactors = new double[]{0.01, 0.25, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0};
-		
-		double[] stds = new double[]{0.2, 0.5, 0.75, 1.0, 1.2};
-		double[] prefactors = new double[]{5, 10, 20, 30, 40, 50, 60};
+		int no_iterations = 10;
+		double[] stds = new double[]{0.5, 0.75, 1.0};
+		double[] prefactors = new double[]{20, 30, 40};
 		
 		System.out.println("Running benchmark on M/GEU");
 		System.out.println(no_iterations + " iterations for each sample (" + data.size() + " samples)");
@@ -279,10 +278,8 @@ public class test_abundance_estimation {
 				}
 				
 				// already write something
-				//Utilities.writeEntries(all_iterations, "perf_all_iterations.txt.gz");
-				//Utilities.writeEntries(sample_construction, "sample_construction.txt.gz");
-				Utilities.writeEntries(all_iterations, "perf_all_iterations_approx.txt.gz");
-				Utilities.writeEntries(sample_construction, "sample_construction_approx.txt.gz");
+				Utilities.writeEntries(all_iterations, "perf_all_iterations_approx2.txt.gz");
+				Utilities.writeEntries(sample_construction, "sample_construction_approx2.txt.gz");
 			}
 		
 		System.out.println("Finished!");
