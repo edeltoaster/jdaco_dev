@@ -24,7 +24,7 @@ import framework.Utilities;
 
 public class test_abundance_estimation2 {
 	public static Random rnd = new Random(System.currentTimeMillis());
-	public static Map<Integer, ArrayList<Double[]>> real_distr = new HashMap<>();
+	public static Map<Integer, List<Double[]>> real_distr = new HashMap<>();
 	
 	/**
 	 * Realistic simulation of the "equal distribution"-model on the basis of real data and noise regarding the equality of the distribution of abundance values and 
@@ -283,7 +283,7 @@ public class test_abundance_estimation2 {
 			for (int i = 0; i < len; i++)
 				dspl[i] = Double.parseDouble(spl[i]);
 			if (!real_distr.containsKey(len))
-				real_distr.put(len, new ArrayList<Double[]>());
+				real_distr.put(len, Collections.synchronizedList(new ArrayList<Double[]>()));
 			real_distr.get(len).add(dspl);
 		}
 		
