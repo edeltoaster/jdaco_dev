@@ -281,7 +281,7 @@ public class test_abundance_estimation2 {
 			int len = spl.length;
 			ArrayList<Double> dspl = new ArrayList<>(len);
 			for (int i = 0; i < len; i++)
-				dspl.set(i, Double.parseDouble(spl[i]));
+				dspl.add(Double.parseDouble(spl[i]));
 			if (!real_distr.containsKey(len))
 				real_distr.put(len, new ArrayList<ArrayList<Double>>());
 			real_distr.get(len).add(dspl);
