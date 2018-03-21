@@ -24,7 +24,7 @@ import framework.Utilities;
 
 public class test_abundance_estimation2 {
 	public static Random rnd = new Random(System.currentTimeMillis());
-	public static Map<Integer, List<Double[]>> real_distr = new HashMap<>();
+	public static Map<Integer, List<ArrayList<Double>>> real_distr = new HashMap<>();
 	
 	/**
 	 * Realistic simulation of the "equal distribution"-model on the basis of real data and noise regarding the equality of the distribution of abundance values and 
@@ -90,9 +90,9 @@ public class test_abundance_estimation2 {
 			
 			// determine distribution from real values
 			List<Double> abundances = new ArrayList<>(size);
-			Double[] distr = real_distr.get(size).get(rnd.nextInt(real_distr.get(size).size()));
+			ArrayList<Double> distr = real_distr.get(size).get(rnd.nextInt(real_distr.get(size).size()));
 			for (int i = 0; i < size; i++) {
-				abundances.add(prot_abundance * distr[i]);
+				abundances.add(prot_abundance * distr.get(i));
 			}
 			
 			// collect for statistics
@@ -279,11 +279,11 @@ public class test_abundance_estimation2 {
 		for (String s:Utilities.readFile("real_distr_data.csv.gz")) {
 			String[] spl = s.trim().split(",");
 			int len = spl.length;
-			Double[] dspl = new Double[len];
+			ArrayList<Double> dspl = new ArrayList<>(len);
 			for (int i = 0; i < len; i++)
-				dspl[i] = Double.parseDouble(spl[i]);
+				dspl.set(i, Double.parseDouble(spl[i]));
 			if (!real_distr.containsKey(len))
-				real_distr.put(len, Collections.synchronizedList(new ArrayList<Double[]>()));
+				real_distr.put(len, new ArrayList<ArrayList<Double>>());
 			real_distr.get(len).add(dspl);
 		}
 		
