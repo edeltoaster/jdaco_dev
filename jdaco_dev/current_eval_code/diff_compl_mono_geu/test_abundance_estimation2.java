@@ -26,16 +26,37 @@ public class test_abundance_estimation2 {
 	public static Random rnd = new Random(System.currentTimeMillis());
 	public static Map<Integer, List<ArrayList<Double>>> real_distr = new HashMap<>();
 	
+	
+	/**
+	 * Samples from a real distribution of distributions
+	 * @param size
+	 * @return
+	 */
+	public static ArrayList<Double> getDistr(int size) {
+		ArrayList<Double> distr = null;
+		
+		if (real_distr.containsKey(size))
+			distr = real_distr.get(size).get(rnd.nextInt(real_distr.get(size).size()));
+		else {
+			int size1 = size / 2;
+			int size2 = size - size1;
+			distr = getDistr(size1);
+			distr.addAll(getDistr(size2));
+			distr = new ArrayList<Double>(distr.stream().map(f -> (f/2.0)).collect(Collectors.toList()));
+		}
+		
+		return distr;
+	}
+	
 	/**
 	 * Realistic simulation of the "equal distribution"-model on the basis of real data and noise regarding the equality of the distribution of abundance values and 
 	 * the portion of remaining protein abundances.
 	 * @param daco_outfile
 	 * @param major_transcript_file
-	 * @param std_factor
 	 * @param remaining_prefactor
 	 * @return
 	 */
-	public static Object[] simulate_sample_model(String daco_outfile, String major_transcript_file, double std_factor, double remaining_prefactor) {
+	public static Object[] simulate_sample_model(String daco_outfile, String major_transcript_file, double remaining_prefactor) {
 		// load real complex result
 		QuantDACOResultSet dr = new QuantDACOResultSet(daco_outfile, "mixed_data/hocomoco_human_TFs_v10.txt.gz", major_transcript_file);
 		List<HashSet<String>> complexes = new ArrayList<>(dr.getResult());
@@ -50,7 +71,6 @@ public class test_abundance_estimation2 {
 		
 		// select limiting proteins
 		HashMap<String, LinkedList<HashSet<String>>> limiting_protein_to_complex = new HashMap<>();
-		HashMap<String, LinkedList<HashSet<String>>> limiting_protein_to_all_complexes = new HashMap<>();
 		Collections.shuffle(complexes, rnd); // order is shuffled to ensure very different choices of limiting proteins
 		for (HashSet<String> complex:complexes) {
 			Set<String> temp_set = new HashSet<>(limiting_protein_to_complex.keySet());
@@ -59,7 +79,6 @@ public class test_abundance_estimation2 {
 				int chosen_index = rnd.nextInt(complex.size());
 				String chosen = (String) complex.toArray()[chosen_index];
 				limiting_protein_to_complex.put(chosen, new LinkedList<HashSet<String>>());
-				limiting_protein_to_all_complexes.put(chosen, new LinkedList<HashSet<String>>());
 			}
 		}
 		
@@ -67,10 +86,8 @@ public class test_abundance_estimation2 {
 		for (HashSet<String> complex:complexes) {
 			List<String> temp_list = new ArrayList<>(complex);
 			temp_list.retainAll(limiting_protein_to_complex.keySet());
-			for (String limiting_protein:temp_list)
-				limiting_protein_to_all_complexes.get(limiting_protein).add(complex);
 			
-			if (temp_list.size() > 0)// there may be one or more proteins limiting, chose one randomly and link that
+			if (temp_list.size() > 1)// there may be one or more proteins limiting, chose one randomly and link that
 				Collections.shuffle(temp_list, rnd);
 			for (String limiting_protein:temp_list) { 
 				limiting_protein_to_complex.get(limiting_protein).add(complex);
@@ -84,13 +101,13 @@ public class test_abundance_estimation2 {
 		Map<String, List<Double>> limiting_protein_distribution = new HashMap<>();
 		for (String limiting_protein:limiting_protein_to_complex.keySet()) {
 			int chosen_index = rnd.nextInt(tr_abundance_values.size());
-			int size = limiting_protein_to_all_complexes.get(limiting_protein).size();
+			int size = limiting_protein_to_complex.get(limiting_protein).size();
 			double prot_abundance = tr_abundance_values.get(chosen_index); // will be fast as it is an array list
 			double complex_abundance_mean = prot_abundance / size;
 			
 			// determine distribution from real values
 			List<Double> abundances = new ArrayList<>(size);
-			ArrayList<Double> distr = real_distr.get(size).get(rnd.nextInt(real_distr.get(size).size()));
+			ArrayList<Double> distr = getDistr(size);
 			for (int i = 0; i < size; i++) {
 				abundances.add(prot_abundance * distr.get(i));
 			}
@@ -151,10 +168,10 @@ public class test_abundance_estimation2 {
 	 * @param remaining_prefactor
 	 * @return
 	 */
-	public static double[] simulate_sample_model_run(String daco_result_file, String major_transcripts_file, double std_factor, double remaining_prefactor, int iteration, String[] sample_construction_outputs) {
+	public static double[] simulate_sample_model_run(String daco_result_file, String major_transcripts_file, double remaining_prefactor, int iteration, List<String> sample_construction_outputs) {
 		
 		// get results of simulation
-		Object[] simulation = simulate_sample_model(daco_result_file, major_transcripts_file, std_factor, remaining_prefactor);
+		Object[] simulation = simulate_sample_model(daco_result_file, major_transcripts_file, remaining_prefactor);
 		QuantDACOResultSet qdr = (QuantDACOResultSet) simulation[0];
 		@SuppressWarnings("unchecked")
 		Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) simulation[1];
@@ -199,8 +216,8 @@ public class test_abundance_estimation2 {
 		results[3] = Utilities.getRMSD(rem_artificial, rem_evaluated);
 		
 		if (sample_construction_outputs != null) {
-			String out = daco_result_file + " " + std_factor + " " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_medians + " " + lim_distr_std + " " + rem_abundance_medians + " " +rem_abundance_std;
-			sample_construction_outputs[iteration] = out;
+			String out = daco_result_file + " rd " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_medians + " " + lim_distr_std + " " + rem_abundance_medians + " " +rem_abundance_std;
+			sample_construction_outputs.add(out);
 		}
 		
 		return results;
@@ -226,50 +243,51 @@ public class test_abundance_estimation2 {
 		sample_construction.add("sample std prefactor iter lim_distr_medians lim_distr_std rem_abundance_medians rem_abundance_std");
 		
 		int no_iterations = 20;
-		double[] stds = new double[]{1.0};
+		String std = "rd";
 		double[] prefactors = new double[]{5, 10, 20, 30, 40, 50, 60};
 		
 		System.out.println("Running benchmark on M/GEU using real distributions");
 		System.out.println(no_iterations + " iterations for each sample (" + data.size() + " samples)");
-		System.out.println("STDevs: " + Arrays.toString(stds));
+		System.out.println("real distributions: rd");
 		System.out.println("Prefactors: " + Arrays.toString(prefactors));
 		
 		ForkJoinPool pool = new ForkJoinPool(definitions.no_threads);
 		
-		for (double std:stds)
-			for (double prefactor:prefactors) {
-				System.out.println("Running " + std + "/" + prefactor);
-				System.out.flush();
-				String[] sample_construction_outputs = new String[no_iterations];
-				
-				Map<String, ForkJoinTask<List<double[]>>> tasks = new HashMap<>();
-				
-				for (Entry<String, String> sample : data.entrySet()) {
-					ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run(sample.getKey(), sample.getValue(), std, prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
-					tasks.put(sample.getKey(), task);
-				}
-				
-				for (String sample : tasks.keySet()) {
-					ForkJoinTask<List<double[]>> task = tasks.get(sample);
-					List<double[]> results = null;
-					try {
-						results = task.get();
-					} catch (Exception e) {
-						e.printStackTrace();
-						System.exit(1);
-					}
-					int n = 1;
-					for (double[] result:results) {
-						all_iterations.add(sample + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
-						sample_construction.add(sample_construction_outputs[n-1]);
-						++n;
-					}
-				}
-				
-				// already write something
-				Utilities.writeEntries(all_iterations, "perf_all_iterations_approx2.txt.gz");
-				Utilities.writeEntries(sample_construction, "sample_construction_approx2.txt.gz");
+		for (double prefactor:prefactors) {
+			System.out.println("Running " + std + "/" + prefactor);
+			System.out.flush();
+			List<String> sample_construction_outputs = Collections.synchronizedList(new LinkedList<String>());
+			
+			Map<String, ForkJoinTask<List<double[]>>> tasks = new HashMap<>();
+			
+			for (Entry<String, String> sample : data.entrySet()) {
+				ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run(sample.getKey(), sample.getValue(), prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
+				tasks.put(sample.getKey(), task);
 			}
+			
+			for (String sample : tasks.keySet()) {
+				ForkJoinTask<List<double[]>> task = tasks.get(sample);
+				List<double[]> results = null;
+				try {
+					results = task.get();
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
+				int n = 1;
+				for (double[] result:results) {
+					all_iterations.add(sample + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+					++n;
+				}
+			}
+			
+			Collections.sort(sample_construction_outputs);
+			sample_construction.addAll(sample_construction_outputs);
+			
+			// already write something
+			Utilities.writeEntries(all_iterations, "perf_all_iterations_approx2.txt.gz");
+			Utilities.writeEntries(sample_construction, "sample_construction_approx2.txt.gz");
+		}
 		
 		System.out.println("Finished!");
 	}

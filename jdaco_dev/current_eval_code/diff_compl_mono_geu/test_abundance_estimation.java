@@ -49,7 +49,6 @@ public class test_abundance_estimation {
 		
 		// select limiting proteins
 		HashMap<String, LinkedList<HashSet<String>>> limiting_protein_to_complex = new HashMap<>();
-		HashMap<String, LinkedList<HashSet<String>>> limiting_protein_to_all_complexes = new HashMap<>();
 		Collections.shuffle(complexes, rnd); // order is shuffled to ensure very different choices of limiting proteins
 		for (HashSet<String> complex:complexes) {
 			Set<String> temp_set = new HashSet<>(limiting_protein_to_complex.keySet());
@@ -58,7 +57,6 @@ public class test_abundance_estimation {
 				int chosen_index = rnd.nextInt(complex.size());
 				String chosen = (String) complex.toArray()[chosen_index];
 				limiting_protein_to_complex.put(chosen, new LinkedList<HashSet<String>>());
-				limiting_protein_to_all_complexes.put(chosen, new LinkedList<HashSet<String>>());
 			}
 		}
 		
@@ -66,10 +64,8 @@ public class test_abundance_estimation {
 		for (HashSet<String> complex:complexes) {
 			List<String> temp_list = new ArrayList<>(complex);
 			temp_list.retainAll(limiting_protein_to_complex.keySet());
-			for (String limiting_protein:temp_list)
-				limiting_protein_to_all_complexes.get(limiting_protein).add(complex);
 			
-			if (temp_list.size() > 0)// there may be one or more proteins limiting, chose one randomly and link that
+			if (temp_list.size() > 1)// there may be one or more proteins limiting, chose one randomly and link that
 				Collections.shuffle(temp_list, rnd);
 			for (String limiting_protein:temp_list) { 
 				limiting_protein_to_complex.get(limiting_protein).add(complex);
@@ -84,21 +80,22 @@ public class test_abundance_estimation {
 		for (String limiting_protein:limiting_protein_to_complex.keySet()) {
 			int chosen_index = rnd.nextInt(tr_abundance_values.size());
 			double prot_abundance = tr_abundance_values.get(chosen_index); // will be fast as it is an array list
-			double complex_abundance_mean = prot_abundance / limiting_protein_to_all_complexes.get(limiting_protein).size();
-			List<Double> abundances = new ArrayList<>(limiting_protein_to_all_complexes.get(limiting_protein).size());
+			final int size = limiting_protein_to_complex.get(limiting_protein).size();
+			double complex_abundance_mean = prot_abundance / size;
+			List<Double> abundances = new ArrayList<>(size);
 			
 			// introduce the noise as a factor of the mean, correct the sum afterwards and ensure that there are only abundances > 0
 			do {
 				abundances.clear();
 				double sum = 0;
-				for (int i = 0; i < limiting_protein_to_all_complexes.get(limiting_protein).size(); i++) {
+				for (int i = 0; i < size; i++) {
 					double alteration_amount = rnd.nextDouble() * std_factor * complex_abundance_mean;
 					if (rnd.nextBoolean())
 						alteration_amount *= -1;
 					abundances.add(complex_abundance_mean + alteration_amount);
 					sum += alteration_amount;
 				}
-				sum /= limiting_protein_to_all_complexes.get(limiting_protein).size();
+				sum /= size;
 				sum *= -1;
 				final double fsum = sum;
 				abundances = abundances.stream().map(d->d + fsum).collect(Collectors.toList());
@@ -160,7 +157,7 @@ public class test_abundance_estimation {
 	 * @param remaining_prefactor
 	 * @return
 	 */
-	public static double[] simulate_sample_model_run(String daco_result_file, String major_transcripts_file, double std_factor, double remaining_prefactor, int iteration, String[] sample_construction_outputs) {
+	public static double[] simulate_sample_model_run(String daco_result_file, String major_transcripts_file, double std_factor, double remaining_prefactor, int iteration, List<String> sample_construction_outputs) {
 		
 		// get results of simulation
 		Object[] simulation = simulate_sample_model(daco_result_file, major_transcripts_file, std_factor, remaining_prefactor);
@@ -209,7 +206,7 @@ public class test_abundance_estimation {
 		
 		if (sample_construction_outputs != null) {
 			String out = daco_result_file + " " + std_factor + " " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_medians + " " + lim_distr_std + " " + rem_abundance_medians + " " +rem_abundance_std;
-			sample_construction_outputs[iteration] = out;
+			sample_construction_outputs.add(out);
 		}
 		
 		return results;
@@ -250,7 +247,7 @@ public class test_abundance_estimation {
 			for (double prefactor:prefactors) {
 				System.out.println("Running " + std + "/" + prefactor);
 				System.out.flush();
-				String[] sample_construction_outputs = new String[no_iterations];
+				List<String> sample_construction_outputs = Collections.synchronizedList(new LinkedList<String>());
 				
 				Map<String, ForkJoinTask<List<double[]>>> tasks = new HashMap<>();
 				
@@ -271,10 +268,12 @@ public class test_abundance_estimation {
 					int n = 1;
 					for (double[] result:results) {
 						all_iterations.add(sample + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
-						sample_construction.add(sample_construction_outputs[n-1]);
 						++n;
 					}
 				}
+				
+				Collections.sort(sample_construction_outputs);
+				sample_construction.addAll(sample_construction_outputs);
 				
 				// already write something
 				Utilities.writeEntries(all_iterations, "perf_all_iterations_approx.txt.gz");
