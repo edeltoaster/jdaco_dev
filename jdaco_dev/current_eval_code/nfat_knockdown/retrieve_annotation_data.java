@@ -25,8 +25,8 @@ public class retrieve_annotation_data {
 		Map<String, Set<String>> annotation_map = new HashMap<String, Set<String>>();
 		String human = "9606";
 		Set<String> temp;
-		String out_file = "/Users/tho/Desktop/annotation_data.tsv";
-		boolean include_IEA = false;
+		String out_file = "/Users/tho/Desktop/annotation_data_iea.tsv";
+		boolean include_IEA = true;
 		
 		// Inducing Angiogenesis	 GO:0001525	 angiogenesis
 		System.out.println("Inducing Angiogenesis");

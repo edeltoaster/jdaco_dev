@@ -40,7 +40,7 @@ public class test_abundance_estimation2 {
 		else {
 			int size1 = size / 2;
 			int size2 = size - size1;
-			distr = getDistr(size1);
+			distr = new ArrayList<Double>(getDistr(size1));
 			distr.addAll(getDistr(size2));
 			distr = new ArrayList<Double>(distr.stream().map(f -> (f/2.0)).collect(Collectors.toList()));
 		}
