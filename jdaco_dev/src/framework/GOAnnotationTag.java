@@ -99,9 +99,9 @@ public class GOAnnotationTag {
 	 */
 	private void retrieveAndProcessData() {
 		for (String GO_term:this.positive_GO_terms)
-			this.positive_proteins.addAll(DataQuery.getProteinsWithGO(GO_term, this.taxon, this.include_IEA, false));
+			this.positive_proteins.addAll(DataQuery.getProteinsWithGO(GO_term, this.taxon, this.include_IEA, false, false));
 		for (String GO_term:this.negative_GO_terms)
-			this.negative_proteins.addAll(DataQuery.getProteinsWithGO(GO_term, this.taxon, this.include_IEA, false));
+			this.negative_proteins.addAll(DataQuery.getProteinsWithGO(GO_term, this.taxon, this.include_IEA, false, false));
 		
 		this.mixed_proteins.addAll(positive_proteins);
 		this.mixed_proteins.retainAll(negative_proteins);

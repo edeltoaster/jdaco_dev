@@ -217,7 +217,10 @@ public class test_abundance_estimation2 {
 		
 		if (sample_construction_outputs != null) {
 			String out = daco_result_file + " rd " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_medians + " " + lim_distr_std + " " + rem_abundance_medians + " " +rem_abundance_std;
-			sample_construction_outputs.add(out);
+			
+			synchronized (sample_construction_outputs) {
+				sample_construction_outputs.add(out);
+			}
 		}
 		
 		return results;
@@ -253,12 +256,14 @@ public class test_abundance_estimation2 {
 		
 		ForkJoinPool pool = new ForkJoinPool(definitions.no_threads);
 		
+		List<String> sample_construction_outputs = new LinkedList<String>();
+		
 		for (double prefactor:prefactors) {
 			System.out.println("Running " + std + "/" + prefactor);
 			System.out.flush();
-			List<String> sample_construction_outputs = Collections.synchronizedList(new LinkedList<String>());
 			
 			Map<String, ForkJoinTask<List<double[]>>> tasks = new HashMap<>();
+			sample_construction_outputs.clear();
 			
 			for (Entry<String, String> sample : data.entrySet()) {
 				ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run(sample.getKey(), sample.getValue(), prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
@@ -305,6 +310,11 @@ public class test_abundance_estimation2 {
 			real_distr.get(len).add(dspl);
 		}
 		
-		benchmark();
+		try {
+			benchmark();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 }

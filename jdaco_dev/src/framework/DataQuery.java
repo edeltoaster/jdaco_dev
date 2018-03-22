@@ -1244,7 +1244,7 @@ public class DataQuery {
 	 * @param include_IEA
 	 * @return
 	 */
-	public static Set<String> getProteinsWithGO(String GO_id, String taxon, boolean include_IEA, boolean only_experimental) {
+	public static Set<String> getProteinsWithGO(String GO_id, String taxon, boolean include_IEA, boolean only_experimental, boolean report_genes) {
 		
 		Set<String> entries = new HashSet<>();
 		BufferedReader datastream = null;
@@ -1269,7 +1269,11 @@ public class DataQuery {
 				// manual experimental: IMP,IGI,IPI,IDA,IEP,EXP
 				if (only_experimental && !inf.equals("IMP") && !inf.equals("IGI") && !inf.equals("IPI") && !inf.equals("IDA") && !inf.equals("IEP") && !inf.equals("EXP"))
 					continue;
-				entries.add(temp[1]);
+				
+				if (report_genes)
+					entries.add(temp[3]);
+				else
+					entries.add(temp[1]);
 			}
 			
 		} catch (Exception e) {
@@ -1284,7 +1288,7 @@ public class DataQuery {
 			} catch (InterruptedException e1) {
 			}
 			
-			return getProteinsWithGO(GO_id, taxon, include_IEA, only_experimental);
+			return getProteinsWithGO(GO_id, taxon, include_IEA, only_experimental, report_genes);
 			
 		} finally {
 			try {
@@ -1304,8 +1308,9 @@ public class DataQuery {
 	 * @return
 	 */
 	public static Set<String> getProteinsWithGO(String GO_id, String taxon) {
-		return getProteinsWithGO(GO_id, taxon, true, false);
+		return getProteinsWithGO(GO_id, taxon, true, false, false);
 	}
+	
 	
 	/**
 	 * Retrieves STRING v10 network
