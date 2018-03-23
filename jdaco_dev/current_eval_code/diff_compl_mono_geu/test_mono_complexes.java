@@ -20,16 +20,16 @@ import framework.Utilities;
 
 public class test_mono_complexes {
 	
-	public static int iterations = 5000;
-	public static int[] samples_per_group = {15, 10, 5}; // 17 samples in both groups
+	static int iterations = 5000;
+	static int[] samples_per_group = {15, 10, 5}; // 17 samples in both groups
 	
-	public static int paired_iterations = 500;
-	public static int[] paired_samples_per_group = {13, 10, 5}; // 16 paired samples in both groups
+	static int paired_iterations = 500;
+	static int[] paired_samples_per_group = {13, 10, 5}; // 16 paired samples in both groups
 	
 	// current reference to compare with
-	public static Set<HashSet<String>> ref_dcd_complexes;
-	public static Set<HashSet<String>> ref_dcd_tfcs;
-	public static Set<HashSet<String>> ref_dsvd_tfcs;
+	static Set<HashSet<String>> ref_dcd_complexes;
+	static Set<HashSet<String>> ref_dcd_tfcs;
+	static Set<HashSet<String>> ref_dsvd_tfcs;
 
 	
 	/**
