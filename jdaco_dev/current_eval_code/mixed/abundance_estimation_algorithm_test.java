@@ -12,7 +12,7 @@ public class abundance_estimation_algorithm_test {
 	public static Random rnd = new Random(System.currentTimeMillis());
 	
 	// example why complexes that consist only of one protein do not work well here; gladly this cannot happen with DACO results!
-	public static void single_prot_complex_test() {
+	public static QuantDACOResultSet single_prot_complex_test() {
 		HashSet<HashSet<String>> results = new HashSet<>();
 		results.add(new HashSet<>(Arrays.asList("PA", "PB")));
 		results.add(new HashSet<>(Arrays.asList("PC", "PD")));
@@ -36,12 +36,11 @@ public class abundance_estimation_algorithm_test {
 		transcript_abundance.put("TE", 1f);
 		transcript_abundance.put("TF", 1f);
 		
-		QuantDACOResultSet qdr = new QuantDACOResultSet(results, null, protein_to_assumed_transcript, transcript_abundance);
-		System.out.println("out: " + qdr.getAbundanceOfComplexes());
+		return new QuantDACOResultSet(results, null, protein_to_assumed_transcript, transcript_abundance);
 	}
 	
 	// example where only a part of the remaining_abundance can be directly distributed to complexes that are constrained by the particular abundance
-	public static void alterating_example() {
+	public static QuantDACOResultSet alterating_example() {
 		HashSet<HashSet<String>> results = new HashSet<>();
 		results.add(new HashSet<>(Arrays.asList("PA", "PB")));
 		results.add(new HashSet<>(Arrays.asList("PC", "PD")));
@@ -66,13 +65,12 @@ public class abundance_estimation_algorithm_test {
 		transcript_abundance.put("TF", 1.0f);
 		transcript_abundance.put("TG", 1.0f);
 		
-		QuantDACOResultSet qdr = new QuantDACOResultSet(results, null, protein_to_assumed_transcript, transcript_abundance);
-		System.out.println("out: " + qdr.getAbundanceOfComplexes());
+		return new QuantDACOResultSet(results, null, protein_to_assumed_transcript, transcript_abundance);
 	}
 	
 	
 	// simpe example
-	public static void simple_example() {
+	public static QuantDACOResultSet simple_example() {
 		HashSet<HashSet<String>> results = new HashSet<>();
 		results.add(new HashSet<>(Arrays.asList("PA", "PB")));
 		results.add(new HashSet<>(Arrays.asList("PC", "PD")));
@@ -95,8 +93,7 @@ public class abundance_estimation_algorithm_test {
 		transcript_abundance.put("TE", 1.5f);
 		transcript_abundance.put("TF", 1.0f);
 		
-		QuantDACOResultSet qdr = new QuantDACOResultSet(results, null, protein_to_assumed_transcript, transcript_abundance);
-		System.out.println("out: " + qdr.getAbundanceOfComplexes(1.0E-7 * qdr.getProteinToAssumedTranscript().size(), 10000, true));
+		return new QuantDACOResultSet(results, null, protein_to_assumed_transcript, transcript_abundance);
 	}
 	
 	public static void main(String[] args) {
