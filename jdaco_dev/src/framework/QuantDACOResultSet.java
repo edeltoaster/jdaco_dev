@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 public class QuantDACOResultSet extends DACOResultSet {
 	private  Map<String, String> protein_to_assumed_transcript;
@@ -250,7 +251,17 @@ public class QuantDACOResultSet extends DACOResultSet {
 			++iteration_no;
 		} while (true); // while(true) actually nicest form to implement that! :-P
 		
-		this.cached_remaining_abundance_of_proteins = remaining_amount;
+		// set remaining abundance
+		Map<String, Double> used_abundance = new HashMap<>();
+		for (Entry<HashSet<String>, Double> e:quantification_result.entrySet()) {
+			for (String p:e.getKey())
+				used_abundance.put(p, used_abundance.getOrDefault(p, 0.0) + e.getValue());
+		}
+		this.cached_remaining_abundance_of_proteins = new HashMap<>();
+		for (String p:this.protein_to_assumed_transcript.keySet()) {
+			this.cached_remaining_abundance_of_proteins.put(p, this.getProteinAbundance(p) - used_abundance.getOrDefault(p, 0.0));
+		}
+		this.cached_remaining_abundance_of_proteins.keySet().removeIf(k -> this.cached_remaining_abundance_of_proteins.get(k) == 0.0);
 		
 		return quantification_result;
 	}
