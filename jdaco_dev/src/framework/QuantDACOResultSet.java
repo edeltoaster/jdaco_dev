@@ -260,6 +260,9 @@ public class QuantDACOResultSet extends DACOResultSet {
 	 * @return
 	 */
 	public Map<String, Double> getRemainingAbundanceOfProteins() {
+		
+		if (this.cached_remaining_abundance_of_proteins == null)
+			this.getAbundanceOfComplexes();
 		return this.cached_remaining_abundance_of_proteins;
 	}
 	

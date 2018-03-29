@@ -5,14 +5,16 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import framework.QuantDACOResultSet;
+import mixed.abundance_estimation_algorithm_test;
 import scpsolver.lpsolver.LinearProgramSolver;
 import scpsolver.lpsolver.SolverFactory;
 import scpsolver.problems.LPWizard;
 import scpsolver.problems.LPWizardConstraint;
 import scpsolver.problems.LinearProgram;
-import mixed.abundance_estimation_algorithm_test;
 
 public class LP_algo {
 	private Map<HashSet<String>, Double> cached_abundance_of_complexes;
@@ -31,8 +33,8 @@ public class LP_algo {
 			double factors = 0;
 			for (String prot:compl) {
 				double p_i = qdr.getProteinAbundance(prot);
-				if (p_i == 0)
-					continue;
+				//if (p_i == 0)
+					//continue;
 				if (!prot_compl_map.containsKey(prot))
 					prot_compl_map.put(prot, new LinkedList<>());
 				prot_compl_map.get(prot).add(compl);
@@ -46,8 +48,6 @@ public class LP_algo {
 		double N = 0;
 		for (String prot:prot_compl_map.keySet()) {
 			double p_i = qdr.getProteinAbundance(prot);
-			if (p_i == 0)
-				continue;
 			N++;
 			LPWizardConstraint c = lpw.addConstraint(prot, p_i,">=");
 			
@@ -76,17 +76,30 @@ public class LP_algo {
 		LinearProgramSolver solver  = SolverFactory.newDefault();
 		solver.setTimeconstraint(time_constraint);
 		
-		// solve
+		// run solver
 		double[] sol = solver.solve(this.lp);
+
 		this.cached_abundance_of_complexes = new HashMap<>();
 		this.cached_remaining_abundance_of_proteins = new HashMap<>();
 		
 		if (sol == null || sol.length < this.qdr.getResult().size())
 			return;
 		
+		// set complex abundance from solution
 		for (HashSet<String> compl:this.qdr.getResult()) {
 			this.cached_abundance_of_complexes.put(compl, sol[this.lp.getIndexmap().get(String.join(",", compl))]);
 		}
+		
+		// set remaining abundance
+		Map<String, Double> used_abundance = new HashMap<>();
+		for (Entry<HashSet<String>, Double> e:this.cached_abundance_of_complexes.entrySet()) {
+			for (String p:e.getKey())
+				used_abundance.put(p, used_abundance.getOrDefault(p, 0.0) + e.getValue());
+		}
+		for (String p:this.qdr.getProteinToAssumedTranscript().keySet()) {
+			this.cached_remaining_abundance_of_proteins.put(p, this.qdr.getProteinAbundance(p) - used_abundance.getOrDefault(p, 0.0));
+		}
+		this.cached_remaining_abundance_of_proteins.keySet().removeIf(k -> this.cached_remaining_abundance_of_proteins.get(k) == 0.0);
 	}
 	
 	public Map<HashSet<String>, Double> getAbundanceOfComplexes() {
@@ -103,21 +116,17 @@ public class LP_algo {
 	}
 
 	public static void main(String[] args) {
-	
-		QuantDACOResultSet qdr = abundance_estimation_algorithm_test.alterating_example();
+		QuantDACOResultSet qdr = abundance_estimation_algorithm_test.simple_example();
 		
 		LP_algo lp = new LP_algo(qdr);
-		System.out.println(lp.getLP().getIndexmap());
-		System.out.println(lp.getLP().convertToCPLEX());
 		lp.solve(100);
+		
+		System.out.println();
 		System.out.println(lp.getAbundanceOfComplexes());
 		System.out.println(qdr.getAbundanceOfComplexes());
-		
-		QuantDACOResultSet dr = new QuantDACOResultSet("/Users/tho/Desktop/HG00171.csv.gz", "mixed_data/hocomoco_human_TFs_v10.txt.gz", "/Users/tho/Desktop/HG00171_major-transcripts.txt.gz");
-		lp = new LP_algo(dr);
-		lp.solve(1200);
-		System.out.println(lp.getAbundanceOfComplexes());
-		System.out.println(dr.getAbundanceOfComplexes());
+		System.out.println();
+		System.out.println(lp.getRemainingAbundanceOfProteins());
+		System.out.println(qdr.getRemainingAbundanceOfProteins());
 	}
 
 }
