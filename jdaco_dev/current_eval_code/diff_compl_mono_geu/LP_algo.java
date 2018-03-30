@@ -69,11 +69,13 @@ public class LP_algo {
 		// setup solver
 		this.lp = lpw.getLP();
 		this.lp.setMinProblem(true);
+		
+		// solve
+		this.solve();
 	}
 	
-	public void solve(int time_constraint) {
+	private void solve() {
 		LinearProgramSolver solver  = SolverFactory.newDefault();
-		solver.setTimeconstraint(time_constraint);
 		
 		// run solver
 		double[] sol = solver.solve(this.lp);
@@ -118,7 +120,6 @@ public class LP_algo {
 		QuantDACOResultSet qdr = abundance_estimation_algorithm_test.simple_example();
 		
 		LP_algo lp = new LP_algo(qdr);
-		lp.solve(100);
 		
 		System.out.println();
 		System.out.println(lp.getAbundanceOfComplexes());

@@ -9,6 +9,5 @@
 	<classpathentry kind="lib" path="ext_dep/mysql-connector-java-5.1.45-bin.jar"/>
 	<classpathentry kind="lib" path="ext_dep/SCPSolver.jar"/>
 	<classpathentry kind="lib" path="ext_dep/LPSOLVESolverPack.jar"/>
-	<classpathentry kind="lib" path="ext_dep/GLPKSolverPack.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

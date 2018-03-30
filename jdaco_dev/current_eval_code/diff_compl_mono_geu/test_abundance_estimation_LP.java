@@ -184,7 +184,6 @@ public class test_abundance_estimation_LP {
 		
 		// prepare evaluation
 		LP_algo lp = new LP_algo(qdr);
-		lp.solve(360);
 		
 		Map<HashSet<String>, Double> eval_complex_abundance = lp.getAbundanceOfComplexes();
 		Map<String, Double> eval_remaining_protein_abundance = lp.getRemainingAbundanceOfProteins();
@@ -436,7 +435,6 @@ public class test_abundance_estimation_LP {
 		
 		// prepare evaluation
 		LP_algo lp = new LP_algo(qdr);
-		lp.solve(360);
 		
 		Map<HashSet<String>, Double> eval_complex_abundance = lp.getAbundanceOfComplexes();
 		Map<String, Double> eval_remaining_protein_abundance = lp.getRemainingAbundanceOfProteins();
