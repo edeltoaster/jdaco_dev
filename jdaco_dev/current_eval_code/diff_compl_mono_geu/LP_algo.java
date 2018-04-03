@@ -21,7 +21,7 @@ public class LP_algo {
 	private Map<HashSet<String>, Double> cached_abundance_of_complexes;
 	private Map<String, Double> cached_remaining_abundance_of_proteins;
 	private Map<HashSet<String>, Integer> compl_sol_map = new HashMap<>(); // stores relation of  complexes->j in c_j; c_0 is used to model the constant factor
-	private double convergence_limit = 0;
+	private double tolerance = 1.0E-7;
 	LPOptimizationRequest or = new LPOptimizationRequest();
 	private QuantDACOResultSet qdr;
 	
@@ -97,8 +97,7 @@ public class LP_algo {
 		this.or.setH(protein_levels);
 		this.or.setLb(lower_bounds);
 		this.or.setUb(upper_bounds);
-		this.convergence_limit = 1.0E-7 * this.qdr.getProteinToAssumedTranscript().size();
-		this.or.setTolerance(this.convergence_limit);
+		this.or.setTolerance(this.tolerance);
 		
 		// solve
 		this.solve();
@@ -123,7 +122,7 @@ public class LP_algo {
 		// set complex abundance from solution
 		for (HashSet<String> compl:this.qdr.getResult()) {
 			double res = sol[this.compl_sol_map.get(compl)];
-			if (res < this.convergence_limit)
+			if (res < this.tolerance)
 				res = 0;
 			this.cached_abundance_of_complexes.put(compl, res);
 		}
@@ -154,8 +153,8 @@ public class LP_algo {
 		return compl_sol_map;
 	}
 
-	public double getConvergenceLimit() {
-		return convergence_limit;
+	public double getTolerance() {
+		return tolerance;
 	}
 
 	public LPOptimizationRequest getOptimizationRequest() {
