@@ -24,6 +24,7 @@ import framework.Utilities;
 
 public class test_abundance_estimation_LP {
 	static int no_iterations = 20;
+	static int no_threads = 20;
 	static double[] stds = new double[]{0.2, 0.5, 0.75, 1.0};
 	static double[] prefactors = new double[]{5, 10, 20, 30, 40, 50, 60};
 	
@@ -247,7 +248,7 @@ public class test_abundance_estimation_LP {
 		System.out.println("STDevs: " + Arrays.toString(stds));
 		System.out.println("Prefactors: " + Arrays.toString(prefactors));
 		
-		ForkJoinPool pool = new ForkJoinPool(definitions.no_threads);
+		ForkJoinPool pool = new ForkJoinPool(no_threads);
 		List<String> sample_construction_outputs = new LinkedList<String>();
 
 		for (double std:stds)
@@ -519,7 +520,7 @@ public class test_abundance_estimation_LP {
 		System.out.println("real distributions: rd");
 		System.out.println("Prefactors: " + Arrays.toString(prefactors));
 		
-		ForkJoinPool pool = new ForkJoinPool(definitions.no_threads);
+		ForkJoinPool pool = new ForkJoinPool(no_threads);
 		
 		List<String> sample_construction_outputs = new LinkedList<String>();
 		String std = "rd";
