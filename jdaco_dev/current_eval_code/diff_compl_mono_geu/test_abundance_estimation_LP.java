@@ -578,11 +578,10 @@ public class test_abundance_estimation_LP {
 		
 		try {
 			
-			benchmark();
-			
-			System.out.println();
-			
-			benchmark2();
+			if (args.length == 0)
+				benchmark();
+			else
+				benchmark2();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
