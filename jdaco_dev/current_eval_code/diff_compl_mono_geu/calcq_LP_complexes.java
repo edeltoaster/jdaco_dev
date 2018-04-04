@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import framework.QuantDACOResultSet;
 import framework.Utilities;
@@ -33,7 +34,18 @@ public class calcq_LP_complexes {
 		
 		for (Entry<String, QuantDACOResultSet> e:data.entrySet()) {
 			System.out.println("calculating " + e.getKey());
+			long start = System.currentTimeMillis();
 			LP_algo lp = new LP_algo(e.getValue());
+			long end = System.currentTimeMillis();
+			
+			long duration_LP = TimeUnit.MILLISECONDS.toSeconds(end - start);
+			
+			start = System.currentTimeMillis();
+			e.getValue().getAbundanceOfComplexes();
+			end = System.currentTimeMillis();
+			
+			long duration_approx = TimeUnit.MILLISECONDS.toSeconds(end - start);
+			System.out.println(duration_LP + " " + duration_approx);
 			
 			Map<HashSet<String>, Double> abundances = lp.getAbundanceOfComplexes();
 			List<String> to_write = new LinkedList<>();
