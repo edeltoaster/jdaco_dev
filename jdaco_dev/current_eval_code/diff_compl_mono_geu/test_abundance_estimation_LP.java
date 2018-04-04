@@ -256,16 +256,11 @@ public class test_abundance_estimation_LP {
 				System.out.println("Running " + std + "/" + prefactor);
 				System.out.flush();
 				
-				Map<String, ForkJoinTask<List<double[]>>> tasks = new HashMap<>();
 				sample_construction_outputs.clear();
 				
 				for (Entry<String, String> sample : data.entrySet()) {
 					ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run(sample.getKey(), sample.getValue(), std, prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
-					tasks.put(sample.getKey(), task);
-				}
-				
-				for (String sample : tasks.keySet()) {
-					ForkJoinTask<List<double[]>> task = tasks.get(sample);
+					
 					List<double[]> results = null;
 					try {
 						results = task.get();
@@ -275,9 +270,10 @@ public class test_abundance_estimation_LP {
 					}
 					int n = 1;
 					for (double[] result:results) {
-						all_iterations.add(sample + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+						all_iterations.add(sample.getKey() + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
 						++n;
 					}
+					Runtime.getRuntime().gc();
 				}
 				
 				Collections.sort(sample_construction_outputs);
@@ -528,16 +524,10 @@ public class test_abundance_estimation_LP {
 			System.out.println("Running " + std + "/" + prefactor);
 			System.out.flush();
 			
-			Map<String, ForkJoinTask<List<double[]>>> tasks = new HashMap<>();
 			sample_construction_outputs.clear();
 			
 			for (Entry<String, String> sample : data.entrySet()) {
 				ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run2(sample.getKey(), sample.getValue(), prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
-				tasks.put(sample.getKey(), task);
-			}
-			
-			for (String sample : tasks.keySet()) {
-				ForkJoinTask<List<double[]>> task = tasks.get(sample);
 				List<double[]> results = null;
 				try {
 					results = task.get();
@@ -547,9 +537,10 @@ public class test_abundance_estimation_LP {
 				}
 				int n = 1;
 				for (double[] result:results) {
-					all_iterations.add(sample + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+					all_iterations.add(sample.getKey() + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
 					++n;
 				}
+				Runtime.getRuntime().gc();
 			}
 			
 			Collections.sort(sample_construction_outputs);
