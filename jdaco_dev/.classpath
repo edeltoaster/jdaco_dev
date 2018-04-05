@@ -26,5 +26,7 @@
 	<classpathentry kind="lib" path="jopt_dep/netlib-java-0.9.3.jar"/>
 	<classpathentry kind="lib" path="jopt_dep/optimization-1.0.jar"/>
 	<classpathentry kind="lib" path="jopt_dep/parallelcolt-0.10.1.jar"/>
+	<classpathentry kind="lib" path="ext_dep/LPSOLVESolverPack.jar"/>
+	<classpathentry kind="lib" path="ext_dep/SCPSolver.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
