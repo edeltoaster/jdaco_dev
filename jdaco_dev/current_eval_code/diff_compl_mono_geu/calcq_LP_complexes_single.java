@@ -14,7 +14,7 @@ public class calcq_LP_complexes_single {
 	public static void main(String[] args) {
 
 		String sample = args[0];
-		QuantDACOResultSet qdr = new QuantDACOResultSet(sample + ".csv.gz", definitions.seed, definitions.networks_folder + sample + "_major-transcripts.txt.gz");
+		QuantDACOResultSet qdr = new QuantDACOResultSet(definitions.daco_results_folder + sample + ".csv.gz", definitions.seed, definitions.networks_folder + sample + "_major-transcripts.txt.gz");
 
 		
 		System.out.println("calculating " + sample);
