@@ -122,8 +122,6 @@ public class LP_algo {
 		// set complex abundance from solution
 		for (HashSet<String> compl:this.qdr.getResult()) {
 			double res = sol[this.compl_sol_map.get(compl)];
-			if (res < this.tolerance)
-				res = 0;
 			this.cached_abundance_of_complexes.put(compl, res);
 		}
 		
