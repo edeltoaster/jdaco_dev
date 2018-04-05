@@ -53,7 +53,7 @@ public class calcq_LP_complexes {
 			for (HashSet<String> cluster : abundances.keySet())
 				to_write.add( String.join(",", cluster) + " " + abundances.get(cluster));
 			
-			Utilities.writeEntries(to_write, "lp_q_results_95_5/" + e.getValue() + ".txt.gz");
+			Utilities.writeEntries(to_write, "lp_q_results_95_5/" + e.getKey() + ".txt.gz");
 		}
 		
 	}
