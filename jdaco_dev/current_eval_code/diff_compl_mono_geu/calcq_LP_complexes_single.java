@@ -19,7 +19,7 @@ public class calcq_LP_complexes_single {
 		
 		System.out.println("calculating " + sample);
 		long start = System.currentTimeMillis();
-		LP_algo_SCP lp = new LP_algo_SCP(qdr);
+		LP_algo lp = new LP_algo(qdr);
 		long end = System.currentTimeMillis();
 		
 		long duration_LP = TimeUnit.MILLISECONDS.toSeconds(end - start);
