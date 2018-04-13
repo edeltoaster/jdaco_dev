@@ -386,6 +386,20 @@ public class QuantDACOResultSet extends DACOResultSet {
 		return data;
 	}
 	
+	public void writeMajorTranscriptFile(String out_file) {
+		List<String> to_write = new LinkedList<>();
+		
+		for (String protein:this.protein_to_assumed_transcript.keySet()) {
+			String transcript = this.protein_to_assumed_transcript.get(protein);
+			
+			if (this.transcript_abundance != null)
+				to_write.add( protein + " " + transcript + " " + this.transcript_abundance.get(transcript) );
+			else
+				to_write.add( protein + " " + transcript );
+		}
+		
+		Utilities.writeEntries(to_write, out_file);
+	}
 	
 	/*
 	 * getters

@@ -1,5 +1,6 @@
 package diff_compl_mono_geu;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -8,18 +9,25 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import framework.QuantDACOResultSet;
-import mixed.abundance_estimation_algorithm_test;
+import framework.Utilities;
 import scpsolver.lpsolver.LinearProgramSolver;
 import scpsolver.lpsolver.SolverFactory;
 import scpsolver.problems.LPWizard;
 import scpsolver.problems.LPWizardConstraint;
 import scpsolver.problems.LinearProgram;
 
+/**
+ * Implementation of LP-based method by Lee et al., Global organization of protein complexome in the yeast Saccharomyces cerevisiae, BMC Systems Biology (2011). 
+ * @author tho
+ */
 public class LP_algo {
 	private Map<HashSet<String>, Double> cached_abundance_of_complexes;
 	private Map<String, Double> cached_remaining_abundance_of_proteins;
 	private QuantDACOResultSet qdr;
 	private LinearProgram lp;
+	private static final Runtime rt = Runtime.getRuntime();
+	private static String LP_cmd = "/home/tho/Tools/jre8/bin/java -Xmx5g -jar LP_algo.jar";
+	private static String tmp_folder = "tmp/";
 	
 	public LP_algo(QuantDACOResultSet qdr) {
 		LPWizard lpw = new LPWizard(); 
@@ -116,17 +124,62 @@ public class LP_algo {
 		return lp;
 	}
 
-	public static void main(String[] args) {
-		QuantDACOResultSet qdr = abundance_estimation_algorithm_test.simple_example();
+	
+	public static Map<HashSet<String>, Double> runLPAlgo(QuantDACOResultSet qdr, String quantified_results_file) {
 		
+		// write files
+		String thr_id = Thread.currentThread().toString();
+		String compl_res = tmp_folder + thr_id + "_r.txt.gz";
+		String mt = tmp_folder + thr_id + "_mt.txt.gz";
+		String res = tmp_folder + thr_id + "_res.txt.gz";
+		
+		qdr.writeResult(compl_res);
+		qdr.writeMajorTranscriptFile(mt);
+		
+		// run LP-algo
+		try {
+			Process pr = rt.exec(LP_cmd + " " + compl_res + " " + mt + " " + res);
+			pr.waitFor();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		// read output
+		Map<HashSet<String>, Double> abundances = QuantDACOResultSet.readQuantifiedResult(res);
+		
+		// delete tmp-files
+		new File(compl_res).delete();
+		new File(mt).delete();
+		new File(res).delete();
+		
+		return abundances;
+	}
+	
+	/**
+	 * standalone-implementation of LP algo. Given a DACO result, major_transcript_file and output_file, computes LP-optimal complex abundances.
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		
+		if (args.length == 0) {
+			System.out.println("No input specified.");
+			return;
+		}
+		
+		String daco_result_file = args[0];
+		String major_transcript_file = args[1];
+		String quantified_results_file = args[2];
+		
+		QuantDACOResultSet qdr = new QuantDACOResultSet(daco_result_file, definitions.seed, major_transcript_file);
 		LP_algo lp = new LP_algo(qdr);
 		
-		System.out.println();
-		System.out.println(lp.getAbundanceOfComplexes());
-		System.out.println(qdr.getAbundanceOfComplexes());
-		System.out.println();
-		System.out.println(lp.getRemainingAbundanceOfProteins());
-		System.out.println(qdr.getRemainingAbundanceOfProteins());
+		Map<HashSet<String>, Double> abundances = lp.getAbundanceOfComplexes();
+		List<String> to_write = new LinkedList<>();
+		for (HashSet<String> cluster : abundances.keySet())
+			to_write.add( String.join(",", cluster) + " " + abundances.get(cluster));
+		
+		Utilities.writeEntries(to_write, quantified_results_file);
 	}
 
 }
