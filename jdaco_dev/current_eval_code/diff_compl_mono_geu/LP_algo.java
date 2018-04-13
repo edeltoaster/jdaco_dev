@@ -26,7 +26,7 @@ public class LP_algo {
 	private QuantDACOResultSet qdr;
 	private LinearProgram lp;
 	private static final Runtime rt = Runtime.getRuntime();
-	private static String LP_cmd = "/home/tho/Tools/jre8/bin/java -Xmx5g -jar LP_algo.jar";
+	private static String LP_cmd = "/home/tho/Tools/jre8/bin/java -Xmx10g -jar LP_algo.jar";
 	private static String tmp_folder = "tmp/";
 	
 	public LP_algo(QuantDACOResultSet qdr) {
@@ -128,10 +128,9 @@ public class LP_algo {
 	public static Map<HashSet<String>, Double> runLPAlgo(QuantDACOResultSet qdr) {
 		
 		// write files
-		String thr_id = Thread.currentThread().toString();
-		String compl_res = tmp_folder + thr_id + "_r.txt.gz";
-		String mt = tmp_folder + thr_id + "_mt.txt.gz";
-		String res = tmp_folder + thr_id + "_res.txt.gz";
+		String compl_res = tmp_folder + "r.txt.gz";
+		String mt = tmp_folder + "_mt.txt.gz";
+		String res = tmp_folder + "_res.txt.gz";
 		
 		qdr.writeResult(compl_res);
 		qdr.writeMajorTranscriptFile(mt);

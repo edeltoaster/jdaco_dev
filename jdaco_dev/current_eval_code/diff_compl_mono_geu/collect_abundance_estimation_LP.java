@@ -10,8 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,12 +19,11 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
 import framework.QuantDACOResultSet;
 import framework.Utilities;
-
-public class test_abundance_estimation_LP {
-	static int no_iterations = 2;
-	static int no_threads = 10;
-	static double[] stds = new double[]{0.2, 0.5, 0.75, 1.0};
-	static double[] prefactors = new double[]{5, 10, 20, 30, 40, 50, 60};
+// TODO: actually implement 
+public class collect_abundance_estimation_LP {
+	static int no_iterations = 20;
+	static double[] stds = new double[]{0.2, 1.0};
+	static double[] prefactors = new double[]{5, 30, 60};
 	
 	
 	static Random rnd = new Random(System.currentTimeMillis());
@@ -251,12 +248,11 @@ public class test_abundance_estimation_LP {
 		all_iterations.add("sample std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
 		sample_construction.add("sample std prefactor iter lim_distr_medians lim_distr_std rem_abundance_medians rem_abundance_std");
 		
-		System.out.println("Running benchmark on M/GEU");
+		System.out.println("Running LP benchmark on M/GEU");
 		System.out.println(no_iterations + " iterations for each sample (" + data.size() + " samples)");
 		System.out.println("STDevs: " + Arrays.toString(stds));
 		System.out.println("Prefactors: " + Arrays.toString(prefactors));
 		
-		ForkJoinPool pool = new ForkJoinPool(no_threads);
 		List<String> sample_construction_outputs = new LinkedList<String>();
 
 		for (double std:stds)
@@ -264,36 +260,17 @@ public class test_abundance_estimation_LP {
 				System.out.println("Running " + std + "/" + prefactor);
 				System.out.flush();
 				
-				Map<String, ForkJoinTask<List<double[]>>> tasks = new HashMap<>();
-				sample_construction_outputs.clear();
-				
 				for (Entry<String, String> sample : data.entrySet()) {
-					ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run(sample.getKey(), sample.getValue(), std, prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
-					tasks.put(sample.getKey(), task);
-				}
-				
-				for (String sample : tasks.keySet()) {
-					ForkJoinTask<List<double[]>> task = tasks.get(sample);
-					List<double[]> results = null;
-					try {
-						results = task.get();
-					} catch (Exception e) {
-						e.printStackTrace();
-						System.exit(1);
-					}
+					List<double[]> results = IntStream.range(0, no_iterations).boxed().map(d -> simulate_sample_model_run(sample.getKey(), sample.getValue(), std, prefactor, d, sample_construction_outputs)).collect(Collectors.toList());;
 					int n = 1;
 					for (double[] result:results) {
-						all_iterations.add(sample + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+						all_iterations.add(sample.getKey() + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
 						++n;
 					}
+					
+					Utilities.writeEntries(all_iterations, "perf_all_iterations_LP2.txt.gz");
+					Utilities.writeEntries(sample_construction_outputs, "sample_construction_LP2.txt.gz");
 				}
-				
-				Collections.sort(sample_construction_outputs);
-				sample_construction.addAll(sample_construction_outputs);
-				
-				// already write something
-				Utilities.writeEntries(all_iterations, "perf_all_iterations_approx.txt.gz");
-				Utilities.writeEntries(sample_construction, "sample_construction_approx.txt.gz");
 			}
 		
 		System.out.println("Finished!");
@@ -531,12 +508,10 @@ public class test_abundance_estimation_LP {
 		all_iterations.add("sample std prefactor iter corr_compl rmsd_compl corr_rem rmsd_rem");
 		sample_construction.add("sample std prefactor iter lim_distr_medians lim_distr_std rem_abundance_medians rem_abundance_std");
 		
-		System.out.println("Running benchmark on M/GEU using real distributions");
+		System.out.println("Running LP benchmark on M/GEU using real distributions");
 		System.out.println(no_iterations + " iterations for each sample (" + data.size() + " samples)");
 		System.out.println("real distributions: rd");
 		System.out.println("Prefactors: " + Arrays.toString(prefactors));
-		
-		ForkJoinPool pool = new ForkJoinPool(no_threads);
 		
 		List<String> sample_construction_outputs = new LinkedList<String>();
 		String std = "rd";
@@ -544,36 +519,17 @@ public class test_abundance_estimation_LP {
 			System.out.println("Running " + std + "/" + prefactor);
 			System.out.flush();
 			
-			Map<String, ForkJoinTask<List<double[]>>> tasks = new HashMap<>();
-			sample_construction_outputs.clear();
-			
 			for (Entry<String, String> sample : data.entrySet()) {
-				ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run2(sample.getKey(), sample.getValue(), prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
-				tasks.put(sample.getKey(), task);
-			}
-			
-			for (String sample : tasks.keySet()) {
-				ForkJoinTask<List<double[]>> task = tasks.get(sample);
-				List<double[]> results = null;
-				try {
-					results = task.get();
-				} catch (Exception e) {
-					e.printStackTrace();
-					System.exit(1);
-				}
+				List<double[]> results = IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run2(sample.getKey(), sample.getValue(), prefactor, d, sample_construction_outputs)).collect(Collectors.toList());
 				int n = 1;
 				for (double[] result:results) {
-					all_iterations.add(sample + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
+					all_iterations.add(sample.getKey() + " " + std + " " + prefactor + " " + n + " " + result[0] + " " + result[1] + " " + result[2] + " " + result[3]);
 					++n;
 				}
+				
+				Utilities.writeEntries(all_iterations, "perf_all_iterations_LP2.txt.gz");
+				Utilities.writeEntries(sample_construction_outputs, "sample_construction_LP2.txt.gz");
 			}
-			
-			Collections.sort(sample_construction_outputs);
-			sample_construction.addAll(sample_construction_outputs);
-			
-			// already write something
-			Utilities.writeEntries(all_iterations, "perf_all_iterations_approx2.txt.gz");
-			Utilities.writeEntries(sample_construction, "sample_construction_approx2.txt.gz");
 		}
 		
 		System.out.println("Finished!");
@@ -594,11 +550,11 @@ public class test_abundance_estimation_LP {
 		
 		try {
 			
-			benchmark();
+			benchmark2();
 			
 			System.out.println();
 			
-			benchmark2();
+			benchmark();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
