@@ -125,7 +125,7 @@ public class LP_algo {
 	}
 
 	
-	public static Map<HashSet<String>, Double> runLPAlgo(QuantDACOResultSet qdr, String quantified_results_file) {
+	public static Map<HashSet<String>, Double> runLPAlgo(QuantDACOResultSet qdr) {
 		
 		// write files
 		String thr_id = Thread.currentThread().toString();
