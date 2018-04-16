@@ -173,9 +173,9 @@ public class prep_abundance_estimation_LP {
 		String sample = daco_result_file.split("/")[daco_result_file.split("/").length-1].split("\\.")[0];
 		String run_id = sample + "-" + std_factor + "-" + remaining_prefactor + "-" + iteration;
 		String compl_res = tmp_folder + run_id + "_daco.txt.gz";
-		String mt = tmp_folder + run_id+ "_mt.txt.gz";
-		String art_compl_ab = tmp_folder + run_id+ "_artcomplab.txt.gz";
-		String art_prot_ab = tmp_folder + run_id+ "_artpab.txt.gz";
+		String mt = tmp_folder + run_id + "_mt.txt.gz";
+		String art_compl_ab = tmp_folder + run_id + "_artcomplab.txt.gz";
+		String art_prot_ab = tmp_folder + run_id + "_artpab.txt.gz";
 		qdr.writeResult(compl_res);
 		qdr.writeMajorTranscriptFile(mt);
 		
@@ -385,9 +385,9 @@ public class prep_abundance_estimation_LP {
 		String sample = daco_result_file.split("/")[daco_result_file.split("/").length-1].split("\\.")[0];
 		String run_id = sample + "-" + "rd" + "-" + remaining_prefactor + "-" + iteration;
 		String compl_res = tmp_folder + run_id + "_daco.txt.gz";
-		String mt = tmp_folder + run_id+ "_mt.txt.gz";
-		String art_compl_ab = tmp_folder + run_id+ "_artcomplab.txt.gz";
-		String art_prot_ab = tmp_folder + run_id+ "_artpab.txt.gz";
+		String mt = tmp_folder + run_id + "_mt.txt.gz";
+		String art_compl_ab = tmp_folder + run_id + "_artcomplab.txt.gz";
+		String art_prot_ab = tmp_folder + run_id + "_artpab.txt.gz";
 		qdr.writeResult(compl_res);
 		qdr.writeMajorTranscriptFile(mt);
 		
