@@ -86,5 +86,32 @@ public class check_mono_complexes_GRN {
 		regnet.writeRegulatoryNetwork(out_folder + "regnet.txt", 2);
 		regnet.writeRegulatoryNetwork(out_folder + "regnet_all.txt", 1);
 		regnet.writeNodeTable(out_folder + "regnet_nodes.txt", annotational_data);
+		
+		
+		/*
+		 * incorporating interactions among TFs
+		 */
+		
+		// TFs incorporated as targets
+		res.getMemberSeedComb().values().forEach(c -> relevant_targets.addAll(c));
+		
+		System.out.println("Read binding data 2 ...");
+		bdh = new BindingDataHandler(definitions.binding_data, relevant_TFs, relevant_targets);
+		
+		System.out.println("Building RegNet 2...");
+		regnet = new RegulatoryNetwork(res.getSignificanceSortedComplexes(), relevant_TFs, bdh, definitions.d_min, definitions.d_max, no_threads, 1);
+
+		System.out.println(regnet.getSizesStr());
+		regnet.writeRegulatoryNetwork(out_folder + "regnet2.txt", 2);
+		regnet.writeRegulatoryNetwork(out_folder + "regnet2_all.txt", 1);
+		regnet.writeNodeTable(out_folder + "regnet_nodes2.txt");
+		
+		// prune network
+		regnet.pruneToLargestSCCs();
+		System.out.println(regnet.getSizesStr());
+		regnet.writeRegulatoryNetwork(out_folder + "regnet2p.txt", 2);
+		regnet.writeRegulatoryNetwork(out_folder + "regnet2p_all.txt", 1);
+		regnet.writeNodeTable(out_folder + "regnet2p_nodes.txt");
+		
 	}
 }
