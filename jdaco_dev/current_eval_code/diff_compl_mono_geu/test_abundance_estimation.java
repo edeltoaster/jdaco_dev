@@ -700,7 +700,7 @@ public class test_abundance_estimation {
 	public static double[] simulate_sample_model_run3(String daco_result_file, String major_transcripts_file, double remaining_prefactor, int iteration, List<String> sample_construction_outputs) {
 		
 		// get results of simulation
-		Object[] simulation = simulate_sample_model2(daco_result_file, major_transcripts_file, remaining_prefactor);
+		Object[] simulation = simulate_sample_model3(daco_result_file, major_transcripts_file, remaining_prefactor);
 		QuantDACOResultSet qdr = (QuantDACOResultSet) simulation[0];
 		@SuppressWarnings("unchecked")
 		Map<HashSet<String>, Double> artificial_complex_abundance = (Map<HashSet<String>, Double>) simulation[1];
@@ -791,7 +791,7 @@ public class test_abundance_estimation {
 			sample_construction_outputs.clear();
 			
 			for (Entry<String, String> sample : data.entrySet()) {
-				ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run2(sample.getKey(), sample.getValue(), prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
+				ForkJoinTask<List<double[]>> task = pool.submit(() -> IntStream.range(0, no_iterations).boxed().parallel().map(d -> simulate_sample_model_run3(sample.getKey(), sample.getValue(), prefactor, d, sample_construction_outputs)).collect(Collectors.toList()));
 				tasks.put(sample.getKey(), task);
 			}
 			
@@ -839,9 +839,13 @@ public class test_abundance_estimation {
 		try {
 			
 			benchmark();
+			
 			System.out.println();
+			
 			benchmark2();
+			
 			System.out.println();
+			
 			benchmark3();
 			
 		} catch (Exception e) {
