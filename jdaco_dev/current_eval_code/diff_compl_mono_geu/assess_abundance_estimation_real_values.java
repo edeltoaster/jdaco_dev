@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import framework.Utilities;
 
-public class test_abundance_estimation_real_values {
+public class assess_abundance_estimation_real_values {
 
 	static double limiting_prot_threshold = 1.0E-7;
 	static List<Double> rem_data_total = new LinkedList<>();
