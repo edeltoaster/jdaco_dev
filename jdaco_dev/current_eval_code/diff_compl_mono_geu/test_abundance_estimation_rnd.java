@@ -749,7 +749,7 @@ public class test_abundance_estimation_rnd {
 		results[3] = Utilities.getRMSD(rem_artificial, rem_evaluated);
 		
 		if (sample_construction_outputs != null) {
-			String out = daco_result_file + " rd " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_medians + " " + lim_distr_std + " " + rem_abundance_medians + " " +rem_abundance_std;
+			String out = daco_result_file + " rnd " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_medians + " " + lim_distr_std + " " + rem_abundance_medians + " " +rem_abundance_std;
 			
 			synchronized (sample_construction_outputs) {
 				sample_construction_outputs.add(out);
@@ -1509,7 +1509,7 @@ public class test_abundance_estimation_rnd {
 		results[3] = Utilities.getRMSD(rem_artificial, rem_evaluated);
 		
 		if (sample_construction_outputs != null) {
-			String out = daco_result_file + " rd " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_medians + " " + lim_distr_std + " " + rem_abundance_medians + " " +rem_abundance_std;
+			String out = daco_result_file + " rnd " + remaining_prefactor + " " + (iteration+1) + " " + lim_distr_medians + " " + lim_distr_std + " " + rem_abundance_medians + " " +rem_abundance_std;
 			
 			synchronized (sample_construction_outputs) {
 				sample_construction_outputs.add(out);
