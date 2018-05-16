@@ -474,8 +474,21 @@ public class RegulatoryNetwork {
 		
 		// convert to general graph format
 		Map<String, List<String>> graph = new HashMap<>();
-		for (HashSet<String> complex:this.complex_to_targets.keySet())
-			graph.put("C:" + String.join("/", complex), new ArrayList<>(this.complex_to_targets.get(complex)));
+		Map<HashSet<String>, List<String>> non_TF_targets = new HashMap<>();
+		for (HashSet<String> complex:this.complex_to_targets.keySet()) {
+			List<String> targets = new ArrayList<>(this.complex_to_targets.get(complex));
+			graph.put("C:" + String.join("/", complex), targets);
+			
+			// check if there are non-TF targets, those are then added again later
+			for (String target:targets) {
+				if (!this.tf_to_complex.containsKey(target)) {
+					if (!non_TF_targets.containsKey(complex)) 
+						non_TF_targets.put(complex, new LinkedList<String>());
+					non_TF_targets.get(complex).add(target);
+					
+				}
+			}
+		}
 		
 		for (String tf:this.tf_to_complex.keySet())
 			graph.put(tf, this.tf_to_complex.get(tf).stream().map( c -> "C:" + String.join("/", c) ).collect(Collectors.toList()));
@@ -504,15 +517,15 @@ public class RegulatoryNetwork {
 			}
 		}
 		
-		this.pruneToConsistency(allowed_proteins, allowed_complexes);
+		this.pruneToConsistency(allowed_proteins, allowed_complexes, non_TF_targets);
 	}
 	
 	/**
-	 * Iteratively prune to ensure all TF -> complex links exist. Input sets are altered for consistency.
+	 * Iteratively prune to ensure all TF -> complex links exist. Input sets are altered for consistency, non_TF_targets later again added if TF complex still here
 	 * @param allowed_proteins
 	 * @param allowed_complexes
 	 */
-	private void pruneToConsistency(Set<String> allowed_proteins, Set<HashSet<String>> allowed_complexes) {
+	private void pruneToConsistency(Set<String> allowed_proteins, Set<HashSet<String>> allowed_complexes, Map<HashSet<String>, List<String>> non_TF_targets) {
 		
 		boolean prune = false;
 		int allowed_complexes_before = Integer.MAX_VALUE;
@@ -555,6 +568,16 @@ public class RegulatoryNetwork {
 			
 			// if there was pruning, repeat once more
 		} while (prune);
+		
+		// add non_TF_targets again if set
+		if (non_TF_targets != null)
+			for (HashSet<String> complex:non_TF_targets.keySet()) {
+				if (this.complex_to_targets.containsKey(complex)) {
+					Set<String> new_targets = new HashSet<>(this.complex_to_targets.get(complex));
+					new_targets.addAll(non_TF_targets.get(complex));
+					this.complex_to_targets.put(complex, new_targets);
+				}
+			}
 	}
 	
 	/**
@@ -574,7 +597,7 @@ public class RegulatoryNetwork {
 			if (complex.stream().anyMatch(p -> !allowed_proteins.contains(p)))
 				allowed_complexes.remove(complex);
 		
-		this.pruneToConsistency(allowed_proteins, allowed_complexes);
+		this.pruneToConsistency(allowed_proteins, allowed_complexes, null);
 	}
 	
 	/*

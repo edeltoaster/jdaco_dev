@@ -19,7 +19,7 @@ import framework.RegulatoryNetwork;
 public class check_mono_complexes_GRN {
 	static String compl_results = "/Users/tho/GDrive/Work/projects/CompleXChange/results/diff_results_95_5/unpaired_nonparametric/mono_dcd_compl.txt";
 	static int no_threads = 4;
-	static List<String> markers = Arrays.asList("P08637", "O75015", "P08571"); //, "P01375", "P01584"); CD16 and CD 14 interesting, TNF IL1B not so much
+	static List<String> markers = Arrays.asList("P08637", "O75015", "P08571", "P41597", "P49238"); // CD16, CD14, CCR2, CX3CR1
 	static String out_folder = "/Users/tho/Desktop/";
 	static Map<String, String> up_name = DataQuery.getUniprotToGeneNameMap("homo_sapiens_core_90_38");
 	static GOAnnotator goa = new GOAnnotator("mixed_data/stem_tags_retrieved.txt.gz");
