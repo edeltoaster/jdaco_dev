@@ -1277,7 +1277,7 @@ public class DataQuery {
 			}
 			
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 			
 			if (DataQuery.retries == 10)
 				terminateRetrieval("QuickGO");
