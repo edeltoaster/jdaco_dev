@@ -1236,6 +1236,89 @@ public class DataQuery {
 		
 		return isoform_protein_domain_mapping;
 	}
+	/**
+	 * Queries EBI QuickGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon
+	 * @param GO_id
+	 * @param taxon
+	 * @param include_IEA
+	 * @return
+	 */
+	public static Set<String> getProteinsWithGO(String GO_id, String taxon, boolean include_IEA, boolean report_genes, boolean lite_annotation) {
+		
+		Set<String> entries = new HashSet<>();
+		
+		Connection connection = null;
+		String server = "spitz.lbl.gov";
+		String user = "go_select";
+		String db = "go_latest";
+		if (lite_annotation)
+			db = "go_latest_lite";
+		try {
+			connection = DriverManager.getConnection("jdbc:mysql://" + server + "/" + db + "?autoReconnect=true&useSSL=false", user, "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			ResultSet rs = st.executeQuery("SELECT DISTINCT\n" + 
+					" gene_product.symbol,\n" + 
+					" dbxref.xref_key,\n" + 
+					" evidence.code\n" + 
+					"FROM term\n" + 
+					" INNER JOIN graph_path ON (term.id=graph_path.term1_id)\n" + 
+					" INNER JOIN association ON (graph_path.term2_id=association.term_id)\n" + 
+					" INNER JOIN gene_product ON (association.gene_product_id=gene_product.id)\n" + 
+					" INNER JOIN species ON (gene_product.species_id=species.id)\n" + 
+					" INNER JOIN dbxref ON (gene_product.dbxref_id=dbxref.id)\n" + 
+					" INNER JOIN evidence on (evidence.association_id=association.id)\n" + 
+					"WHERE\n" + 
+					" term.acc = '" + GO_id + "'\n" + 
+					" AND species.ncbi_taxa_id = '" + taxon + "'\n" + 
+					" AND dbxref.xref_dbname = 'UniProtKB'");
+			while (rs.next()) {
+				String[] row = {rs.getString(1), rs.getString(2), rs.getString(3)}; // gene symbol, UniProt Acc, evidence code
+				
+				if (row[2] == "IEA" && !include_IEA)
+					continue;
+				
+				if (report_genes)
+					entries.add(row[0]);
+				else
+					entries.add(row[1]);
+				
+			}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("AmiGO");
+			//e.printStackTrace();
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get annotation data from AmiGO in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			DataQuery.switchServer();
+			
+			return getProteinsWithGO(GO_id, taxon, include_IEA, report_genes, lite_annotation);
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
+		}
+		
+		return entries;
+	}
+	
+	/**
+	 * Queries EBI QuickGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon,
+	 * automatically includes also the ones with evidence code IEA
+	 * @param GO_id
+	 * @param taxon
+	 * @return
+	 */
+	public static Set<String> getProteinsWithGO(String GO_id, String taxon) {
+		return getProteinsWithGO(GO_id, taxon, true, false, false);
+	}
 	
 	/**
 	 * Queries EBI QuickGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon
@@ -1244,7 +1327,7 @@ public class DataQuery {
 	 * @param include_IEA
 	 * @return
 	 */
-	public static Set<String> getProteinsWithGO(String GO_id, String taxon, boolean include_IEA, boolean only_experimental, boolean report_genes) {
+	public static Set<String> getProteinsWithGOOld(String GO_id, String taxon, boolean include_IEA, boolean only_experimental, boolean report_genes) {
 		
 		Set<String> entries = new HashSet<>();
 		BufferedReader datastream = null;
@@ -1288,7 +1371,7 @@ public class DataQuery {
 			} catch (InterruptedException e1) {
 			}
 			
-			return getProteinsWithGO(GO_id, taxon, include_IEA, only_experimental, report_genes);
+			return getProteinsWithGOOld(GO_id, taxon, include_IEA, only_experimental, report_genes);
 			
 		} finally {
 			try {
@@ -1307,8 +1390,8 @@ public class DataQuery {
 	 * @param taxon
 	 * @return
 	 */
-	public static Set<String> getProteinsWithGO(String GO_id, String taxon) {
-		return getProteinsWithGO(GO_id, taxon, true, false, false);
+	public static Set<String> getProteinsWithGOOld(String GO_id, String taxon) {
+		return getProteinsWithGOOld(GO_id, taxon, true, false, false);
 	}
 	
 	

@@ -25,22 +25,26 @@ public class retrieve_annotation_data {
 		String human = "9606";
 		Set<String> temp;
 		String out_file = "/Users/tho/Desktop/annotation_data.tsv";
-		boolean include_IEA = true;
 		
-		temp = DataQuery.getProteinsWithGO("GO:0045095", human, include_IEA, false, false);
-		temp.addAll(DataQuery.getProteinsWithGO("GO:0031424", human, include_IEA, false, false));
+		temp = DataQuery.getProteinsWithGO("GO:0045095", human);
+		temp.addAll(DataQuery.getProteinsWithGO("GO:0031424", human));
+		System.out.println("keratinizaion:" + temp.size());
 		annotation_map.put("keratinization", temp);
 		
-		temp = DataQuery.getProteinsWithGO("GO:0005840", human, include_IEA, false, false);
+		temp = DataQuery.getProteinsWithGO("GO:0005840", human);
+		System.out.println("ribosome:" + temp.size());
 		annotation_map.put("ribosome", temp);
 		
-		temp = DataQuery.getProteinsWithGO("GO:0031982", human, include_IEA, false, false);
+		temp = DataQuery.getProteinsWithGO("GO:0031982", human);
+		System.out.println("vesicle:" + temp.size());
 		annotation_map.put("vesicle", temp);
 		
-		temp = DataQuery.getProteinsWithGO("GO:0005829", human, include_IEA, false, false);
+		temp = DataQuery.getProteinsWithGO("GO:0005829", human);
+		System.out.println("cytosol:" + temp.size());
 		annotation_map.put("cytosol", temp);
 		
-		temp = DataQuery.getProteinsWithGO("GO:0005634", human, include_IEA, false, false);
+		temp = DataQuery.getProteinsWithGO("GO:0005634", human);
+		System.out.println("nucleus:" + temp.size());
 		annotation_map.put("nucleus", temp);
 		
 		writeOut(out_file, annotation_map);
