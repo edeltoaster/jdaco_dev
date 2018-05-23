@@ -46,7 +46,7 @@ public class DataQuery {
 	private static String ensembl_mysql = "ensembldb.ensembl.org:3306";
 	private static Map<String, List<String>> known_DDIs;
 	private static boolean up2date_DDIs = true;
-	private static String STRING_version = "10";
+	private static String STRING_version = "10.5";
 	private static String specific_ensembl_release = ""; // global option
 	private static String specific_3did_release = "current";
 	private static int retries = 0;
@@ -257,7 +257,7 @@ public class DataQuery {
 		String db = "";
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://" + ensembl_mysql  + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("show databases like "+query);
@@ -350,11 +350,11 @@ public class DataQuery {
 		
 		if (DataQuery.cache_genestransprots.containsKey(organism_core_database))
 			return DataQuery.cache_genestransprots.get(organism_core_database);
-		List<String[]> associations = new LinkedList<>();
 		
+		List<String[]> associations = new LinkedList<>();
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://" + ensembl_mysql + "/" + organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, transcript.stable_id, trans_table.dbprimary_acc FROM gene, transcript, (SELECT translation.translation_id, xref.dbprimary_acc FROM translation, object_xref, xref WHERE translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200') AS trans_table WHERE gene.gene_id=transcript.gene_id AND transcript.canonical_translation_id = trans_table.translation_id");
@@ -457,7 +457,7 @@ public class DataQuery {
 		Map<String,String> gene_to_names = new HashMap<>();
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://" + ensembl_mysql + "/" + organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT gene.stable_id, xref.display_label "
@@ -509,7 +509,7 @@ public class DataQuery {
 		Map<String, List<String>> ensembl_to_uniprot = new HashMap<>();
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT translation.stable_id, xref.dbprimary_acc "
@@ -559,7 +559,7 @@ public class DataQuery {
 		
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			
@@ -617,7 +617,7 @@ public class DataQuery {
 		
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			// query using database name from https://www.biostars.org/p/106470/
@@ -1010,7 +1010,7 @@ public class DataQuery {
 		
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, trans_table.dbprimary_acc, translation_attrib.value FROM transcript, (SELECT translation.translation_id, xref.dbprimary_acc FROM translation, object_xref, xref WHERE translation.translation_id=object_xref.ensembl_id AND object_xref.xref_id=xref.xref_id AND xref.external_db_id='2200') AS trans_table, translation_attrib WHERE transcript.canonical_translation_id = trans_table.translation_id AND trans_table.translation_id = translation_attrib.translation_id AND translation_attrib.attrib_type_id = '167'");
@@ -1070,7 +1070,7 @@ public class DataQuery {
 		Map <String, List<String>> transcript_domain_mapping = new HashMap<>();
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, protein_feature.hit_name, protein_feature.hit_start, protein_feature.hit_end, transcript.biotype "
@@ -1133,7 +1133,7 @@ public class DataQuery {
 		Map <String, Integer> transcript_bp_count = new HashMap<>();
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database, "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, exon.seq_region_start, exon.seq_region_end FROM transcript, exon_transcript, exon "
@@ -1413,11 +1413,10 @@ public class DataQuery {
 		BufferedReader datastream = null;
 		try {
 			// URL is version-dependent
-			String version = DataQuery.STRING_version.split("\\.")[0];
-			if (DataQuery.STRING_version.split("\\.").length > 1)
-				version += DataQuery.STRING_version.split("\\.")[1];
-			URL server = new URL("http://string" + version +".embl.de/newstring_download/protein.links.v"+DataQuery.STRING_version+"/"+taxon_id+".protein.links.v"+DataQuery.STRING_version+".txt.gz");
+			URL server = new URL("https://stringdb-static.org/download/protein.links.v" + DataQuery.STRING_version + "/" + taxon_id + ".protein.links.v" + DataQuery.STRING_version + ".txt.gz");
+			//https://stringdb-static.org/download/protein.links.v10.5/9606.protein.links.v10.5.txt.gz
 			URLConnection connection = server.openConnection();
+			connection.addRequestProperty("User-Agent", "Chrome");
 			
 			// read and build pipe
 			datastream = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())));
@@ -1439,6 +1438,7 @@ public class DataQuery {
 			}
 			
 		} catch (Exception e) {
+			//e.printStackTrace();
 			if (DataQuery.retries == 10)
 				terminateRetrieval("STRING");
 			
@@ -2534,7 +2534,7 @@ public class DataQuery {
 		public Map<String, List<String>> call() throws Exception {
 			
 			Map<String,List<String>> transcript_proteins = new HashMap<>();
-			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/" + this.organism_core_database, "anonymous", "");
+			Connection connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/" + this.organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			
