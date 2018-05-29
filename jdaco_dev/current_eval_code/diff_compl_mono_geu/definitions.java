@@ -1,11 +1,16 @@
 package diff_compl_mono_geu;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import framework.Utilities;
 
 public class definitions {
 	static String daco_results_folder = "res_95_5/";
+	static String local_daco_results_folder = "/Users/tho/GDrive/Work/projects/CompleXChange/results/res_95_5/";
 	static String networks_folder = "networks/";
 	static String diff_out_folder = "diff_results_95_5/";
 	static String qr_output_folder = "q_results_95_5/";
@@ -30,6 +35,21 @@ public class definitions {
 	static int d_min = -15; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
 	static int d_max = 10;
 	
+	static String compl_results = "/Users/tho/GDrive/Work/projects/CompleXChange/results/diff_results_95_5/unpaired_nonparametric/mono_dcd_compl.txt";
+	static List<String> markers = Arrays.asList("P08637", "O75015", "P08571", "P41597", "P49238", "P14151", "P20701"); // CD16, CD16, CD14, CCR2, CX3CR1, SELL/CD62L, ITGAL
+	static Map<String, String> marker_dir = new HashMap<String, String>() {
+		private static final long serialVersionUID = 1L;
+		{
+			put("P08637", "+"); // CD16
+			put("O75015", "+"); // CD16
+			put("P08571", "-"); // CD14
+			put("P41597", "-"); // CCR2 -> not sufficiently expressed in expr data
+			put("P49238", "+"); // CX3CR1
+			put("P14151", "-"); // SELL / CD62L
+			put("P20701", "+"); // ITGAL
+		}
+	};
+	
 	public static void printInitParameters() {
 		System.out.println("DACO results folder : " + daco_results_folder);
 		System.out.println("networks folder : " + networks_folder);
@@ -50,6 +70,8 @@ public class definitions {
 		System.out.println("SPC compl. part. threshold : " + SPCEnrich_compl_part_threshold);
 		System.out.println("SPE iterations : " + SPEnrich_iterations);
 		System.out.println("SPE compl. part. threshold : " + SPEnrich_compl_part_threshold);
+
+		System.out.println("Markers: " + markers);
 	}
 	
 	public static void printBindingDataParameters() {

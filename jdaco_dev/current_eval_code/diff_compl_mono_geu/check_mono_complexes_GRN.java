@@ -1,6 +1,5 @@
 package diff_compl_mono_geu;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -17,29 +16,15 @@ import framework.GOAnnotator;
 import framework.RegulatoryNetwork;
 
 public class check_mono_complexes_GRN {
-	static String compl_results = "/Users/tho/GDrive/Work/projects/CompleXChange/results/diff_results_95_5/unpaired_nonparametric/mono_dcd_compl.txt";
 	static int no_threads = 4;
-	static List<String> markers = Arrays.asList("P08637", "O75015", "P08571", "P41597", "P49238", "P14151", "P20701"); // CD16, CD16, CD14, CCR2, CX3CR1, SELL/CD62L, ITGAL
-	static Map<String, String> marker_dir = new HashMap<String, String>() {
-		private static final long serialVersionUID = 1L;
-		{
-			put("P08637", "+"); // CD16
-			put("O75015", "+"); // CD16
-			put("P08571", "-"); // CD14
-			put("P41597", "-"); // CCR2 -> not sufficiently expressed in expr data
-			put("P49238", "+"); // CX3CR1
-			put("P14151", "-"); // SELL / CD62L
-			put("P20701", "+"); // ITGAL
-		}
-	};
 	static String out_folder = "/Users/tho/Desktop/";
 	static Map<String, String> up_name = DataQuery.getUniprotToGeneNameMap("homo_sapiens_core_90_38");
 	static GOAnnotator goa = new GOAnnotator("mixed_data/stem_tags_retrieved.txt.gz");
 	
 	public static void main(String[] args) {
 		
-		DiffComplexDetector.SignSortedComplexesResult res = DiffComplexDetector.readSignSortedComplexResult(compl_results);
-		Set<String> relevant_targets = new HashSet<>(markers);
+		DiffComplexDetector.SignSortedComplexesResult res = DiffComplexDetector.readSignSortedComplexResult(definitions.compl_results);
+		Set<String> relevant_targets = new HashSet<>(definitions.markers);
 		Set<String> relevant_TFs = new HashSet<>();
 		res.getMemberSeedComb().values().forEach(c -> relevant_TFs.addAll(c));
 		
@@ -93,7 +78,7 @@ public class check_mono_complexes_GRN {
 		annotational_data.put("Fold-Changes", fc_map);
 		annotational_data.put("Median-Changes", med_map);
 		annotational_data.put("GOA", goa_map);
-		annotational_data.put("Marker-Directions", marker_dir);
+		annotational_data.put("Marker-Directions", definitions.marker_dir);
 		
 		
 		System.out.println(regnet.getSizesStr());
