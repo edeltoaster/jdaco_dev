@@ -33,7 +33,7 @@ public class definitions {
 	
 	static String binding_data = "/Users/tho/GDrive/Work/data_general/binding_sites/hocomoco_v10_EPD_v5_2k.txt.gz";
 	static int d_min = -15; // -15-10 should cover most known dimers, up to 25 even more; few may go higher; -25 as 24 is largest motif and overlap should be allowed
-	static int d_max = 10;
+	static int d_max = 10; // 10?
 	
 	static String compl_results = "/Users/tho/GDrive/Work/projects/CompleXChange/results/diff_results_95_5/unpaired_nonparametric/mono_dcd_compl.txt";
 	static List<String> markers = Arrays.asList("P08637", "O75015", "P08571", "P41597", "P49238", "P14151", "P20701"); // CD16, CD16, CD14, CCR2, CX3CR1, SELL/CD62L, ITGAL

@@ -19,24 +19,23 @@ public class check_mono_complexes_GRN {
 	static int no_threads = 4;
 	static String out_folder = "/Users/tho/Desktop/";
 	static Map<String, String> up_name = DataQuery.getUniprotToGeneNameMap("homo_sapiens_core_90_38");
-	static GOAnnotator goa = new GOAnnotator("mixed_data/stem_tags_retrieved.txt.gz");
+	static GOAnnotator goa = new GOAnnotator("9606", "mixed_data/mono_tags.txt.gz");
+	
 	static double q_threshold = 0.001;
 	
 	public static void main(String[] args) {
 		
-		DiffComplexDetector.SignSortedComplexesResult res = DiffComplexDetector.readSignSortedComplexResult(definitions.compl_results);
+		DiffComplexDetector.SignSortedComplexesResult res = DiffComplexDetector.readSignSortedComplexResult(definitions.compl_results, q_threshold);
 		
-		List<HashSet<String>> very_sign_complexes = new LinkedList<>(res.getSignificanceSortedComplexes());
-		very_sign_complexes.removeIf(c -> res.getQValues().get(c) >= q_threshold);
 		Set<String> relevant_TFs = new HashSet<>();
 		Set<String> relevant_targets = new HashSet<>(definitions.markers);
-		very_sign_complexes.forEach(c -> relevant_TFs.addAll(res.getMemberSeedComb().get(c)));
+		res.getSignificanceSortedComplexes().forEach(c -> relevant_TFs.addAll(res.getMemberSeedComb().get(c)));
 		
 		System.out.println("Read binding data ...");
 		BindingDataHandler bdh = new BindingDataHandler(definitions.binding_data, relevant_TFs, relevant_targets);
 		
 		System.out.println("Building RegNet ...");
-		RegulatoryNetwork regnet = new RegulatoryNetwork(very_sign_complexes, relevant_TFs, bdh, definitions.d_min, definitions.d_max, no_threads, 1);
+		RegulatoryNetwork regnet = new RegulatoryNetwork(res.getSignificanceSortedComplexes(), relevant_TFs, bdh, definitions.d_min, definitions.d_max, no_threads, 1);
 		
 		Map<String, Map<String,String>> annotational_data = new HashMap<String, Map<String,String>>();
 		
@@ -96,13 +95,13 @@ public class check_mono_complexes_GRN {
 		 */
 		
 		// TFs incorporated as targets
-		very_sign_complexes.forEach(c -> relevant_targets.addAll(res.getMemberSeedComb().get(c)));
+		res.getSignificanceSortedComplexes().forEach(c -> relevant_targets.addAll(res.getMemberSeedComb().get(c)));
 		
 		System.out.println("Read binding data 2 ...");
 		bdh = new BindingDataHandler(definitions.binding_data, relevant_TFs, relevant_targets);
 		
 		System.out.println("Building RegNet 2...");
-		regnet = new RegulatoryNetwork(very_sign_complexes, relevant_TFs, bdh, definitions.d_min, definitions.d_max, no_threads, 1);
+		regnet = new RegulatoryNetwork(res.getSignificanceSortedComplexes(), relevant_TFs, bdh, definitions.d_min, definitions.d_max, no_threads, 1);
 
 		System.out.println(regnet.getSizesStr());
 		regnet.writeRegulatoryNetwork(out_folder + "regnet2.txt", 2);

@@ -645,6 +645,16 @@ public class DiffComplexDetector {
 	}
 	
 	/**
+	 * Reads written output of writeSignSortedComplexes into a convenient data structure (only until certain q-value is met).
+	 * @param output_file
+	 * @param qval_threshold
+	 * @return
+	 */
+	public static SignSortedComplexesResult readSignSortedComplexResult(String output_file, double qval_threshold) {
+		return new SignSortedComplexesResult(output_file, qval_threshold);
+	}
+	
+	/**
 	 * Returns parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
 	 * seed_comb direction direction_coarse avg_q-value sum_fold-change sum_median-change member_complexes direction_details q-value_details fold-change_details; in the order of avg_q-value, amount of fold-change and abs. sum. median change
 	 * @param include_header
@@ -1660,6 +1670,28 @@ public class DiffComplexDetector {
 				this.significance_sorted_complexes.add(complex);
 				this.directions.put(complex, spl[1]);
 				this.qvalues.put(complex, Double.parseDouble(spl[2]));
+				this.fold_change.put(complex, Double.parseDouble(spl[3]));
+				this.median_change.put(complex, Double.parseDouble(spl[4]));
+				this.member_seed_comb.put(complex, new HashSet<String>(Arrays.asList(spl[5].split("/"))));
+				this.member_seed_complexes.put(complex, Arrays.stream(spl[6].split(",")).map(s -> new HashSet<String>(Arrays.asList(s.split("/")))).collect(Collectors.toList()));
+			}
+		}
+		
+		public SignSortedComplexesResult(String in_file, double qval_threshold) {
+			for (String line:Utilities.readFile(in_file)) {
+				if (line.startsWith("("))
+					continue;
+				String[] spl = line.split("\\s+");
+				double qval = Double.parseDouble(spl[2]);
+				
+				// stops with the last entry below the threshold
+				if (qval >= qval_threshold)
+					break;
+				
+				HashSet<String> complex = new HashSet<String>(Arrays.asList(spl[0].split("/")));
+				this.significance_sorted_complexes.add(complex);
+				this.directions.put(complex, spl[1]);
+				this.qvalues.put(complex, qval);
 				this.fold_change.put(complex, Double.parseDouble(spl[3]));
 				this.median_change.put(complex, Double.parseDouble(spl[4]));
 				this.member_seed_comb.put(complex, new HashSet<String>(Arrays.asList(spl[5].split("/"))));
