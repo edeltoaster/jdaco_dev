@@ -70,7 +70,7 @@ public class CompleXChange {
 		System.out.println("	-mf=[MIN_VAR_FRACTION] : fraction of either group a complex must be part of to be considered in the analysis (default: 0.75)");
 		System.out.println("	-s=[SEED-FILE] : file listing proteins around which the complexes are centered, e.g. seed file used for (J)DACO complex predictions (default: none)");
 		System.out.println("	-t=[#threads] : number of threads to be used (default: #cores/2)");
-		System.out.println("	-nd : assume normal distribution when testing (default: no assumption, nonparametric tests applied)");
+		System.out.println("	-nd : assume normal distribution when testing (default: no assumption, non-parametric tests applied)");
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent tests applied)");
 		System.out.println("	-ss : also associate supersets in the analyses (default: no supersets)");
 		System.out.println("	-enr : determine seed proteins enriched in up/down-regulated complexes (as in GSEA)");
@@ -256,11 +256,11 @@ public class CompleXChange {
 		System.out.println("Seed: " + path_seed);
 		System.out.println("FDR: " + FDR);
 		
-		String test = "Wilcoxon rank sum test (unpaired, nonparametric)";
+		String test = "Wilcoxon rank sum test (unpaired, non-parametric)";
 		if (paired && parametric)
 			test = "paired t-test (paired, parametric)";
 		else if (paired)
-			test = "Wilcoxon signed-rank test (paired, nonparametric)";
+			test = "Wilcoxon signed-rank test (paired, non-parametric)";
 		else if (parametric)
 			test = "Welch's unequal variances t-test (unpaired, parametric)";
 		
