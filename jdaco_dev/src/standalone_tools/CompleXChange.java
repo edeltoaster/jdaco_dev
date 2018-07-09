@@ -74,7 +74,7 @@ public class CompleXChange {
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent tests applied)");
 		System.out.println("	-ss : also associate supersets in the analyses (default: no supersets)");
 		System.out.println("	-enr : determine seed proteins enriched in up/down-regulated complexes (as in GSEA)");
-		System.out.println("	-sc : additional analysis based on seed combinations rather than sole complexes");
+		System.out.println("	-sc : additional analysis based on seed combinations rather than sole complexes (as in GSEA)");
 		System.out.println("	-hr : additionally output human readable files with gene names and rounded numbers (default: no output)");
 		
 		System.out.println();
