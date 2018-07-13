@@ -308,7 +308,6 @@ public class PPIXpress_GUI {
 					    			progressBar.setValue(0);
 					    			setActivity(true);
 					    		} catch (Exception ex) {
-					    			ex.printStackTrace();
 					    			compute_thread.interrupt();
 					    			computing = false;
 					    			try {
