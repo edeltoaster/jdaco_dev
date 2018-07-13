@@ -295,7 +295,11 @@ public class CompleXChange {
 		}
 		
 		SPEnrichment spe = null;
-		if (seed != null && also_seed_enrich) {
+		if (seed == null && also_seed_enrich) {
+			System.out.println("Please specify a seed protein file if seed protein enrichment should be determined.");
+			System.out.flush();
+		}
+		else if (seed != null && also_seed_enrich) {
 			System.out.println("Calculating seed protein enrichment with 10000 permutations to approximate null distribution and only considering seed proteins participating in at least 10 complexes.");
 			System.out.flush();
 			spe = dcd.calculateSPEnrichment(FDR, 10000, 10);
