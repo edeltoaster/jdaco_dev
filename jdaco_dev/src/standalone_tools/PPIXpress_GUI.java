@@ -308,6 +308,7 @@ public class PPIXpress_GUI {
 					    			progressBar.setValue(0);
 					    			setActivity(true);
 					    		} catch (Exception ex) {
+					    			ex.printStackTrace();
 					    			compute_thread.interrupt();
 					    			computing = false;
 					    			try {
@@ -703,6 +704,7 @@ public class PPIXpress_GUI {
 			    		}
 			    	}
 			    };
+			    
 			    try {
 			    	computing = true;
 			    	setActivity(false);
@@ -830,6 +832,7 @@ public class PPIXpress_GUI {
 		progressBar.setValue(5);
 		
 		// gathering data that will always be needed
+		stream_output.println("Identifying organism ... ");
 		organism_database = DataQuery.getEnsemblOrganismDatabaseFromProteins(original_ppin.getProteins());
 		String ensembl_version = organism_database.split("_")[organism_database.split("_").length-2];
 		

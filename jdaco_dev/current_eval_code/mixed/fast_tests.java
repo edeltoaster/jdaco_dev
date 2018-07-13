@@ -5,6 +5,9 @@ import framework.DataQuery;
 public class fast_tests {
 	
 	public static void main(String[] args) {
-		System.out.println(DataQuery.getSTRINGNetwork("9606").getSizesStr());
+		String db = DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens");
+		System.out.println(db);
+		System.out.println(DataQuery.getTranscriptsDomains(db).size());
+		System.out.println(DataQuery.getDecayTranscripts(db).size());
 	}
 }

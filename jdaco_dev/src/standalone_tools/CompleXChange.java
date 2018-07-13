@@ -68,7 +68,7 @@ public class CompleXChange {
 		System.out.println("[OPTIONS] (optional) :");
 		System.out.println("	-fdr=[FDR] : false discovery rate (default: 0.05)");
 		System.out.println("	-mf=[MIN_VAR_FRACTION] : fraction of either group a complex must be part of to be considered in the analysis (default: 0.75)");
-		System.out.println("	-s=[SEED-FILE] : file listing proteins around which the complexes are centered, e.g. seed file used for (J)DACO complex predictions (default: none)");
+		System.out.println("	-s=[SEED-FILE] : file listing proteins around which the complexes are centered, e.g. seed file used for JDACO complex predictions (default: none)");
 		System.out.println("	-t=[#threads] : number of threads to be used (default: #cores/2)");
 		System.out.println("	-nd : assume normal distribution when testing (default: no assumption, non-parametric tests applied)");
 		System.out.println("	-p : assume paired/dependent data (default: unpaired/independent tests applied)");

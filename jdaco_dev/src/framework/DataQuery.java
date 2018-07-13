@@ -86,7 +86,7 @@ public class DataQuery {
 		String organism = "";
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("http://www.uniprot.org/uniprot/"+uniprot_acc+".txt");
+			URL server = new URL("https://www.uniprot.org/uniprot/"+uniprot_acc+".txt");
 			URLConnection connection = server.openConnection();
 			// read
 			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -135,7 +135,7 @@ public class DataQuery {
 		String taxon = "";
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("http://www.uniprot.org/uniprot/"+uniprot_acc+".txt");
+			URL server = new URL("https://www.uniprot.org/uniprot/"+uniprot_acc+".txt");
 			URLConnection connection = server.openConnection();
 			
 			// read
@@ -205,7 +205,7 @@ public class DataQuery {
 		String organism = "";
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("http://www.uniprot.org/taxonomy/"+taxon_id+".rdf");
+			URL server = new URL("https://www.uniprot.org/taxonomy/"+taxon_id+".rdf");
 			URLConnection connection = server.openConnection();
 			
 			// read
@@ -668,7 +668,7 @@ public class DataQuery {
 		List<String[]> entries = new LinkedList<>();
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("http://www.genenames.org/cgi-bin/download?col=gd_app_sym&col=md_prot_id&col=md_ensembl_id&status=Approved&status_opt=2&where=&order_by=gd_app_sym_sort&format=text&limit=&submit=submit");
+			URL server = new URL("https://www.genenames.org/cgi-bin/download?col=gd_app_sym&col=md_prot_id&col=md_ensembl_id&status=Approved&status_opt=2&where=&order_by=gd_app_sym_sort&format=text&limit=&submit=submit");
 			URLConnection connection = server.openConnection();
 			
 			// read
@@ -872,7 +872,7 @@ public class DataQuery {
 		
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("http://www.biomart.org/biomart/martservice?query="+ URLEncoder.encode(query_xml, "UTF-8"));
+			URL server = new URL("https://www.biomart.org/biomart/martservice?query="+ URLEncoder.encode(query_xml, "UTF-8"));
 			URLConnection connection = server.openConnection();
 			
 			// read
@@ -1068,6 +1068,9 @@ public class DataQuery {
 			return DataQuery.cache_transcrdom.get(organism_core_database);
 		
 		Map <String, List<String>> transcript_domain_mapping = new HashMap<>();
+		
+		DataQuery.cache_decay_transcripts.put(organism_core_database, new HashSet<String>());
+		
 		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
@@ -1084,8 +1087,6 @@ public class DataQuery {
 				
 				String biotype = rs.getString(5);
 				if (biotype.equals("nonsense_mediated_decay") || biotype.equals("non_stop_decay")) { // see http://www.gencodegenes.org/gencode_biotypes.html
-					if (!DataQuery.cache_decay_transcripts.containsKey(organism_core_database))
-						DataQuery.cache_decay_transcripts.put(organism_core_database, new HashSet<String>());
 					DataQuery.cache_decay_transcripts.get(organism_core_database).add(rs.getString(1));
 				}
 			}
