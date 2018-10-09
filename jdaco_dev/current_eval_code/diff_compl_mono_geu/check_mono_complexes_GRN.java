@@ -67,7 +67,7 @@ public class check_mono_complexes_GRN {
 		// store median-change
 		Map<HashSet<String>, String> complex_med_map = new HashMap<>();
 		Map<String, String> med_map = new HashMap<>();
-		res.getSignificanceSortedComplexes().forEach(c -> complex_med_map.put(c, complex_genes_map.get(c) + ":" + String.format(Locale.US, "%.3g", res.getMedianChange().get(c))));
+		res.getSignificanceSortedComplexes().forEach(c -> complex_med_map.put(c, complex_genes_map.get(c) + ":" + String.format(Locale.US, "%.3g", res.getMeanChange().get(c))));
 		tfc_complex_map.keySet().forEach(tfc -> med_map.put(tfc.toString(), String.join(",", tfc_complex_map.get(tfc).stream().map(c -> complex_med_map.get(c)).collect(Collectors.toList()))));
 				
 
