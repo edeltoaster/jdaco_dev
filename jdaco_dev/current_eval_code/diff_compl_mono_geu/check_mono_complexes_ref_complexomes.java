@@ -49,6 +49,8 @@ public class check_mono_complexes_ref_complexomes {
 		DiffComplexDetector mono_dcd = new DiffComplexDetector(cm_data, ncm_data, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 		mono_dcd.writeSignSortedComplexes(diff_out_folder + "mono_dcd_complh.txt", true);
 		mono_dcd.writeSignSortedVariants(diff_out_folder + "mono_dcd_tfcsh.txt", true);
+		mono_dcd.writeAllComplexes(diff_out_folder + "mono_dcd_allcomplh.txt", true);
+		mono_dcd.writeAllComplexes(diff_out_folder + "mono_dcd_allcompl.txt", false);
 		mono_dcd.writeSignSortedComplexes(diff_out_folder + "mono_dcd_compl.txt", false);
 		mono_dcd.writeSignSortedVariants(diff_out_folder + "mono_dcd_tfcs.txt", false);
 		framework.DiffComplexDetector.SPEnrichment spe = mono_dcd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
@@ -99,6 +101,8 @@ public class check_mono_complexes_ref_complexomes {
 		mono_dcd = new DiffComplexDetector(cm_data, ncm_data, definitions.qvalue, definitions.parametric, definitions.paired, definitions.check_supersets, definitions.min_variant_fraction, definitions.no_threads);
 		mono_dcd.writeSignSortedComplexes(diff_out_folder + "mono_dcd_complh.txt", true);
 		mono_dcd.writeSignSortedVariants(diff_out_folder + "mono_dcd_tfcsh.txt", true);
+		mono_dcd.writeAllComplexes(diff_out_folder + "mono_dcd_allcomplh.txt", true);
+		mono_dcd.writeAllComplexes(diff_out_folder + "mono_dcd_allcompl.txt", false);
 		mono_dcd.writeSignSortedComplexes(diff_out_folder + "mono_dcd_compl.txt", false);
 		mono_dcd.writeSignSortedVariants(diff_out_folder + "mono_dcd_tfcs.txt", false);
 		spe = mono_dcd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
