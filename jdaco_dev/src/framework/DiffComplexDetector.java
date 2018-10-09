@@ -188,6 +188,39 @@ public class DiffComplexDetector {
 	}
 	
 	/**
+	 * Custom compareTo function that first sorts by the adjusted p-value/q-value and breaks ties using the amount of fold-change and absolute differences of the median between groups
+	 * @param v1
+	 * @param v2
+	 * @return
+	 */
+	private int diffCompareTo2(HashSet<String> v1, HashSet<String> v2, Map<HashSet<String>, Double> all_qvalues) {
+		int sign_compareTo = all_qvalues.get(v1).compareTo(all_qvalues.get(v2));
+		
+		if (sign_compareTo == 0) {
+			// determining fold-chance for v1
+			double fold_change1 = Utilities.calcFoldChange(this.group1_medians.get(v1), this.group2_medians.get(v1));
+			// ... and its extend
+			fold_change1 = Utilities.amountFoldChange(fold_change1);
+			
+			// determining fold-chance for v2
+			double fold_change2 = Utilities.calcFoldChange(this.group1_medians.get(v2), this.group2_medians.get(v2));
+			// ... and its extend
+			fold_change2 = Utilities.amountFoldChange(fold_change2);
+			
+			int sign_compareTo2 = Double.compare(fold_change2, fold_change1);
+			
+			if (sign_compareTo2 == 0) {
+				double v1_med_diff = Math.abs(this.group1_medians.get(v1) - this.group2_medians.get(v1));
+				double v2_med_diff = Math.abs(this.group1_medians.get(v2) - this.group2_medians.get(v2));
+				return Double.compare(v2_med_diff, v1_med_diff); // note that we want to have the bigger difference as the smaller entry
+			} else
+				return sign_compareTo2;
+			
+		} else
+			return sign_compareTo;
+	}
+	
+	/**
 	 * Determines the abundance of complexes in the samples of the groups. 
 	 * Ordering of samples is ensured to order paired data correctly.
 	 * @param group
@@ -307,8 +340,8 @@ public class DiffComplexDetector {
 	 */
 	private Map<HashSet<String>, String> determineDirections() {
 		
-		Map<HashSet<String>, String> significance_variants_directions = new HashMap<>();
-		for (HashSet<String> variant:this.significance_sorted_complexes) {
+		Map<HashSet<String>, String> directions = new HashMap<>();
+		for (HashSet<String> variant:this.raw_pvalues.keySet()) {
 			double median_g1 = this.group1_medians.get(variant);
 			double median_g2 = this.group2_medians.get(variant);
 			
@@ -326,10 +359,10 @@ public class DiffComplexDetector {
 					sign = "+";
 			}
 			
-			significance_variants_directions.put(variant, sign);
+			directions.put(variant, sign);
 		}
 		
-		return significance_variants_directions;
+		return directions;
 	}
 	
 	
@@ -554,7 +587,7 @@ public class DiffComplexDetector {
 	}
 
 	/**
-	 * Returns parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
+	 * Returns parsable output on significantly deregulated complexes in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
 	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
 	 * @param include_header
 	 * @param human_readable
@@ -625,6 +658,80 @@ public class DiffComplexDetector {
 	}
 	
 	/**
+	 * Returns parsable output on all complexes in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
+	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
+	 * @param include_header
+	 * @param human_readable
+	 */
+	public List<String> getAllComplexes(boolean include_header, boolean human_readable) {
+		List<String> to_write = new LinkedList<>();
+		
+		if (include_header)
+			to_write.add("(sub)complex direction q-value fold-change median-change member_seed_comb member_complexes");
+		
+		if (human_readable)
+			this.getUniprotToGeneMap();
+		
+		Map<HashSet<String>, Double> all_qvalues = Utilities.convertRawPValuesToBHFDRall(this.raw_pvalues);
+		List<HashSet<String>> sorted_complexes = new ArrayList<>(all_qvalues.keySet());
+		sorted_complexes.sort( (v1, v2) -> diffCompareTo2(v1, v2, all_qvalues));
+		for (HashSet<String> complex:sorted_complexes) {
+			
+			// id conversion is necessary
+			Set<String> sign_compl_temp = null;
+			if (human_readable)
+				sign_compl_temp = complex.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet());
+			else 
+				sign_compl_temp = complex;
+			String compl_string = String.join("/", sign_compl_temp);
+			
+			// fold-change calculation
+			double fold_change = Utilities.calcFoldChange(this.group1_medians.get(complex), this.group2_medians.get(complex));
+			
+			// median change calculation
+			double median_change = this.group2_medians.get(complex) - this.group1_medians.get(complex);
+			
+			// determine member seed combination
+			HashSet<String> seed_sub = new HashSet<>(complex);
+			seed_sub.retainAll(this.getSeedProteins());
+			
+			if (human_readable) {
+				seed_sub = new HashSet<String>(seed_sub.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()));
+			}
+			String member_seed_comb_string = String.join("/", seed_sub);
+			
+			// determine member complexes
+			List<HashSet<String>> members = this.relevant_complexes.get(complex);
+			if (human_readable) {
+				List<HashSet<String>> members_temp = new ArrayList<>(members.size());
+				members.stream().forEach(l -> members_temp.add(new HashSet<String>(l.stream().map(p -> up_to_gene_map.getOrDefault(p, p)).collect(Collectors.toSet()))));
+				members = members_temp;
+			}
+			String members_string = String.join(",", members.stream().map(l -> String.join("/", l)).collect(Collectors.toList()));
+			
+			// shortening numbers depending on human/machine-usage
+			String qval_string = null;
+			String foldc_string = null;
+			String med_change_string = null;
+			if (human_readable) {
+				qval_string = String.format(Locale.US, "%.3g", all_qvalues.get(complex));
+				foldc_string = String.format(Locale.US, "%.3g", fold_change);
+				med_change_string = String.format(Locale.US, "%.3g", median_change);
+			} else {
+				qval_string = Double.toString(all_qvalues.get(complex));
+				foldc_string = Double.toString(fold_change);
+				med_change_string = Double.toString(median_change);
+			}
+			
+			//format: (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
+			List<String> line = Arrays.asList(compl_string, this.directions.get(complex), qval_string, foldc_string, med_change_string, member_seed_comb_string, members_string);
+			to_write.add(String.join(" ", line));
+		}
+		
+		return to_write;
+	}
+	
+	/**
 	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
 	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
 	 * @param out_file
@@ -633,6 +740,17 @@ public class DiffComplexDetector {
 	public void writeSignSortedComplexes(String out_file, boolean human_readable) {
 		
 		Utilities.writeEntries(this.getSignSortedComplexes(true, human_readable), out_file);
+	}
+	
+	/**
+	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers and numbers are shortened):
+	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
+	 * @param out_file
+	 * @param human_readable
+	 */
+	public void writeAllComplexes(String out_file, boolean human_readable) {
+		
+		Utilities.writeEntries(this.getAllComplexes(true, human_readable), out_file);
 	}
 	
 	/**

@@ -62,6 +62,10 @@ public class check_mono_complexes {
 		mono_dcd.writeSignSortedVariants(definitions.diff_out_folder + "mono_dcd_tfcsh.txt", true);
 		mono_dcd.writeSignSortedComplexes(definitions.diff_out_folder + "mono_dcd_compl.txt", false);
 		mono_dcd.writeSignSortedVariants(definitions.diff_out_folder + "mono_dcd_tfcs.txt", false);
+		
+		mono_dcd.writeAllComplexes(definitions.diff_out_folder + "mono_dcd_allcompl.txt", false);
+		mono_dcd.writeAllComplexes(definitions.diff_out_folder + "mono_dcd_allcomplh.txt", true);
+		
 		framework.DiffComplexDetector.SPEnrichment spe = mono_dcd.calculateSPEnrichment(definitions.qvalue, definitions.SPEnrich_iterations, definitions.SPEnrich_compl_part_threshold);
 		spe.writeSignificantSeedProteins(definitions.diff_out_folder + "mono_dcd_SPenr.txt");
 		SPCEnrichment spc = mono_dcd.calculateSPCEnrichment(definitions.qvalue, definitions.SPCEnrich_iterations, definitions.SPCEnrich_compl_part_threshold);

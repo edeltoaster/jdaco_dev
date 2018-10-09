@@ -413,6 +413,51 @@ public class Utilities {
 		return sign_obj_to_adjusted_p;
 	}
 	
+	/**
+	 * Converts raw pvalues to Benjamini-Hochberg adjusted pvalues, returns all objects.
+	 * @param raw_pvalues
+	 * @param FDR
+	 * @return
+	 */
+	public static <T> Map<T, Double> convertRawPValuesToBHFDRall(Map<T, Double> raw_pvalues) {
+		// initialize reverse map
+		Map<Double, List<T>> p_to_obj = new HashMap<>();
+		for (T obj:raw_pvalues.keySet()) {
+			double p = raw_pvalues.get(obj);
+			if (!p_to_obj.containsKey(p))
+				p_to_obj.put(p, new LinkedList<T>());
+			p_to_obj.get(p).add(obj);
+		}
+		
+		// find largest k and convert
+		List<Double> p_values = new ArrayList<>(raw_pvalues.values());
+		int m = p_values.size();
+		Collections.sort(p_values);
+		int k = 1;
+		Map<Double, Double> raw_to_adj_p = new HashMap<>();
+		for (double p:p_values) {
+		    raw_to_adj_p.put(p, (p* m) / k); // if multiple have the same rank, take largest k
+		    k++;
+		}
+		
+		p_values = new ArrayList<>(new HashSet<>(p_values));
+		Collections.sort(p_values);
+		Collections.reverse(p_values);
+		
+		Map<T, Double> obj_to_adjusted_p = new HashMap<>();
+		double adj_p_before = 1.0;
+		for (double p:p_values) {
+			double adj_p = Math.min(raw_to_adj_p.get(p), adj_p_before);
+			
+			raw_to_adj_p.put(p, adj_p);
+			adj_p_before = adj_p;
+			
+			for (T obj:p_to_obj.get(p))
+				obj_to_adjusted_p.put(obj, adj_p);
+		}
+		
+		return obj_to_adjusted_p;
+	}
 	
 	/*
 	 * fold-change helpers
@@ -669,4 +714,5 @@ public class Utilities {
     	
     	return date_data[2] + "_" + date_data[1] + "_" + date_data[0].substring(2);
     }
+    
 }
