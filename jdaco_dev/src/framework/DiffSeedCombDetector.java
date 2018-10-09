@@ -39,8 +39,8 @@ public class DiffSeedCombDetector {
 	private final Map<HashSet<String>, LinkedList<HashSet<String>>> seed_combination_variants;
 	private final Map<HashSet<String>, LinkedList<Double>> group1_abundances;
 	private final Map<HashSet<String>, LinkedList<Double>> group2_abundances;
-	private Map<HashSet<String>, Double> group1_medians;
-	private Map<HashSet<String>, Double> group2_medians;
+	private Map<HashSet<String>, Double> group1_means;
+	private Map<HashSet<String>, Double> group2_means;
 	
 	// differential analysis results
 	private Map<HashSet<String>, Double> variants_raw_pvalues;
@@ -118,11 +118,11 @@ public class DiffSeedCombDetector {
 		this.group2_abundances = this.determineAbundanceOfSeedVariantsComplexes(group2);
 		
 		// determine medians
-		ForkJoinTask<Map<HashSet<String>, Double>> group1_task = pool.submit(() -> this.group1_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMedian(e.getValue()))));
-		ForkJoinTask<Map<HashSet<String>, Double>> group2_task = pool.submit(() -> this.group2_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMedian(e.getValue()))));
+		ForkJoinTask<Map<HashSet<String>, Double>> group1_task = pool.submit(() -> this.group1_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMean(e.getValue()))));
+		ForkJoinTask<Map<HashSet<String>, Double>> group2_task = pool.submit(() -> this.group2_abundances.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(), e -> Utilities.getMean(e.getValue()))));
 		try {
-			this.group1_medians = group1_task.get();
-			this.group2_medians = group2_task.get();
+			this.group1_means = group1_task.get();
+			this.group2_means = group2_task.get();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -191,18 +191,18 @@ public class DiffSeedCombDetector {
 		
 		// read data
 		this.variants_raw_pvalues = new HashMap<>();
-		this.group1_medians = new HashMap<>();
-		this.group2_medians = new HashMap<>();
+		this.group1_means = new HashMap<>();
+		this.group2_means = new HashMap<>();
 		
 		for (String line:Utilities.readFile(raw_pvalues_medians_file)) {
 			String[] spl = line.trim().split("\\s+");
 			HashSet<String> variant = new HashSet<>(Arrays.asList(spl[0].split(",")));
 			double raw_p = Double.parseDouble(spl[1]);
-			double group1_med = Double.parseDouble(spl[2]);
-			double group2_med = Double.parseDouble(spl[3]);
+			double group1_mean = Double.parseDouble(spl[2]);
+			double group2_mean = Double.parseDouble(spl[3]);
 			this.variants_raw_pvalues.put(variant, raw_p);
-			this.group1_medians.put(variant, group1_med);
-			this.group2_medians.put(variant, group2_med);
+			this.group1_means.put(variant, group1_mean);
+			this.group2_means.put(variant, group2_mean);
 		}
 		
 		this.significance_sorted_variants = new ArrayList<>(this.variants_raw_pvalues.keySet()); // only for testing
@@ -210,7 +210,7 @@ public class DiffSeedCombDetector {
 	}
 	
 	/**
-	 * Custom compareTo function that first sorts by the adjusted p-value/q-value and breaks ties using the amount of fold-change and absolute differences of the median between groups
+	 * Custom compareTo function that first sorts by the adjusted p-value/q-value and breaks ties using the amount of fold-change and absolute differences of the mean between groups
 	 * @param v1
 	 * @param v2
 	 * @return
@@ -220,21 +220,21 @@ public class DiffSeedCombDetector {
 		
 		if (sign_compareTo == 0) {
 			// determining fold-chance for v1
-			double fold_change1 = Utilities.calcFoldChange(this.group1_medians.get(v1), this.group2_medians.get(v1));
+			double fold_change1 = Utilities.calcFoldChange(this.group1_means.get(v1), this.group2_means.get(v1));
 			// ... and its extend
 			fold_change1 = Utilities.amountFoldChange(fold_change1);
 			
 			// determining fold-chance for v2
-			double fold_change2 = Utilities.calcFoldChange(this.group1_medians.get(v2), this.group2_medians.get(v2));
+			double fold_change2 = Utilities.calcFoldChange(this.group1_means.get(v2), this.group2_means.get(v2));
 			// ... and its extend
 			fold_change2 = Utilities.amountFoldChange(fold_change2);
 			
 			int sign_compareTo2 = Double.compare(fold_change2, fold_change1);
 			
 			if (sign_compareTo2 == 0) {
-				double v1_med_diff = Math.abs(this.group1_medians.get(v1) - this.group2_medians.get(v1));
-				double v2_med_diff = Math.abs(this.group1_medians.get(v2) - this.group2_medians.get(v2));
-				return Double.compare(v2_med_diff, v1_med_diff); // note that we want to have the bigger difference as the smaller entry
+				double v1_mean_diff = Math.abs(this.group1_means.get(v1) - this.group2_means.get(v1));
+				double v2_mean_diff = Math.abs(this.group1_means.get(v2) - this.group2_means.get(v2));
+				return Double.compare(v2_mean_diff, v1_mean_diff); // note that we want to have the bigger difference as the smaller entry
 			} else
 				return sign_compareTo2;
 			
@@ -365,20 +365,20 @@ public class DiffSeedCombDetector {
 		
 		Map<HashSet<String>, String> significance_variants_directions = new HashMap<>();
 		for (HashSet<String> variant:this.significance_sorted_variants) {
-			double median_g1 = this.group1_medians.get(variant);
-			double median_g2 = this.group2_medians.get(variant);
+			double mean_g1 = this.group1_means.get(variant);
+			double mean_g2 = this.group2_means.get(variant);
 			
 			String sign = "-";
-			if (median_g2 > median_g1)
+			if (mean_g2 > mean_g1)
 				sign = "+";
 			
-			if (median_g1 == median_g2) {
-				// get means instead
-				double mean_g1 = Utilities.getMean(this.group1_abundances.get(variant));
-				double mean_g2 = Utilities.getMean(this.group2_abundances.get(variant));
+			if (mean_g1 == mean_g2) {
+				// get medians instead
+				double median_g1 = Utilities.getMedian(this.group1_abundances.get(variant));
+				double median_g2 = Utilities.getMedian(this.group2_abundances.get(variant));
 				
 				sign = "-";
-				if (mean_g2 > mean_g1)
+				if (median_g2 > median_g1)
 					sign = "+";
 			}
 			
@@ -462,7 +462,6 @@ public class DiffSeedCombDetector {
 		} else 
 			output_folder_obj = new File(output_folder);
 			
-		if (!output_folder_obj.exists())
 			output_folder_obj.mkdir();
 		
 		// actually writing something
@@ -538,16 +537,16 @@ public class DiffSeedCombDetector {
 		
 		// build information for regulatory network
 		//Map<String, String> occ_across_samples = new HashMap<>();
-		Map<String, String> med_abun_g1 = new HashMap<>();
-		Map<String, String> med_abun_g2 = new HashMap<>();
+		Map<String, String> mean_abun_g1 = new HashMap<>();
+		Map<String, String> mean_abun_g2 = new HashMap<>();
 		Map<String, String> GO_details = new HashMap<>();
 		Map<String, String> GO_overall = new HashMap<>();
 		for (HashSet<String> tf_comb:tfc_to_complexes.keySet()) {
 			String[] annotation_output = this.getSPCAnnotations(tf_comb, tfc_to_complexes.get(tf_comb), goa);
 			String tfc = tf_comb.toString();
 			//occ_across_samples.put(tfc, annotation_output[0]);
-			med_abun_g1.put(tfc, annotation_output[1]);
-			med_abun_g2.put(tfc, annotation_output[2]);
+			mean_abun_g1.put(tfc, annotation_output[1]);
+			mean_abun_g2.put(tfc, annotation_output[2]);
 			GO_details.put(tfc, annotation_output[3]);
 			GO_overall.put(tfc, annotation_output[4]);
 		}
@@ -564,8 +563,8 @@ public class DiffSeedCombDetector {
 		
 		// write annotation data
 		Map<String, Map<String,String>> annotational_data = new TreeMap<>();
-		annotational_data.put("Med_abundance_G1", med_abun_g1);
-		annotational_data.put("Med_abundance_G2", med_abun_g2);
+		annotational_data.put("Mean_abundance_G1", mean_abun_g1);
+		annotational_data.put("Mean_abundance_G2", mean_abun_g2);
 		annotational_data.put("Direction", directions_map);
 		annotational_data.put("GO_details", GO_details);
 		annotational_data.put("GO_overall", GO_overall);
@@ -596,7 +595,7 @@ public class DiffSeedCombDetector {
 	
 	/**
 	 * Returns parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers):
-	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
+	 * (sub)complex direction q-value fold-change mean-change member_seed_comb member_complexes
 	 * @param include_header
 	 * @param human_readable
 	 */
@@ -604,7 +603,7 @@ public class DiffSeedCombDetector {
 		List<String> to_write = new LinkedList<>();
 		
 		if (include_header)
-			to_write.add("(sub)seed_comb direction q-value fold-change median-change member_seed_comb member_complexes");
+			to_write.add("(sub)seed_comb direction q-value fold-change mean-change member_seed_comb member_complexes");
 		
 		if (human_readable)
 			this.getUniprotToGeneMap();
@@ -620,10 +619,10 @@ public class DiffSeedCombDetector {
 			String seed_comb_string = String.join("/", seed_comb_temp);
 			
 			// determine fold-change
-			double fold_change = Utilities.calcFoldChange(this.group1_medians.get(seed_comb), this.group2_medians.get(seed_comb));
+			double fold_change = Utilities.calcFoldChange(this.group1_means.get(seed_comb), this.group2_means.get(seed_comb));
 			
 			// median change calculation
-			double median_change = this.group2_medians.get(seed_comb) - this.group1_medians.get(seed_comb);
+			double mean_change = this.group2_means.get(seed_comb) - this.group1_means.get(seed_comb);
 			
 			// determine member seed combinations if subset was used
 			List<HashSet<String>> member_seed_comb = this.seed_combination_variants.get(seed_comb);
@@ -659,19 +658,19 @@ public class DiffSeedCombDetector {
 			// shortening numbers depending on human/machine-usage
 			String qval_string = null;
 			String foldc_string = null;
-			String med_change_string = null;
+			String mean_change_string = null;
 			if (human_readable) {
 				qval_string = String.format(Locale.US, "%.3g", this.significant_variants_qvalues.get(seed_comb));
 				foldc_string = String.format(Locale.US, "%.3g", fold_change);
-				med_change_string = String.format(Locale.US, "%.3g", median_change);
+				mean_change_string = String.format(Locale.US, "%.3g", mean_change);
 			} else {
 				qval_string = Double.toString(this.significant_variants_qvalues.get(seed_comb));
 				foldc_string = Double.toString(fold_change);
-				med_change_string = Double.toString(median_change);
+				mean_change_string = Double.toString(mean_change);
 			}
 			
 			// write in format: (sub)seed_comb direction q-value fold-change median-change member_seed_comb member_complexes
-			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), qval_string, foldc_string, med_change_string, member_seed_comb_string, member_complexes_string);
+			List<String> line = Arrays.asList(seed_comb_string, this.significance_variants_directions.get(seed_comb), qval_string, foldc_string, mean_change_string, member_seed_comb_string, member_complexes_string);
 			to_write.add(String.join(" ", line));
 		}
 
@@ -680,7 +679,7 @@ public class DiffSeedCombDetector {
 	
 	/**
 	 * Writes parsable output in the space separated format (optionally Uniprot Accs are converted to gene identifiers):
-	 * (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
+	 * (sub)complex direction q-value fold-change mean-change member_seed_comb member_complexes
 	 * @param out_file
 	 * @param human_readable
 	 */
@@ -767,19 +766,19 @@ public class DiffSeedCombDetector {
 	}
 
 	/**
-	 * Returns median abundance data of group1
+	 * Returns mean abundance data of group1
 	 * @return
 	 */
-	public Map<HashSet<String>, Double> getGroup1MedianAbundances() {
-		return group1_medians;
+	public Map<HashSet<String>, Double> getGroup1MeanAbundances() {
+		return group1_means;
 	}
 
 	/**
-	 * Returns median abundance data of group2
+	 * Returns mean abundance data of group2
 	 * @return
 	 */
-	public Map<HashSet<String>, Double> getGroup2MedianAbundances() {
-		return group2_medians;
+	public Map<HashSet<String>, Double> getGroup2MeanAbundances() {
+		return group2_means;
 	}
 	
 	/**
@@ -865,14 +864,14 @@ public class DiffSeedCombDetector {
 		occ_sorted_complexes.stream().forEach(c -> names_map.put(c, String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList()))));
 		String occ_sorted_complexes_string = String.join(",", occ_sorted_complexes.stream().map(c -> names_map.get(c) + ":" + count_map.get(c)).collect(Collectors.toList()));
 		
-		// determine median abundance values
-		Map<HashSet<String>, Double> group1_med_abundances = new HashMap<>();
-		occ_sorted_complexes.stream().forEach(c -> group1_med_abundances.put(c, Utilities.getMedian(this.group1.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault(c, 0.0)).collect(Collectors.toList()))));
-		String abun_g1_string = String.join(",", occ_sorted_complexes.stream().map(c -> names_map.get(c) + ":" + String.format(Locale.US, "%.2g", group1_med_abundances.get(c)) ).collect(Collectors.toList()));
+		// determine mean abundance values
+		Map<HashSet<String>, Double> group1_mean_abundances = new HashMap<>();
+		occ_sorted_complexes.stream().forEach(c -> group1_mean_abundances.put(c, Utilities.getMean(this.group1.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault(c, 0.0)).collect(Collectors.toList()))));
+		String abun_g1_string = String.join(",", occ_sorted_complexes.stream().map(c -> names_map.get(c) + ":" + String.format(Locale.US, "%.2g", group1_mean_abundances.get(c)) ).collect(Collectors.toList()));
 		
-		Map<HashSet<String>, Double> group2_med_abundances = new HashMap<>();
-		occ_sorted_complexes.stream().forEach(c -> group2_med_abundances.put(c, Utilities.getMedian(this.group2.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault(c, 0.0)).collect(Collectors.toList()))));
-		String abun_g2_string = String.join(",", occ_sorted_complexes.stream().map(c -> names_map.get(c) + ":" + String.format(Locale.US, "%.2g", group2_med_abundances.get(c)) ).collect(Collectors.toList()));
+		Map<HashSet<String>, Double> group2_mean_abundances = new HashMap<>();
+		occ_sorted_complexes.stream().forEach(c -> group2_mean_abundances.put(c, Utilities.getMean(this.group2.values().stream().map(qdr -> qdr.getAbundanceOfComplexes().getOrDefault(c, 0.0)).collect(Collectors.toList()))));
+		String abun_g2_string = String.join(",", occ_sorted_complexes.stream().map(c -> names_map.get(c) + ":" + String.format(Locale.US, "%.2g", group2_mean_abundances.get(c)) ).collect(Collectors.toList()));
 		
 		// annotate with GO annotations
 		Map<Set<String>, String> GOA_map = new HashMap<>();
@@ -992,11 +991,12 @@ public class DiffSeedCombDetector {
 			// -log p-values -> scores
 			Map<HashSet<String>, Double> scores = new HashMap<>();
 			for (HashSet<String> variant:variants_raw_pvalues.keySet()) {
-				double med_diff = group2_medians.get(variant) - group1_medians.get(variant);
+				double mean_diff = group2_means.get(variant) - group1_means.get(variant);
 				double score = -Math.log(variants_raw_pvalues.get(variant));
 				
-				if (med_diff < 0)
+				if (mean_diff < 0)
 					score *= -1;
+				
 				scores.put(variant, score);
 			}
 			
@@ -1105,9 +1105,9 @@ public class DiffSeedCombDetector {
 			int sign_compareTo = scores.get(v1).compareTo(scores.get(v2));
 			
 			if (sign_compareTo == 0) {
-				double v1_med_diff = group2_medians.get(v1) - group1_medians.get(v1);
-				double v2_med_diff = group2_medians.get(v2) - group1_medians.get(v2);
-				return Double.compare(v1_med_diff, v2_med_diff);
+				double v1_mean_diff = group2_means.get(v1) - group1_means.get(v1);
+				double v2_mean_diff = group2_means.get(v2) - group1_means.get(v2);
+				return Double.compare(v1_mean_diff, v2_mean_diff);
 			} else
 				return sign_compareTo;
 		}

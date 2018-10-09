@@ -177,9 +177,9 @@ public class DiffComplexDetector {
 			int sign_compareTo2 = Double.compare(fold_change2, fold_change1);
 			
 			if (sign_compareTo2 == 0) {
-				double v1_med_diff = Math.abs(this.group1_means.get(v1) - this.group2_means.get(v1));
-				double v2_med_diff = Math.abs(this.group1_means.get(v2) - this.group2_means.get(v2));
-				return Double.compare(v2_med_diff, v1_med_diff); // note that we want to have the bigger difference as the smaller entry
+				double v1_mean_diff = Math.abs(this.group1_means.get(v1) - this.group2_means.get(v1));
+				double v2_mean_diff = Math.abs(this.group1_means.get(v2) - this.group2_means.get(v2));
+				return Double.compare(v2_mean_diff, v1_mean_diff); // note that we want to have the bigger difference as the smaller entry
 			} else
 				return sign_compareTo2;
 			
@@ -210,9 +210,9 @@ public class DiffComplexDetector {
 			int sign_compareTo2 = Double.compare(fold_change2, fold_change1);
 			
 			if (sign_compareTo2 == 0) {
-				double v1_med_diff = Math.abs(this.group1_means.get(v1) - this.group2_means.get(v1));
-				double v2_med_diff = Math.abs(this.group1_means.get(v2) - this.group2_means.get(v2));
-				return Double.compare(v2_med_diff, v1_med_diff); // note that we want to have the bigger difference as the smaller entry
+				double v1_mean_diff = Math.abs(this.group1_means.get(v1) - this.group2_means.get(v1));
+				double v2_mean_diff = Math.abs(this.group1_means.get(v2) - this.group2_means.get(v2));
+				return Double.compare(v2_mean_diff, v1_mean_diff); // note that we want to have the bigger difference as the smaller entry
 			} else
 				return sign_compareTo2;
 			
@@ -335,7 +335,7 @@ public class DiffComplexDetector {
 	}
 	
 	/**
-	 * Precomputes directions of change
+	 * Precomputes directions of change, first based on means between groups then based on medians
 	 * @return
 	 */
 	private Map<HashSet<String>, String> determineDirections() {
@@ -526,8 +526,8 @@ public class DiffComplexDetector {
 		 */
 		
 		// build information for regulatory network
-		Map<String, String> med_abun_g1 = new HashMap<>();
-		Map<String, String> med_abun_g2 = new HashMap<>();
+		Map<String, String> mean_abun_g1 = new HashMap<>();
+		Map<String, String> mean_abun_g2 = new HashMap<>();
 		Map<String, String> directions = new HashMap<>();
 		Map<String, String> direction = new HashMap<>();
 		Map<String, String> GO_details = new HashMap<>();
@@ -535,8 +535,8 @@ public class DiffComplexDetector {
 		for (HashSet<String> tf_comb:tfc_to_complexes.keySet()) {
 			String[] annotation_output = this.getSPCAnnotations(tf_comb, tfc_to_complexes.get(tf_comb), goa);
 			String tfc = tf_comb.toString();
-			med_abun_g1.put(tfc, annotation_output[0]);
-			med_abun_g2.put(tfc, annotation_output[1]);
+			mean_abun_g1.put(tfc, annotation_output[0]);
+			mean_abun_g2.put(tfc, annotation_output[1]);
 			directions.put(tfc, annotation_output[2]);
 			direction.put(tfc, annotation_output[3]);
 			GO_details.put(tfc, annotation_output[4]);
@@ -555,8 +555,8 @@ public class DiffComplexDetector {
 		
 		// write annotation data
 		Map<String, Map<String,String>> annotational_data = new TreeMap<>();
-		annotational_data.put("Med_abundance_G1", med_abun_g1);
-		annotational_data.put("Med_abundance_G2", med_abun_g2);
+		annotational_data.put("Mean_abundance_G1", mean_abun_g1);
+		annotational_data.put("Mean_abundance_G2", mean_abun_g2);
 		annotational_data.put("Direction_details", directions);
 		annotational_data.put("Direction_overall", direction);
 		annotational_data.put("GO_details", GO_details);
@@ -614,7 +614,7 @@ public class DiffComplexDetector {
 			// fold-change calculation
 			double fold_change = Utilities.calcFoldChange(this.group1_means.get(sign_complex), this.group2_means.get(sign_complex));
 			
-			// median change calculation
+			// mean change calculation
 			double mean_change = this.group2_means.get(sign_complex) - this.group1_means.get(sign_complex);
 			
 			// determine member seed combination
@@ -649,7 +649,7 @@ public class DiffComplexDetector {
 				mean_change_string = Double.toString(mean_change);
 			}
 			
-			//format: (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
+			//format: (sub)complex direction q-value fold-change mean-change member_seed_comb member_complexes
 			List<String> line = Arrays.asList(compl_string, this.directions.get(sign_complex), qval_string, foldc_string, mean_change_string, member_seed_comb_string, members_string);
 			to_write.add(String.join(" ", line));
 		}
@@ -688,7 +688,7 @@ public class DiffComplexDetector {
 			// fold-change calculation
 			double fold_change = Utilities.calcFoldChange(this.group1_means.get(complex), this.group2_means.get(complex));
 			
-			// median change calculation
+			// mean change calculation
 			double mean_change = this.group2_means.get(complex) - this.group1_means.get(complex);
 			
 			// determine member seed combination
@@ -723,7 +723,7 @@ public class DiffComplexDetector {
 				mean_change_string = Double.toString(mean_change);
 			}
 			
-			//format: (sub)complex direction q-value fold-change median-change member_seed_comb member_complexes
+			//format: (sub)complex direction q-value fold-change mean-change member_seed_comb member_complexes
 			List<String> line = Arrays.asList(compl_string, this.directions.get(complex), qval_string, foldc_string, mean_change_string, member_seed_comb_string, members_string);
 			to_write.add(String.join(" ", line));
 		}
@@ -1184,7 +1184,7 @@ public class DiffComplexDetector {
 		// complexes sorted by p-val
 		complexes.stream().forEach(c -> names_map.put(c, String.join("/", c.stream().map(p -> up_name.getOrDefault(p, p)).collect(Collectors.toList()))));
 		
-		// determine median abundance values
+		// determine mean abundance values
 		String abun_g1_string = String.join(",", complexes.stream().map(c -> names_map.get(c) + ":" + String.format(Locale.US, "%.2g", this.group1_means.getOrDefault(c, 0.0)) ).collect(Collectors.toList()));
 		String abun_g2_string = String.join(",", complexes.stream().map(c -> names_map.get(c) + ":" + String.format(Locale.US, "%.2g", this.group2_means.getOrDefault(c, 0.0)) ).collect(Collectors.toList()));
 		
@@ -1778,7 +1778,7 @@ public class DiffComplexDetector {
 		private final Map<HashSet<String>, HashSet<String>> member_seed_comb = new HashMap<>();
 		private final Map<HashSet<String>, List<HashSet<String>>> member_seed_complexes = new HashMap<>();
 
-		//format: 0 (sub)complex 1 direction 2 q-value 3 fold-change 4 median-change 5 member_seed_comb 6 member_complexes
+		//format: 0 (sub)complex 1 direction 2 q-value 3 fold-change 4 mean-change 5 member_seed_comb 6 member_complexes
 		public SignSortedComplexesResult(String in_file) {
 			for (String line:Utilities.readFile(in_file)) {
 				if (line.startsWith("("))
