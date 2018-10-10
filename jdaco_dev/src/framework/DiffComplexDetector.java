@@ -41,6 +41,7 @@ public class DiffComplexDetector {
 	private final Map<HashSet<String>, LinkedList<Double>> group2_abundances;
 	private Map<HashSet<String>, Double> group1_means;
 	private Map<HashSet<String>, Double> group2_means;
+	private Map<HashSet<String>, Double> fold_changes;
 	
 	// differential analysis results
 	private Map<HashSet<String>, Double> raw_pvalues;
@@ -145,6 +146,10 @@ public class DiffComplexDetector {
 			
 		}
 		
+		// precompute fold-changes
+		this.fold_changes = new HashMap<HashSet<String>, Double>();
+		this.raw_pvalues.keySet().forEach(c -> this.fold_changes.put(c, Utilities.calcFoldChange(this.group1_means.get(c), this.group2_means.get(c))));
+		
 		// sort from most to least significant
 		this.significance_sorted_complexes = new ArrayList<>(this.qvalues.keySet());
 		this.significance_sorted_complexes.sort( (v1, v2) -> diffCompareTo(v1, v2));
@@ -165,12 +170,12 @@ public class DiffComplexDetector {
 		
 		if (sign_compareTo == 0) {
 			// determining fold-chance for v1
-			double fold_change1 = Utilities.calcFoldChange(this.group1_means.get(v1), this.group2_means.get(v1));
+			double fold_change1 = this.fold_changes.get(v1);
 			// ... and its extend
 			fold_change1 = Utilities.amountFoldChange(fold_change1);
 			
 			// determining fold-chance for v2
-			double fold_change2 = Utilities.calcFoldChange(this.group1_means.get(v2), this.group2_means.get(v2));
+			double fold_change2 = this.fold_changes.get(v2);
 			// ... and its extend
 			fold_change2 = Utilities.amountFoldChange(fold_change2);
 			
@@ -198,12 +203,12 @@ public class DiffComplexDetector {
 		
 		if (sign_compareTo == 0) {
 			// determining fold-chance for v1
-			double fold_change1 = Utilities.calcFoldChange(this.group1_means.get(v1), this.group2_means.get(v1));
+			double fold_change1 = this.fold_changes.get(v1);
 			// ... and its extend
 			fold_change1 = Utilities.amountFoldChange(fold_change1);
 			
 			// determining fold-chance for v2
-			double fold_change2 = Utilities.calcFoldChange(this.group1_means.get(v2), this.group2_means.get(v2));
+			double fold_change2 = this.fold_changes.get(v2);
 			// ... and its extend
 			fold_change2 = Utilities.amountFoldChange(fold_change2);
 			
@@ -612,7 +617,7 @@ public class DiffComplexDetector {
 			String compl_string = String.join("/", sign_compl_temp);
 			
 			// fold-change calculation
-			double fold_change = Utilities.calcFoldChange(this.group1_means.get(sign_complex), this.group2_means.get(sign_complex));
+			double fold_change = this.fold_changes.get(sign_complex);
 			
 			// mean change calculation
 			double mean_change = this.group2_means.get(sign_complex) - this.group1_means.get(sign_complex);
@@ -686,7 +691,7 @@ public class DiffComplexDetector {
 			String compl_string = String.join("/", sign_compl_temp);
 			
 			// fold-change calculation
-			double fold_change = Utilities.calcFoldChange(this.group1_means.get(complex), this.group2_means.get(complex));
+			double fold_change = this.fold_changes.get(complex);
 			
 			// mean change calculation
 			double mean_change = this.group2_means.get(complex) - this.group1_means.get(complex);
@@ -806,7 +811,7 @@ public class DiffComplexDetector {
 			sign_comb_sign_compl_map.get(seed_sub).add(sign_complex);
 			
 			// store fold change
-			double fold_change = Utilities.calcFoldChange(this.group1_means.get(sign_complex), this.group2_means.get(sign_complex));
+			double fold_change = this.fold_changes.get(sign_complex);
 			
 			sign_compl_foldc.put(sign_complex, fold_change);
 			double meanc = this.group2_means.get(sign_complex) - this.group1_means.get(sign_complex);
@@ -1368,7 +1373,7 @@ public class DiffComplexDetector {
 		}
 		
 		/**
-		 * Custom compareTo function that first sorts by the log-scores and breaks ties using the differences of the means between groups
+		 * Custom compareTo function that first sorts by the log-scores and breaks ties using the fold-change and mean difference between groups.
 		 * @param v1
 		 * @param v2
 		 * @param scores
@@ -1378,9 +1383,19 @@ public class DiffComplexDetector {
 			int sign_compareTo = scores.get(v1).compareTo(scores.get(v2));
 			
 			if (sign_compareTo == 0) {
-				double v1_mean_diff = group2_means.get(v1) - group1_means.get(v1);
-				double v2_mean_diff = group2_means.get(v2) - group1_means.get(v2);
-				return Double.compare(v1_mean_diff, v2_mean_diff);
+				// determining fold-chance for v1
+				double fold_change1 = fold_changes.get(v1);
+				// determining fold-chance for v2
+				double fold_change2 = fold_changes.get(v2);
+				int sign_compareTo2 = Double.compare(fold_change1, fold_change2);
+				
+				if (sign_compareTo2 == 0) {
+					double v1_mean_diff = group2_means.get(v1) - group1_means.get(v1);
+					double v2_mean_diff = group2_means.get(v2) - group1_means.get(v2);
+					return Double.compare(v1_mean_diff, v2_mean_diff);
+				} else
+					return sign_compareTo2;
+				
 			} else
 				return sign_compareTo;
 		}
@@ -1641,7 +1656,7 @@ public class DiffComplexDetector {
 		}
 		
 		/**
-		 * Custom compareTo function that first sorts by the log-scores and breaks ties using the differences of the mean between groups.
+		 * Custom compareTo function that first sorts by the log-scores and breaks ties using the fold-change and mean difference of the mean between groups.
 		 * @param v1
 		 * @param v2
 		 * @param scores
@@ -1651,9 +1666,19 @@ public class DiffComplexDetector {
 			int sign_compareTo = scores.get(v1).compareTo(scores.get(v2));
 			
 			if (sign_compareTo == 0) {
-				double v1_mean_diff = group2_means.get(v1) - group1_means.get(v1);
-				double v2_mean_diff = group2_means.get(v2) - group1_means.get(v2);
-				return Double.compare(v1_mean_diff, v2_mean_diff);
+				// determining fold-chance for v1
+				double fold_change1 = fold_changes.get(v1);
+				// determining fold-chance for v2
+				double fold_change2 = fold_changes.get(v2);
+				int sign_compareTo2 = Double.compare(fold_change1, fold_change2);
+				
+				if (sign_compareTo2 == 0) {
+					double v1_mean_diff = group2_means.get(v1) - group1_means.get(v1);
+					double v2_mean_diff = group2_means.get(v2) - group1_means.get(v2);
+					return Double.compare(v1_mean_diff, v2_mean_diff);
+				} else
+					return sign_compareTo2;
+				
 			} else
 				return sign_compareTo;
 		}

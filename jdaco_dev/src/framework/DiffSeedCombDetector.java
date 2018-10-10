@@ -41,6 +41,7 @@ public class DiffSeedCombDetector {
 	private final Map<HashSet<String>, LinkedList<Double>> group2_abundances;
 	private Map<HashSet<String>, Double> group1_means;
 	private Map<HashSet<String>, Double> group2_means;
+	private Map<HashSet<String>, Double> fold_changes;
 	
 	// differential analysis results
 	private Map<HashSet<String>, Double> variants_raw_pvalues;
@@ -144,6 +145,9 @@ public class DiffSeedCombDetector {
 				this.significant_variants_qvalues = this.determinePairedPValuesNonParametric();
 			
 		}
+		// precompute fold-changes
+		this.fold_changes = new HashMap<HashSet<String>, Double>();
+		this.variants_raw_pvalues.keySet().forEach(c -> this.fold_changes.put(c, Utilities.calcFoldChange(this.group1_means.get(c), this.group2_means.get(c))));
 		
 		// sort from most to least significant
 		this.significance_sorted_variants = new ArrayList<>(this.significant_variants_qvalues.keySet());
@@ -164,49 +168,6 @@ public class DiffSeedCombDetector {
 	 */
 	public DiffSeedCombDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired) {
 		this(group1, group2, FDR, parametric, paired, false, 0.0, Runtime.getRuntime().availableProcessors());
-	} 
-	
-	/**
-	 * Constructor only for testing
-	 * @param raw_pvalues_medians_file
-	 * @param FDR
-	 * @param no_threads
-	 */
-	public DiffSeedCombDetector(String raw_pvalues_medians_file, double FDR, int no_threads) {
-		// empty parameters
-		this.group1 = null;
-		this.group2 = null;
-		this.FDR = FDR;
-		this.parametric = false;
-		this.paired = false;
-		this.incorporate_supersets = false;
-		this.no_threads = no_threads;
-		
-		// empty results
-		this.significant_variants_qvalues = null;
-		this.seed_combination_variants = null;
-		this.pool = null;
-		this.group1_abundances = null;
-		this.group2_abundances = null;
-		
-		// read data
-		this.variants_raw_pvalues = new HashMap<>();
-		this.group1_means = new HashMap<>();
-		this.group2_means = new HashMap<>();
-		
-		for (String line:Utilities.readFile(raw_pvalues_medians_file)) {
-			String[] spl = line.trim().split("\\s+");
-			HashSet<String> variant = new HashSet<>(Arrays.asList(spl[0].split(",")));
-			double raw_p = Double.parseDouble(spl[1]);
-			double group1_mean = Double.parseDouble(spl[2]);
-			double group2_mean = Double.parseDouble(spl[3]);
-			this.variants_raw_pvalues.put(variant, raw_p);
-			this.group1_means.put(variant, group1_mean);
-			this.group2_means.put(variant, group2_mean);
-		}
-		
-		this.significance_sorted_variants = new ArrayList<>(this.variants_raw_pvalues.keySet()); // only for testing
-		this.significance_variants_directions = this.determineDirections();
 	}
 	
 	/**
@@ -220,12 +181,12 @@ public class DiffSeedCombDetector {
 		
 		if (sign_compareTo == 0) {
 			// determining fold-chance for v1
-			double fold_change1 = Utilities.calcFoldChange(this.group1_means.get(v1), this.group2_means.get(v1));
+			double fold_change1 = this.fold_changes.get(v1);
 			// ... and its extend
 			fold_change1 = Utilities.amountFoldChange(fold_change1);
 			
 			// determining fold-chance for v2
-			double fold_change2 = Utilities.calcFoldChange(this.group1_means.get(v2), this.group2_means.get(v2));
+			double fold_change2 = this.fold_changes.get(v2);
 			// ... and its extend
 			fold_change2 = Utilities.amountFoldChange(fold_change2);
 			
@@ -619,7 +580,7 @@ public class DiffSeedCombDetector {
 			String seed_comb_string = String.join("/", seed_comb_temp);
 			
 			// determine fold-change
-			double fold_change = Utilities.calcFoldChange(this.group1_means.get(seed_comb), this.group2_means.get(seed_comb));
+			double fold_change = this.fold_changes.get(seed_comb);
 			
 			// median change calculation
 			double mean_change = this.group2_means.get(seed_comb) - this.group1_means.get(seed_comb);
@@ -1105,9 +1066,19 @@ public class DiffSeedCombDetector {
 			int sign_compareTo = scores.get(v1).compareTo(scores.get(v2));
 			
 			if (sign_compareTo == 0) {
-				double v1_mean_diff = group2_means.get(v1) - group1_means.get(v1);
-				double v2_mean_diff = group2_means.get(v2) - group1_means.get(v2);
-				return Double.compare(v1_mean_diff, v2_mean_diff);
+				// determining fold-chance for v1
+				double fold_change1 = fold_changes.get(v1);
+				// determining fold-chance for v2
+				double fold_change2 = fold_changes.get(v2);
+				int sign_compareTo2 = Double.compare(fold_change1, fold_change2);
+				
+				if (sign_compareTo2 == 0) {
+					double v1_mean_diff = group2_means.get(v1) - group1_means.get(v1);
+					double v2_mean_diff = group2_means.get(v2) - group1_means.get(v2);
+					return Double.compare(v1_mean_diff, v2_mean_diff);
+				} else
+					return sign_compareTo2;
+				
 			} else
 				return sign_compareTo;
 		}
