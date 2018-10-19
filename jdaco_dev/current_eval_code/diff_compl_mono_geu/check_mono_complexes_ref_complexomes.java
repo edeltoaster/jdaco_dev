@@ -37,6 +37,12 @@ public class check_mono_complexes_ref_complexomes {
 				cm_data.put(sample, qdr);
 		}
 		
+		System.out.println("Precompute quantified complexes ...");
+		new File("/Users/tho/Desktop/qr_corum/").mkdir();
+		Map<String, QuantDACOResultSet> cm_data_f = new HashMap<>(cm_data);
+		Map<String, QuantDACOResultSet> ncm_data_f = new HashMap<>(ncm_data);
+		cm_data_f.keySet().parallelStream().forEach(s -> cm_data_f.get(s).writeQuantifiedResult("/Users/tho/Desktop/qr_corum/" + s + ".txt.gz"));
+		ncm_data_f.keySet().parallelStream().forEach(s -> ncm_data_f.get(s).writeQuantifiedResult("/Users/tho/Desktop/qr_corum/" + s + ".txt.gz"));
 		
 		/**
 		 * Diff. complexes (unpaired)
@@ -93,6 +99,13 @@ public class check_mono_complexes_ref_complexomes {
 		/**
 		 * Diff. complexes (unpaired)
 		 */
+		
+		System.out.println("Precompute quantified complexes ...");
+		new File("/Users/tho/Desktop/qr_humap/").mkdir();
+		Map<String, QuantDACOResultSet> cm_data_f2 = new HashMap<>(cm_data);
+		Map<String, QuantDACOResultSet> ncm_data_f2 = new HashMap<>(ncm_data);
+		cm_data_f2.keySet().parallelStream().forEach(s -> cm_data_f2.get(s).writeQuantifiedResult("/Users/tho/Desktop/qr_humap/" + s + ".txt.gz"));
+		ncm_data_f2.keySet().parallelStream().forEach(s -> ncm_data_f2.get(s).writeQuantifiedResult("/Users/tho/Desktop/qr_humap/" + s + ".txt.gz"));
 		
 		new File(diff_out_folder).mkdir();
 		System.out.println("Monocyte comparison cm->ncm (unpaired): " + cm_data.size() + " vs " + ncm_data.size());
