@@ -18,7 +18,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class PPIXpress {
-	static String version_string = "PPIXpress 1.19";
+	static String version_string = "PPIXpress 1.20";
 	
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;

@@ -15,7 +15,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class PPICompare {
-	static String version_string = "PPICompare 1.03";
+	static String version_string = "PPICompare 1.04";
 	
 	private static String path_group1 = "[GROUP1-FOLDER]";
 	private static String path_group2 = "[GROUP2-FOLDER]";
