@@ -466,6 +466,95 @@ public class DACO {
 	}
 	
 	/**
+	 * Starts the pair growing and DACO algorithm for all seed nodes
+	 * @param seed_proteins
+	 * @return
+	 */
+	public HashSet<HashSet<String>> growPairs(Set<String> seed_proteins) {
+		
+		// seed job construction
+		LinkedList<StepFunction> jobs = new LinkedList<>();
+		int no_pair_proteins = 0;
+		for (String protein:seed_proteins) {
+			
+			// check if in PPI
+			if (!ppi.contains(protein)) {
+				continue;
+			}
+			
+			// determine start-pairs and DDIs
+			HashSet<String> seed = new HashSet<>();
+			seed.add(protein);
+			HashMap<String, LinkedList<StrPair>> incident = getIncidentNodes(seed, new HashSet<>());
+			
+			// get all DDIs and proteins
+			for (String other_protein : incident.keySet()) {
+				// if known that more will be processed, don't start symmetric
+				if (seed_proteins.contains(other_protein) && protein.compareTo(other_protein) < 0)
+					continue;
+				double P = ppi.getWeights().get(new StrPair(protein, other_protein));
+				if (P <= pair_building_threshold)
+					continue;
+				no_pair_proteins++;
+				LinkedList<StrPair> relevant_ddis = filterDomainInteractionAlternatives(incident.get(other_protein));
+				final HashSet<String> temp_set = new HashSet<>(seed);
+				temp_set.add(other_protein);
+				double[] coh = ppi.computeClusterCohesiveness(temp_set);
+				for (StrPair ddi_choice : relevant_ddis) {
+					final HashSet<StrPair> new_domain_interactions = new HashSet<>();
+					new_domain_interactions.add(ddi_choice);
+					jobs.add(new StepFunction(temp_set, new_domain_interactions, coh[0], coh[1], P));
+				}
+			}
+			
+		}
+		
+		// stop early if there is nothing to do
+		if (jobs.size() == 0) {
+			if (verbose != null)
+				verbose.println("No interaction partners above pair-building threshold.");
+			return new HashSet<HashSet<String>>();
+		}
+		
+		if (verbose != null)
+			verbose.println("Seeding from " + no_pair_proteins + " protein pair(s) with " + jobs.size() + " unique domain interactions.");
+		
+		// re-init data structures if necessary
+		if (this.temp_results == null) 
+			this.temp_results = Collections.newSetFromMap(new ConcurrentHashMap<>(Math.min(jobs.size(), 20), 0.75f, Math.max(number_of_threads / 4, 1)));
+		 else 
+			this.temp_results.clear();
+		
+		if (this.pool == null || this.pool.isShutdown()) {
+			if (this.cached_execution)
+				this.pool = new CachingThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+			else
+				this.pool = new ThreadPoolExecutor(number_of_threads, number_of_threads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+		}
+		// start computing and output
+		Timer timer = new Timer();
+		if (this.compute_timeout > 0)
+			timer.schedule(new EarlyStopper(), this.compute_timeout * 60 * 1000);
+		
+		long check_interval = (long) Math.pow(max_depth_of_search, 2);
+		
+		for (StepFunction job : jobs)
+			this.pool.execute(job);
+		do {
+			try {
+				Thread.sleep(check_interval);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		while (this.pool.getActiveCount() > 0 || this.pool.getQueue().size() > 0);
+		
+		timer.cancel();
+		
+		return new HashSet<>(temp_results);
+	}
+	
+	/**
 	 * Returns boundary nodes and
 	 * @param internal_proteins
 	 * @param domain_interactions

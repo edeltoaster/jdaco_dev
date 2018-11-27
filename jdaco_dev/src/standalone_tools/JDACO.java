@@ -15,7 +15,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class JDACO {
-	static String version_string = "JDACO 1.01";
+	static String version_string = "JDACO 1.02";
 	
 	private static String ppin_file;
 	private static String ddin_file;
@@ -35,6 +35,7 @@ public class JDACO {
 	private static int compute_timeout = 60;
 	private static boolean cached_execution = true;
 	private static boolean benchmark_mode = false;
+	private static boolean hp_mode = false;
 	
 	
 	/**
@@ -54,6 +55,7 @@ public class JDACO {
 		System.out.println("	-s : silent mode, no output during actual computation");
 		System.out.println("	-c : non-cached execution, uses slightly less main memory but may take more time");
 		System.out.println("	-b : benchmark mode, always output the runtime in seconds");
+		System.out.println("	-hp : high-performance mode, merges compute jobs of all seed proteins for improved load balancing");
 		
 		System.out.println();
 		
@@ -139,6 +141,10 @@ public class JDACO {
 			// benchmark mode
 			else if (arg.equals("-b")) 
 				benchmark_mode = true;
+			
+			// high-performance mode
+			else if (arg.equals("-hp")) 
+				hp_mode = true;
 			
 			// other parameters
 			else {
@@ -239,22 +245,33 @@ public class JDACO {
 		// initialize calculation and set parameters
 		DACO daco = new DACO(ddin, ppin, no_threads, max_depth, pair_threshold, prob_threshold, out, compute_timeout, cached_execution);
 		
-		
-		// carry out computation
-		System.out.println("Computing ...");
+		long start = 0;
+		long duration = 0;
 		HashSet<HashSet<String>> results = new HashSet<>();
-		int n = seed.size();
-		int i = 1;
-		long start = System.currentTimeMillis();
-		for (String tf : seed) {
-			if (out != null)
-				out.println("========================================================");
-				out.println(i + "/" + n + ": " + tf);
-			results.addAll(daco.growPairs(tf, seed));
-			++i;
-		}
-		long duration = System.currentTimeMillis() - start;
 		
+		if (!hp_mode) {
+			// carry out computation in standard mode
+			System.out.println("Computing ...");
+			
+			int n = seed.size();
+			int i = 1;
+			start = System.currentTimeMillis();
+			for (String tf : seed) {
+				if (out != null)
+					out.println("========================================================");
+					out.println(i + "/" + n + ": " + tf);
+				results.addAll(daco.growPairs(tf, seed));
+				++i;
+			}
+			duration = System.currentTimeMillis() - start;
+			
+		} else {
+			// carry out computation in high-performance mode
+			System.out.println("Computing in high-performance mode ...");
+			start = System.currentTimeMillis();
+			results.addAll(daco.growPairs(seed));
+			duration = System.currentTimeMillis() - start;
+		}
 		
 		// aftermath
 		daco.ensurePoolShutdown();
