@@ -15,7 +15,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class JDACO {
-	static String version_string = "JDACO 1.02";
+	static String version_string = "JDACO 1.03";
 	
 	private static String ppin_file;
 	private static String ddin_file;

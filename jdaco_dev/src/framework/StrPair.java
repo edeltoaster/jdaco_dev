@@ -20,7 +20,7 @@ public class StrPair {
 
 	@Override
 	public int hashCode() {
-		return l.hashCode() + r.hashCode();
+		return 97*l.hashCode() + r.hashCode();
 	}
 
 	@Override

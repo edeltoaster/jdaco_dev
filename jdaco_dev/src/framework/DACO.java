@@ -115,12 +115,11 @@ public class DACO {
 		
 		@Override
 		public void execute(Runnable r) {
-			int size = ((StepFunction) r).internal_proteins.size();
-			if (size < 5 && size > 2) {
-				if (already_seen.contains(r))
-					return;
-				already_seen.add(r);
-			}
+
+			if (already_seen.contains(r))
+				return;
+			already_seen.add(r);
+			
 			super.execute(r);
 		}
 	}
@@ -145,18 +144,7 @@ public class DACO {
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + getOuterType().hashCode();
-			result = prime
-					* result
-					+ ((domain_interactions == null) ? 0 : domain_interactions
-							.hashCode());
-			result = prime
-					* result
-					+ ((internal_proteins == null) ? 0 : internal_proteins
-							.hashCode());
-			return result;
+			return domain_interactions.hashCode();
 		}
 
 		@Override
@@ -174,11 +162,6 @@ public class DACO {
 				if (other.domain_interactions != null)
 					return false;
 			} else if (!domain_interactions.equals(other.domain_interactions))
-				return false;
-			if (internal_proteins == null) {
-				if (other.internal_proteins != null)
-					return false;
-			} else if (!internal_proteins.equals(other.internal_proteins))
 				return false;
 			return true;
 		}
