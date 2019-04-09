@@ -1238,7 +1238,7 @@ public class DataQuery {
 		return isoform_protein_domain_mapping;
 	}
 	/**
-	 * Queries EBI QuickGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon
+	 * Queries AmiGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon
 	 * @param GO_id
 	 * @param taxon
 	 * @param include_IEA
