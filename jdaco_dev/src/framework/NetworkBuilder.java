@@ -429,7 +429,7 @@ public class NetworkBuilder {
 	 * @param genes
 	 * @return
 	 */
-	public ConstructedNetworks constructAssociatedNetworksFromGeneAbundance(Set<String> genes, boolean remove_decayed) {
+	public ConstructedNetworks constructAssociatedNetworksFromGeneAbundanceSet(Set<String> genes, boolean remove_decayed) {
 		
 		// map proteins to isoform
 		Map<String, String> isoform = DataQuery.getIsoformTranscriptsOfProteins(this.organism_database);
@@ -461,6 +461,49 @@ public class NetworkBuilder {
 		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, null, remove_decayed, true);
 	}
 
+	/**
+	 * Construct specific PPIN and DDIN from gene abundance values
+	 * @param genes
+	 * @return
+	 */
+	public ConstructedNetworks constructAssociatedNetworksFromGeneAbundance(Map<String, Float> gene_abundance, boolean remove_decayed) {
+		
+		// map proteins to isoform
+		Map<String, String> isoform = DataQuery.getIsoformTranscriptsOfProteins(this.organism_database);
+		Map<String, String> relevant_isoforms = new HashMap<>();
+		
+		// determine proteins
+		Set<String> proteins = new HashSet<>();
+		Map<String, HashSet<String>> genes_to_proteins = new HashMap<>();
+		
+		for (String[] data:DataQuery.getGenesTranscriptsProteins(this.organism_database)) {
+			String gene = data[0];
+			String protein = data[2];
+			if (!genes_to_proteins.containsKey(gene))
+				genes_to_proteins.put(gene, new HashSet<String>());
+			genes_to_proteins.get(gene).add(protein);
+		}
+		
+		Map<String, Float> protein_abundance = new HashMap<String, Float>();
+		for (String gene:gene_abundance.keySet())
+			if (genes_to_proteins.containsKey(gene)) {
+				proteins.addAll(genes_to_proteins.get(gene));
+				for (String p:genes_to_proteins.get(gene))
+					protein_abundance.put(p, gene_abundance.get(gene) + protein_abundance.getOrDefault(p, 0f));
+			}
+		
+		Map<String, Float> transcr_abundance = new HashMap<String, Float>();
+		for (String protein:proteins) { // empty list is returned in actual builder function for "", but protein is said to be abundant and can still have FB domains
+			if (!isoform.containsKey(protein)) //compatibility
+				isoform.put(protein, "");
+			relevant_isoforms.put(protein, isoform.get(protein));
+			transcr_abundance.put(isoform.get(protein), protein_abundance.get(protein));
+		}
+		
+
+		return this.constructAssociatedNetworksFromTranscriptMap(relevant_isoforms, transcr_abundance, remove_decayed, true);
+	}
+	
 	/**
 	 * Constructs matching DDIN to PPIN subnetwork of abundant proteins assuming principal isoforms
 	 * @param unpruned_ppi

@@ -246,11 +246,11 @@ public class BRCAdiff {
 			
 			
 			// gene-based
-			PPIN tumor_net = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(tumor_file, rsem_cutoff), false).getPPIN();
+			PPIN tumor_net = builder.constructAssociatedNetworksFromGeneAbundanceSet(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(tumor_file, rsem_cutoff), false).getPPIN();
 			tumor_nodes.add((double) tumor_net.getSizes()[0]);
 			tumor_edges.add((double) tumor_net.getSizes()[1]);
 			
-			PPIN normal_net = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(normal_file, rsem_cutoff), false).getPPIN();
+			PPIN normal_net = builder.constructAssociatedNetworksFromGeneAbundanceSet(TranscriptAbundanceReader.getGeneAbundanceFromTCGAIsoformRSEM(normal_file, rsem_cutoff), false).getPPIN();
 			normal_nodes.add((double) normal_net.getSizes()[0]);
 			normal_edges.add((double) normal_net.getSizes()[1]);
 			

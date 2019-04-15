@@ -18,7 +18,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class PPIXpress {
-	static String version_string = "PPIXpress 1.20";
+	static String version_string = "PPIXpress 1.21";
 	
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
@@ -431,7 +431,7 @@ public class PPIXpress {
 			// build
 			ConstructedNetworks constr;
 			if (gene_level_only || !type.endsWith("T")) {
-				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance.keySet(), remove_decay_transcripts);
+				constr = builder.constructAssociatedNetworksFromGeneAbundance(abundance, remove_decay_transcripts);
 			} else {
 				constr = builder.constructAssociatedNetworksFromTranscriptAbundance(abundance, remove_decay_transcripts, report_gene_abundance);
 			}
