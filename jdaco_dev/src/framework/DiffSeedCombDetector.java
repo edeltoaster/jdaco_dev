@@ -64,7 +64,7 @@ public class DiffSeedCombDetector {
 	 * @param min_variant_fraction
 	 * @param no_threads
 	 */
-	public DiffSeedCombDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
+	public DiffSeedCombDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads, boolean filter_allosome) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
@@ -90,12 +90,29 @@ public class DiffSeedCombDetector {
 		
 		Set<HashSet<String>> unfiltered_seed_comb_var = new HashSet<>(count_map_g1.keySet());
 		unfiltered_seed_comb_var.addAll(count_map_g2.keySet());
+		
+		// filter complexes with allosome proteins
+		if (filter_allosome) {
+			String db = DataQuery.getEnsemblOrganismDatabaseFromProteins(count_map_g1.keySet().iterator().next());
+			Set<String> allosome = DataQuery.getAllosomeProteins(db);
+			
+			Set<HashSet<String>> to_remove = new HashSet<>();
+			for (HashSet<String> tfc:unfiltered_seed_comb_var) {
+				Set<String> overlap = new HashSet<>(tfc);
+				overlap.retainAll(allosome);
+				if (overlap.size() > 0)
+					to_remove.add(tfc);
+ 			}
+			unfiltered_seed_comb_var.removeAll(to_remove);
+		}
 
+		
 		// check if above consideration threshold and determine subsets (if necessary)
 		this.seed_combination_variants = new HashMap<>();
 		double min_count_g1 = min_variant_fraction * group1.size();
 		double min_count_g2 = min_variant_fraction * group2.size();
 		for (HashSet<String> tfc:unfiltered_seed_comb_var) {
+			
 			this.seed_combination_variants.put(tfc, new LinkedList<HashSet<String>>());
 			this.seed_combination_variants.get(tfc).add(tfc);
 			int count_g1 = count_map_g1.getOrDefault(tfc, 0);
@@ -113,6 +130,8 @@ public class DiffSeedCombDetector {
 			if (count_g1 < min_count_g1 && count_g2 < min_count_g2)
 				this.seed_combination_variants.remove(tfc);
 		}
+		
+		
 		
 		// determine abundance values
 		this.group1_abundances = this.determineAbundanceOfSeedVariantsComplexes(group1);
@@ -159,6 +178,21 @@ public class DiffSeedCombDetector {
 	}
 	
 	/**
+	 * Compatibility constructor
+	 * @param group1
+	 * @param group2
+	 * @param FDR
+	 * @param parametric
+	 * @param paired
+	 * @param incorporate_supersets
+	 * @param min_variant_fraction
+	 * @param no_threads
+	 */
+	public DiffSeedCombDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
+		this(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads, false);
+	}
+	
+	/**
 	 * Minimal constructor
 	 * @param group1
 	 * @param group2
@@ -167,7 +201,7 @@ public class DiffSeedCombDetector {
 	 * @param paired
 	 */
 	public DiffSeedCombDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired) {
-		this(group1, group2, FDR, parametric, paired, false, 0.0, Runtime.getRuntime().availableProcessors());
+		this(group1, group2, FDR, parametric, paired, false, 0.0, Runtime.getRuntime().availableProcessors(), false);
 	}
 	
 	/**

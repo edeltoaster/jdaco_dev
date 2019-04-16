@@ -73,6 +73,7 @@ public class DataQuery {
 	private static List<String[]> cache_HGNC;
 	private static Map<String, String> cache_uniprot_HGNC;
 	private static Map<String, String> uniprot_sec_accs;
+	private static Map<String, Set<String>> cache_allosome_proteins = new HashMap<>();
 	private static String uniprot_release;
 	
 	
@@ -555,6 +556,10 @@ public class DataQuery {
 	 */
 	public static Set<String> getAllosomeProteins(String organism_core_database) {
 		
+		// return directly if in cache
+		if (DataQuery.cache_allosome_proteins.containsKey(organism_core_database))
+			return DataQuery.cache_allosome_proteins.get(organism_core_database);
+		
 		Set<String> allosome_proteins = new HashSet<String>();
 		
 		Connection connection = null;
@@ -599,6 +604,9 @@ public class DataQuery {
 			} catch (Exception e) {
 			}
 		}
+		
+		// store in cache
+		DataQuery.cache_allosome_proteins.put(organism_core_database, allosome_proteins);
 		
 		return allosome_proteins;
 	}

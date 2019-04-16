@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import framework.DataQuery;
 import framework.DiffComplexDetector;
 import framework.DiffComplexDetector.SPEnrichment;
 import framework.DiffSeedCombDetector;
@@ -16,7 +17,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class CompleXChange {
-	static String version_string = "CompleXChange 1.0";
+	static String version_string = "CompleXChange 1.01";
 	
 	private static String path_group1 = "[GROUP1-FOLDER]";
 	private static String path_group2 = "[GROUP2-FOLDER]";
@@ -34,6 +35,7 @@ public class CompleXChange {
 	private static boolean human_readable = false;
 	private static boolean also_seedcomb_calcs = false;
 	private static boolean also_seed_enrich = false;
+	private static boolean filter_allosome = false;
 	private static int no_threads = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1); // assuming HT/SMT systems
 	
 	/**
@@ -76,6 +78,7 @@ public class CompleXChange {
 		System.out.println("	-enr : determine seed proteins enriched in up/down-regulated complexes (as in GSEA)");
 		System.out.println("	-sc : additional analysis based on seed combinations rather than sole complexes (as in GSEA)");
 		System.out.println("	-hr : additionally output human readable files with gene names and rounded numbers (default: no output)");
+		System.out.println("	-f : filter complexes with allosome proteins (default: no filtering)");
 		
 		System.out.println();
 		
@@ -167,6 +170,10 @@ public class CompleXChange {
 			// output human readable files?
 			else if (arg.equals("-hr"))
 				human_readable = true;
+			
+			// filter allosome proteins?
+			else if (arg.equals("-f"))
+				filter_allosome = true;
 			
 			// read groupwise input
 			else if (group1 == null) {
@@ -267,13 +274,21 @@ public class CompleXChange {
 		System.out.println("Statistical test: " + test);
 		System.out.println("Min. fraction: " + min_variant_fraction);
 		System.out.println("Incorporate supersets: " + (incorporate_supersets ? "yes" : "no"));
+		
+		if (filter_allosome) {
+			System.out.print("Filtering of complexes with allosome proteins enabled. Downloading data ... ");
+			String db = DataQuery.getEnsemblOrganismDatabaseFromProteins(group1.values().iterator().next().getAbundantSeedProteins());
+			DataQuery.getAllosomeProteins(db);
+			System.out.println("done.");
+		}	
 		System.out.println();
 		
 		// computations
 		boolean output_to_write = false;
 		System.out.println("Processing " + path_group1 + " (" + group1.keySet().size() + ") vs " + path_group2 + " (" + group2.keySet().size() + ") ...");
 		System.out.flush();
-		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads);
+		
+		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads, filter_allosome);
 		
 		if (seed != null)
 			System.out.println(dcd.getRawPValues().size() + " complexes tested, " + dcd.getSignificanceSortedComplexes().size() +" (" + dcd.getSignSortedVariants(false, false).size() + " seed combination variants) significant.");
@@ -285,7 +300,7 @@ public class CompleXChange {
 		
 		DiffSeedCombDetector dscd = null;
 		if (also_seedcomb_calcs) {
-			dscd = new DiffSeedCombDetector(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads);
+			dscd = new DiffSeedCombDetector(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads, filter_allosome);
 			System.out.println(dscd.getVariantsRawPValues().size() + " seed combinations tested, " + dscd.getSignificanceSortedVariants().size() + " significant.");
 			
 			if (!dscd.getSignificanceSortedVariants().isEmpty())

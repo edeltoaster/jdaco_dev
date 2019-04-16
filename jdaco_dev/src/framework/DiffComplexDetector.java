@@ -65,7 +65,7 @@ public class DiffComplexDetector {
 	 * @param min_variant_fraction
 	 * @param no_threads
 	 */
-	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
+	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads, boolean filter_allosome) {
 		this.group1 = group1;
 		this.group2 = group2;
 		this.FDR = FDR;
@@ -90,6 +90,21 @@ public class DiffComplexDetector {
 		group2.values().stream().forEach(sample -> sample.getSeedToComplexMap().values().stream().forEach(cl -> cl.stream().forEach(c -> count_map_g2.put(c, count_map_g2.getOrDefault(c, 0) + 1))));
 		Set<HashSet<String>> unfiltered_complexes = new HashSet<>(count_map_g1.keySet());
 		unfiltered_complexes.addAll(count_map_g2.keySet());
+		
+		// filter complexes with allosome proteins
+		if (filter_allosome) {
+			String db = DataQuery.getEnsemblOrganismDatabaseFromProteins(count_map_g1.keySet().iterator().next());
+			Set<String> allosome = DataQuery.getAllosomeProteins(db);
+			
+			Set<HashSet<String>> to_remove = new HashSet<>();
+			for (HashSet<String> tfc:unfiltered_complexes) {
+				Set<String> overlap = new HashSet<>(tfc);
+				overlap.retainAll(allosome);
+				if (overlap.size() > 0)
+					to_remove.add(tfc);
+ 			}
+			unfiltered_complexes.removeAll(to_remove);
+		}
 		
 		// check if above consideration threshold and determine subsets (if necessary)
 		this.relevant_complexes = new HashMap<>();
@@ -158,6 +173,22 @@ public class DiffComplexDetector {
 		
 		pool.shutdownNow();
 	}
+	
+	/**
+	 * Compatibility constructor
+	 * @param group1
+	 * @param group2
+	 * @param FDR
+	 * @param parametric
+	 * @param paired
+	 * @param incorporate_supersets
+	 * @param min_variant_fraction
+	 * @param no_threads
+	 */
+	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads) {
+		this(group1, group2, FDR, parametric, paired, incorporate_supersets, min_variant_fraction, no_threads, false);
+	}
+	
 	
 	/**
 	 * Custom compareTo function that first sorts by the adjusted p-value/q-value and breaks ties using the amount of fold-change and absolute differences of the means between groups
