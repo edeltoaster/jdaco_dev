@@ -39,7 +39,7 @@ public class build_networks_mentha {
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(expr_folder, ".txt.gz")) {
 			String path = f.getAbsolutePath();
 			String[] path_split = path.split("/");
-			String file_name = path_split[path_split.length-1].split("\\.")[0] + "." + path_split[path_split.length-1].split("\\.")[1];
+			String file_name = path_split[path_split.length-1].split("\\.")[1];
 			System.out.println("Processing " + file_name);
 			
 			ConstructedNetworks cn = builder.constructAssociatedNetworksFromGeneAbundance(TranscriptAbundanceReader.readSample(path, 0.0, true, db), true);
@@ -47,6 +47,7 @@ public class build_networks_mentha {
 			cn.getDDIN().writeDDIN(network_folder + file_name + "_ddin.txt.gz");
 			cn.writeProteinToAssumedTranscriptMap(network_folder + file_name + "_major-transcripts.txt.gz");
 			System.out.println(cn.getPPIN().getSizesStr());
+			System.out.println("upper 5% cutoff: " + cn.getPPIN().getPercentile(5));
 		}
 		
 		System.out.println();
