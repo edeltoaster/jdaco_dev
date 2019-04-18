@@ -7,11 +7,11 @@ import java.util.Map;
 import framework.QuantDACOResultSet;
 import framework.Utilities;
 
-public class diff_complexes_mentha {
+public class diff_complexes_rel_mentha {
 	static String net_folder = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/mentha_networks/";
 	static String compl_folder = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/res/";
 	static String seed_file = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/JDACO_run_stuff/hocomoco_human_core_TFs_v11.txt.gz";
-	static String qr_folder = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/nquant_compl/";
+	static String qr_folder = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/relquant_compl/";
 	
 	static Map<String, QuantDACOResultSet> data = new HashMap<>();
 	
@@ -20,9 +20,7 @@ public class diff_complexes_mentha {
 		for (File f:Utilities.getAllSuffixMatchingFilesInSubfolders(compl_folder, ".csv.gz")) {
 			String sample = f.getName().split("\\.")[0];
 			System.out.println("Processing " + sample);
-			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), seed_file, net_folder + sample + "_major-transcripts.txt.gz");
-			
-			qdr.convertToPMMeasure();
+			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), seed_file, net_folder + sample + "_major-transcripts_rel.txt.gz");
 			
 			if (write)
 				qdr.writeQuantifiedResult(qr_folder + sample + ".txt.gz");
