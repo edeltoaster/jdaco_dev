@@ -401,6 +401,15 @@ public class QuantDACOResultSet extends DACOResultSet {
 		Utilities.writeEntries(to_write, out_file);
 	}
 	
+	/**
+	 * Convert abundance data to counts/transcripts per million (better comparability across samples) and resets caches.
+	 */
+	public void convertToPMMeasure() {
+		transcript_abundance = TranscriptAbundanceReader.convertToPMMeasure(transcript_abundance, 0.0);
+		cached_abundance_of_complexes = null;
+		cached_remaining_abundance_of_proteins = null;
+	}
+	
 	/*
 	 * getters
 	 */
