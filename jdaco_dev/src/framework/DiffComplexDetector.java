@@ -64,6 +64,7 @@ public class DiffComplexDetector {
 	 * @param incorporate_supersets
 	 * @param min_variant_fraction
 	 * @param no_threads
+	 * @param filter_allosome
 	 */
 	public DiffComplexDetector(Map<String, QuantDACOResultSet> group1, Map<String, QuantDACOResultSet> group2, double FDR, boolean parametric, boolean paired, boolean incorporate_supersets, double min_variant_fraction, int no_threads, boolean filter_allosome) {
 		this.group1 = group1;
