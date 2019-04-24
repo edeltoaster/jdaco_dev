@@ -16,7 +16,7 @@ public class diff_complexes_rel_mentha {
 	static String compl_folder = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/res/";
 	static String seed_file = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/JDACO_run_stuff/hocomoco_human_core_TFs_v11.txt.gz";
 	static String qr_folder = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/relquant_compl/";
-	static String out_folder = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/rel_diffout/";
+	static String out_folder = "/Users/tho/GDrive/Work/projects/breastcancer_proteome_complexomes/rel_log2_diffout/";
 	
 	static Map<String, QuantDACOResultSet> all_data = new HashMap<>();
 	static Map<String, QuantDACOResultSet> Basal_data = new HashMap<>();
@@ -47,6 +47,8 @@ public class diff_complexes_rel_mentha {
 			String sample = f.getName().split("\\.")[0];
 			System.out.println("Processing " + sample);
 			QuantDACOResultSet qdr = new QuantDACOResultSet(f.getAbsolutePath(), seed_file, net_folder + sample + "_major-transcripts_rel.txt.gz");
+			
+			qdr.convertToLog2();
 			
 			if (write)
 				qdr.writeQuantifiedResult(qr_folder + sample + ".txt.gz");

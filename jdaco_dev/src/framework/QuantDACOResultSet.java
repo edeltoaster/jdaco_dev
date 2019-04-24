@@ -410,6 +410,14 @@ public class QuantDACOResultSet extends DACOResultSet {
 		cached_remaining_abundance_of_proteins = null;
 	}
 	
+	/**
+	 * Convert abundance data to log2-abundances and reset caches.
+	 */
+	public void convertToLog2() {
+		for (String transcript:transcript_abundance.keySet())
+			transcript_abundance.put(transcript, (float) (Math.log( transcript_abundance.get(transcript) )/Math.log(2)));
+	}
+	
 	/*
 	 * getters
 	 */
