@@ -9,7 +9,7 @@ import framework.PPIN;
 import framework.TranscriptAbundanceReader;
 import framework.Utilities;
 
-public class build_networks_preppi { // intended to be run on a server
+public class build_networks { // intended to be run on a server
 	static String expr_folder = "quantified_samples/";
 	
 	static String preppi_in = "mixed_data/human_PrePPI_17_01_17_hc.txt.gz";
