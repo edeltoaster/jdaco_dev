@@ -33,6 +33,7 @@ public class build_networks { // intended to be run on a server
 		System.out.println("Updating Uniprot Accs with " + DataQuery.getUniprotRelease());
 		System.out.println(original_ppin.getSizesStr());
 		System.out.println("upper 5% cutoff: " + original_ppin.getPercentile(5));
+		System.out.println("upper 10% cutoff: " + original_ppin.getPercentile(10));
 		builder = new NetworkBuilder(original_ppin);
 		
 		System.out.println("Proteins mapped: " + builder.getMappingDomainPercentage());
