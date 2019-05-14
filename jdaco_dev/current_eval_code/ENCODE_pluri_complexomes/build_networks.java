@@ -17,11 +17,12 @@ public class build_networks { // intended to be run on a server
 	
 	static String mentha_in = "mixed_data/human_mentha_14_04_19.txt.gz";
 	static String mentha_network_folder = "mentha_networks/";
+	static String wmentha_network_folder = "wmentha_networks/";
 	
 	static PPIN original_ppin;
 	static NetworkBuilder builder;
 	
-	public static void preprocess(String in_file) {
+	public static void preprocess(String in_file, boolean string_weight) {
 		System.out.println("Original PPIN: " + in_file);
 		System.out.println("Ensembl version: " + DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
 		System.out.println("3did: " + DataQuery.get3didVersion());
@@ -32,6 +33,13 @@ public class build_networks { // intended to be run on a server
 		original_ppin = original_ppin.updateUniprotAccessions();
 		System.out.println("Updating Uniprot Accs with " + DataQuery.getUniprotRelease());
 		System.out.println(original_ppin.getSizesStr());
+		
+		if (string_weight) {
+			original_ppin = original_ppin.getAsSTRINGWeighted(false);
+			System.out.println("Updating using STRING");
+			System.out.println(original_ppin.getSizesStr());
+		}
+		
 		System.out.println("upper 5% cutoff: " + original_ppin.getPercentile(5));
 		System.out.println("upper 10% cutoff: " + original_ppin.getPercentile(10));
 		builder = new NetworkBuilder(original_ppin);
@@ -61,14 +69,19 @@ public class build_networks { // intended to be run on a server
 	}
 	
 	public static void main(String[] args) {
+		preprocess(mentha_in, true);
+		new File(wmentha_network_folder).mkdir();
+		process(wmentha_network_folder);
 		
-		preprocess(mentha_in);
+		System.out.println();
+		
+		preprocess(mentha_in, false);
 		new File(mentha_network_folder).mkdir();
 		process(mentha_network_folder);
 		
 		System.out.println();
 		
-		preprocess(preppi_in);
+		preprocess(preppi_in, false);
 		new File(preppi_network_folder).mkdir();
 		process(preppi_network_folder);
 		
