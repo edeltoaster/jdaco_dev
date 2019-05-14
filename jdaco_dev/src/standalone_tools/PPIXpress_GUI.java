@@ -45,7 +45,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
 public class PPIXpress_GUI {
-	static String version_string = "PPIXpress 1.21";
+	static String version_string = "PPIXpress 1.22";
 	
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;

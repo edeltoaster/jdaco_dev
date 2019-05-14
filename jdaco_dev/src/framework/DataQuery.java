@@ -46,7 +46,7 @@ public class DataQuery {
 	private static String ensembl_mysql = "ensembldb.ensembl.org:3306";
 	private static Map<String, List<String>> known_DDIs;
 	private static boolean up2date_DDIs = true;
-	private static String STRING_version = "10.5";
+	private static String STRING_version = "11.0";
 	private static String specific_ensembl_release = ""; // global option
 	private static String specific_3did_release = "current";
 	private static int retries = 0;
@@ -1405,7 +1405,7 @@ public class DataQuery {
 	
 	
 	/**
-	 * Retrieves STRING v10 network
+	 * Retrieves STRING v11 network
 	 * @param taxon_id
 	 * @return
 	 */
@@ -1423,7 +1423,7 @@ public class DataQuery {
 		try {
 			// URL is version-dependent
 			URL server = new URL("https://stringdb-static.org/download/protein.links.v" + DataQuery.STRING_version + "/" + taxon_id + ".protein.links.v" + DataQuery.STRING_version + ".txt.gz");
-			//https://stringdb-static.org/download/protein.links.v10.5/9606.protein.links.v10.5.txt.gz
+			//https://stringdb-static.org/download/protein.links.v11.0/9606.protein.links.v11.0.txt.gz
 			URLConnection connection = server.openConnection();
 			connection.addRequestProperty("User-Agent", "Chrome");
 			
