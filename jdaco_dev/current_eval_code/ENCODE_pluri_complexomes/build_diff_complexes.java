@@ -40,10 +40,8 @@ public class build_diff_complexes { // intended to be run on a server
 			}
 		}
 		
-		System.out.println();
 		System.out.println("non-pluri samples : " + group1.size());
 		System.out.println("pluri samples : " + group2.size());
-		System.out.println();
 		
 		System.out.println("Determine differential complexes ...");
 		DiffComplexDetector dcd = new DiffComplexDetector(group1, group2, FDR, false, false, false, min_variant_fraction, 64, true);
@@ -80,9 +78,10 @@ public class build_diff_complexes { // intended to be run on a server
 			if (!out_dir.exists())
 				out_dir.mkdir();
 			
-			process_data(out_dir.getAbsolutePath(), "wmentha", min_var);
-			process_data(out_dir.getAbsolutePath(), "mentha", min_var);
-			process_data(out_dir.getAbsolutePath(), "preppi", min_var);
+			String out_fold = out_dir.getAbsolutePath() + "/";
+			process_data(out_fold, "wmentha", min_var);
+			process_data(out_fold, "mentha", min_var);
+			process_data(out_fold, "preppi", min_var);
 			
 			System.out.println();
 			System.out.println();
