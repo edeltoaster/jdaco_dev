@@ -63,7 +63,7 @@ public class build_diff_complexes { // intended to be run on a server
 		DiffComplexDetector.SPEnrichment tf_enrich2 = dcd.calculateSPEnrichment(FDR, 10000, 10);
 		tf_enrich2.writeSignificantSeedProteins(spec_out_folder + network + "_TFs.txt");
 		tf_enrich2.writeSignificantSeedProteins(spec_out_folder + network + "_pos_TFs.txt", spec_out_folder + network + "_neg_TFs.txt");
-		System.out.println(tf_enrich2.getSignificanceSortedSeedProteins() + " sign seed proteins");
+		System.out.println(tf_enrich2.getSignificanceSortedSeedProteins().size() + " sign seed proteins");
 		
 		System.out.println();
 	}
