@@ -20,6 +20,9 @@ public class build_diff_complexes { // intended to be run on a server
 	static String mentha_network_folder = "mentha_networks/";
 	static String mentha_compl_folder = "res_mentha/";
 	
+	static String wmentha_network_folder = "wmentha_networks/";
+	static String wmentha_compl_folder = "res_wmentha/";
+	
 	public static void process_data(String network) {
 		
 		Map<String, QuantDACOResultSet> group1 = new HashMap<>();
@@ -65,6 +68,8 @@ public class build_diff_complexes { // intended to be run on a server
 		File out_dir = new File(out_folder);
 		if (!out_dir.exists())
 			out_dir.mkdir();
+		
+		process_data("wmentha");
 		
 		process_data("mentha");
 		
