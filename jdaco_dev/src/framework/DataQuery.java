@@ -87,7 +87,7 @@ public class DataQuery {
 		String organism = "";
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("https://www.uniprot.org/uniprot/"+uniprot_acc+".txt");
+			URL server = new URL("https://www.uniprot.org/uniprot/" + uniprot_acc + ".txt");
 			URLConnection connection = server.openConnection();
 			// read
 			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -136,8 +136,8 @@ public class DataQuery {
 		String taxon = "";
 		BufferedReader datastream = null;
 		try {
-			URL server = new URL("https://www.uniprot.org/uniprot/"+uniprot_acc+".txt");
-			URLConnection connection = server.openConnection();
+			URL server = new URL("https://www.uniprot.org/uniprot/" + uniprot_acc + ".txt");
+			URLConnection connection = server.openConnection(); 
 			
 			// read
 			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -473,7 +473,7 @@ public class DataQuery {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("ENSEMBL");
 			e.printStackTrace();
-			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get common names from ENSEMBL in 10 seconds ..." );
+			err_out.println("Attempting " + (++DataQuery.retries) + ". retry to get common names from ENSEMBL in 10 seconds ..." );
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e1) {
@@ -510,7 +510,7 @@ public class DataQuery {
 		Map<String, List<String>> ensembl_to_uniprot = new HashMap<>();
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql+"/"+organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
+			connection = DriverManager.getConnection("jdbc:mysql://"+ensembl_mysql + "/" + organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
 			ResultSet rs = st.executeQuery("SELECT translation.stable_id, xref.dbprimary_acc "
@@ -1257,11 +1257,14 @@ public class DataQuery {
 		Set<String> entries = new HashSet<>();
 		
 		Connection connection = null;
-		String server = "spitz.lbl.gov";
+//		String server = "spitz.lbl.gov";
+		String server = "mysql-amigo.ebi.ac.uk:4085"; // TODO: GO retrieval MySQLs are offline since mid of 2018?
 		String user = "go_select";
 		String db = "go_latest";
+		
 		if (lite_annotation)
 			db = "go_latest_lite";
+
 		try {
 			connection = DriverManager.getConnection("jdbc:mysql://" + server + "/" + db + "?autoReconnect=true&useSSL=false", user, "");
 			Statement st = connection.createStatement();
@@ -1297,14 +1300,12 @@ public class DataQuery {
 		} catch (Exception e) {
 			if (DataQuery.retries == 10)
 				terminateRetrieval("AmiGO");
-			//e.printStackTrace();
+			e.printStackTrace();
 			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get annotation data from AmiGO in 10 seconds ..." );
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e1) {
 			}
-			
-			DataQuery.switchServer();
 			
 			return getProteinsWithGO(GO_id, taxon, include_IEA, report_genes, lite_annotation);
 			

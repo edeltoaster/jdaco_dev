@@ -1,0 +1,820 @@
+﻿GENE PRODUCT DB	GENE PRODUCT ID	SYMBOL	QUALIFIER	GO TERM	GO NAME	ECO ID	GO EVIDENCE CODE	REFERENCE	WITH/FROM	TAXON ID	ASSIGNED BY	ANNOTATION EXTENSION	GO ASPECT
+UniProtKB	A0A024R0Y4	TADA2A	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR016827	9606	InterPro		P
+UniProtKB	A0A024R1R9	hCG_31740	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR026711	9606	InterPro		P
+UniProtKB	A0A024R1V6	PCGF2	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P23798|ensembl:ENSMUSP00000137517	9606	Ensembl		P
+UniProtKB	A0A024R274	SMAD4	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P97471|ensembl:ENSMUSP00000025393	9606	Ensembl		P
+UniProtKB	A0A024R597	HTATIP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		F
+UniProtKB	A0A024R597	HTATIP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		P
+UniProtKB	A0A024R597	HTATIP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A024R5C6	NAT11	involved_in	GO:0043967	histone H4 acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0010485	9606	GOC		P
+UniProtKB	A0A024R5C6	NAT11	involved_in	GO:0043968	histone H2A acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0043998	9606	GOC		P
+UniProtKB	A0A024R5C6	NAT11	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	A0A024R5C6	NAT11	enables	GO:0043998	H2A histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	A0A024R5E8	HTATIP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		F
+UniProtKB	A0A024R5E8	HTATIP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		P
+UniProtKB	A0A024R5E8	HTATIP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A0S2Z4G1	TADA2A	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR016827	9606	InterPro		P
+UniProtKB	A0A140VKC4	MECP2	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9Z2D6|ensembl:ENSMUSP00000033770	9606	Ensembl		P
+UniProtKB	A0A1B0GW41	ING5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028638	9606	InterPro		P
+UniProtKB	A0A2R8YFJ4	TRRAP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR033317	9606	InterPro		P
+UniProtKB	A0A3B3IRI4	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3IRI4	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3IRI4	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3IS53	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR031280	9606	InterPro		F
+UniProtKB	A0A3B3IS53	KAT6A	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3IS53	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	A0A3B3IS53	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3IS73	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3IS73	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3IS73	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3ISD5	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3ISD5	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3ISD5	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3ISF5	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3ISF5	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3ISF5	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3ISI1	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3ISI1	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3ISI1	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3ISU5	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		F
+UniProtKB	A0A3B3ISU5	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	A0A3B3ISW3	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3ISW3	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3ISW3	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3ISZ3	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		F
+UniProtKB	A0A3B3ISZ3	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	A0A3B3IT19	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3IT19	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3IT19	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3IT63	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3IT63	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3IT63	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3ITA4	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3ITA4	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3ITA4	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3ITI0	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3ITI0	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3ITI0	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3ITI3	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR031280	9606	InterPro		F
+UniProtKB	A0A3B3ITI3	KAT6A	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3ITI3	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	A0A3B3ITI3	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3IU93	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3IU93	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3IU93	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3B3IUA4	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A0A3B3IUA4	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3B3IUA4	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0A3F2YNX6	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR031280	9606	InterPro		F
+UniProtKB	A0A3F2YNX6	KAT6A	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A0A3F2YNX6	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	A0A3F2YNX6	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A0AUZ9	KANSL1L	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001095998|UniProtKB:Q7Z3B3	9606	GO_Central		F
+UniProtKB	A0AUZ9	KANSL1L	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001095998|UniProtKB:Q7Z3B3	9606	GO_Central		F
+UniProtKB	A0AUZ9	KANSL1L	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001095998|UniProtKB:Q7Z3B3	9606	GO_Central		F
+UniProtKB	A0AUZ9	KANSL1L	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0043995	9606	GOC		P
+UniProtKB	A0AUZ9	KANSL1L	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0043996	9606	GOC		P
+UniProtKB	A0AUZ9	KANSL1L	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0046972	9606	GOC		P
+UniProtKB	A4KYM5	ING4	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028647	9606	InterPro		P
+UniProtKB	A4KYM7	ING4	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028647	9606	InterPro		P
+UniProtKB	A5PKX7	MYST3	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR031280	9606	InterPro		F
+UniProtKB	A5PKX7	MYST3	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A5PKX7	MYST3	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	A5PKX7	MYST3	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A5PLL3	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR031280	9606	InterPro		F
+UniProtKB	A5PLL3	KAT6A	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A5PLL3	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	A5PLL3	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A7E2B6	MYST4	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	A7E2B6	MYST4	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	A7E2B6	MYST4	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	A9UGY9	ATG5	involved_in	GO:2000619	negative regulation of histone H4-K16 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q99J83|ensembl:ENSMUSP00000044769	9606	Ensembl		P
+UniProtKB	B1AK63	MEAF6	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR015418	9606	InterPro		P
+UniProtKB	B2R8A7	B2R8A7	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		F
+UniProtKB	B2R8A7	B2R8A7	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		P
+UniProtKB	B2R8A7	B2R8A7	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	B2RWN8	MYST4	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	B2RWN8	MYST4	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	B2RWN8	MYST4	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	B3KU13	B3KU13	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR016827	9606	InterPro		P
+UniProtKB	B3KVJ2	B3KVJ2	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	B3KVJ2	B3KVJ2	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	B3KVJ2	B3KVJ2	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	B3KW44	METTL8	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:A2AUU0|ensembl:ENSMUSP00000107804	9606	Ensembl		P
+UniProtKB	B3KW44	METTL8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:A2AUU0|ensembl:ENSMUSP00000107804	9606	Ensembl		F
+UniProtKB	B3KWR7	B3KWR7	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR026711	9606	InterPro		P
+UniProtKB	B4DDF2	B4DDF2	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028647	9606	InterPro		P
+UniProtKB	B4DEF2	B4DEF2	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4DEF2	B4DEF2	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4DG18	B4DG18	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	B4DG18	B4DG18	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	B4DG18	B4DG18	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	B4DGH8	B4DGH8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	B4DGH8	B4DGH8	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	B4DGH8	B4DGH8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	B4DJ40	B4DJ40	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	B4DJ40	B4DJ40	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	B4DJ40	B4DJ40	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	B4DKA4	ELP3	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B4DKA4	ELP3	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B4DKA4	ELP3	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	B4DKA4	ELP3	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000104	UniRule:UR000435787	9606	UniProt		F
+UniProtKB	B4DMT3	B4DMT3	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR026711	9606	InterPro		P
+UniProtKB	B4DPB7	B4DPB7	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B4DPB7	B4DPB7	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B4DPB7	B4DPB7	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	B4DPB7	B4DPB7	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000104	UniRule:UR000435787	9606	UniProt		F
+UniProtKB	B4DQG8	B4DQG8	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4DQG8	B4DQG8	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4DTH3	B4DTH3	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4DTH3	B4DTH3	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4DTU6	B4DTU6	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4DTU6	B4DTU6	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4DU03	B4DU03	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4DU03	B4DU03	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	B4E0W9	B4E0W9	involved_in	GO:0043967	histone H4 acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0010485	9606	GOC		P
+UniProtKB	B4E0W9	B4E0W9	involved_in	GO:0043968	histone H2A acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0043998	9606	GOC		P
+UniProtKB	B4E0W9	B4E0W9	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	B4E0W9	B4E0W9	enables	GO:0043998	H2A histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	B4E3L4	B4E3L4	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197|InterPro:IPR013178	9606	InterPro		F
+UniProtKB	B4E3L4	B4E3L4	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	B4E3L4	B4E3L4	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000104	UniRule:UR000414945	9606	UniProt		F
+UniProtKB	B5A211	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		F
+UniProtKB	B5A211	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	B5A212	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		F
+UniProtKB	B5A212	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	B5A222	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		F
+UniProtKB	B5A222	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	B5A224	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B5A224	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197	9606	InterPro		F
+UniProtKB	B5A227	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		F
+UniProtKB	B5A227	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	B5A228	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		F
+UniProtKB	B5A228	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	B5A231	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B5A231	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197	9606	InterPro		F
+UniProtKB	B5A232	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B5A232	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197	9606	InterPro		F
+UniProtKB	B5A233	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B5A233	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197	9606	InterPro		F
+UniProtKB	B5A234	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B5A234	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197	9606	InterPro		F
+UniProtKB	B5A235	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B5A235	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197	9606	InterPro		F
+UniProtKB	B5A243	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		F
+UniProtKB	B5A243	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	B5A248	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B5A248	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197	9606	InterPro		F
+UniProtKB	B5A253	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	B5A253	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197	9606	InterPro		F
+UniProtKB	B7Z4D9	B7Z4D9	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	B7Z4D9	B7Z4D9	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	B7Z4D9	B7Z4D9	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	B7Z6R2	B7Z6R2	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028638	9606	InterPro		P
+UniProtKB	C9JJY6	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		F
+UniProtKB	C9JJY6	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	C9K0N1	TRRAP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR033317	9606	InterPro		P
+UniProtKB	E7EPP6	CHEK1	involved_in	GO:2000615	regulation of histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:O35280|ensembl:ENSMUSP00000134388	9606	Ensembl		P
+UniProtKB	E7EUP3	KAT7	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	E7EUP3	KAT7	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	E7EUP3	KAT7	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	E9PEN0	ING5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028638	9606	InterPro		P
+UniProtKB	E9PJ14	ING4	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028647	9606	InterPro		P
+UniProtKB	E9PJI1	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		F
+UniProtKB	E9PJI1	KAT5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		P
+UniProtKB	E9PJI1	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	E9PMG8	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR037995	9606	InterPro		F
+UniProtKB	E9PMG8	KAT5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR037995	9606	InterPro		P
+UniProtKB	E9PRL6	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		F
+UniProtKB	E9PRL6	KAT5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		P
+UniProtKB	E9PRM3	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR037995	9606	InterPro		F
+UniProtKB	E9PRM3	KAT5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR037995	9606	InterPro		P
+UniProtKB	F2YHM7	NAA40	involved_in	GO:0043967	histone H4 acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0010485	9606	GOC		P
+UniProtKB	F2YHM7	NAA40	involved_in	GO:0043968	histone H2A acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0043998	9606	GOC		P
+UniProtKB	F2YHM7	NAA40	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	F2YHM7	NAA40	enables	GO:0043998	H2A histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	F2Z2U4	TRRAP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR033317	9606	InterPro		P
+UniProtKB	F5GY88	MED24	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	F5GY88	MED24	enables	GO:0004402	histone acetyltransferase activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q4V8B3|ensembl:ENSRNOP00000011947	9606	Ensembl		F
+UniProtKB	F5H0K0	HNF1A	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P22361|ensembl:ENSMUSP00000031535	9606	Ensembl		P
+UniProtKB	F5H2C9	NAA40	involved_in	GO:0043967	histone H4 acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0010485	9606	GOC		P
+UniProtKB	F5H2C9	NAA40	involved_in	GO:0043968	histone H2A acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0043998	9606	GOC		P
+UniProtKB	F5H2C9	NAA40	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	F5H2C9	NAA40	enables	GO:0043998	H2A histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	H0Y4W2	TRRAP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR033317	9606	InterPro		P
+UniProtKB	H0YEG3	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR037995	9606	InterPro		F
+UniProtKB	H0YEG3	KAT5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR037995	9606	InterPro		P
+UniProtKB	H0YEP0	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR037995	9606	InterPro		F
+UniProtKB	H0YEP0	KAT5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR037995	9606	InterPro		P
+UniProtKB	H0YN68	EID1	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR033255	9606	InterPro		P
+UniProtKB	H3BMX5	KAT8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037906	9606	InterPro		F
+UniProtKB	H3BMX5	KAT8	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	H3BMX5	KAT8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	I3L3I5	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		F
+UniProtKB	I3L3I5	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	I3L466	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		F
+UniProtKB	I3L466	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	I3L466	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000104	UniRule:UR000414945	9606	UniProt		F
+UniProtKB	J3KRQ4	MSL1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR026711	9606	InterPro		P
+UniProtKB	J3KSZ8	MSL1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR026711	9606	InterPro		P
+UniProtKB	J3KTC2	MSL1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR026711	9606	InterPro		P
+UniProtKB	J3QQY0	MSL1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR026711	9606	InterPro		P
+UniProtKB	K7EPC4	KAT2A	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	K7EPC4	KAT2A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR037800	9606	InterPro		F
+UniProtKB	K7ERQ8	K7ERQ8	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	K7ERQ8	K7ERQ8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR009464|InterPro:IPR037800	9606	InterPro		F
+UniProtKB	K7ERS6	KAT2A	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	K7ERS6	KAT2A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR009464|InterPro:IPR037800	9606	InterPro		F
+UniProtKB	O00213	APBB1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:P46933	9606	UniProt		P
+UniProtKB	O00213	APBB1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P46933|ensembl:ENSRNOP00000024402	9606	Ensembl		P
+UniProtKB	O14757	CHEK1	involved_in	GO:2000615	regulation of histone H3-K9 acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:O35280	9606	UniProt		P
+UniProtKB	O14929	HAT1	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000314	IDA	PMID:22615379		9606	UniProt		F
+UniProtKB	O14929	HAT1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:22615379		9606	UniProt		P
+UniProtKB	O14929	HAT1	enables	GO:0004402	histone acetyltransferase activity	ECO:0000304	TAS	PMID:9427644		9606	PINC		F
+UniProtKB	O14929	HAT1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000248102|UniProtKB:O14929	9606	GO_Central		P
+UniProtKB	O14929	HAT1	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0037376|PANTHER:PTN000248102|SGD:S000005922|TAIR:locus:2165091|UniProtKB:O14929	9606	GO_Central		F
+UniProtKB	O14929	HAT1	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR017380	9606	InterPro		F
+UniProtKB	O14929	HAT1	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR017380	9606	InterPro		P
+UniProtKB	O14929	HAT1	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	O15294	OGT	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	O15294	OGT	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	O15294	OGT	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	O15294	OGT	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	O15294	OGT	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	O15294	OGT	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	O15516	CLOCK	enables	GO:0004402	histone acetyltransferase activity	ECO:0000315	IMP	PMID:28985504		9606	UniProt		F
+UniProtKB	O15516	CLOCK	enables	GO:0004402	histone acetyltransferase activity	ECO:0000315	IMP	PMID:21980503		9606	UniProt		F
+UniProtKB	O15516	CLOCK	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	O15516	CLOCK	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	O15516	CLOCK	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	O15516	CLOCK	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	O15516	CLOCK	enables	GO:0004402	histone acetyltransferase activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:O08785|ensembl:ENSMUSP00000143939	9606	Ensembl		F
+UniProtKB	O15516	CLOCK	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	O15534	PER1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14645221		9606	UniProt		P
+UniProtKB	O15534	PER1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:14645221		9606	UniProt		P
+UniProtKB	O15534	PER1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:O35973|ensembl:ENSMUSP00000021271	9606	Ensembl		P
+UniProtKB	O43318	MAP3K7	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	O43623	SNAI2	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P97469|ensembl:ENSMUSP00000023356	9606	Ensembl		P
+UniProtKB	O60318	MCM3AP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:23652018		9606	UniProt		F
+UniProtKB	O60318	MCM3AP	enables	GO:0010484	H3 histone acetyltransferase activity	ECO:0000314	IDA	PMID:23652018		9606	UniProt		F
+UniProtKB	O60318	MCM3AP	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	O60318	MCM3AP	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	O60318	MCM3AP	involved_in	GO:0043966	histone H3 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0010484	9606	GOC		P
+UniProtKB	O60318	MCM3AP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	O60424	CBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197|InterPro:IPR013178|InterPro:IPR014744	9606	InterPro		F
+UniProtKB	O60424	CBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178|InterPro:IPR014744	9606	InterPro		P
+UniProtKB	O75478	TADA2A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:9674425		9606	UniProt		P
+UniProtKB	O75478	TADA2A	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:9674425		9606	UniProt		F
+UniProtKB	O75478	TADA2A	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0037555|PANTHER:PTN000271860|SGD:S000002856	9606	GO_Central		P
+UniProtKB	O75478	TADA2A	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0037555|PANTHER:PTN000271860|SGD:S000002856|UniProtKB:O75478	9606	GO_Central		F
+UniProtKB	O75478	TADA2A	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR016827	9606	InterPro		P
+UniProtKB	O75486	SUPT3H	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	O75486	SUPT3H	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	O75528	TADA3	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	O75528	TADA3	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	O75528	TADA3	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	O75528	TADA3	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0030891|PANTHER:PTN001005430	9606	GO_Central		P
+UniProtKB	O75528	TADA3	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0030891|PANTHER:PTN001005430|UniProtKB:O75528	9606	GO_Central		P
+UniProtKB	O75528	TADA3	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0030891|PANTHER:PTN001005430|SGD:S000002583|UniProtKB:O75528	9606	GO_Central		F
+UniProtKB	O75529	TAF5L	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	O75529	TAF5L	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	O75582	RPS6KA5	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000315	IMP	PMID:20018936		9606	BHF-UCL		P
+UniProtKB	O75676	RPS6KA4	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000315	IMP	PMID:20018936		9606	BHF-UCL		P
+UniProtKB	O75844	ZMPSTE24	involved_in	GO:2000618	regulation of histone H4-K16 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q80W54|ensembl:ENSMUSP00000053900	9606	Ensembl		P
+UniProtKB	O75844	ZMPSTE24	involved_in	GO:0090239	regulation of histone H4 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q80W54|ensembl:ENSMUSP00000053900	9606	Ensembl		P
+UniProtKB	O75844	ZMPSTE24	involved_in	GO:0043979	histone H2B-K5 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q80W54|ensembl:ENSMUSP00000053900	9606	Ensembl		P
+UniProtKB	O75844	ZMPSTE24	involved_in	GO:0043969	histone H2B acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q80W54|ensembl:ENSMUSP00000053900	9606	Ensembl		P
+UniProtKB	O94805	ACTL6B	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001732543|PomBase:SPBP23A10.08|UniProtKB:O96019	9606	GO_Central		P
+UniProtKB	O94864	SUPT7L	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	O94864	SUPT7L	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	O94864	SUPT7L	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0030874|PANTHER:PTN002006400|UniProtKB:O94864	9606	GO_Central		P
+UniProtKB	O94864	SUPT7L	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0030874|PANTHER:PTN002006400|UniProtKB:O94864	9606	GO_Central		F
+UniProtKB	O94864	SUPT7L	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039460	9606	InterPro		F
+UniProtKB	O95251	KAT7	involved_in	GO:0090240	positive regulation of histone H4 acetylation	ECO:0000315	IMP	PMID:21856198		9606	CAFA		P
+UniProtKB	O95251	KAT7	NOT|involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	O95251	KAT7	involved_in	GO:0043983	histone H4-K12 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	O95251	KAT7	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	O95251	KAT7	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	O95251	KAT7	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	O95251	KAT7	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0028387|FB:FBgn0034975|MGI:MGI:2442415|PANTHER:PTN000834868|UniProtKB:O95251|UniProtKB:Q8WYB5|UniProtKB:Q92794	9606	GO_Central		P
+UniProtKB	O95251	KAT7	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0028387|PANTHER:PTN002239249|SGD:S000005770	9606	GO_Central		F
+UniProtKB	O95251	KAT7	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	O95251	KAT7	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	O95251	KAT7	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	O95251	KAT7	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	O95361	TRIM16	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:16636064		9606	UniProt		P
+UniProtKB	O95361	TRIM16	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:19147277		9606	UniProt		P
+UniProtKB	O95398	RAPGEF3	NOT|involved_in	GO:2000615	regulation of histone H3-K9 acetylation	ECO:0000315	IMP	PMID:23867755		9606	UniProt		P
+UniProtKB	O95619	YEATS4	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	O95619	YEATS4	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	O95696	BRD1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	O95983	MBD3	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9Z2D8|ensembl:ENSMUSP00000089948	9606	Ensembl		P
+UniProtKB	O96019	ACTL6A	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	O96019	ACTL6A	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	O96019	ACTL6A	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001732543|PomBase:SPBP23A10.08|UniProtKB:O96019	9606	GO_Central		P
+UniProtKB	P01137	TGFB1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P04202|ensembl:ENSMUSP00000002678	9606	Ensembl		P
+UniProtKB	P01584	IL1B	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000303	NAS	PMID:20018936		9606	BHF-UCL		P
+UniProtKB	P05067:PRO_0000000097	APP	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000316	IGI	PMID:19057576	UniProtKB:P05067:PRO_0000000098,UniProtKB:P05067:PRO_0000000099	9606	ARUK-UCL	has_regulation_target(ENSEMBL:ENSG00000196549),occurs_at(SO:0000170)	P
+UniProtKB	P05067:PRO_0000000098	APP	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000316	IGI	PMID:19057576	UniProtKB:P05067:PRO_0000000097,UniProtKB:P05067:PRO_0000000099	9606	ARUK-UCL	has_regulation_target(ENSEMBL:ENSG00000196549),occurs_at(SO:0000170)	P
+UniProtKB	P05067:PRO_0000000099	APP	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000316	IGI	PMID:19057576	UniProtKB:P05067:PRO_0000000097,UniProtKB:P05067:PRO_0000000098	9606	ARUK-UCL	has_regulation_target(ENSEMBL:ENSG00000196549),occurs_at(SO:0000170)	P
+UniProtKB	P0C860	MSL3P1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000853767|UniProtKB:Q8N5Y2	9606	GO_Central		P
+UniProtKB	P0C860	MSL3P1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000093964|UniProtKB:Q9UBU8	9606	GO_Central		P
+UniProtKB	P0C860	MSL3P1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000093964|UniProtKB:Q9UBU8	9606	GO_Central		P
+UniProtKB	P0C860	MSL3P1	involved_in	GO:0016573	histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0027378|PANTHER:PTN000093963	9606	GO_Central		P
+UniProtKB	P15018	LIF	involved_in	GO:1901676	positive regulation of histone H3-K27 acetylation	ECO:0000314	IDA	PMID:22783022		9606	BHF-UCL		P
+UniProtKB	P15172	MYOD1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:P10085	9606	UniProt		P
+UniProtKB	P15172	MYOD1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:P10085	9606	UniProt		P
+UniProtKB	P15172	MYOD1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P10085|ensembl:ENSMUSP00000072330	9606	Ensembl		P
+UniProtKB	P15172	MYOD1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P10085|ensembl:ENSMUSP00000072330	9606	Ensembl		P
+UniProtKB	P15336	ATF2	enables	GO:0004402	histone acetyltransferase activity	ECO:0000304	TAS	Reactome:R-HSA-3318415		9606	Reactome		F
+UniProtKB	P15336	ATF2	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	P15336	ATF2	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	P15336	ATF2	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	P15941	MUC1	involved_in	GO:0090240	positive regulation of histone H4 acetylation	ECO:0000314	IDA	PMID:15710329		9606	BHF-UCL		P
+UniProtKB	P17947	SPI1	involved_in	GO:0090241	negative regulation of histone H4 acetylation	ECO:0000315	IMP	PMID:20139074		9606	UniProt		P
+UniProtKB	P17947	SPI1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000315	IMP	PMID:20139074		9606	UniProt		P
+UniProtKB	P21675	TAF1	NOT|enables	GO:0004402	histone acetyltransferase activity	ECO:0000303	NAS	PMID:24927529		9606	ParkinsonsUK-UCL		F
+UniProtKB	P21675	TAF1	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:8980232		9606	UniProt		F
+UniProtKB	P21675	TAF1	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	MGI:MGI:1336878|PANTHER:PTN000356981|SGD:S000003506|UniProtKB:P21675	9606	GO_Central		F
+UniProtKB	P21675	TAF1	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	P21675	TAF1	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	P21675	TAF1	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	P23769	GATA2	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:O09100|ensembl:ENSMUSP00000015197	9606	Ensembl		P
+UniProtKB	P23771	GATA3	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P23772|ensembl:ENSMUSP00000100041	9606	Ensembl		P
+UniProtKB	P23771	GATA3	involved_in	GO:0071442	positive regulation of histone H3-K14 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P23772|ensembl:ENSMUSP00000100041	9606	Ensembl		P
+UniProtKB	P27361	MAPK3	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000315	IMP	PMID:20018936		9606	BHF-UCL		P
+UniProtKB	P29475	NOS1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:Q9Z0J4	9606	BHF-UCL		P
+UniProtKB	P29475	NOS1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9Z0J4|ensembl:ENSMUSP00000120421	9606	Ensembl		P
+UniProtKB	P35227	PCGF2	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P23798|ensembl:ENSMUSP00000137517	9606	Ensembl		P
+UniProtKB	P37840	SNCA	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000314	IDA	PMID:16959795		9606	UniProt		P
+UniProtKB	P38398	BRCA1	involved_in	GO:2000620	positive regulation of histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20820192		9606	BHF-UCL		P
+UniProtKB	P38398	BRCA1	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000314	IDA	PMID:20820192		9606	BHF-UCL		P
+UniProtKB	P38398	BRCA1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000314	IDA	PMID:20820192		9606	BHF-UCL		P
+UniProtKB	P38398	BRCA1	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000318	IBA	PMID:21873635	MGI:MGI:104537|PANTHER:PTN000349139	9606	GO_Central		P
+UniProtKB	P38398	BRCA1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000318	IBA	PMID:21873635	MGI:MGI:104537|PANTHER:PTN000349139|UniProtKB:P38398	9606	GO_Central		P
+UniProtKB	P38398	BRCA1	involved_in	GO:2000620	positive regulation of histone H4-K16 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P48754|ensembl:ENSMUSP00000017290	9606	Ensembl		P
+UniProtKB	P38398	BRCA1	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P48754|ensembl:ENSMUSP00000017290	9606	Ensembl		P
+UniProtKB	P38398	BRCA1	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P48754|ensembl:ENSMUSP00000017290	9606	Ensembl		P
+UniProtKB	P38398	BRCA1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P48754|ensembl:ENSMUSP00000017290	9606	Ensembl		P
+UniProtKB	P49407	ARRB1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000315	IMP	PMID:16325578		9606	BHF-UCL		P
+UniProtKB	P49407	ARRB1	involved_in	GO:0090240	positive regulation of histone H4 acetylation	ECO:0000315	IMP	PMID:16325578		9606	UniProt		P
+UniProtKB	P49407	ARRB1	NOT|enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:16325578		9606	UniProt		F
+UniProtKB	P49407	ARRB1	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	P49711	CTCF	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q61164|ensembl:ENSMUSP00000005841	9606	Ensembl		P
+UniProtKB	P51587	BRCA2	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:9619837		9606	UniProt		P
+UniProtKB	P51587	BRCA2	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:9619837		9606	UniProt		P
+UniProtKB	P51587	BRCA2	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000314	IDA	PMID:9619837		9606	UniProt		F
+UniProtKB	P51587	BRCA2	enables	GO:0010484	H3 histone acetyltransferase activity	ECO:0000314	IDA	PMID:9619837		9606	UniProt		F
+UniProtKB	P51587	BRCA2	NOT|enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:9824164		9606	UniProt		F
+UniProtKB	P51608	MECP2	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9Z2D6|ensembl:ENSMUSP00000033770	9606	Ensembl		P
+UniProtKB	P51610	HCFC1	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	P51610	HCFC1	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	P51610	HCFC1	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	P51610	HCFC1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	P51610	HCFC1	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	P51610	HCFC1	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	P55201	BRPF1	involved_in	GO:0043972	histone H3-K23 acetylation	ECO:0000315	IMP	PMID:27939640		9606	UniProt		P
+UniProtKB	P55201	BRPF1	contributes_to	GO:0043994	histone acetyltransferase activity (H3-K23 specific)	ECO:0000314	IDA	PMID:27939640		9606	UniProt		F
+UniProtKB	P55201	BRPF1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	P61371	ISL1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P61372|ensembl:ENSMUSP00000044879	9606	Ensembl		P
+UniProtKB	P61964	WDR5	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	P61964	WDR5	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	P61964	WDR5	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	P61964	WDR5	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	P61964	WDR5	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	P61964	WDR5	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	P61964	WDR5	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q00403	GTF2B	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q00403	GTF2B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q01105	SET	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000304	TAS	PMID:11555662		9606	UniProt		P
+UniProtKB	Q01658	DR1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	Q03164	KMT2A	involved_in	GO:2000615	regulation of histone H3-K9 acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:P55200	9606	UniProt		P
+UniProtKB	Q03164	KMT2A	involved_in	GO:0071440	regulation of histone H3-K14 acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:P55200	9606	UniProt		P
+UniProtKB	Q03164	KMT2A	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000315	IMP	PMID:15960975		9606	UniProt		P
+UniProtKB	Q09472	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000304	TAS	PMID:10362258		9606	ARUK-UCL		F
+UniProtKB	Q09472	EP300	involved_in	GO:0016573	histone acetylation	ECO:0000314	IDA	PMID:25818647		9606	UniProt		P
+UniProtKB	Q09472	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:25818647		9606	UniProt		F
+UniProtKB	Q09472	EP300	involved_in	GO:0016573	histone acetylation	ECO:0000314	IDA	PMID:27256286		9606	ARUK-UCL		P
+UniProtKB	Q09472	EP300	involved_in	GO:0043969	histone H2B acetylation	ECO:0000314	IDA	PMID:23415232		9606	UniProt		P
+UniProtKB	Q09472	EP300	involved_in	GO:0043967	histone H4 acetylation	ECO:0000315	IMP	PMID:16325578		9606	UniProt		P
+UniProtKB	Q09472	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:14645221		9606	UniProt		F
+UniProtKB	Q09472	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:23415232		9606	UniProt		F
+UniProtKB	Q09472	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:12040021		9606	UniProt		F
+UniProtKB	Q09472	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000304	TAS	Reactome:R-HSA-3662335		9606	Reactome		F
+UniProtKB	Q09472	EP300	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:B2RWS6|ensembl:ENSMUSP00000066789	9606	Ensembl		P
+UniProtKB	Q09472	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:B2RWS6|ensembl:ENSMUSP00000066789	9606	Ensembl		F
+UniProtKB	Q09472	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197|InterPro:IPR013178|InterPro:IPR014744	9606	InterPro		F
+UniProtKB	Q09472	EP300	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178|InterPro:IPR014744	9606	InterPro		P
+UniProtKB	Q09472	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q12824	SMARCB1	involved_in	GO:0090240	positive regulation of histone H4 acetylation	ECO:0000315	IMP	PMID:22368283		9606	UniProt		P
+UniProtKB	Q12824	SMARCB1	NOT|involved_in	GO:2000618	regulation of histone H4-K16 acetylation	ECO:0000315	IMP	PMID:22368283		9606	UniProt		P
+UniProtKB	Q12824	SMARCB1	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000315	IMP	PMID:22368283		9606	UniProt		P
+UniProtKB	Q12962	TAF10	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:9674425		9606	UniProt		P
+UniProtKB	Q12962	TAF10	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	Q12962	TAF10	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:9674425		9606	UniProt		F
+UniProtKB	Q12962	TAF10	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	Q13363	CTBP1	involved_in	GO:0090241	negative regulation of histone H4 acetylation	ECO:0000315	IMP	PMID:21102443		9606	BHF-UCL		P
+UniProtKB	Q13363	CTBP1	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000315	IMP	PMID:21102443		9606	BHF-UCL		P
+UniProtKB	Q13485	SMAD4	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:P97471	9606	BHF-UCL		P
+UniProtKB	Q13485	SMAD4	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P97471|ensembl:ENSMUSP00000025393	9606	Ensembl		P
+UniProtKB	Q14012	CAMK1	NOT|involved_in	GO:2000615	regulation of histone H3-K9 acetylation	ECO:0000315	IMP	PMID:23867755		9606	UniProt		P
+UniProtKB	Q15014	MORF4L2	involved_in	GO:0043968	histone H2A acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000093964|UniProtKB:Q9UBU8	9606	GO_Central		P
+UniProtKB	Q15014	MORF4L2	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000093964|UniProtKB:Q9UBU8	9606	GO_Central		P
+UniProtKB	Q15014	MORF4L2	involved_in	GO:0016573	histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0027378|PANTHER:PTN000093963	9606	GO_Central		P
+UniProtKB	Q15306	IRF4	involved_in	GO:0043967	histone H4 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q64287|ensembl:ENSMUSP00000021784	9606	Ensembl		P
+UniProtKB	Q15306	IRF4	involved_in	GO:0043966	histone H3 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q64287|ensembl:ENSMUSP00000021784	9606	Ensembl		P
+UniProtKB	Q15542	TAF5	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:10373431		9606	UniProt		F
+UniProtKB	Q15542	TAF5	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q15545	TAF7	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000314	IDA	PMID:11592977		9606	UniProt		P
+UniProtKB	Q15672	TWIST1	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P26687|ensembl:ENSMUSP00000040089	9606	Ensembl		P
+UniProtKB	Q15788	NCOA1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P70365|ensembl:ENSMUSP00000082971	9606	Ensembl		P
+UniProtKB	Q15788	NCOA1	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q16514	TAF12	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	Q16514	TAF12	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	Q16514	TAF12	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0011290|PANTHER:PTN000262707|UniProtKB:Q16514	9606	GO_Central		P
+UniProtKB	Q16514	TAF12	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0011290|PANTHER:PTN000262707|UniProtKB:Q16514	9606	GO_Central		F
+UniProtKB	Q16594	TAF9	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:9674425		9606	UniProt		P
+UniProtKB	Q16594	TAF9	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	Q16594	TAF9	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:9674425		9606	UniProt		F
+UniProtKB	Q16594	TAF9	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	Q16594	TAF9	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0000617|PANTHER:PTN000249331|UniProtKB:Q16594	9606	GO_Central		P
+UniProtKB	Q16594	TAF9	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0000617|PANTHER:PTN000249331|UniProtKB:Q16594	9606	GO_Central		F
+UniProtKB	Q52LR7	EPC2	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000382618|SGD:S000001870|UniProtKB:A0A0B4KFP2|UniProtKB:Q9H2F5	9606	GO_Central		F
+UniProtKB	Q52LR7	EPC2	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q53ET0	CRTC2	involved_in	GO:0043970	histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q3U182|ensembl:ENSMUSP00000029545	9606	Ensembl		P
+UniProtKB	Q59EJ8	Q59EJ8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		F
+UniProtKB	Q59EJ8	Q59EJ8	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		P
+UniProtKB	Q59EJ8	Q59EJ8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q59FH1	Q59FH1	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR033317	9606	InterPro		P
+UniProtKB	Q5T170	PYGO2	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0035034	9606	GOC		P
+UniProtKB	Q5T170	PYGO2	enables	GO:0035034	histone acetyltransferase regulator activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q80V76|ensembl:ENSMUSP00000053672	9606	Ensembl		F
+UniProtKB	Q5T5X7	BEND3	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:26100909		9606	UniProt		P
+UniProtKB	Q5TG36	DMAP1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q5TG36	DMAP1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q5TG37	DMAP1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q5TG37	DMAP1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q5TG38	DMAP1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q5TG38	DMAP1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q5TG39	DMAP1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q5TG39	DMAP1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q5TG40	DMAP1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q5TG40	DMAP1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q68DK7	MSL1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q68DK7	MSL1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001092398|UniProtKB:Q68DK7	9606	GO_Central		P
+UniProtKB	Q68DK7	MSL1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR026711	9606	InterPro		P
+UniProtKB	Q69YR9	DKFZp313G1618	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	Q69YR9	DKFZp313G1618	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	Q6IE81	JADE1	NOT|involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q6IE81	JADE1	involved_in	GO:0043983	histone H4-K12 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q6IE81	JADE1	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q6IE81	JADE1	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q6IE81	JADE1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q6ZRS2	SRCAP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000304	TAS	PMID:10347196		9606	PINC		F
+UniProtKB	Q6ZRS2	SRCAP	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q6ZW49	PAXIP1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:Q6NZQ4	9606	UniProt		P
+UniProtKB	Q6ZW49	PAXIP1	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q6NZQ4|ensembl:ENSMUSP00000002291	9606	Ensembl		P
+UniProtKB	Q712H5	MOZ/CBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		F
+UniProtKB	Q712H5	MOZ/CBP	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	Q75MY6	CREB-binding protein	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q75MY6	CREB-binding protein	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197	9606	InterPro		F
+UniProtKB	Q7Z3B3	KANSL1	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q7Z3B3	KANSL1	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q7Z3B3	KANSL1	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q7Z3B3	KANSL1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q7Z3B3	KANSL1	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q7Z3B3	KANSL1	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q7Z3B3	KANSL1	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001095998|UniProtKB:Q7Z3B3	9606	GO_Central		F
+UniProtKB	Q7Z3B3	KANSL1	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001095998|UniProtKB:Q7Z3B3	9606	GO_Central		F
+UniProtKB	Q7Z3B3	KANSL1	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001095998|UniProtKB:Q7Z3B3	9606	GO_Central		F
+UniProtKB	Q7Z6C1	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197|InterPro:IPR013178	9606	InterPro		F
+UniProtKB	Q7Z6C1	EP300	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178	9606	InterPro		P
+UniProtKB	Q7Z6C1	EP300	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000104	UniRule:UR000414945	9606	UniProt		F
+UniProtKB	Q86TJ2	TADA2B	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0037555|PANTHER:PTN000271860|SGD:S000002856	9606	GO_Central		P
+UniProtKB	Q86TJ2	TADA2B	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0037555|PANTHER:PTN000271860|SGD:S000002856|UniProtKB:O75478	9606	GO_Central		F
+UniProtKB	Q86TJ2	TADA2B	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q86TJ2	TADA2B	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR016827	9606	InterPro		P
+UniProtKB	Q86U70	LDB1	involved_in	GO:0043973	histone H3-K4 acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:P70662	9606	BHF-UCL		P
+UniProtKB	Q86U70	LDB1	involved_in	GO:0043973	histone H3-K4 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P70662|ensembl:ENSMUSP00000118546	9606	Ensembl		P
+UniProtKB	Q86UY6	NAA40	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:25619998		9606	UniProt		P
+UniProtKB	Q86UY6	NAA40	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:25619998		9606	UniProt		P
+UniProtKB	Q86UY6	NAA40	enables	GO:0043998	H2A histone acetyltransferase activity	ECO:0000314	IDA	PMID:25619998		9606	UniProt		F
+UniProtKB	Q86UY6	NAA40	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000314	IDA	PMID:25619998		9606	UniProt		F
+UniProtKB	Q86UY6	NAA40	enables	GO:0043998	H2A histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000464144|UniProtKB:Q86UY6	9606	GO_Central		F
+UniProtKB	Q86UY6	NAA40	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000464144|UniProtKB:Q86UY6	9606	GO_Central		F
+UniProtKB	Q86UY6	NAA40	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	Q86UY6	NAA40	enables	GO:0043998	H2A histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR039949	9606	InterPro		F
+UniProtKB	Q8IZQ8	MYOCD	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:Q8VIM5	9606	UniProt		P
+UniProtKB	Q8IZQ8	MYOCD	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q8VIM5|ensembl:ENSMUSP00000104335	9606	Ensembl		P
+UniProtKB	Q8IZX4	TAF1L	enables	GO:0004402	histone acetyltransferase activity	ECO:0000250	ISS	PMID:12217962	UniProtKB:P21675	9606	UniProt		F
+UniProtKB	Q8IZX4	TAF1L	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	MGI:MGI:1336878|PANTHER:PTN000356981|SGD:S000003506|UniProtKB:P21675	9606	GO_Central		F
+UniProtKB	Q8IZX4	TAF1L	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q8IZX4	TAF1L	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q8N3Y7	SDR16C5	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000314	IDA	PMID:16691198		9606	CAFA		P
+UniProtKB	Q8N5Y2	MSL3	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q8N5Y2	MSL3	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000853767|UniProtKB:Q8N5Y2	9606	GO_Central		P
+UniProtKB	Q8N5Y2	MSL3	involved_in	GO:0043968	histone H2A acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000093964|UniProtKB:Q9UBU8	9606	GO_Central		P
+UniProtKB	Q8N5Y2	MSL3	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000093964|UniProtKB:Q9UBU8	9606	GO_Central		P
+UniProtKB	Q8N5Y2	MSL3	involved_in	GO:0016573	histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0027378|PANTHER:PTN000093963	9606	GO_Central		P
+UniProtKB	Q8NFG4	FLCN	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:Q8QZS3	9606	UniProt		P
+UniProtKB	Q8NFG4	FLCN	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q8QZS3|ensembl:ENSMUSP00000099758	9606	Ensembl		P
+UniProtKB	Q8TC59	PIWIL2	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q8CDG1|ensembl:ENSMUSP00000047385	9606	Ensembl		P
+UniProtKB	Q8TC59	PIWIL2	involved_in	GO:0071442	positive regulation of histone H3-K14 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q8CDG1|ensembl:ENSMUSP00000047385	9606	Ensembl		P
+UniProtKB	Q8TDI0	CHD5	involved_in	GO:0043967	histone H4 acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:A2A8L1	9606	UniProt		P
+UniProtKB	Q8WUB8	PHF10	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	Q8WUB8	PHF10	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q8WXX7	AUTS2	involved_in	GO:2000620	positive regulation of histone H4-K16 acetylation	ECO:0000314	IDA	PMID:25519132		9606	MGI		P
+UniProtKB	Q8WYB5	KAT6B	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q8WYB5	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000314	IDA	PMID:11965546		9606	UniProt		P
+UniProtKB	Q8WYB5	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:10497217		9606	UniProt		F
+UniProtKB	Q8WYB5	KAT6B	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0028387|FB:FBgn0034975|MGI:MGI:2442415|PANTHER:PTN000834868|UniProtKB:O95251|UniProtKB:Q8WYB5|UniProtKB:Q92794	9606	GO_Central		P
+UniProtKB	Q8WYB5	KAT6B	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0028387|PANTHER:PTN002239249|SGD:S000005770	9606	GO_Central		F
+UniProtKB	Q8WYB5	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	Q8WYB5	KAT6B	involved_in	GO:0043967	histone H4 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0010485	9606	GOC		P
+UniProtKB	Q8WYB5	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q8BRB7|ensembl:ENSMUSP00000138377	9606	Ensembl		P
+UniProtKB	Q8WYB5	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q8BRB7|ensembl:ENSMUSP00000138377	9606	Ensembl		F
+UniProtKB	Q8WYB5	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		F
+UniProtKB	Q8WYB5	KAT6B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	Q8WYB5	KAT6B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q8WYH8	ING5	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q8WYH8	ING5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028638	9606	InterPro		P
+UniProtKB	Q92613	JADE3	NOT|involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q92613	JADE3	involved_in	GO:0043983	histone H4-K12 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q92613	JADE3	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q92613	JADE3	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q92613	JADE3	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q92782	DPF1	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	Q92782	DPF1	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q92784	DPF3	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	Q92784	DPF3	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q92785	DPF2	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	Q92785	DPF2	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q92793	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000304	TAS	PMID:10362258		9606	ARUK-UCL		F
+UniProtKB	Q92793	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000314	IDA	PMID:11742995		9606	UniProt		P
+UniProtKB	Q92793	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11742995		9606	UniProt		F
+UniProtKB	Q92793	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR000197|InterPro:IPR013178|InterPro:IPR014744	9606	InterPro		F
+UniProtKB	Q92793	CREBBP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR013178|InterPro:IPR014744	9606	InterPro		P
+UniProtKB	Q92793	CREBBP	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q92794	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q92794	KAT6A	involved_in	GO:0016573	histone acetylation	ECO:0000314	IDA	PMID:17925393		9606	UniProt		P
+UniProtKB	Q92794	KAT6A	involved_in	GO:0016573	histone acetylation	ECO:0000314	IDA	PMID:11742995		9606	UniProt		P
+UniProtKB	Q92794	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:17925393		9606	UniProt		F
+UniProtKB	Q92794	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11742995		9606	UniProt		F
+UniProtKB	Q92794	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0028387|FB:FBgn0034975|MGI:MGI:2442415|PANTHER:PTN000834868|UniProtKB:O95251|UniProtKB:Q8WYB5|UniProtKB:Q92794	9606	GO_Central		P
+UniProtKB	Q92794	KAT6A	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0028387|PANTHER:PTN002239249|SGD:S000005770	9606	GO_Central		F
+UniProtKB	Q92794	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	Q92794	KAT6A	involved_in	GO:0043967	histone H4 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0010485	9606	GOC		P
+UniProtKB	Q92794	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR031280	9606	InterPro		F
+UniProtKB	Q92794	KAT6A	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	Q92794	KAT6A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR031280	9606	InterPro		P
+UniProtKB	Q92794	KAT6A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q92830	KAT2A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:29211711		9606	UniProt		P
+UniProtKB	Q92830	KAT2A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:29211711		9606	UniProt		F
+UniProtKB	Q92830	KAT2A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	Q92830	KAT2A	enables	GO:0010484	H3 histone acetyltransferase activity	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		F
+UniProtKB	Q92830	KAT2A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:10373431		9606	UniProt		P
+UniProtKB	Q92830	KAT2A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	Q92830	KAT2A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:10373431		9606	UniProt		F
+UniProtKB	Q92830	KAT2A	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	Q92830	KAT2A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000304	TAS	Reactome:R-NUL-4549228		9606	Reactome		F
+UniProtKB	Q92830	KAT2A	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:D4ACX5|ensembl:ENSRNOP00000052125	9606	Ensembl		P
+UniProtKB	Q92830	KAT2A	involved_in	GO:0044154	histone H3-K14 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9JHD2|ensembl:ENSMUSP00000099407	9606	Ensembl		P
+UniProtKB	Q92830	KAT2A	enables	GO:0043997	histone acetyltransferase activity (H4-K12 specific)	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9JHD2|ensembl:ENSMUSP00000099407	9606	Ensembl		F
+UniProtKB	Q92830	KAT2A	involved_in	GO:0043983	histone H4-K12 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9JHD2|ensembl:ENSMUSP00000099407	9606	Ensembl		P
+UniProtKB	Q92830	KAT2A	involved_in	GO:0043966	histone H3 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9JHD2|ensembl:ENSMUSP00000099407	9606	Ensembl		P
+UniProtKB	Q92830	KAT2A	enables	GO:0010484	H3 histone acetyltransferase activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9JHD2|ensembl:ENSMUSP00000099407	9606	Ensembl		F
+UniProtKB	Q92830	KAT2A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9JHD2|ensembl:ENSMUSP00000099407	9606	Ensembl		F
+UniProtKB	Q92830	KAT2A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR009464|InterPro:IPR016376|InterPro:IPR037800	9606	InterPro		F
+UniProtKB	Q92830	KAT2A	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR016376	9606	InterPro		P
+UniProtKB	Q92830	KAT2A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q92831	KAT2B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000315	IMP	PMID:16829519		9606	CACAO		F
+UniProtKB	Q92831	KAT2B	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	Q92831	KAT2B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:14645221		9606	UniProt		F
+UniProtKB	Q92831	KAT2B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000269	EXP	PMID:23555303		9606	Reactome		F
+UniProtKB	Q92831	KAT2B	involved_in	GO:0043970	histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9JHD1|ensembl:ENSMUSP00000000724	9606	Ensembl		P
+UniProtKB	Q92831	KAT2B	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9JHD1|ensembl:ENSMUSP00000000724	9606	Ensembl		P
+UniProtKB	Q92831	KAT2B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q9JHD1|ensembl:ENSMUSP00000000724	9606	Ensembl		F
+UniProtKB	Q92831	KAT2B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR009464|InterPro:IPR016376|InterPro:IPR037800	9606	InterPro		F
+UniProtKB	Q92831	KAT2B	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR016376	9606	InterPro		P
+UniProtKB	Q92831	KAT2B	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q92993	KAT5	involved_in	GO:0016573	histone acetylation	ECO:0000314	IDA	PMID:10966108		9606	UniProt		P
+UniProtKB	Q92993	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000315	IMP	PMID:17996965		9606	UniProt		F
+UniProtKB	Q92993	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:18397884		9606	UniProt		F
+UniProtKB	Q92993	KAT5	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:14966270		9606	UniProt		F
+UniProtKB	Q92993	KAT5	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0028387|PANTHER:PTN002239249|SGD:S000005770	9606	GO_Central		F
+UniProtKB	Q92993	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	Q92993	KAT5	involved_in	GO:0043967	histone H4 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0010485	9606	GOC		P
+UniProtKB	Q92993	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		F
+UniProtKB	Q92993	KAT5	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037995	9606	InterPro		P
+UniProtKB	Q92993	KAT5	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q969T9	WBP2	involved_in	GO:0071442	positive regulation of histone H3-K14 acetylation	ECO:0000315	IMP	PMID:23233354		9606	UniProt	happens_during(GO:0071391)	P
+UniProtKB	Q96BN2	TADA1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	Q96BN2	TADA1	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	Q96BN2	TADA1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0051865|FB:FBgn0051866|PANTHER:PTN001083423|UniProtKB:Q96BN2	9606	GO_Central		P
+UniProtKB	Q96BN2	TADA1	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0051865|FB:FBgn0051866|PANTHER:PTN001083423|UniProtKB:Q96BN2	9606	GO_Central		F
+UniProtKB	Q96EB6	SIRT1	involved_in	GO:2000619	negative regulation of histone H4-K16 acetylation	ECO:0000315	IMP	PMID:17916362		9606	CACAO		P
+UniProtKB	Q96EB6	SIRT1	involved_in	GO:0071441	negative regulation of histone H3-K14 acetylation	ECO:0000315	IMP	PMID:17916362		9606	CACAO		P
+UniProtKB	Q96ES7	SGF29	involved_in	GO:0016573	histone acetylation	ECO:0000314	IDA	PMID:23894581		9606	UniProt		P
+UniProtKB	Q96ES7	SGF29	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	Q96ES7	SGF29	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0050390|PANTHER:PTN000488952|UniProtKB:A0A1P8BA25|UniProtKB:Q96ES7	9606	GO_Central		P
+UniProtKB	Q96EZ8	MCRS1	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q96EZ8	MCRS1	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q96EZ8	MCRS1	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q96EZ8	MCRS1	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q96EZ8	MCRS1	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q96EZ8	MCRS1	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q96EZ8	MCRS1	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000325907|UniProtKB:Q96EZ8	9606	GO_Central		F
+UniProtKB	Q96EZ8	MCRS1	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000325907|UniProtKB:Q96EZ8	9606	GO_Central		F
+UniProtKB	Q96EZ8	MCRS1	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000325907|UniProtKB:Q96EZ8	9606	GO_Central		F
+UniProtKB	Q96L91	EP400	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q96L91	EP400	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q96ST2	IWS1	involved_in	GO:0090239	regulation of histone H4 acetylation	ECO:0000315	IMP	PMID:19141475		9606	UniProt		P
+UniProtKB	Q96ST3	SIN3A	involved_in	GO:1901675	negative regulation of histone H3-K27 acetylation	ECO:0000315	IMP	PMID:22783022		9606	BHF-UCL		P
+UniProtKB	Q96T23	RSF1	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	Q96T23	RSF1	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q9BRQ0	PYGO2	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0035034	9606	GOC		P
+UniProtKB	Q9BRQ0	PYGO2	enables	GO:0035034	histone acetyltransferase regulator activity	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q80V76|ensembl:ENSMUSP00000053672	9606	Ensembl		F
+UniProtKB	Q9BVI0	PHF20	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9BVI0	PHF20	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9BVI0	PHF20	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9BVI0	PHF20	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9BVI0	PHF20	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9BVI0	PHF20	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9BVI0	PHF20	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000407006|UniProtKB:Q9BVI0	9606	GO_Central		F
+UniProtKB	Q9BVI0	PHF20	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000407006|UniProtKB:Q9BVI0	9606	GO_Central		F
+UniProtKB	Q9BVI0	PHF20	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000407006|UniProtKB:Q9BVI0	9606	GO_Central		F
+UniProtKB	Q9BVI0	PHF20	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000407006|UniProtKB:Q9BVI0	9606	GO_Central		P
+UniProtKB	Q9BVI0	PHF20	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000407006|UniProtKB:Q9BVI0	9606	GO_Central		P
+UniProtKB	Q9BVI0	PHF20	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000407006|UniProtKB:Q9BVI0	9606	GO_Central		P
+UniProtKB	Q9BZS1	FOXP3	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000315	IMP	PMID:19276356		9606	BHF-UCL		P
+UniProtKB	Q9BZS1	FOXP3	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q99JB6|ensembl:ENSMUSP00000111405	9606	Ensembl		P
+UniProtKB	Q9BZS1	FOXP3	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q99JB6|ensembl:ENSMUSP00000111405	9606	Ensembl		P
+UniProtKB	Q9BZT5	Q9BZT5	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR033255	9606	InterPro		P
+UniProtKB	Q9C0A6	SETD5	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000250	ISS	GO_REF:0000024	UniProtKB:Q5XJV7	9606	UniProt		P
+UniProtKB	Q9C0A6	SETD5	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q5XJV7|ensembl:ENSMUSP00000047398	9606	Ensembl		P
+UniProtKB	Q9GZZ1	NAA50	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000314	IDA	PMID:19744929		9606	UniProt		F
+UniProtKB	Q9GZZ1	NAA50	involved_in	GO:0016573	histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0024188|PANTHER:PTN000558165	9606	GO_Central		P
+UniProtKB	Q9GZZ1	NAA50	involved_in	GO:0043967	histone H4 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0010485	9606	GOC		P
+UniProtKB	Q9H0E9	BRD8	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9H0E9	BRD8	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9H1Y0	ATG5	involved_in	GO:2000619	negative regulation of histone H4-K16 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q99J83|ensembl:ENSMUSP00000044769	9606	Ensembl		P
+UniProtKB	Q9H2F5	EPC1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9H2F5	EPC1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9H2F5	EPC1	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:14966270		9606	UniProt		F
+UniProtKB	Q9H2F5	EPC1	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000382618|SGD:S000001870|UniProtKB:A0A0B4KFP2|UniProtKB:Q9H2F5	9606	GO_Central		F
+UniProtKB	Q9H7X0	NAA60	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:21981917		9606	UniProt		P
+UniProtKB	Q9H7X0	NAA60	enables	GO:0010485	H4 histone acetyltransferase activity	ECO:0000314	IDA	PMID:21981917		9606	UniProt		F
+UniProtKB	Q9H7X0	NAA60	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000380943|UniProtKB:Q9H7X0	9606	GO_Central		P
+UniProtKB	Q9H7X0	NAA60	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000380943|TAIR:locus:2075467	9606	GO_Central		P
+UniProtKB	Q9H7X0	NAA60	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q9H7Z6	KAT8	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9H7Z6	KAT8	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9H7Z6	KAT8	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9H7Z6	KAT8	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000315	IMP	PMID:15960975		9606	UniProt		P
+UniProtKB	Q9H7Z6	KAT8	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9H7Z6	KAT8	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9H7Z6	KAT8	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9H7Z6	KAT8	involved_in	GO:0016573	histone acetylation	ECO:0000314	IDA	PMID:11742995		9606	UniProt		P
+UniProtKB	Q9H7Z6	KAT8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11742995		9606	UniProt		F
+UniProtKB	Q9H7Z6	KAT8	enables	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|PANTHER:PTN000742436|UniProtKB:Q9H7Z6	9606	GO_Central		F
+UniProtKB	Q9H7Z6	KAT8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0014340|FB:FBgn0026080|MGI:MGI:1858746|PANTHER:PTN000064894|SGD:S000000148|SGD:S000004734|SGD:S000005770|TAIR:locus:2144776|TAIR:locus:2174764|UniProtKB:Q8III2|UniProtKB:Q8WYB5|UniProtKB:Q92794|UniProtKB:Q92993|UniProtKB:Q9H7Z6|ZFIN:ZDB-GENE-021022-3	9606	GO_Central		F
+UniProtKB	Q9H7Z6	KAT8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717|InterPro:IPR037906	9606	InterPro		F
+UniProtKB	Q9H7Z6	KAT8	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR002717	9606	InterPro		P
+UniProtKB	Q9H7Z6	KAT8	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q9H8E8	KAT14	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	Q9H8E8	KAT14	involved_in	GO:0016573	histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0032691|MGI:MGI:1917264|PANTHER:PTN000467663	9606	GO_Central		P
+UniProtKB	Q9H8E8	KAT14	enables	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000467663|UniProtKB:Q9H8E8	9606	GO_Central		F
+UniProtKB	Q9H8E8	KAT14	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:19103755		9606	MGI		F
+UniProtKB	Q9H8E8	KAT14	involved_in	GO:0016573	histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q8CID0|ensembl:ENSMUSP00000028911	9606	Ensembl		P
+UniProtKB	Q9H9L4	KANSL2	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9H9L4	KANSL2	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9H9L4	KANSL2	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9H9L4	KANSL2	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9H9L4	KANSL2	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9H9L4	KANSL2	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9H9L4	KANSL2	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001003176|UniProtKB:Q9H9L4	9606	GO_Central		F
+UniProtKB	Q9H9L4	KANSL2	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001003176|UniProtKB:Q9H9L4	9606	GO_Central		F
+UniProtKB	Q9H9L4	KANSL2	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001003176|UniProtKB:Q9H9L4	9606	GO_Central		F
+UniProtKB	Q9H9L4	KANSL2	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001003176|UniProtKB:Q9H9L4	9606	GO_Central		P
+UniProtKB	Q9H9L4	KANSL2	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001003176|UniProtKB:Q9H9L4	9606	GO_Central		P
+UniProtKB	Q9H9L4	KANSL2	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001003176|UniProtKB:Q9H9L4	9606	GO_Central		P
+UniProtKB	Q9H9T3	ELP3	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q9H9T3	ELP3	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0044154	histone H3-K14 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9HAF1	MEAF6	NOT|involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0043983	histone H4-K12 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0044154	histone H3-K14 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000336569|UniProtKB:Q9HAF1	9606	GO_Central		P
+UniProtKB	Q9HAF1	MEAF6	contributes_to	GO:0043994	histone acetyltransferase activity (H3-K23 specific)	ECO:0000318	IBA	PMID:21873635	FB:FBgn0035624|PANTHER:PTN000336569	9606	GO_Central		F
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0043983	histone H4-K12 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000336569|UniProtKB:Q9HAF1	9606	GO_Central		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000336569|UniProtKB:Q9HAF1	9606	GO_Central		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000336569|UniProtKB:Q9HAF1	9606	GO_Central		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0043968	histone H2A acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000336569|UniProtKB:Q9HAF1	9606	GO_Central		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0043972	histone H3-K23 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0043994	9606	GOC		P
+UniProtKB	Q9HAF1	MEAF6	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR015418	9606	InterPro		P
+UniProtKB	Q9HBM6	TAF9B	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0000617|PANTHER:PTN000249331|UniProtKB:Q16594	9606	GO_Central		P
+UniProtKB	Q9HBM6	TAF9B	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0000617|PANTHER:PTN000249331|UniProtKB:Q16594	9606	GO_Central		F
+UniProtKB	Q9HCI7	MSL2	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9HCI7	MSL2	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN001042522|UniProtKB:Q9HCI7	9606	GO_Central		P
+UniProtKB	Q9NPF5	DMAP1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9NPF5	DMAP1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9NPF5	DMAP1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000304415|UniProtKB:Q9NPF5	9606	GO_Central		P
+UniProtKB	Q9NPF5	DMAP1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000304415|UniProtKB:Q9NPF5	9606	GO_Central		P
+UniProtKB	Q9NPF5	DMAP1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q9NPF5	DMAP1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR027109	9606	InterPro		P
+UniProtKB	Q9NPI1	BRD7	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000314	IDA	PMID:20228809		9606	UniProt		P
+UniProtKB	Q9NQC1	JADE2	NOT|involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9NQC1	JADE2	involved_in	GO:0043983	histone H4-K12 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9NQC1	JADE2	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9NQC1	JADE2	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9NQC1	JADE2	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9NR33	POLE4	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	Q9NRA0	SPHK2	involved_in	GO:0043977	histone H2A-K5 acetylation	ECO:0000314	IDA	PMID:19729656		9606	UniProt		P
+UniProtKB	Q9NRA0	SPHK2	involved_in	GO:0043980	histone H2B-K12 acetylation	ECO:0000314	IDA	PMID:19729656		9606	UniProt		P
+UniProtKB	Q9NRA0	SPHK2	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000314	IDA	PMID:19729656		9606	UniProt		P
+UniProtKB	Q9NRF9	POLE3	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	Q9NRF9	POLE3	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0043002|PANTHER:PTN000869255	9606	GO_Central		F
+UniProtKB	Q9NRL2	BAZ1A	NOT|enables	GO:0004402	histone acetyltransferase activity	ECO:0000304	TAS	PMID:10662543		9606	BHF-UCL		F
+UniProtKB	Q9NRL2	BAZ1A	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q9NS73	MBIP	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	Q9NV56	MRGBP	involved_in	GO:0016573	histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0033341|PANTHER:PTN001783547	9606	GO_Central		P
+UniProtKB	Q9NWS0	PIH1D1	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000315	IMP	PMID:22368283		9606	UniProt	happens_during(GO:1902661)	P
+UniProtKB	Q9NWS0	PIH1D1	involved_in	GO:2000619	negative regulation of histone H4-K16 acetylation	ECO:0000315	IMP	PMID:22368283		9606	UniProt		P
+UniProtKB	Q9NWS0	PIH1D1	involved_in	GO:0090240	positive regulation of histone H4 acetylation	ECO:0000315	IMP	PMID:22368283		9606	UniProt		P
+UniProtKB	Q9NXR8	ING3	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9NXR8	ING3	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9NXR8	ING3	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9NXR8	ING3	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9NXR8	ING3	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:14966270		9606	UniProt		F
+UniProtKB	Q9NXR8	ING3	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	FB:FBgn0030945|PANTHER:PTN000817799|UniProtKB:Q9NXR8	9606	GO_Central		F
+UniProtKB	Q9P2N6	KANSL3	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9P2N6	KANSL3	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9P2N6	KANSL3	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000314	IDA	PMID:20018852		9606	UniProt		F
+UniProtKB	Q9P2N6	KANSL3	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9P2N6	KANSL3	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9P2N6	KANSL3	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:20018852		9606	UniProt		P
+UniProtKB	Q9P2N6	KANSL3	contributes_to	GO:0046972	histone acetyltransferase activity (H4-K16 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000992949|UniProtKB:Q9P2N6	9606	GO_Central		F
+UniProtKB	Q9P2N6	KANSL3	contributes_to	GO:0043996	histone acetyltransferase activity (H4-K8 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000992949|UniProtKB:Q9P2N6	9606	GO_Central		F
+UniProtKB	Q9P2N6	KANSL3	contributes_to	GO:0043995	histone acetyltransferase activity (H4-K5 specific)	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000992949|UniProtKB:Q9P2N6	9606	GO_Central		F
+UniProtKB	Q9P2N6	KANSL3	involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000992949|UniProtKB:Q9P2N6	9606	GO_Central		P
+UniProtKB	Q9P2N6	KANSL3	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000992949|UniProtKB:Q9P2N6	9606	GO_Central		P
+UniProtKB	Q9P2N6	KANSL3	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000992949|UniProtKB:Q9P2N6	9606	GO_Central		P
+UniProtKB	Q9UBK2	PPARGC1A	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000304	TAS	PMID:14636573		9606	UniProt		P
+UniProtKB	Q9UBU8	MORF4L1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9UBU8	MORF4L1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9UBU8	MORF4L1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000093964|UniProtKB:Q9UBU8	9606	GO_Central		P
+UniProtKB	Q9UBU8	MORF4L1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000093964|UniProtKB:Q9UBU8	9606	GO_Central		P
+UniProtKB	Q9UBU8	MORF4L1	involved_in	GO:0016573	histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0027378|PANTHER:PTN000093963	9606	GO_Central		P
+UniProtKB	Q9UI42	CPA4	involved_in	GO:0016573	histone acetylation	ECO:0000303	NAS	PMID:10383164		9606	UniProt		P
+UniProtKB	Q9UJU2	LEF1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000315	IMP	PMID:20363964		9606	UniProt		P
+UniProtKB	Q9UJU2	LEF1	involved_in	GO:0043966	histone H3 acetylation	ECO:0000315	IMP	PMID:20363964		9606	UniProt		P
+UniProtKB	Q9UKN8	GTF3C4	enables	GO:0004402	histone acetyltransferase activity	ECO:0000304	TAS	PMID:10523658		9606	PINC		F
+UniProtKB	Q9UKN8	GTF3C4	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q9UKN8	GTF3C4	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q9UKN8	GTF3C4	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q9ULD4	BRPF3	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9ULM3	YEATS2	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:18838386		9606	BHF-UCL		P
+UniProtKB	Q9ULW6	NAP1L2	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P51860|ensembl:ENSMUSP00000112677	9606	Ensembl		P
+UniProtKB	Q9ULW6	NAP1L2	involved_in	GO:0071442	positive regulation of histone H3-K14 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P51860|ensembl:ENSMUSP00000112677	9606	Ensembl		P
+UniProtKB	Q9ULW6	NAP1L2	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:P51860|ensembl:ENSMUSP00000112677	9606	Ensembl		P
+UniProtKB	Q9UNL4	ING4	NOT|involved_in	GO:0043984	histone H4-K16 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9UNL4	ING4	involved_in	GO:0043983	histone H4-K12 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9UNL4	ING4	involved_in	GO:0043982	histone H4-K8 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9UNL4	ING4	involved_in	GO:0043981	histone H4-K5 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9UNL4	ING4	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:16387653		9606	UniProt		P
+UniProtKB	Q9UNL4	ING4	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028647	9606	InterPro		P
+UniProtKB	Q9UPT9	USP22	contributes_to	GO:0010485	H4 histone acetyltransferase activity	ECO:0000314	IDA	PMID:18206973		9606	UniProt		F
+UniProtKB	Q9UPT9	USP22	involved_in	GO:0043967	histone H4 acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0010485	9606	GOC		P
+UniProtKB	Q9UQL6	HDAC5	NOT|involved_in	GO:2000615	regulation of histone H3-K9 acetylation	ECO:0000315	IMP	PMID:23867755		9606	UniProt		P
+UniProtKB	Q9Y230	RUVBL2	involved_in	GO:0035066	positive regulation of histone acetylation	ECO:0000315	IMP	PMID:23637611		9606	UniProt	has_input(UniProtKB:P0C0S5)	P
+UniProtKB	Q9Y230	RUVBL2	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9Y230	RUVBL2	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9Y230	RUVBL2	involved_in	GO:0016573	histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0040075|FB:FBgn0040078|PANTHER:PTN000120244	9606	GO_Central		P
+UniProtKB	Q9Y265	RUVBL1	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9Y265	RUVBL1	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9Y265	RUVBL1	involved_in	GO:0016573	histone acetylation	ECO:0000318	IBA	PMID:21873635	FB:FBgn0040075|FB:FBgn0040078|PANTHER:PTN000120244	9606	GO_Central		P
+UniProtKB	Q9Y3T9	NOC2L	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000314	IDA	PMID:16322561		9606	UniProt		P
+UniProtKB	Q9Y3T9	NOC2L	involved_in	GO:0035067	negative regulation of histone acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000976013|UniProtKB:Q9Y3T9	9606	GO_Central		P
+UniProtKB	Q9Y4A5	TRRAP	involved_in	GO:0043968	histone H2A acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9Y4A5	TRRAP	involved_in	GO:0043967	histone H4 acetylation	ECO:0000314	IDA	PMID:14966270		9606	UniProt		P
+UniProtKB	Q9Y4A5	TRRAP	involved_in	GO:0016573	histone acetylation	ECO:0000303	NAS	PMID:10966108		9606	UniProt		P
+UniProtKB	Q9Y4A5	TRRAP	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR033317	9606	InterPro		P
+UniProtKB	Q9Y4E5	ZNF451	involved_in	GO:2000616	negative regulation of histone H3-K9 acetylation	ECO:0000315	IMP	PMID:24324267		9606	UniProt		P
+UniProtKB	Q9Y6B2	EID1	enables	GO:0035034	histone acetyltransferase regulator activity	ECO:0000314	IDA	PMID:11073990		9606	UniProt		F
+UniProtKB	Q9Y6B2	EID1	involved_in	GO:0035065	regulation of histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR033255	9606	InterPro		P
+UniProtKB	Q9Y6F7	CDY2A	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q9Y6F7	CDY2A	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q9Y6F8	CDY1	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q9Y6F8	CDY1	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	Q9Y6J9	TAF6L	involved_in	GO:0043966	histone H3 acetylation	ECO:0000314	IDA	PMID:11564863		9606	UniProt		P
+UniProtKB	Q9Y6J9	TAF6L	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:11564863		9606	UniProt		F
+UniProtKB	Q9Y6J9	TAF6L	involved_in	GO:0043966	histone H3 acetylation	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000812328|UniProtKB:Q9Y6J9	9606	GO_Central		P
+UniProtKB	Q9Y6J9	TAF6L	contributes_to	GO:0004402	histone acetyltransferase activity	ECO:0000318	IBA	PMID:21873635	PANTHER:PTN000812328|UniProtKB:Q9Y6J9	9606	GO_Central		F
+UniProtKB	Q9Y6Q9	NCOA3	enables	GO:0004402	histone acetyltransferase activity	ECO:0000314	IDA	PMID:9267036		9606	UniProt		F
+UniProtKB	Q9Y6Q9	NCOA3	involved_in	GO:0016573	histone acetylation	ECO:0000364	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q9Y6Q9	NCOA3	involved_in	GO:0016573	histone acetylation	ECO:0000366	IEA	GO_REF:0000108	GO:0004402	9606	GOC		P
+UniProtKB	Q9Y6Q9	NCOA3	enables	GO:0004402	histone acetyltransferase activity	ECO:0000501	IEA	GO_REF:0000003	EC:2.3.1.48	9606	UniProt		F
+UniProtKB	R4GNG1	ING4	involved_in	GO:0016573	histone acetylation	ECO:0000256	IEA	GO_REF:0000002	InterPro:IPR028647	9606	InterPro		P
+UniProtKB	W0HK13	PIWIL2	involved_in	GO:2000617	positive regulation of histone H3-K9 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q8CDG1|ensembl:ENSMUSP00000047385	9606	Ensembl		P
+UniProtKB	W0HK13	PIWIL2	involved_in	GO:0071442	positive regulation of histone H3-K14 acetylation	ECO:0000265	IEA	GO_REF:0000107	UniProtKB:Q8CDG1|ensembl:ENSMUSP00000047385	9606	Ensembl		P
