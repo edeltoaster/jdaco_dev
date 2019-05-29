@@ -33,16 +33,22 @@ public class check_H3K27ac {
 			Hac_proteins.add(s.split("\t")[1]);
 		}
 		
-		int n = 0;
+		Map<String, Integer> n = new HashMap<>();
+		n.put("+", 0);
+		n.put("-", 0);
+		Map<String, Integer> n_ep300 = new HashMap<>();
+		n_ep300.put("+", 0);
+		n_ep300.put("-", 0);
 		for (Set<String> tfc : tfcs) {
 			Set<String> ov = new HashSet<>(tfc);
 			ov.retainAll(Hac_proteins);
-			 if (ov.size() > 0) {
-				 System.out.println(tfc + " " + dir_map.get(tfc));
-				 n++;
-			 }
+			if (ov.size() > 0) {
+				n.put(dir_map.get(tfc), n.get(dir_map.get(tfc)) + 1);
+			}
+			if (tfc.contains("Q09472"))
+				n_ep300.put(dir_map.get(tfc), n_ep300.get(dir_map.get(tfc)) + 1);
 		}
-		System.out.println(n);
+		System.out.println(n + " " + n_ep300);
 	}
 
 }
