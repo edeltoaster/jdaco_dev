@@ -1245,6 +1245,8 @@ public class DataQuery {
 		
 		return isoform_protein_domain_mapping;
 	}
+	
+	
 	/**
 	 * Queries AmiGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon
 	 * @param GO_id
@@ -1252,7 +1254,7 @@ public class DataQuery {
 	 * @param include_IEA
 	 * @return
 	 */
-	public static Set<String> getProteinsWithGO(String GO_id, String taxon, boolean include_IEA, boolean report_genes, boolean lite_annotation) {
+	public static Set<String> getProteinsWithGO_oldAMIGO(String GO_id, String taxon, boolean include_IEA, boolean report_genes, boolean lite_annotation) {
 		
 		Set<String> entries = new HashSet<>();
 		
@@ -1307,7 +1309,7 @@ public class DataQuery {
 			} catch (InterruptedException e1) {
 			}
 			
-			return getProteinsWithGO(GO_id, taxon, include_IEA, report_genes, lite_annotation);
+			return getProteinsWithGO_oldAMIGO(GO_id, taxon, include_IEA, report_genes, lite_annotation);
 			
 		} finally {
 			try {
@@ -1326,18 +1328,18 @@ public class DataQuery {
 	 * @param taxon
 	 * @return
 	 */
-	public static Set<String> getProteinsWithGO(String GO_id, String taxon) {
-		return getProteinsWithGO(GO_id, taxon, true, false, false);
+	public static Set<String> getProteinsWithGO_oldAMIGO(String GO_id, String taxon) {
+		return getProteinsWithGO_oldAMIGO(GO_id, taxon, true, false, false);
 	}
 	
 	/**
-	 * Queries EBI QuickGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon
+	 * Queried old EBI QuickGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon
 	 * @param GO_id
 	 * @param taxon
 	 * @param include_IEA
 	 * @return
 	 */
-	public static Set<String> getProteinsWithGOOld(String GO_id, String taxon, boolean include_IEA, boolean only_experimental, boolean report_genes) {
+	public static Set<String> getProteinsWithGO_oldQuickGO(String GO_id, String taxon, boolean include_IEA, boolean only_experimental, boolean report_genes) {
 		
 		Set<String> entries = new HashSet<>();
 		BufferedReader datastream = null;
@@ -1381,7 +1383,93 @@ public class DataQuery {
 			} catch (InterruptedException e1) {
 			}
 			
-			return getProteinsWithGOOld(GO_id, taxon, include_IEA, only_experimental, report_genes);
+			return getProteinsWithGO_oldQuickGO(GO_id, taxon, include_IEA, only_experimental, report_genes);
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
+		}
+		
+		return entries;
+	}
+	
+	/**
+	 * Queried old EBI QuickGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon,
+	 * automatically includes also the ones with evidence code IEA
+	 * @param GO_id
+	 * @param taxon
+	 * @return
+	 */
+	public static Set<String> getProteinsWithGO_oldQuickGO(String GO_id, String taxon) {
+		return getProteinsWithGO_oldQuickGO(GO_id, taxon, true, false, false);
+	}
+	
+	/**
+	 * Queries EBI QuickGO to get all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon
+	 * @param GO_id
+	 * @param taxon
+	 * @param include_IEA
+	 * @param only_experimental
+	 * @param report_genes
+	 * @return
+	 */
+	public static Set<String> getProteinsWithGO(String GO_id, String taxon, boolean include_IEA, boolean only_experimental, boolean report_genes) {
+		
+		Set<String> entries = new HashSet<>();
+		BufferedReader datastream = null;
+		try {
+			URL server = new URL("https://www.ebi.ac.uk/QuickGO/services/annotation/downloadSearch?geneProductType=protein&geneProductSubset=Swiss-Prot&"
+					+ "goId=" + GO_id + "&goUsage=descendants&goUsageRelationships=is_a%2C%20part_of%2C%20occurs_in&"
+					+ "taxonId=" + taxon + "&taxonUsage=descendants");
+			HttpURLConnection connection = (HttpURLConnection) server.openConnection();
+			
+			// adapted from EBI API generator
+			connection.setRequestProperty("Accept", "text/tsv");
+		    int responseCode = connection.getResponseCode();
+
+		    if(responseCode != 200) {
+		      throw new RuntimeException("Response code was not 200. Detected response was " + responseCode);
+		    }
+		    
+			// read
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+			String line;
+			
+			while ( (line = datastream.readLine()) != null ) {
+				if (line.isEmpty() || line.startsWith("GENE"))
+					continue;
+				String[] temp = line.trim().split("\t");
+				String inf = temp[7];
+				
+				// not IEA
+				if (!include_IEA && inf.equals("IEA"))
+					continue;
+				
+				// manual experimental: IMP,IGI,IPI,IDA,IEP,EXP
+				if (only_experimental && !inf.equals("IMP") && !inf.equals("IGI") && !inf.equals("IPI") && !inf.equals("IDA") && !inf.equals("IEP") && !inf.equals("EXP"))
+					continue;
+				
+				if (report_genes)
+					entries.add(temp[2]);
+				else
+					entries.add(temp[1].split("-")[0].split(":")[0]); // accounts for a few datapoints of isoform information and at least one artefact
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+			if (DataQuery.retries == 10)
+				terminateRetrieval("QuickGO");
+			
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get GO data from QuickGO in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			return getProteinsWithGO(GO_id, taxon, include_IEA, only_experimental, report_genes);
 			
 		} finally {
 			try {
@@ -1400,8 +1488,8 @@ public class DataQuery {
 	 * @param taxon
 	 * @return
 	 */
-	public static Set<String> getProteinsWithGOOld(String GO_id, String taxon) {
-		return getProteinsWithGOOld(GO_id, taxon, true, false, false);
+	public static Set<String> getProteinsWithGO(String GO_id, String taxon) {
+		return getProteinsWithGO(GO_id, taxon, true, false, false);
 	}
 	
 	
