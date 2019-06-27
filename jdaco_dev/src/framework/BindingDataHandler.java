@@ -113,8 +113,8 @@ public class BindingDataHandler {
 				if (line == null)
 					break;
 				
-				// skip comments
-				if (line.startsWith("#"))
+				// skip header and comments
+				if (line.startsWith("#") || line.startsWith("motif_id"))
 					continue;
 				
 				// parse
