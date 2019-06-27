@@ -1260,7 +1260,7 @@ public class DataQuery {
 		
 		Connection connection = null;
 //		String server = "spitz.lbl.gov";
-		String server = "mysql-amigo.ebi.ac.uk:4085"; // TODO: GO retrieval MySQLs are offline since mid of 2018?
+		String server = "mysql-amigo.ebi.ac.uk:4085";
 		String user = "go_select";
 		String db = "go_latest";
 		
