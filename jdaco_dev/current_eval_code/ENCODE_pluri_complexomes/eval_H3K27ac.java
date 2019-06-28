@@ -1,6 +1,8 @@
 package ENCODE_pluri_complexomes;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -69,21 +71,26 @@ public class eval_H3K27ac {
 		
 		// read upregulated diff complexes
 		List<Set<String>> pluri_upCs = new LinkedList<>();
-		Set<String> pluri_upTFs = new HashSet<>();
+		List<Set<String>> pluri_downCs = new LinkedList<>();
+		Set<String> pluri_TFs = new HashSet<>();
 		for (String s : Utilities.readFile(diff_compl_file)) {
 			if (s.startsWith("(sub)"))
 					continue;
 			String[] spl = s.split(" ");
 			Set<String> tfc = new HashSet<String>(Arrays.asList(spl[0].split("/")));
+			
 			if (spl[1].equals("+")) {
 				pluri_upCs.add(tfc);
-				pluri_upTFs.addAll(tfc);
+			} else {
+				pluri_downCs.add(tfc);
 			}
+			pluri_TFs.addAll(tfc);
 		}
-		pluri_upTFs.retainAll(TFs);
+		pluri_TFs.retainAll(TFs);
 		
 		System.out.println(pluri_upCs.size() + " sign upregulated pluri complexes");
-		System.out.println(pluri_upTFs.size() + " TFs therein");
+		System.out.println(pluri_downCs.size() + " sign downregulated pluri complexes");
+		System.out.println(pluri_TFs.size() + " TFs therein");
 		
 //		Set<String> Hac_proteins = DataQuery.getProteinsWithGO("GO:001657", "9606");
 //		Set<String> Hdac_proteins = DataQuery.getProteinsWithGO("GO:0016575", "9606");
@@ -103,19 +110,157 @@ public class eval_H3K27ac {
 				pluri_Hac_upCs.add(complex);
 			}
 		}
-		System.out.println(pluri_Hac_upCs.size() + " Hac complexes therein");
+		System.out.println(pluri_Hac_upCs.size() + " Hac complexes in up");
 		
-		BindingDataHandler bdh = new BindingDataHandler(fimo_data, 1.0, pluri_upTFs);
+		List<Set<String>> pluri_Hac_downCs = new LinkedList<>();
+		for (Set<String> complex : pluri_downCs) {
+			Set<String> ov = new HashSet<>(complex);
+			ov.retainAll(Hac_proteins);
+			if (ov.size() > 0) {
+				pluri_Hac_downCs.add(complex);
+			}
+		}
+		System.out.println(pluri_Hac_downCs.size() + " Hac complexes in down");
+		
+		
+		// gather "pluri enhancers"
+		Set<String> pluri_regions = new HashSet<>();
+		for (String region : pluri.keySet()) {
+			if (nonpluri.get(region) == 0.0 && pluri.get(region) > 0)
+				pluri_regions.add(region);
+		}
+		System.out.println(pluri_regions.size() + " pluri enhancer regions");
+		BindingDataHandler bdh = new BindingDataHandler(fimo_data, TFs, pluri_regions);
 		System.out.println("FIMO data read.");
 		System.out.println();
 		
+		System.out.println("++++");
+		double n = 0;
+		double score = 0;
+		double hitscore = 0;
 		for (Set<String> complex : pluri_Hac_upCs) {
 			Set<String> tfc = new HashSet<>(complex);
 			tfc.retainAll(TFs);
-			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -10, +10, false);
-			System.out.println("Checking " + complex + "/" + tfc + " targetting " + target_regions.size() + " enhancers");
-			System.out.println(regionCheck(target_regions));
+			
+			if (tfc.size() < 2)
+				continue;
+			
+			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
+			//System.out.println("Checking " + complex + "/" + tfc + " targetting " + target_regions.size() + " enhancers");
+			n += target_regions.size();
+			if (target_regions.size() > 0) {
+				double sub_score = 0;
+				for (String reg : target_regions) {
+					sub_score += pluri.get(reg);
+					hitscore += pluri.get(reg);
+				}
+				sub_score /= target_regions.size();
+				score += sub_score;
+			}
 		}
+		hitscore /= n;
+		n /= pluri_Hac_upCs.size();
+		score /= pluri_Hac_upCs.size();
+		System.out.println(n + "  " + score + "  " + hitscore);
+		
+		
+		System.out.println();
+		System.out.println("----");
+		n = 0;
+		score = 0;
+		hitscore = 0;
+		for (Set<String> complex : pluri_Hac_downCs) {
+			Set<String> tfc = new HashSet<>(complex);
+			tfc.retainAll(TFs);
+			
+			if (tfc.size() < 2)
+				continue;
+			
+			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
+			//System.out.println("Checking " + complex + "/" + tfc + " targetting " + target_regions.size() + " enhancers");
+			n += target_regions.size();
+			if (target_regions.size() > 0) {
+				double sub_score = 0;
+				for (String reg : target_regions) {
+					sub_score += pluri.get(reg);
+					hitscore += pluri.get(reg);
+				}
+				sub_score /= target_regions.size();
+				score += sub_score;
+			}
+		}
+		hitscore /= n;
+		n /= pluri_Hac_downCs.size();
+		score /= pluri_Hac_downCs.size();
+		System.out.println(n + "  " + score + "  " + hitscore);
+		
+		
+		System.out.println();
+		System.out.println("all+-+-+-+-+-+-+-+-+-");
+		n = 0;
+		score = 0;
+		hitscore = 0;
+		List<String> tfl = new ArrayList<>(TFs);
+		int sample_size = 1000;
+		for (int i = 0; i < sample_size; i++) {
+			Set<String> tfc = new HashSet<>();
+			Collections.shuffle(tfl);
+			tfc.add(tfl.get(0));
+			tfc.add(tfl.get(1));
+			
+			if (i % 2 == 0)
+				tfc.add(tfl.get(2));
+			
+			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
+			//System.out.println("Checking " + tfc + " targetting " + target_regions.size() + " enhancers");
+			n += target_regions.size();
+			if (target_regions.size() > 0) {
+				double sub_score = 0;
+				for (String reg : target_regions) {
+					sub_score += pluri.get(reg);
+					hitscore += pluri.get(reg);
+				}
+				sub_score /= target_regions.size();
+				score += sub_score;
+			}
+		}
+		hitscore /= n;
+		n /= sample_size;
+		score /= sample_size;
+		System.out.println(n + "  " + score + "  " + hitscore);
+		
+		System.out.println();
+		System.out.println("TFCTFsonly+-+-+-+-+-+-+-+-+-");
+		n = 0;
+		score = 0;
+		hitscore = 0;
+		tfl = new ArrayList<>(pluri_TFs);
+		for (int i = 0; i < sample_size; i++) {
+			Set<String> tfc = new HashSet<>();
+			Collections.shuffle(tfl);
+			tfc.add(tfl.get(0));
+			tfc.add(tfl.get(1));
+			
+			if (i % 2 == 0)
+				tfc.add(tfl.get(2));
+			
+			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
+			//System.out.println("Checking " + tfc + " targetting " + target_regions.size() + " enhancers");
+			n += target_regions.size();
+			if (target_regions.size() > 0) {
+				double sub_score = 0;
+				for (String reg : target_regions) {
+					sub_score += pluri.get(reg);
+					hitscore += pluri.get(reg);
+				}
+				sub_score /= target_regions.size();
+				score += sub_score;
+			}
+		}
+		hitscore /= n;
+		n /= sample_size;
+		score /= sample_size;
+		System.out.println(n + "  " + score + "  " + hitscore);
 	}
 
 }
