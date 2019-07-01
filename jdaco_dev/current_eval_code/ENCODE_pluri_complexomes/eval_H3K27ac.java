@@ -94,13 +94,23 @@ public class eval_H3K27ac {
 		
 //		Set<String> Hac_proteins = DataQuery.getProteinsWithGO("GO:001657", "9606");
 //		Set<String> Hdac_proteins = DataQuery.getProteinsWithGO("GO:0016575", "9606");
+//		Set<String> Hac_proteins = new HashSet<>();
+//		System.out.println("ALL histone acetylating proteins");
+//		for (String s:Utilities.readFile("mixed_data/H_ac.tsv")) {
+//			if (s.startsWith("GENE"))
+//					continue;
+//			Hac_proteins.add(s.split("\t")[1]);
+//		}
+		
 		Set<String> Hac_proteins = new HashSet<>();
-		for (String s:Utilities.readFile("mixed_data/H_ac.tsv")) {
-			if (s.startsWith("GENE"))
-					continue;
-			Hac_proteins.add(s.split("\t")[1]);
-		}
+		System.out.println("P300/CBP only");
+		Hac_proteins.add("Q09472"); // EP300
+		Hac_proteins.add("Q92793"); // CBP
+		
 		System.out.println("GO data retrieved.");
+		
+		boolean at_least_two_TFs = false;
+		System.out.println("at least two TFs: "+ at_least_two_TFs);
 		
 		List<Set<String>> pluri_Hac_upCs = new LinkedList<>();
 		for (Set<String> complex : pluri_upCs) {
@@ -136,15 +146,16 @@ public class eval_H3K27ac {
 		
 		System.out.println("++++");
 		double n = 0;
+		double samples = 0;
 		double score = 0;
 		double hitscore = 0;
 		for (Set<String> complex : pluri_Hac_upCs) {
 			Set<String> tfc = new HashSet<>(complex);
 			tfc.retainAll(TFs);
 			
-			if (tfc.size() < 2)
+			if (at_least_two_TFs && tfc.size() < 2)
 				continue;
-			
+			samples++;
 			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
 			//System.out.println("Checking " + complex + "/" + tfc + " targetting " + target_regions.size() + " enhancers");
 			n += target_regions.size();
@@ -159,23 +170,24 @@ public class eval_H3K27ac {
 			}
 		}
 		hitscore /= n;
-		n /= pluri_Hac_upCs.size();
-		score /= pluri_Hac_upCs.size();
-		System.out.println(n + "  " + score + "  " + hitscore);
+		n /= samples;
+		score /= samples;
+		System.out.println(samples + "  " + n + "  " + score + "  " + hitscore);
 		
 		
 		System.out.println();
 		System.out.println("----");
 		n = 0;
+		samples = 0;
 		score = 0;
 		hitscore = 0;
 		for (Set<String> complex : pluri_Hac_downCs) {
 			Set<String> tfc = new HashSet<>(complex);
 			tfc.retainAll(TFs);
 			
-			if (tfc.size() < 2)
+			if (at_least_two_TFs && tfc.size() < 2)
 				continue;
-			
+			samples++;
 			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
 			//System.out.println("Checking " + complex + "/" + tfc + " targetting " + target_regions.size() + " enhancers");
 			n += target_regions.size();
@@ -190,77 +202,103 @@ public class eval_H3K27ac {
 			}
 		}
 		hitscore /= n;
-		n /= pluri_Hac_downCs.size();
-		score /= pluri_Hac_downCs.size();
-		System.out.println(n + "  " + score + "  " + hitscore);
+		n /= samples;
+		score /= samples;
+		System.out.println(samples + "  " + n + "  " + score + "  " + hitscore);
 		
+		
+		// prepare sampling distribution
+		List<Integer> distr = new ArrayList<>();
+		for (Set<String> complex : pluri_Hac_upCs) {
+			Set<String> tfc = new HashSet<>(complex);
+			tfc.retainAll(TFs);
+			if (at_least_two_TFs && tfc.size() < 2)
+				continue;
+			distr.add(tfc.size());
+		}
+		int repetitions = 1000;
 		
 		System.out.println();
 		System.out.println("all+-+-+-+-+-+-+-+-+-");
-		n = 0;
-		score = 0;
-		hitscore = 0;
+		double tot_n = 0;
+		double tot_score = 0;
+		double tot_hitscore = 0;
 		List<String> tfl = new ArrayList<>(TFs);
-		int sample_size = 1000;
-		for (int i = 0; i < sample_size; i++) {
-			Set<String> tfc = new HashSet<>();
-			Collections.shuffle(tfl);
-			tfc.add(tfl.get(0));
-			tfc.add(tfl.get(1));
-			
-			if (i % 2 == 0)
-				tfc.add(tfl.get(2));
-			
-			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
-			//System.out.println("Checking " + tfc + " targetting " + target_regions.size() + " enhancers");
-			n += target_regions.size();
-			if (target_regions.size() > 0) {
-				double sub_score = 0;
-				for (String reg : target_regions) {
-					sub_score += pluri.get(reg);
-					hitscore += pluri.get(reg);
+		for (int rep = 0; rep < repetitions; rep++) {
+			n = 0;
+			score = 0;
+			hitscore = 0;
+			for (int s : distr) {
+				Set<String> tfc = new HashSet<>();
+				Collections.shuffle(tfl);
+				for (int i = 0; i < s ; i++)
+					tfc.add(tfl.get(i));
+				
+				Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
+				//System.out.println("Checking " + tfc + " targetting " + target_regions.size() + " enhancers");
+				n += target_regions.size();
+				if (target_regions.size() > 0) {
+					double sub_score = 0;
+					for (String reg : target_regions) {
+						sub_score += pluri.get(reg);
+						hitscore += pluri.get(reg);
+					}
+					sub_score /= target_regions.size();
+					score += sub_score;
 				}
-				sub_score /= target_regions.size();
-				score += sub_score;
 			}
+			hitscore /= n;
+			n /= distr.size();
+			score /= distr.size();
+			tot_n += n;
+			tot_score += score;
+			tot_hitscore += hitscore;
 		}
-		hitscore /= n;
-		n /= sample_size;
-		score /= sample_size;
-		System.out.println(n + "  " + score + "  " + hitscore);
+		tot_n /= repetitions;
+		tot_score /= repetitions;
+		tot_hitscore /= repetitions;
+		System.out.println(distr.size() + "  " + tot_n + "  " + tot_score + "  " + tot_hitscore);
 		
 		System.out.println();
 		System.out.println("TFCTFsonly+-+-+-+-+-+-+-+-+-");
-		n = 0;
-		score = 0;
-		hitscore = 0;
+		tot_n = 0;
+		tot_score = 0;
+		tot_hitscore = 0;
 		tfl = new ArrayList<>(pluri_TFs);
-		for (int i = 0; i < sample_size; i++) {
-			Set<String> tfc = new HashSet<>();
-			Collections.shuffle(tfl);
-			tfc.add(tfl.get(0));
-			tfc.add(tfl.get(1));
-			
-			if (i % 2 == 0)
-				tfc.add(tfl.get(2));
-			
-			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
-			//System.out.println("Checking " + tfc + " targetting " + target_regions.size() + " enhancers");
-			n += target_regions.size();
-			if (target_regions.size() > 0) {
-				double sub_score = 0;
-				for (String reg : target_regions) {
-					sub_score += pluri.get(reg);
-					hitscore += pluri.get(reg);
+		for (int rep = 0; rep < repetitions; rep++) {
+			n = 0;
+			score = 0;
+			hitscore = 0;
+			for (int s : distr) {
+				Set<String> tfc = new HashSet<>();
+				Collections.shuffle(tfl);
+				for (int i = 0; i < s ; i++)
+					tfc.add(tfl.get(i));
+				
+				Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
+				//System.out.println("Checking " + tfc + " targetting " + target_regions.size() + " enhancers");
+				n += target_regions.size();
+				if (target_regions.size() > 0) {
+					double sub_score = 0;
+					for (String reg : target_regions) {
+						sub_score += pluri.get(reg);
+						hitscore += pluri.get(reg);
+					}
+					sub_score /= target_regions.size();
+					score += sub_score;
 				}
-				sub_score /= target_regions.size();
-				score += sub_score;
 			}
+			hitscore /= n;
+			n /= distr.size();
+			score /= distr.size();
+			tot_n += n;
+			tot_score += score;
+			tot_hitscore += hitscore;
 		}
-		hitscore /= n;
-		n /= sample_size;
-		score /= sample_size;
-		System.out.println(n + "  " + score + "  " + hitscore);
+		tot_n /= repetitions;
+		tot_score /= repetitions;
+		tot_hitscore /= repetitions;
+		System.out.println(distr.size() + "  " + tot_n + "  " + tot_score + "  " + tot_hitscore);
 	}
 
 }
