@@ -73,7 +73,7 @@ public class eval_H3K27ac {
 		// read upregulated diff complexes
 		List<Set<String>> pluri_upCs = new LinkedList<>();
 		List<Set<String>> pluri_downCs = new LinkedList<>();
-		Set<String> pluri_TFs = new HashSet<>();
+		Set<String> pluri_upTFs = new HashSet<>();
 		for (String s : Utilities.readFile(diff_compl_file)) {
 			if (s.startsWith("(sub)"))
 					continue;
@@ -82,33 +82,34 @@ public class eval_H3K27ac {
 			
 			if (spl[1].equals("+")) {
 				pluri_upCs.add(tfc);
+				pluri_upTFs.addAll(tfc);
 			} else {
 				pluri_downCs.add(tfc);
 			}
-			pluri_TFs.addAll(tfc);
+			
 		}
-		pluri_TFs.retainAll(TFs);
+		pluri_upTFs.retainAll(TFs);
 		
 		System.out.println(pluri_upCs.size() + " sign upregulated pluri complexes");
 		System.out.println(pluri_downCs.size() + " sign downregulated pluri complexes");
-		System.out.println(pluri_TFs.size() + " TFs therein");
+		System.out.println(pluri_upTFs.size() + " TFs in upregulated");
 		
 //		System.out.println("freshly retrieved Hac");
 //		Set<String> Hac_proteins = DataQuery.getProteinsWithGO("GO:001657", "9606");
 //		Set<String> Hdac_proteins = DataQuery.getProteinsWithGO("GO:0016575", "9606");
 		
-		Set<String> Hac_proteins = new HashSet<>();
-		System.out.println("ALL histone acetylating proteins");
-		for (String s:Utilities.readFile("mixed_data/H_ac.tsv")) {
-			if (s.startsWith("GENE"))
-					continue;
-			Hac_proteins.add(s.split("\t")[1]);
-		}
-		
 //		Set<String> Hac_proteins = new HashSet<>();
-//		System.out.println("P300/CBP only");
-//		Hac_proteins.add("Q09472"); // EP300
-//		Hac_proteins.add("Q92793"); // CBP
+//		for (String s:Utilities.readFile("mixed_data/H_ac.tsv")) {
+//			if (s.startsWith("GENE"))
+//					continue;
+//			Hac_proteins.add(s.split("\t")[1]);
+//		}
+//		System.out.println("All histone acetylating proteins: " + Hac_proteins.size());
+		
+		Set<String> Hac_proteins = new HashSet<>();
+		System.out.println("P300/CBP only");
+		Hac_proteins.add("Q09472"); // EP300
+		Hac_proteins.add("Q92793"); // CBP
 		
 		System.out.println("GO data retrieved.");
 		
@@ -117,7 +118,7 @@ public class eval_H3K27ac {
 		int d_min = -20;
 		int d_max = 10;
 		System.out.println("d_min / d_max: " + d_min + "-" + d_max);
-		int repetitions = 1000;
+		int repetitions = 10000;
 		System.out.println("#repetitions: " + repetitions);
 		
 		List<Set<String>> pluri_Hac_upCs = new LinkedList<>();
@@ -281,14 +282,14 @@ public class eval_H3K27ac {
 		System.out.println("     " + "  " + p_n + "  " + p_score + "  " + p_hitscore);
 		
 		System.out.println();
-		System.out.println("TFCTFsonly+-+-+-+-+-+-+-+-+-");
+		System.out.println("upTFs only+-+-+-+-+-+-+-+-+-");
 		tot_n = 0;
 		tot_score = 0;
 		tot_hitscore = 0;
 		p_n = 0;
 		p_score = 0;
 		p_hitscore = 0;
-		tfl = new ArrayList<>(pluri_TFs);
+		tfl = new ArrayList<>(pluri_upTFs);
 		for (int rep = 0; rep < repetitions; rep++) {
 			n = 0;
 			score = 0;
