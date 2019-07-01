@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 
 import framework.BindingDataHandler;
+import framework.DataQuery;
 import framework.Utilities;
 
 public class eval_H3K27ac {
@@ -92,25 +93,32 @@ public class eval_H3K27ac {
 		System.out.println(pluri_downCs.size() + " sign downregulated pluri complexes");
 		System.out.println(pluri_TFs.size() + " TFs therein");
 		
+//		System.out.println("freshly retrieved Hac");
 //		Set<String> Hac_proteins = DataQuery.getProteinsWithGO("GO:001657", "9606");
 //		Set<String> Hdac_proteins = DataQuery.getProteinsWithGO("GO:0016575", "9606");
-//		Set<String> Hac_proteins = new HashSet<>();
-//		System.out.println("ALL histone acetylating proteins");
-//		for (String s:Utilities.readFile("mixed_data/H_ac.tsv")) {
-//			if (s.startsWith("GENE"))
-//					continue;
-//			Hac_proteins.add(s.split("\t")[1]);
-//		}
 		
 		Set<String> Hac_proteins = new HashSet<>();
-		System.out.println("P300/CBP only");
-		Hac_proteins.add("Q09472"); // EP300
-		Hac_proteins.add("Q92793"); // CBP
+		System.out.println("ALL histone acetylating proteins");
+		for (String s:Utilities.readFile("mixed_data/H_ac.tsv")) {
+			if (s.startsWith("GENE"))
+					continue;
+			Hac_proteins.add(s.split("\t")[1]);
+		}
+		
+//		Set<String> Hac_proteins = new HashSet<>();
+//		System.out.println("P300/CBP only");
+//		Hac_proteins.add("Q09472"); // EP300
+//		Hac_proteins.add("Q92793"); // CBP
 		
 		System.out.println("GO data retrieved.");
 		
 		boolean at_least_two_TFs = false;
 		System.out.println("at least two TFs: "+ at_least_two_TFs);
+		int d_min = -20;
+		int d_max = 10;
+		System.out.println("d_min / d_max: " + d_min + "-" + d_max);
+		int repetitions = 1000;
+		System.out.println("#repetitions: " + repetitions);
 		
 		List<Set<String>> pluri_Hac_upCs = new LinkedList<>();
 		for (Set<String> complex : pluri_upCs) {
@@ -156,8 +164,7 @@ public class eval_H3K27ac {
 			if (at_least_two_TFs && tfc.size() < 2)
 				continue;
 			samples++;
-			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
-			//System.out.println("Checking " + complex + "/" + tfc + " targetting " + target_regions.size() + " enhancers");
+			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, d_min, d_max, false);
 			n += target_regions.size();
 			if (target_regions.size() > 0) {
 				double sub_score = 0;
@@ -173,7 +180,9 @@ public class eval_H3K27ac {
 		n /= samples;
 		score /= samples;
 		System.out.println(samples + "  " + n + "  " + score + "  " + hitscore);
-		
+		double ref_n = n;
+		double ref_score = score;
+		double ref_hitscore = hitscore;
 		
 		System.out.println();
 		System.out.println("----");
@@ -188,8 +197,7 @@ public class eval_H3K27ac {
 			if (at_least_two_TFs && tfc.size() < 2)
 				continue;
 			samples++;
-			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
-			//System.out.println("Checking " + complex + "/" + tfc + " targetting " + target_regions.size() + " enhancers");
+			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, d_min, d_max, false);
 			n += target_regions.size();
 			if (target_regions.size() > 0) {
 				double sub_score = 0;
@@ -205,7 +213,7 @@ public class eval_H3K27ac {
 		n /= samples;
 		score /= samples;
 		System.out.println(samples + "  " + n + "  " + score + "  " + hitscore);
-		
+
 		
 		// prepare sampling distribution
 		List<Integer> distr = new ArrayList<>();
@@ -216,13 +224,15 @@ public class eval_H3K27ac {
 				continue;
 			distr.add(tfc.size());
 		}
-		int repetitions = 1000;
 		
 		System.out.println();
 		System.out.println("all+-+-+-+-+-+-+-+-+-");
 		double tot_n = 0;
 		double tot_score = 0;
 		double tot_hitscore = 0;
+		double p_n = 0;
+		double p_score = 0;
+		double p_hitscore = 0;
 		List<String> tfl = new ArrayList<>(TFs);
 		for (int rep = 0; rep < repetitions; rep++) {
 			n = 0;
@@ -234,8 +244,7 @@ public class eval_H3K27ac {
 				for (int i = 0; i < s ; i++)
 					tfc.add(tfl.get(i));
 				
-				Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
-				//System.out.println("Checking " + tfc + " targetting " + target_regions.size() + " enhancers");
+				Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, d_min, d_max, false);
 				n += target_regions.size();
 				if (target_regions.size() > 0) {
 					double sub_score = 0;
@@ -253,17 +262,32 @@ public class eval_H3K27ac {
 			tot_n += n;
 			tot_score += score;
 			tot_hitscore += hitscore;
+			
+			// check if better than ref
+			if (n > ref_n)
+				p_n++;
+			if (score > ref_score)
+				p_score++;
+			if(hitscore > ref_hitscore)
+				p_hitscore++;
 		}
 		tot_n /= repetitions;
 		tot_score /= repetitions;
 		tot_hitscore /= repetitions;
 		System.out.println(distr.size() + "  " + tot_n + "  " + tot_score + "  " + tot_hitscore);
+		p_n /= repetitions;
+		p_score /= repetitions;
+		p_hitscore /= repetitions;
+		System.out.println("     " + "  " + p_n + "  " + p_score + "  " + p_hitscore);
 		
 		System.out.println();
 		System.out.println("TFCTFsonly+-+-+-+-+-+-+-+-+-");
 		tot_n = 0;
 		tot_score = 0;
 		tot_hitscore = 0;
+		p_n = 0;
+		p_score = 0;
+		p_hitscore = 0;
 		tfl = new ArrayList<>(pluri_TFs);
 		for (int rep = 0; rep < repetitions; rep++) {
 			n = 0;
@@ -275,8 +299,7 @@ public class eval_H3K27ac {
 				for (int i = 0; i < s ; i++)
 					tfc.add(tfl.get(i));
 				
-				Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, -20, +10, false);
-				//System.out.println("Checking " + tfc + " targetting " + target_regions.size() + " enhancers");
+				Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, d_min, d_max, false);
 				n += target_regions.size();
 				if (target_regions.size() > 0) {
 					double sub_score = 0;
@@ -294,11 +317,23 @@ public class eval_H3K27ac {
 			tot_n += n;
 			tot_score += score;
 			tot_hitscore += hitscore;
+			
+			// check if better than ref
+			if (n > ref_n)
+				p_n++;
+			if (score > ref_score)
+				p_score++;
+			if(hitscore > ref_hitscore)
+				p_hitscore++;
 		}
 		tot_n /= repetitions;
 		tot_score /= repetitions;
 		tot_hitscore /= repetitions;
 		System.out.println(distr.size() + "  " + tot_n + "  " + tot_score + "  " + tot_hitscore);
+		p_n /= repetitions;
+		p_score /= repetitions;
+		p_hitscore /= repetitions;
+		System.out.println("     " + "  " + p_n + "  " + p_score + "  " + p_hitscore);
 	}
 
 }
