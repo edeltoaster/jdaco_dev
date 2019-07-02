@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 
@@ -93,25 +94,13 @@ public class eval_H3K27ac {
 		System.out.println(pluri_upCs.size() + " sign upregulated pluri complexes");
 		System.out.println(pluri_downCs.size() + " sign downregulated pluri complexes");
 		System.out.println(pluri_upTFs.size() + " TFs in upregulated");
-		
-//		System.out.println("freshly retrieved Hac");
-//		Set<String> Hac_proteins = DataQuery.getProteinsWithGO("GO:001657", "9606");
-//		Set<String> Hdac_proteins = DataQuery.getProteinsWithGO("GO:0016575", "9606");
-		
-//		Set<String> Hac_proteins = new HashSet<>();
-//		for (String s:Utilities.readFile("mixed_data/H_ac.tsv")) {
-//			if (s.startsWith("GENE"))
-//					continue;
-//			Hac_proteins.add(s.split("\t")[1]);
-//		}
-//		System.out.println("All histone acetylating proteins: " + Hac_proteins.size());
-		
+
 		Set<String> Hac_proteins = new HashSet<>();
 		System.out.println("P300/CBP only");
 		Hac_proteins.add("Q09472"); // EP300
 		Hac_proteins.add("Q92793"); // CBP
-		
-		System.out.println("GO data retrieved.");
+		String P300 = "Q09472"; // EP300
+		String CBP ="Q92793"; // CBP
 		
 		boolean at_least_two_TFs = false;
 		System.out.println("at least two TFs: "+ at_least_two_TFs);
@@ -122,14 +111,26 @@ public class eval_H3K27ac {
 		System.out.println("#repetitions: " + repetitions);
 		
 		List<Set<String>> pluri_Hac_upCs = new LinkedList<>();
+		List<Set<String>> pluri_P300_upCs = new LinkedList<>();
+		List<Set<String>> pluri_CBP_upCs = new LinkedList<>();
+		List<Set<String>> pluri_both_upCs = new LinkedList<>();
 		for (Set<String> complex : pluri_upCs) {
 			Set<String> ov = new HashSet<>(complex);
 			ov.retainAll(Hac_proteins);
 			if (ov.size() > 0) {
 				pluri_Hac_upCs.add(complex);
+				if (ov.contains(P300) && ov.contains(CBP))
+					pluri_both_upCs.add(complex);
+				if (ov.contains(P300))
+					pluri_P300_upCs.add(complex);
+				else
+					pluri_CBP_upCs.add(complex);
 			}
 		}
 		System.out.println(pluri_Hac_upCs.size() + " Hac complexes in up");
+		System.out.println(pluri_P300_upCs.size() + " P300 complexes in up");
+		System.out.println(pluri_CBP_upCs.size() + " CBP complexes in up");
+		System.out.println(pluri_both_upCs.size() + " P300+CBP complexes in up");
 		
 		List<Set<String>> pluri_Hac_downCs = new LinkedList<>();
 		for (Set<String> complex : pluri_downCs) {
@@ -184,6 +185,7 @@ public class eval_H3K27ac {
 		double ref_n = n;
 		double ref_score = score;
 		double ref_hitscore = hitscore;
+		
 		
 		System.out.println();
 		System.out.println("----");
@@ -335,6 +337,81 @@ public class eval_H3K27ac {
 		p_score /= repetitions;
 		p_hitscore /= repetitions;
 		System.out.println("     " + "  " + p_n + "  " + p_score + "  " + p_hitscore);
+		
+		
+		/*
+		 *  detailed output
+		 */
+		
+		Map<String, String> up_to_gene = DataQuery.getUniprotToGeneNameMap(DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
+		
+		System.out.println();
+		System.out.println("P300++++");
+		n = 0;
+		samples = 0;
+		score = 0;
+		hitscore = 0;
+		for (Set<String> complex : pluri_P300_upCs) {
+			Set<String> tfc = new HashSet<>(complex);
+			tfc.retainAll(TFs);
+			
+			if (at_least_two_TFs && tfc.size() < 2)
+				continue;
+			samples++;
+			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, d_min, d_max, false);
+			String complex_string = String.join("/", complex);
+			String complex_genes = String.join("/", complex.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
+			String targets = String.join(",", target_regions);
+			System.out.println(complex_genes + " " + complex_string + " " +  target_regions.size() + " " + targets);
+			n += target_regions.size();
+			if (target_regions.size() > 0) {
+				double sub_score = 0;
+				for (String reg : target_regions) {
+					sub_score += pluri.get(reg);
+					hitscore += pluri.get(reg);
+				}
+				sub_score /= target_regions.size();
+				score += sub_score;
+			}
+		}
+		hitscore /= n;
+		n /= samples;
+		score /= samples;
+		System.out.println(samples + "  " + n + "  " + score + "  " + hitscore);
+		
+		System.out.println();
+		System.out.println("CBP++++");
+		n = 0;
+		samples = 0;
+		score = 0;
+		hitscore = 0;
+		for (Set<String> complex : pluri_CBP_upCs) {
+			Set<String> tfc = new HashSet<>(complex);
+			tfc.retainAll(TFs);
+			
+			if (at_least_two_TFs && tfc.size() < 2)
+				continue;
+			samples++;
+			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, d_min, d_max, false);
+			String complex_string = String.join("/", complex);
+			String complex_genes = String.join("/", complex.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
+			String targets = String.join(",", target_regions);
+			System.out.println(complex_genes + " " + complex_string + " " +  target_regions.size() + " " + targets);
+			n += target_regions.size();
+			if (target_regions.size() > 0) {
+				double sub_score = 0;
+				for (String reg : target_regions) {
+					sub_score += pluri.get(reg);
+					hitscore += pluri.get(reg);
+				}
+				sub_score /= target_regions.size();
+				score += sub_score;
+			}
+		}
+		hitscore /= n;
+		n /= samples;
+		score /= samples;
+		System.out.println(samples + "  " + n + "  " + score + "  " + hitscore);
 	}
 
 }
