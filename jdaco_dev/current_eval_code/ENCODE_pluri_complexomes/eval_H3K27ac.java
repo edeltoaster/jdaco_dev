@@ -344,6 +344,11 @@ public class eval_H3K27ac {
 		 */
 		
 		Map<String, String> up_to_gene = DataQuery.getUniprotToGeneNameMap(DataQuery.getEnsemblOrganismDatabaseFromName("homo sapiens"));
+		Set<String> P300_targets = new HashSet<>();
+		Set<String> CBP_targets = new HashSet<>();
+		Set<String> all_targets = new HashSet<>();
+		Map<String, List<String>> region_P300_map = new HashMap<>();
+		Map<String, List<String>> region_CBP_map = new HashMap<>();
 		
 		System.out.println();
 		System.out.println("P300++++");
@@ -359,10 +364,18 @@ public class eval_H3K27ac {
 				continue;
 			samples++;
 			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, d_min, d_max, false);
+			P300_targets.addAll(target_regions);
 			String complex_string = String.join("/", complex);
 			String complex_genes = String.join("/", complex.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
 			String targets = String.join(",", target_regions);
+			
 			System.out.println(complex_genes + " " + complex_string + " " +  target_regions.size() + " " + targets);
+			for (String target : target_regions) {
+				if (!region_P300_map.containsKey(target))
+					region_P300_map.put(target, new LinkedList<>());
+				region_P300_map.get(target).add(complex_genes);
+			}
+			
 			n += target_regions.size();
 			if (target_regions.size() > 0) {
 				double sub_score = 0;
@@ -393,10 +406,18 @@ public class eval_H3K27ac {
 				continue;
 			samples++;
 			Set<String> target_regions = bdh.getAdjacencyPossibilities(tfc, d_min, d_max, false);
+			CBP_targets.addAll(target_regions);
 			String complex_string = String.join("/", complex);
 			String complex_genes = String.join("/", complex.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
 			String targets = String.join(",", target_regions);
+			
 			System.out.println(complex_genes + " " + complex_string + " " +  target_regions.size() + " " + targets);
+			for (String target : target_regions) {
+				if (!region_CBP_map.containsKey(target))
+					region_CBP_map.put(target, new LinkedList<>());
+				region_CBP_map.get(target).add(complex_genes);
+			}
+			
 			n += target_regions.size();
 			if (target_regions.size() > 0) {
 				double sub_score = 0;
@@ -412,6 +433,34 @@ public class eval_H3K27ac {
 		n /= samples;
 		score /= samples;
 		System.out.println(samples + "  " + n + "  " + score + "  " + hitscore);
+		
+		all_targets.addAll(P300_targets);
+		all_targets.addAll(CBP_targets);
+		double pluri_region_size = pluri_regions.size();
+		System.out.println();
+		System.out.println("Enhancer targets:");
+		System.out.println("P300 targets: " + P300_targets.size() + " covering " + P300_targets.size()/pluri_region_size);
+		System.out.println("CBP targets: " + CBP_targets.size() + " covering " + CBP_targets.size()/pluri_region_size);
+		System.out.println("joined targets: " + all_targets.size() + " covering " + all_targets.size()/pluri_region_size);
+		
+		List<String> to_write = new LinkedList<>();
+		for (String target : all_targets) {
+			String P300_size = "0";
+			String P300_complexes = "/";
+			if (region_P300_map.containsKey(target)) {
+				P300_size = Integer.toString(region_P300_map.get(target).size());
+				P300_complexes = String.join(",", region_P300_map.get(target));
+			}
+			String CBP_size = "0";
+			String CBP_complexes = "/";
+			if (region_CBP_map.containsKey(target)) {
+				CBP_size = Integer.toString(region_CBP_map.get(target).size());
+				CBP_complexes = String.join(",", region_CBP_map.get(target));
+			}
+			
+			to_write.add(target + " " + P300_size + " " + CBP_size + " " + P300_complexes + " " + CBP_complexes);
+		}
+		Utilities.writeEntries(to_write, "/Users/tho/Desktop/region_complex_mapping.txt");
 	}
 
 }
