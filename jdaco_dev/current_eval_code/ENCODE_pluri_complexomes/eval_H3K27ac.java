@@ -367,9 +367,10 @@ public class eval_H3K27ac {
 			P300_targets.addAll(target_regions);
 			String complex_string = String.join("/", complex);
 			String complex_genes = String.join("/", complex.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
+			String tfc_string = String.join("/", tfc.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
 			String targets = String.join(",", target_regions);
 			
-			System.out.println(complex_genes + " " + complex_string + " " +  target_regions.size() + " " + targets);
+			System.out.println(complex_genes + " " + tfc_string + " " + complex_string + " " +  target_regions.size() + " " + targets);
 			for (String target : target_regions) {
 				if (!region_P300_map.containsKey(target))
 					region_P300_map.put(target, new LinkedList<>());
@@ -409,9 +410,10 @@ public class eval_H3K27ac {
 			CBP_targets.addAll(target_regions);
 			String complex_string = String.join("/", complex);
 			String complex_genes = String.join("/", complex.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
+			String tfc_string = String.join("/", tfc.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
 			String targets = String.join(",", target_regions);
 			
-			System.out.println(complex_genes + " " + complex_string + " " +  target_regions.size() + " " + targets);
+			System.out.println(complex_genes + " " + tfc_string + " " + complex_string + " " +  target_regions.size() + " " + targets);
 			for (String target : target_regions) {
 				if (!region_CBP_map.containsKey(target))
 					region_CBP_map.put(target, new LinkedList<>());
