@@ -104,7 +104,7 @@ public class eval_EP300 {
 		int d_min = -20;
 		int d_max = 10;
 		System.out.println("d_min / d_max: " + d_min + "-" + d_max);
-		int repetitions = 10000;
+		int repetitions = 1000;
 		System.out.println("#repetitions: " + repetitions);
 		
 		List<Set<String>> pluri_Hac_upCs = new LinkedList<>();
@@ -350,9 +350,9 @@ public class eval_EP300 {
 			String complex_string = String.join("/", complex);
 			String complex_genes = String.join("/", complex.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
 			String tfc_string = String.join("/", tfc.stream().map(p -> up_to_gene.getOrDefault(p, p)).collect(Collectors.toSet()));
-			String targets = String.join(",", target_regions);
+			//String targets = String.join(",", target_regions);
 			
-			System.out.println(complex_genes + " " + tfc_string + " " + complex_string + " " +  target_regions.size() + " " + targets);
+			System.out.println(complex_genes + " " + tfc_string + " " + complex_string + " " +  target_regions.size());// + " " + targets);
 			for (String target : target_regions) {
 				if (!region_P300_map.containsKey(target))
 					region_P300_map.put(target, new LinkedList<>());
