@@ -1423,6 +1423,7 @@ public class DataQuery {
 			URL server = new URL("https://www.ebi.ac.uk/QuickGO/services/annotation/downloadSearch?geneProductType=protein&geneProductSubset=Swiss-Prot&"
 					+ "goId=" + GO_id + "&goUsage=descendants&goUsageRelationships=is_a%2C%20part_of%2C%20occurs_in&"
 					+ "taxonId=" + taxon + "&taxonUsage=descendants");
+			
 			HttpURLConnection connection = (HttpURLConnection) server.openConnection();
 			
 			// adapted from EBI API generator
@@ -1490,6 +1491,17 @@ public class DataQuery {
 	 */
 	public static Set<String> getProteinsWithGO(String GO_id, String taxon) {
 		return getProteinsWithGO(GO_id, taxon, true, false, false);
+	}
+	
+	/**
+	 * Queries EBI QuickGO to get the genes of all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon,
+	 * automatically includes also the ones with evidence code IEA
+	 * @param GO_id
+	 * @param taxon
+	 * @return
+	 */
+	public static Set<String> getGenesWithGO(String GO_id, String taxon) {
+		return getProteinsWithGO(GO_id, taxon, true, false, true);
 	}
 	
 	
