@@ -1500,6 +1500,17 @@ public class DataQuery {
 	 * @param taxon
 	 * @return
 	 */
+	public static Set<String> getGenesWithGO(String GO_id, String taxon, boolean include_IEA, boolean only_experimental) {
+		return getProteinsWithGO(GO_id, taxon, include_IEA, only_experimental, true);
+	}
+	
+	/**
+	 * Queries EBI QuickGO to get the genes of all UniProt proteins that are annotated with or descendants of a certain GO_id of an organism with certain taxon,
+	 * automatically includes also the ones with evidence code IEA
+	 * @param GO_id
+	 * @param taxon
+	 * @return
+	 */
 	public static Set<String> getGenesWithGO(String GO_id, String taxon) {
 		return getProteinsWithGO(GO_id, taxon, true, false, true);
 	}
