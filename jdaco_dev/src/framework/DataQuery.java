@@ -261,7 +261,7 @@ public class DataQuery {
 			connection = DriverManager.getConnection("jdbc:mysql://" + ensembl_mysql  + "?autoReconnect=true&useSSL=false", "anonymous", "");
 			Statement st = connection.createStatement();
 			st.setQueryTimeout(timeout);
-			ResultSet rs = st.executeQuery("show databases like "+query);
+			ResultSet rs = st.executeQuery("show databases like " + query);
 			
 			// take newest version
 			if (DataQuery.specific_ensembl_release.equals("")) {
@@ -300,6 +300,60 @@ public class DataQuery {
 		}
 		
 		DataQuery.cache_ensembl_db.put(organism, db);
+		
+		return db;
+	}
+	
+	/***
+	 * Detects most recent Ensembl Compara database version
+	 * @param organism
+	 * @return Ensembl database name as string
+	 */
+	public static String getEnsemblComparaDatabase() {
+		
+		String db = "";
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jdbc:mysql://" + ensembl_mysql  + "?autoReconnect=true&useSSL=false", "anonymous", "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			ResultSet rs = st.executeQuery("show databases like " + "'ensembl_compara\\_%'");
+			
+			// take newest version
+			if (DataQuery.specific_ensembl_release.equals("")) {
+				while (rs.next()) {
+					db = rs.getString(1); // sorted by name
+				}
+			} else { // take a specific version
+				while (rs.next()) {
+					db = rs.getString(1); // sorted by name
+					String version = db.split("_")[db.split("_").length-2];
+					if (version.equals(DataQuery.specific_ensembl_release))
+						break; // db will be the right one or the newest
+				}
+			}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ENSEMBL");
+			
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to infer Compara database from ENSEMBL in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			DataQuery.switchServer();
+			
+			return getEnsemblComparaDatabase();
+			
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+				// no output necessary
+			}
+		}
 		
 		return db;
 	}
@@ -659,6 +713,38 @@ public class DataQuery {
 		DataQuery.cache_refseq.put(organism_core_database, refseq_annotated_transcripts);
 		
 		return refseq_annotated_transcripts;
+	}
+	
+	/**
+	 * Queries Ensembl for association of XXX with AA sequence
+	 * @param organism_core_database
+	 */
+	public static List<String[]> get(String organism_core_database) {
+// TODO: implement protein sequence retrieval
+		Connection connection = null;
+		String comp_db = DataQuery.getEnsemblComparaDatabase();
+		String organism = organism_core_database.split("_core")[0];
+		try {
+			connection = DriverManager.getConnection("jdbc:mysql://" + ensembl_mysql + "/" + comp_db + "?autoReconnect=true&useSSL=false", "anonymous", "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			ResultSet rs = st.executeQuery("SELECT seq_member.stable_id, sequence.sequence " + 
+					"FROM seq_member, sequence, genome_db " + 
+					"WHERE genome_db.name = '" + organism +  "' AND seq_member.source_name = 'ENSEMBLPEP' AND genome_db.genome_db_id = seq_member.genome_db_id AND seq_member.sequence_id = sequence.sequence_id");
+			while (rs.next()) {
+				System.out.println(rs.getString(1) + " " + rs.getString(2));
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace(); // TODO: remove and add proper handling + caching
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
+		}
+		
+		return null;
 	}
 	
 	/**
