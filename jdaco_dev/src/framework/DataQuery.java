@@ -76,7 +76,7 @@ public class DataQuery {
 	private static Map<String, Set<String>> cache_allosome_proteins = new HashMap<>();
 	private static Map<String, Map<String, String>> cache_ensembl_prot_seq = new HashMap<>();
 	private static String uniprot_release;
-	
+	private static String ELM_release;
 	
 	/**
 	 * Queries UniProt to find organism name from a given protein
@@ -2368,6 +2368,8 @@ public class DataQuery {
 			
 		}
 		
+		// TODO: add ELM data if wanted
+		
 		// to list
 		for (String domain:iddi_ddis.keySet()) {
 			known_DDIs.put(domain, new ArrayList<>(iddi_ddis.get(domain)));
@@ -2759,6 +2761,146 @@ public class DataQuery {
 		}
 
 		return ddis;
+	}
+	
+	
+	/*
+	 * ELM data functions
+	 */
+	
+	/**
+	 * Returns release of ELM data
+	 */
+	public static String getELMRelease() {
+		if (DataQuery.ELM_release == null)
+			DataQuery.getELMMotifs();
+		
+		return DataQuery.ELM_release;
+	}
+	
+	/**
+	 * Retrieval of ELM motif annotations
+	 * @return map of ELM motif name to regular expression defining the motif
+	 */
+	public static HashMap<String, String> getELMMotifs() {
+		
+		BufferedReader datastream = null;
+		HashMap<String, String> motif_data = new HashMap<>();
+		try {
+			URL server = new URL("http://elm.eu.org/elms/elms_index.tsv");
+			URLConnection connection = server.openConnection();
+			
+			// read
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String line;
+			
+			String[] temp;
+			while ( (line = datastream.readLine()) != null ) {
+				
+				// catch special cases
+				if (line.startsWith("#ELM_Classes_Download_Version:")) {
+					temp = line.split("\\s+");
+					DataQuery.ELM_release = temp[1];
+					continue;
+				}
+				else if (line.startsWith("#") || line.startsWith("\"Accession\""))
+					continue;
+				
+				// std data parsing
+				temp = line.split("\\t");
+				String motif = temp[0].substring(1, temp[0].length()-1);
+				String regex = temp[4].substring(1, temp[4].length()-1);
+				motif_data.put(motif, regex);
+			}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ELM");
+			
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get motif data from ELM in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+			
+			return getELMMotifs();
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
+		}
+
+		return motif_data;
+	}
+	
+	/**
+	 * Retrieval of ELM interaction data
+	 * @return map of ELM motif name to Pfam interaction partners
+	 */
+	public static HashMap<String, HashSet<String>> getELMMotifDomainInteractions() {
+		
+		BufferedReader datastream = null;
+		HashMap<String, HashSet<String>> motif_domain_interactions = new HashMap<>();
+		try {
+			URL server = new URL("http://elm.eu.org/infos/browse_elm_interactiondomains.tsv");
+			URLConnection connection = server.openConnection();
+			
+			// read
+			datastream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String line;
+			
+			String[] temp;
+			while ( (line = datastream.readLine()) != null ) {
+				
+				// catch special cases
+				if (line.startsWith("\"ELM identifier\""))
+					continue;
+				
+				// std data parsing
+				temp = line.split("\\t");
+				
+				// fix for individual formation errors in download file, no data lost
+				if (temp.length != 4)
+					continue;
+				
+				String motif = temp[0].substring(1, temp[0].length()-1);
+				String domain = temp[1].substring(1, temp[1].length()-1);
+				
+				// filter non-Pfam domain annotations, e.g. InterPro
+				if (!domain.startsWith("PF"))
+					continue;
+				
+				System.out.println(motif + " " + domain);
+				if (!motif_domain_interactions.containsKey(motif))
+					motif_domain_interactions.put(motif, new HashSet<String>());
+				
+				motif_domain_interactions.get(motif).add(domain);
+			}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ELM");
+			
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get interaction data from ELM in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+			
+			return getELMMotifDomainInteractions();
+			
+		} finally {
+			try {
+				datastream.close();
+			} catch (Exception e) {
+			}
+		}
+
+		return motif_domain_interactions;
 	}
 	
 	/*
