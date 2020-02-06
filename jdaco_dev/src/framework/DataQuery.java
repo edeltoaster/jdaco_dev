@@ -74,6 +74,7 @@ public class DataQuery {
 	private static Map<String, String> cache_uniprot_HGNC;
 	private static Map<String, String> uniprot_sec_accs;
 	private static Map<String, Set<String>> cache_allosome_proteins = new HashMap<>();
+	private static Map<String, Map<String, String>> cache_ensembl_prot_seq = new HashMap<>();
 	private static String uniprot_release;
 	
 	
@@ -390,7 +391,7 @@ public class DataQuery {
 	/**
 	 * Queries Ensembl for association of UniProt Accs. to transcripts and genes
 	 * @param organism_core_database
-	 * @returnreturn list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
+	 * @return list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
 	 */
 	public static List<String[]> getGenesTranscriptsProteins(String organism_core_database) {
 		return DataQuery.getGenesTranscriptsProteinsSingleQuery(organism_core_database); // defines which implementation is used
@@ -399,7 +400,7 @@ public class DataQuery {
 	/**
 	 * Queries Ensembl for association of UniProt Accs. to transcripts and genes
 	 * @param organism_core_database
-	 * @returnreturn list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
+	 * @return list of arrays {GENE, TRANSCRIPT, UNIPROT-ACC}
 	 */
 	public static List<String[]> getGenesTranscriptsProteinsSingleQuery(String organism_core_database) {
 		
@@ -668,7 +669,7 @@ public class DataQuery {
 	/**
 	 * Queries Ensembl for transcripts with RefSeq mRNA id
 	 * @param organism_core_database
-	 * @returm ENST->RefSeq
+	 * @return ENST->RefSeq
 	 */
 	public static Map<String, String> getTranscriptsWithRefSeq(String organism_core_database) {
 		Map<String, String> refseq_annotated_transcripts = new HashMap<>();
@@ -716,13 +717,63 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Queries Ensembl for association of XXX with AA sequence
+	 * Queries Ensembl for association Ensembl proteins and transcripts
 	 * @param organism_core_database
 	 */
-	public static List<String[]> get(String organism_core_database) {
-// TODO: implement protein sequence retrieval
+	public static Map<String, String> getEnsProteinTranscript(String organism_core_database) {
+		
+		// no caching needed since only called by a cached function
+		
+		Map<String, String> associations = new HashMap<>();
 		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jdbc:mysql://" + ensembl_mysql + "/" + organism_core_database + "?autoReconnect=true&useSSL=false", "anonymous", "");
+			Statement st = connection.createStatement();
+			st.setQueryTimeout(timeout);
+			ResultSet rs = st.executeQuery("SELECT transcript.stable_id, translation.stable_id FROM transcript, translation WHERE transcript.canonical_translation_id = translation.translation_id");
+			while (rs.next()) {
+				associations.put(rs.getString(2), rs.getString(1)); // one to one mapping tested as truthful
+			}
+			
+		} catch (Exception e) {
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ENSEMBL");
+			//e.printStackTrace();
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get transcript/Ens protein data from ENSEMBL in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			DataQuery.switchServer();
+			
+			return getEnsProteinTranscript(organism_core_database);
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+			}
+		}
+		
+		return associations;
+	}
+	
+	/**
+	 * Queries Ensembl for association of transcripts with the subsequent protein sequences
+	 * @param organism_core_database
+	 */
+	public static Map<String, String> getTranscriptsProteinSeq(String organism_core_database) {
+		
+		// return directly if in cache
+		if (DataQuery.cache_ensembl_prot_seq.containsKey(organism_core_database))
+			return DataQuery.cache_ensembl_prot_seq.get(organism_core_database);
+		
+		Connection connection = null;
+		
 		String comp_db = DataQuery.getEnsemblComparaDatabase();
+		Map<String, String> prot_trans_association = DataQuery.getEnsProteinTranscript(organism_core_database);
+		Map<String, String> trans_prot_seq = new HashMap<>();
+		
 		String organism = organism_core_database.split("_core")[0];
 		try {
 			connection = DriverManager.getConnection("jdbc:mysql://" + ensembl_mysql + "/" + comp_db + "?autoReconnect=true&useSSL=false", "anonymous", "");
@@ -732,11 +783,25 @@ public class DataQuery {
 					"FROM seq_member, sequence, genome_db " + 
 					"WHERE genome_db.name = '" + organism +  "' AND seq_member.source_name = 'ENSEMBLPEP' AND genome_db.genome_db_id = seq_member.genome_db_id AND seq_member.sequence_id = sequence.sequence_id");
 			while (rs.next()) {
-				System.out.println(rs.getString(1) + " " + rs.getString(2));
+				String prot_id = rs.getString(1);
+				String prot_seq = rs.getString(2);
+				if (prot_trans_association.containsKey(prot_id))
+					trans_prot_seq.put(prot_trans_association.get(prot_id), prot_seq);
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace(); // TODO: remove and add proper handling + caching
+			if (DataQuery.retries == 10)
+				terminateRetrieval("ENSEMBL");
+			//e.printStackTrace();
+			err_out.println("Attempting " + (++DataQuery.retries) +". retry to get protein sequence data from ENSEMBL in 10 seconds ..." );
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+			}
+			
+			DataQuery.switchServer();
+			
+			return getTranscriptsProteinSeq(organism_core_database);
 		} finally {
 			try {
 				connection.close();
@@ -744,7 +809,10 @@ public class DataQuery {
 			}
 		}
 		
-		return null;
+		// store in cache
+		DataQuery.cache_ensembl_prot_seq.put(organism_core_database, trans_prot_seq);
+		
+		return trans_prot_seq;
 	}
 	
 	/**
