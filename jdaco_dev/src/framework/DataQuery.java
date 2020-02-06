@@ -25,11 +25,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -60,6 +63,7 @@ public class DataQuery {
 	private static Map<String, List<String[]>> cache_genestransprots = new HashMap<>();
 	private static Map<String, Map<String, String>> cache_isoformtranscr = new HashMap<>();
 	private static Map<String,Map<String, List<String>>> cache_transcrdom = new HashMap<>();
+	private static Map<String,Map<String, List<String>>> cache_transcr_ELMmotifs = new HashMap<>();
 	private static Map<String, Set<String>> cache_decay_transcripts = new HashMap<>();
 	private static Map<String, Map<String, List<String>>> cache_ensembl_proteins = new HashMap<>();
 	private static Map<String, Map<String, String>> cache_ensembl_names = new HashMap<>();
@@ -554,7 +558,7 @@ public class DataQuery {
 	/**
 	 * Queries Ensembl for association of Ensembl proteins to UniProt Accs., returns all accs per case
 	 * @param organism_core_database
-	 * @returnreturn map Ensembl -> UniProt accs
+	 * @return map Ensembl -> UniProt accs
 	 */
 	public static Map<String, List<String>> getEnsemblToAllUniprotProteins(String organism_core_database) {
 		
@@ -759,7 +763,7 @@ public class DataQuery {
 	}
 	
 	/**
-	 * Queries Ensembl for association of transcripts with the subsequent protein sequences
+	 * Queries Ensembl for association of transcripts with the subsequent protein sequences, filters to those in UniProt
 	 * @param organism_core_database
 	 */
 	public static Map<String, String> getTranscriptsProteinSeq(String organism_core_database) {
@@ -772,6 +776,7 @@ public class DataQuery {
 		
 		String comp_db = DataQuery.getEnsemblComparaDatabase();
 		Map<String, String> prot_trans_association = DataQuery.getEnsProteinTranscript(organism_core_database);
+		Set<String> relevant_ens_proteins = DataQuery.getEnsemblToAllUniprotProteins(organism_core_database).keySet();
 		Map<String, String> trans_prot_seq = new HashMap<>();
 		
 		String organism = organism_core_database.split("_core")[0];
@@ -783,7 +788,13 @@ public class DataQuery {
 					"FROM seq_member, sequence, genome_db " + 
 					"WHERE genome_db.name = '" + organism +  "' AND seq_member.source_name = 'ENSEMBLPEP' AND genome_db.genome_db_id = seq_member.genome_db_id AND seq_member.sequence_id = sequence.sequence_id");
 			while (rs.next()) {
+				
+				// filter to proteins that are also associated with UniProt accessions
 				String prot_id = rs.getString(1);
+				if (!relevant_ens_proteins.contains(prot_id))
+					continue;
+				
+				// store Ensembl transcript > protein sequence
 				String prot_seq = rs.getString(2);
 				if (prot_trans_association.containsKey(prot_id))
 					trans_prot_seq.put(prot_trans_association.get(prot_id), prot_seq);
@@ -813,6 +824,46 @@ public class DataQuery {
 		DataQuery.cache_ensembl_prot_seq.put(organism_core_database, trans_prot_seq);
 		
 		return trans_prot_seq;
+	}
+	
+	/**
+	 * Queries Ensembl and ELM for ELM motif annotation of transcripts (only occurrence, no positional data)
+	 * @param organism_core_database
+	 * @return map of Ensembl transcripts to ELM motifs
+	 */
+	public static Map<String, List<String>> getTranscriptsELMMotifs(String organism_core_database) {
+		
+		// return directly if in cache
+		if (DataQuery.cache_transcr_ELMmotifs.containsKey(organism_core_database))
+			return DataQuery.cache_transcr_ELMmotifs.get(organism_core_database);
+		
+		Map<String, String> ELM_motifs = DataQuery.getELMMotifs();
+		Map<String, String> trans_protseq = DataQuery.getTranscriptsProteinSeq(organism_core_database);
+		
+		Map <String, List<String>> transcript_ELM_mapping = new HashMap<>();
+		
+		for (Entry<String, String> ELM_entry: ELM_motifs.entrySet()) {
+			
+			Pattern p = Pattern.compile(ELM_entry.getValue());
+			String motif = ELM_entry.getKey();
+			
+			for (Entry<String, String> seq_entry : trans_protseq.entrySet()) {
+				
+				Matcher m = p.matcher(seq_entry.getValue());
+				String transcript = seq_entry.getKey();
+				while (m.find()) {
+					if (!transcript_ELM_mapping.containsKey(transcript))
+						transcript_ELM_mapping.put(transcript, new LinkedList<String>());
+					transcript_ELM_mapping.get(transcript).add(motif);
+					// m.start() would give position, may be of interest
+				}
+			}
+		}
+		
+		// store in cache
+		DataQuery.cache_transcr_ELMmotifs.put(organism_core_database, transcript_ELM_mapping);
+		
+		return transcript_ELM_mapping;
 	}
 	
 	/**
