@@ -57,7 +57,7 @@ public class PPIXpress {
 		System.out.println("	-g : only use gene abundances (default: transcript abundance)");
 		System.out.println("	-t=[threshold] : only take transcripts/genes with an expression above [threshold] into account (default: 1.0)");
 		System.out.println("	-tp=[percentile] : only take transcripts/genes with an expression above the [percentile]-th percentile into account (default: overrides option above)");
-		System.out.println("	-elm : include ELM motifs and interactions");
+		System.out.println("	-elm : include ELM motifs and interactions (default: no)");
 		System.out.println("	-n : normalize counts of transcripts by the length of the transcript (only for major_transcript file, applied after threshold)");
 		System.out.println("	-x : do not remove proteins from the network if their coding transcript is subject to degradation (default: remove if tagged as 'nonsense-mediated decay' or 'non-stop decay')");
 		System.out.println("	-d : also output underlying domain-domain interaction network(s) (default: no)");

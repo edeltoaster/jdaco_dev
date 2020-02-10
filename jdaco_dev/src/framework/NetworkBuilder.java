@@ -102,6 +102,7 @@ public class NetworkBuilder {
 					this.transcript_to_domains.get(entry.getKey()).addAll(entry.getValue());
 			}
 		}
+		
 	}
 	
 	/**
@@ -120,7 +121,7 @@ public class NetworkBuilder {
 					knownDDIs.get(entry.getKey()).addAll(entry.getValue());
 			}
 		}
-
+		
 		return knownDDIs;
 	}
 	
@@ -408,10 +409,10 @@ public class NetworkBuilder {
 		
 		// cleanup domains without interactions
 		List<String> removable_domains = new LinkedList<>();
-		for (String domain:domain_to_protein.keySet())
+		for (String domain:domain_to_protein.keySet()) 
 			if (!ddis.containsKey(domain))
 				removable_domains.add(domain);
-			
+
 		for (String domain:removable_domains) {
 			// remove from protein -> domains
 			protein_to_domains.get(domain_to_protein.get(domain)).remove(domain);

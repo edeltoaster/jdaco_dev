@@ -2910,7 +2910,7 @@ public class DataQuery {
 				
 				// std data parsing
 				temp = line.split("\\t");
-				String motif = temp[0].substring(1, temp[0].length()-1);
+				String motif = temp[1].substring(1, temp[1].length()-1);
 				String regex = temp[4].substring(1, temp[4].length()-1);
 				motif_data.put(motif, regex);
 			}
