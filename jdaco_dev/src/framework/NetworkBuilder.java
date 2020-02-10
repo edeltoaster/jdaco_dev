@@ -16,6 +16,7 @@ public class NetworkBuilder {
 	private PPIN original_ppi;
 	private String organism_database;
 	private boolean isoform_based;
+	private boolean include_ELM_data;
 	private Map<String, Set<String>> holistic_protein_domain_composition_map;
 	private Map<String, List<String>> holistic_ddis = new HashMap<>();
 	private HashMap<String, String> holistic_domain_to_protein = new HashMap<>();
@@ -29,7 +30,7 @@ public class NetworkBuilder {
 	 * @param isoform_based
 	 */
 	public NetworkBuilder(PPIN ppi) {
-		buildHolisticNetwork(ppi, true);
+		buildHolisticNetwork(ppi, true, false);
 	}
 	
 	/**
@@ -38,7 +39,7 @@ public class NetworkBuilder {
 	 * @param isoform_based
 	 */
 	public NetworkBuilder(PPIN ppi, boolean isoform_based) {
-		buildHolisticNetwork(ppi, isoform_based);
+		buildHolisticNetwork(ppi, isoform_based, false);
 	}
 	
 	/**
@@ -46,18 +47,24 @@ public class NetworkBuilder {
 	 * @param ppi
 	 * @param isoform_based
 	 */
-	private void buildHolisticNetwork(PPIN ppi, boolean isoform_based) {
+	private void buildHolisticNetwork(PPIN ppi, boolean isoform_based, boolean include_ELM_data) {
 		Set<String> proteins = ppi.getProteins();
 		this.original_ppi = ppi;
 		
 		// retrieve annotational data, also for later usage
 		this.organism_database = DataQuery.getEnsemblOrganismDatabaseFromProteins(proteins);
+		
+		// TODO: include ELM data 1
 		this.isoform_based = isoform_based;
 		if (this.isoform_based)
 			this.holistic_protein_domain_composition_map = DataQuery.getIsoformProteinDomainMap(this.organism_database);
 		else
 			this.holistic_protein_domain_composition_map = DataQuery.getHolisticProteinDomainMap(this.organism_database);
+		
+		// TODO: include ELM data 2
+		this.include_ELM_data = include_ELM_data;
 		this.transcript_to_domains = DataQuery.getTranscriptsDomains(this.organism_database);
+		
 		for (String[] naming:DataQuery.getGenesTranscriptsProteins(this.organism_database)) {
 			String transcript = naming[1];
 			String protein = naming[2];
@@ -90,6 +97,12 @@ public class NetworkBuilder {
 		
 		// determine interactions found in the holistic network
 		Map<String, List<String>> knownDDIs = DataQuery.getKnownDDIs();
+		
+		// TODO: add ELM data 2
+		if (this.include_ELM_data) {
+			
+		}
+		
 		for (String domain_name:domain_map.keySet()) {
 			if (!knownDDIs.containsKey(domain_name))
 				continue;

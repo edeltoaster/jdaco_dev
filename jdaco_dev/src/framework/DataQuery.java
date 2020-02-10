@@ -1403,7 +1403,7 @@ public class DataQuery {
 	/**
 	 * Builds a map of UniProt -> all domain types found in transcripts
 	 * @param organism_core_database
-	 * @returnreturn map of UniProt -> all domain types found in transcripts
+	 * @return map of UniProt -> all domain types found in transcripts
 	 */
 	public static Map<String, Set<String>> getHolisticProteinDomainMap(String organism_core_database) {
 		Map<String, List<String>> transcript_domain_mapping = getTranscriptsDomains(organism_core_database);
@@ -1428,6 +1428,33 @@ public class DataQuery {
 	}
 	
 	/**
+	 * Builds a map of UniProt -> all ELM motifs found in transcripts
+	 * @param organism_core_database
+	 * @return map of UniProt -> all ELM motifs found in transcripts
+	 */
+	public static Map<String, Set<String>> getHolisticProteinELMMap(String organism_core_database) {
+		Map<String, List<String>> transcript_motif_mapping = getTranscriptsELMMotifs(organism_core_database);
+		List<String[]> associations = getGenesTranscriptsProteins(organism_core_database);
+		Map<String, Set<String>> holistic_protein_motif_mapping = new HashMap<>();
+		for (String[] array:associations) {
+			String protein = array[2];
+			String transcript = array[1];
+			
+			if (!holistic_protein_motif_mapping.containsKey(protein))
+				holistic_protein_motif_mapping.put(protein, new HashSet<String>());
+			
+			if (transcript_motif_mapping.containsKey(transcript)) {
+				holistic_protein_motif_mapping.get(protein).addAll(transcript_motif_mapping.get(transcript));
+			} else {
+				holistic_protein_motif_mapping.get(protein).addAll(new LinkedList<String>());
+			}
+			
+		}
+		
+		return holistic_protein_motif_mapping;
+	}
+	
+	/**
 	 * Builds a map of UniProt -> all domain types found in isoform transcripts
 	 * @param organism_core_database
 	 * @returnreturn map of UniProt -> all domain types found in isoform transcripts
@@ -1449,6 +1476,30 @@ public class DataQuery {
 		}
 		
 		return isoform_protein_domain_mapping;
+	}
+	
+	/**
+	 * Builds a map of UniProt -> all ELM motifs found in isoform transcripts
+	 * @param organism_core_database
+	 * @returnreturn map of UniProt ->all ELM motifs found in isoform transcripts
+	 */
+	public static Map<String, Set<String>> getIsoformProteinELMMap(String organism_core_database) {
+		Map<String, List<String>> transcript_motif_mapping = getTranscriptsELMMotifs(organism_core_database);
+		Map<String, String> isoform_map = getIsoformTranscriptsOfProteins(organism_core_database);
+		Map<String, Set<String>> isoform_protein_motif_mapping = new HashMap<>();
+		
+		for (String protein:isoform_map.keySet()) {
+			String isoform = isoform_map.get(protein);
+			
+			if (transcript_motif_mapping.containsKey(isoform)) {
+				isoform_protein_motif_mapping.put(protein, new HashSet<>(transcript_motif_mapping.get(isoform)));
+			} else {
+				isoform_protein_motif_mapping.put(protein, new HashSet<String>());
+			}
+			
+		}
+		
+		return isoform_protein_motif_mapping;
 	}
 	
 	
@@ -2418,8 +2469,6 @@ public class DataQuery {
 			}
 			
 		}
-		
-		// TODO: add ELM data if wanted
 		
 		// to list
 		for (String domain:iddi_ddis.keySet()) {
