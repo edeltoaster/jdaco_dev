@@ -48,6 +48,7 @@ public class DataQuery {
 	// useastdb.ensembl.org:3306 current und previous version only
 	private static String ensembl_mysql = "ensembldb.ensembl.org:3306";
 	private static Map<String, List<String>> known_DDIs;
+	private static Map<String, List<String>> ELM_interactions;
 	private static boolean up2date_DDIs = true;
 	private static String STRING_version = "11.0";
 	private static String specific_ensembl_release = ""; // global option
@@ -2938,9 +2939,13 @@ public class DataQuery {
 	
 	/**
 	 * Retrieval of ELM interaction data
-	 * @return map of ELM motif name to Pfam interaction partners
+	 * @return map of ELM motif name to Pfam interaction partners (and vide versa for correctness of algorithms)
 	 */
-	public static HashMap<String, HashSet<String>> getELMMotifDomainInteractions() {
+	public static Map<String, List<String>> getELMMotifDomainInteractions() {
+		
+		// check cache
+		if (ELM_interactions != null)
+			return ELM_interactions;
 		
 		BufferedReader datastream = null;
 		HashMap<String, HashSet<String>> motif_domain_interactions = new HashMap<>();
@@ -2976,8 +2981,10 @@ public class DataQuery {
 				System.out.println(motif + " " + domain);
 				if (!motif_domain_interactions.containsKey(motif))
 					motif_domain_interactions.put(motif, new HashSet<String>());
-				
 				motif_domain_interactions.get(motif).add(domain);
+				if (!motif_domain_interactions.containsKey(domain))
+					motif_domain_interactions.put(domain, new HashSet<String>());
+				motif_domain_interactions.get(domain).add(motif);
 			}
 			
 		} catch (Exception e) {
@@ -3000,7 +3007,14 @@ public class DataQuery {
 			}
 		}
 
-		return motif_domain_interactions;
+		ELM_interactions = new HashMap<>();
+		
+		// to list
+		for (String motif : motif_domain_interactions.keySet()) {
+			ELM_interactions.put(motif, new ArrayList<>(motif_domain_interactions.get(motif)));
+		}
+		
+		return ELM_interactions;
 	}
 	
 	/*

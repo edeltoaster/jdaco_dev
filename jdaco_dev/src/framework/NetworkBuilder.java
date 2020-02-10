@@ -1,10 +1,12 @@
 package framework;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -27,7 +29,6 @@ public class NetworkBuilder {
 	/**
 	 * Constructs holistic network that can be used for many samples. Construction based on major transcripts.
 	 * @param ppi
-	 * @param isoform_based
 	 */
 	public NetworkBuilder(PPIN ppi) {
 		buildHolisticNetwork(ppi, true, false);
@@ -43,7 +44,88 @@ public class NetworkBuilder {
 	}
 	
 	/**
-	 * Actually builds holistic network either based on major isoform or all transcripts
+	 * Constructs holistic network that can be used for many samples. Construction either based on major isoform or all transcripts and with/without ELM data
+	 * @param ppi
+	 * @param isoform_based
+	 * @param include_ELM
+	 */
+	public NetworkBuilder(PPIN ppi, boolean isoform_based, boolean include_ELM) {
+		buildHolisticNetwork(ppi, isoform_based, include_ELM);
+	}
+	
+	
+	/**
+	 * Sets holistic_protein_domain_composition_map given isoform_based and include_ELM_data
+	 */
+	private void setHolisticDomainComposition() {
+		
+		if (this.isoform_based) {
+			this.holistic_protein_domain_composition_map = DataQuery.getIsoformProteinDomainMap(this.organism_database);
+		}
+		else {
+			this.holistic_protein_domain_composition_map = DataQuery.getHolisticProteinDomainMap(this.organism_database);
+		}
+		
+		// include ELM data is wanted
+		if (this.include_ELM_data) {
+			Map<String, Set<String>> ELM_data;
+			if (this.isoform_based) {
+				ELM_data = DataQuery.getIsoformProteinELMMap(this.organism_database);
+			}
+			else {
+				ELM_data = DataQuery.getHolisticProteinELMMap(this.organism_database);
+			}
+			
+			for (Entry<String, Set<String>> entry : ELM_data.entrySet()) {
+				if (!this.holistic_protein_domain_composition_map.containsKey(entry.getKey()))
+					this.holistic_protein_domain_composition_map.put(entry.getKey(), new HashSet<String>(entry.getValue()));
+				else
+					this.holistic_protein_domain_composition_map.get(entry.getKey()).addAll(entry.getValue());
+			}
+		}
+
+	}
+	
+	/**
+	 * Sets transcript_to_domains given isoform_based and include_ELM_data
+	 */
+	private void setTranscriptsDomainComposition() {
+		this.transcript_to_domains = DataQuery.getTranscriptsDomains(this.organism_database);
+		
+		// include ELM data if wanted
+		if (this.include_ELM_data) {
+			Map<String, List<String>> ELM_data = DataQuery.getTranscriptsELMMotifs(this.organism_database);
+			for (Entry<String, List<String>> entry : ELM_data.entrySet()) {
+				if (!this.transcript_to_domains.containsKey(entry.getKey()))
+					this.transcript_to_domains.put(entry.getKey(), new ArrayList<String>(entry.getValue()));
+				else
+					this.transcript_to_domains.get(entry.getKey()).addAll(entry.getValue());
+			}
+		}
+	}
+	
+	/**
+	 * Sets transcript_to_domains given data retrieval options in DataQuery and include_ELM_data
+	 */
+	private Map<String, List<String>> setKnownDDIs() {
+		Map<String, List<String>> knownDDIs = DataQuery.getKnownDDIs();
+		
+		// include ELM data if wanted
+		if (this.include_ELM_data) {
+			Map<String, List<String>> ELM_data = DataQuery.getELMMotifDomainInteractions();
+			for (Entry<String, List<String>> entry : ELM_data.entrySet()) {
+				if (!knownDDIs.containsKey(entry.getKey()))
+					knownDDIs.put(entry.getKey(), new ArrayList<String>(entry.getValue()));
+				else
+					knownDDIs.get(entry.getKey()).addAll(entry.getValue());
+			}
+		}
+		
+		return knownDDIs;
+	}
+	
+	/**
+	 * Builds holistic network used for the initial mapping stage of PPIXpress, either based on major isoform or all transcripts
 	 * @param ppi
 	 * @param isoform_based
 	 */
@@ -54,16 +136,12 @@ public class NetworkBuilder {
 		// retrieve annotational data, also for later usage
 		this.organism_database = DataQuery.getEnsemblOrganismDatabaseFromProteins(proteins);
 		
-		// TODO: include ELM data 1
+		// set parameters and construct relevant data accordingly
 		this.isoform_based = isoform_based;
-		if (this.isoform_based)
-			this.holistic_protein_domain_composition_map = DataQuery.getIsoformProteinDomainMap(this.organism_database);
-		else
-			this.holistic_protein_domain_composition_map = DataQuery.getHolisticProteinDomainMap(this.organism_database);
-		
-		// TODO: include ELM data 2
 		this.include_ELM_data = include_ELM_data;
-		this.transcript_to_domains = DataQuery.getTranscriptsDomains(this.organism_database);
+		this.setHolisticDomainComposition();
+		this.setTranscriptsDomainComposition();
+		
 		
 		for (String[] naming:DataQuery.getGenesTranscriptsProteins(this.organism_database)) {
 			String transcript = naming[1];
@@ -96,12 +174,7 @@ public class NetworkBuilder {
 		}
 		
 		// determine interactions found in the holistic network
-		Map<String, List<String>> knownDDIs = DataQuery.getKnownDDIs();
-		
-		// TODO: add ELM data 2
-		if (this.include_ELM_data) {
-			
-		}
+		Map<String, List<String>> knownDDIs = this.setKnownDDIs();
 		
 		for (String domain_name:domain_map.keySet()) {
 			if (!knownDDIs.containsKey(domain_name))
@@ -909,7 +982,7 @@ public class NetworkBuilder {
 	}
 	
 	/**
-	 * Return fraction of PPIs associated to non-artificial domain interactions
+	 * Return fraction of PPIs associated to non-artificial domain or motif interactions
 	 * @return
 	 */
 	public double getMappingPercentage() {
@@ -933,7 +1006,7 @@ public class NetworkBuilder {
 	}
 	
 	/**
-	 * Return fraction of PPIs associated to non-artificial domain interactions (subset)
+	 * Return fraction of PPIs associated to non-artificial domain or motif interactions (subset)
 	 * @return
 	 */
 	public double getMappingPercentage(Set<String> proteins) {
@@ -968,7 +1041,7 @@ public class NetworkBuilder {
 	}
 	
 	/**
-	 * Return fraction of proteins with non-artificial domains that contribute to the mapping
+	 * Return fraction of proteins with non-artificial domains or ELM motifs that contribute to the mapping
 	 * @return
 	 */
 	public double getMappingDomainPercentage() {
@@ -985,7 +1058,7 @@ public class NetworkBuilder {
 	}
 	
 	/**
-	 * Return fraction of proteins with non-artificial domains that contribute to the mapping (subset)
+	 * Return fraction of proteins with non-artificial domains or ELM motifs that contribute to the mapping (subset)
 	 * @return
 	 */
 	public double getMappingDomainPercentage(Set<String> proteins) {

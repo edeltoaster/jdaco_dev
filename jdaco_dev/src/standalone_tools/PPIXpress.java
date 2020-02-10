@@ -18,7 +18,7 @@ import framework.Utilities;
  * @author Thorsten Will
  */
 public class PPIXpress {
-	static String version_string = "PPIXpress 1.22";
+	static String version_string = "PPIXpress 1.23";
 	
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
@@ -41,6 +41,7 @@ public class PPIXpress {
 	private static boolean up2date_DDIs = true;
 	private static boolean update_UniProt = false;
 	private static boolean STRING_weights = false;
+	private static boolean include_ELM = false;
 	private static List<String> matching_files_output = new LinkedList<>();
 	
 	
@@ -56,6 +57,7 @@ public class PPIXpress {
 		System.out.println("	-g : only use gene abundances (default: transcript abundance)");
 		System.out.println("	-t=[threshold] : only take transcripts/genes with an expression above [threshold] into account (default: 1.0)");
 		System.out.println("	-tp=[percentile] : only take transcripts/genes with an expression above the [percentile]-th percentile into account (default: overrides option above)");
+		System.out.println("	-elm : include ELM motifs and interactions");
 		System.out.println("	-n : normalize counts of transcripts by the length of the transcript (only for major_transcript file, applied after threshold)");
 		System.out.println("	-x : do not remove proteins from the network if their coding transcript is subject to degradation (default: remove if tagged as 'nonsense-mediated decay' or 'non-stop decay')");
 		System.out.println("	-d : also output underlying domain-domain interaction network(s) (default: no)");
@@ -191,6 +193,10 @@ public class PPIXpress {
 			// try to enforce a release manually
 			else if (arg.startsWith("-r="))
 				DataQuery.enforceSpecificEnsemblRelease(arg.split("=")[1]);
+			
+			// check if ELM data should be included
+			else if (arg.equals("-elm"))
+				include_ELM = true;
 			
 			// server switching
 			else if (arg.startsWith("-s=")){
@@ -357,12 +363,24 @@ public class PPIXpress {
 			DataQuery.getKnownDDIs();
 		}
 		
+		if (include_ELM) {
+			System.out.println("Retrieving current motif and interaction data fom ELM (" + DataQuery.getELMRelease() + "), retrieving protein sequences and searching motifs ...");
+			DataQuery.getTranscriptsELMMotifs(organism_database);
+			DataQuery.getELMMotifDomainInteractions();
+		}
+		
+		
 		// start preprocessing
 		System.out.print("Initializing PPIXpress with original network ... ");
 		System.out.flush();
-		NetworkBuilder builder = new NetworkBuilder(original_network);
-		System.out.println(Math.round(builder.getMappingDomainPercentage() * 10000)/100.0 +"% of proteins could be annotated with at least one non-artificial domain," );
-		System.out.println(Math.round(builder.getMappingPercentage() * 10000)/100.0 +"% of protein interactions could be associated with at least one non-artificial domain interaction." );
+		NetworkBuilder builder = new NetworkBuilder(original_network, true, include_ELM);
+		if (include_ELM) {
+			System.out.println(Math.round(builder.getMappingDomainPercentage() * 10000)/100.0 +"% of proteins could be annotated with at least one non-artificial domain or motif," );
+			System.out.println(Math.round(builder.getMappingPercentage() * 10000)/100.0 +"% of protein interactions could be associated with at least one non-artificial domain or motif interaction." );
+		} else {
+			System.out.println(Math.round(builder.getMappingDomainPercentage() * 10000)/100.0 +"% of proteins could be annotated with at least one non-artificial domain," );
+			System.out.println(Math.round(builder.getMappingPercentage() * 10000)/100.0 +"% of protein interactions could be associated with at least one non-artificial domain interaction." );
+		}
 		System.out.flush();
 		
 		/*
