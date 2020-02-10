@@ -371,7 +371,7 @@ public class PPIXpress {
 		
 		
 		// start preprocessing
-		System.out.print("Initializing PPIXpress with original network ... ");
+		System.out.println("Initializing PPIXpress with original network ... ");
 		System.out.flush();
 		NetworkBuilder builder = new NetworkBuilder(original_network, true, include_ELM);
 		if (include_ELM) {
