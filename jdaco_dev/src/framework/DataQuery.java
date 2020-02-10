@@ -843,6 +843,7 @@ public class DataQuery {
 		
 		Map <String, List<String>> transcript_ELM_mapping = new HashMap<>();
 		
+		// TODO: parallel implementation should be worthwhile
 		for (Entry<String, String> ELM_entry: ELM_motifs.entrySet()) {
 			
 			Pattern p = Pattern.compile(ELM_entry.getValue());
@@ -2978,7 +2979,6 @@ public class DataQuery {
 				if (!domain.startsWith("PF"))
 					continue;
 				
-				System.out.println(motif + " " + domain);
 				if (!motif_domain_interactions.containsKey(motif))
 					motif_domain_interactions.put(motif, new HashSet<String>());
 				motif_domain_interactions.get(motif).add(domain);

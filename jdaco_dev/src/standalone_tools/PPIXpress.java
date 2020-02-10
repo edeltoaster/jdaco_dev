@@ -364,7 +364,7 @@ public class PPIXpress {
 		}
 		
 		if (include_ELM) {
-			System.out.println("Retrieving current motif and interaction data fom ELM (" + DataQuery.getELMRelease() + "), retrieving protein sequences and searching motifs ...");
+			System.out.println("Retrieving current motif and interaction data fom ELM (version " + DataQuery.getELMRelease() + "), retrieving protein sequences and searching motifs ...");
 			DataQuery.getTranscriptsELMMotifs(organism_database);
 			DataQuery.getELMMotifDomainInteractions();
 		}

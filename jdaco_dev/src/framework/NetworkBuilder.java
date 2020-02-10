@@ -109,7 +109,7 @@ public class NetworkBuilder {
 	 */
 	private Map<String, List<String>> setKnownDDIs() {
 		Map<String, List<String>> knownDDIs = DataQuery.getKnownDDIs();
-		
+
 		// include ELM data if wanted
 		if (this.include_ELM_data) {
 			Map<String, List<String>> ELM_data = DataQuery.getELMMotifDomainInteractions();
@@ -120,7 +120,7 @@ public class NetworkBuilder {
 					knownDDIs.get(entry.getKey()).addAll(entry.getValue());
 			}
 		}
-		
+
 		return knownDDIs;
 	}
 	
