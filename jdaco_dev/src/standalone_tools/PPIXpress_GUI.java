@@ -45,7 +45,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
 public class PPIXpress_GUI {
-	static String version_string = "PPIXpress 1.22";
+	static String version_string = "PPIXpress 1.23";
 	
 	private static boolean gene_level_only = false;
 	private static boolean output_DDINs = false;
@@ -68,6 +68,7 @@ public class PPIXpress_GUI {
 	private static boolean STRING_weights = false;
 	private static boolean up2date_DDIs = true;
 	private static boolean update_UniProt = false;
+	private static boolean include_ELM = false;
 	private static List<String> matching_files_output = new LinkedList<>();
 	
 	// GUI stuff
@@ -99,6 +100,7 @@ public class PPIXpress_GUI {
 	private JCheckBox chckbxSumAbundances;
 	private JCheckBox chckbxUpdateUniprotAccs;
 	private JCheckBox chckboxCompressOutput;
+	private JCheckBox chckbxIncludeELM;
 	
 	/**
 	 * Launch the application.
@@ -532,7 +534,7 @@ public class PPIXpress_GUI {
 				}
 			}
 		});
-		chckbxOnlyLocalDdi.setBounds(74, 134, 220, 30);
+		chckbxOnlyLocalDdi.setBounds(74, 134, 193, 30);
 		frmPpixpress.getContentPane().add(chckbxOnlyLocalDdi);
 		activiy_changing_components.add(chckbxOnlyLocalDdi);
 		
@@ -599,6 +601,9 @@ public class PPIXpress_GUI {
 				chckbxOnlyLocalDdi.setSelected(false);
 				DataQuery.defaultDDIs();
 				
+				include_ELM = false;
+				chckbxIncludeELM.setSelected(false);
+
 				output_folder = null;
 				organism_database = null;
 				load_UCSC = false;
@@ -756,6 +761,19 @@ public class PPIXpress_GUI {
 		frmPpixpress.getContentPane().add(chckbxSumAbundances);
 		activiy_changing_components.add(chckbxSumAbundances);
 		
+		chckbxIncludeELM = new JCheckBox("include ELM data");
+		chckbxIncludeELM.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (chckbxIncludeELM.isSelected())
+					include_ELM = true;
+				else
+					include_ELM = false;
+			}
+		});
+		chckbxIncludeELM.setBounds(285, 137, 193, 23);
+		frmPpixpress.getContentPane().add(chckbxIncludeELM);
+		activiy_changing_components.add(chckbxIncludeELM);
+		
 		// most general
 		System.setErr(stream_output);
 		System.setOut(stream_output);
@@ -885,19 +903,34 @@ public class PPIXpress_GUI {
 		}
 		progressBar.setValue(50);
 		
+		if (include_ELM) {
+			stream_output.println("Retrieving current motif and interaction data fom ELM (version " + DataQuery.getELMRelease() + "), retrieving protein sequences and searching motifs ...");
+			DataQuery.getTranscriptsELMMotifs(organism_database);
+			DataQuery.getELMMotifDomainInteractions();
+		}
+		
 		// start preprocessing
 		if (!computing) {
 			progressBar.setValue(0);
 			return;
 		}
+		
 		stream_output.println("Initializing PPIXpress with original network ... ");
-		NetworkBuilder builder = new NetworkBuilder(original_ppin);
+		NetworkBuilder builder = new NetworkBuilder(original_ppin, true, include_ELM);
+		
 		if (!computing) {
 			progressBar.setValue(0);
 			return;
 		}
-		stream_output.println(Math.round(builder.getMappingDomainPercentage() * 10000)/100.0 +"% of proteins could be annotated with at least one non-artificial domain," );
-		stream_output.println(Math.round(builder.getMappingPercentage() * 10000)/100.0 +"% of protein interactions could be associated with at least one non-artificial domain interaction." );
+		
+		
+		if (include_ELM) {
+			stream_output.println(Math.round(builder.getMappingDomainPercentage() * 10000)/100.0 +"% of proteins could be annotated with at least one non-artificial domain or motif," );
+			stream_output.println(Math.round(builder.getMappingPercentage() * 10000)/100.0 +"% of protein interactions could be associated with at least one non-artificial domain or motif interaction." );
+		} else {
+			stream_output.println(Math.round(builder.getMappingDomainPercentage() * 10000)/100.0 +"% of proteins could be annotated with at least one non-artificial domain," );
+			stream_output.println(Math.round(builder.getMappingPercentage() * 10000)/100.0 +"% of protein interactions could be associated with at least one non-artificial domain interaction." );
+		}
 		
 		int add_count = 0;
 		if (report_reference)
